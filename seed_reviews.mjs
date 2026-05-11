@@ -1,0 +1,78 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, Timestamp } from "firebase/firestore";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCMYsqtZzHnXjMGvdum4l3SVn_MG78m0Nc",
+    authDomain: "rejeuphone.firebaseapp.com",
+    projectId: "rejeuphone",
+    storageBucket: "rejeuphone.firebasestorage.app",
+    messagingSenderId: "1401756577",
+    appId: "1:1401756577:web:d07a5f0e304ab048e749e0",
+    measurementId: "G-JWS15NH588"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const reviewsData = [
+  {
+    deviceModel: "아이폰 14 프로",
+    deviceStorage: "256GB",
+    transactionPrice: "85만원",
+    rating: 5,
+    text: "처음 이용해보는데 상담도 빠르고 정말 친절하게 진행해주셨습니다. 금액도 다른 곳보다 훨씬 잘 쳐주시고 입금도 바로 되어서 너무 만족스럽습니다!",
+    userName: "이*민",
+    userId: "anonymous",
+    createdAt: Timestamp.fromDate(new Date("2026-03-25T14:30:00+09:00")),
+    imageUrl: null
+  },
+  {
+    deviceModel: "갤럭시 S23 울트라",
+    deviceStorage: "512GB",
+    transactionPrice: "90만원",
+    rating: 5,
+    text: "집 근처 단가표 보고 반신반의하면서 신청했는데 생각보다 가격 차감 거의 없이 최고가로 매입해주셨어요. 앞으로 폰 바꿀 땐 무조건 여기 이용할게요~~",
+    userName: "박*준",
+    userId: "anonymous",
+    createdAt: Timestamp.fromDate(new Date("2026-03-26T11:15:00+09:00")),
+    imageUrl: null
+  },
+  {
+    deviceModel: "아이폰 13",
+    deviceStorage: "128GB",
+    transactionPrice: "45만원",
+    rating: 4,
+    text: "택배로 보내는 거라 며칠 걸릴 줄 알았는데, 도착하자마자 바로 검수하고 10분 만에 입금해주셨습니다. 안전하고 빠른 거래 감사합니다.",
+    userName: "김*진",
+    userId: "anonymous",
+    createdAt: Timestamp.fromDate(new Date("2026-03-27T16:45:00+09:00")),
+    imageUrl: null
+  },
+  {
+    deviceModel: "갤럭시 Z 플립4",
+    deviceStorage: "256GB",
+    transactionPrice: "35만원",
+    rating: 5,
+    text: "접힌 부분에 약간의 기스가 있어서 걱정했는데, 합리적인 선에서 차감해주셨어요. 상담사분 정말 친절하시고 믿음이 갑니다. 쉐라폰 짱짱!!",
+    userName: "정*희",
+    userId: "anonymous",
+    createdAt: Timestamp.fromDate(new Date("2026-03-28T09:20:00+09:00")),
+    imageUrl: null
+  }
+];
+
+async function seed() {
+  console.log("Starting seed...");
+  try {
+    for (const review of reviewsData) {
+      await addDoc(collection(db, "reviews"), review);
+      console.log(`Added review for ${review.deviceModel}`);
+    }
+    console.log("Done!");
+  } catch (err) {
+    console.error("Error adding doc:", err);
+  }
+  process.exit(0);
+}
+
+seed();

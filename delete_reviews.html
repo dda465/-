@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+
+<html lang="ko">
+
+
+
+
+
+<head>
+
+
+    <meta charset="UTF-8">
+
+
+    <title>Delete Old Reviews</title>
+
+
+</head>
+
+
+
+
+
+<body>
+
+
+    <h1>Deleting 2024 Reviews...</h1>
+
+
+    <div id="status">Waiting to start...</div>
+
+
+    <button id="start-btn">Start Deletion</button>
+
+
+
+
+
+    <script type="module">
+
+
+        import { db, auth } from './firebase-config.js';
+
+
+        import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+
+        import { collection, query, where, getDocs, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
+
+
+        document.getElementById('start-btn').addEventListener('click', async () => {
+
+
+            const statusEl = document.getElementById('status');
+
+
+            try {
+
+
+                statusEl.innerText = "Signing in...";
+
+
+                await signInAnonymously(auth);
+
+
+
+
+
+                statusEl.innerText = "Finding older reviews...";
+
+
+
+
+
+                // Fetch reviews marked as 'admin_generated'
+
+
+                const q = query(collection(db, "reviews"), where("userId", "==", "admin_generated"));
+
+
+                const querySnapshot = await getDocs(q);
+
+
+
+
+
+                let deleteCount = 0;
+
+
+                const batch = writeBatch(db);
+
+
+
+
+
+                querySnapshot.forEach((document) => {
+
+
+                    const data = document.data();
+
+
+                    const createdDate = data.createdAt ? data.createdAt.toDate() : null;
+
+
+
+
+
+                    // Check if it's from 2024
+
+
+                    if (createdDate && createdDate.getFullYear() === 2024) {
+
+
+                        batch.delete(doc(db, "reviews", document.id));
+
+
+                        deleteCount++;
+
+
+                    }
+
+
+                });
+
+
+
+
+
+                if (deleteCount > 0) {
+
+
+                    await batch.commit();
+
+
+                    statusEl.innerText = "SUCCESS! Deleted " + deleteCount + " old reviews.";
+
+
+                    statusEl.style.color = "green";
+
+
+                } else {
+
+
+                    statusEl.innerText = "SUCCESS! No old 2024 reviews found to delete.";
+
+
+                    statusEl.style.color = "green";
+
+
+                }
+
+
+
+
+
+                console.log("SUCCESS");
+
+
+
+
+
+            } catch (error) {
+
+
+                console.error("Error:", error);
+
+
+                statusEl.innerText = "ERROR: " + error.message;
+
+
+                statusEl.style.color = "red";
+
+
+            }
+
+
+        });
+
+
+    </script>
+
+
+</body>
+
+
+
+
+
+</html>

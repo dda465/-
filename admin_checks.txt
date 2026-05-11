@@ -1,0 +1,38 @@
+3: import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+235: if (data.isDeleted) return;
+327: <button class="action-btn" style="color:red; margin-left:5px;" onclick="deleteQuote('${id}')">삭제</button>
+381: // Global Delete Quote (Soft Delete = Move to Trash)
+383: window.deleteQuote = async (id) => {
+385: if (confirm("정말 이 신청내역을 삭제(휴지통으로 이동)하시겠습니까?")) {
+389: await updateDoc(doc(db, "quotes", id), { isDeleted: true });
+397: console.error("Delete Quote Error:", e);
+399: alert("삭제 실패: " + e.message);
+417: await updateDoc(doc(db, "quotes", id), { isDeleted: false });
+437: // Global Permanently Delete Quote (Hard Delete)
+439: window.permanentlyDeleteQuote = async (id) => {
+441: if (confirm("정말 이 신청내역을 완전히 삭제하시겠습니까? (이 작업은 영구적이며 절대 되돌릴 수 없습니다!)")) {
+445: await deleteDoc(doc(db, "quotes", id));
+447: alert("영구 삭제되었습니다.");
+453: console.error("Hard Delete Quote Error:", e);
+455: alert("완전 삭제 실패: " + e.message);
+497: // Show only deleted items
+499: if (!data.isDeleted) return;
+519: <td><span style="color:#d32f2f;">(삭제됨)</span> ${data.customerName}<br><span style="font-size:0.8rem; color:#888;">${data.customerPhone}</span></td>
+533: <button class="action-btn" style="color:red; margin-left:5px;" onclick="permanentlyDeleteQuote('${id}')">완전삭제</button>
+627: <button class="action-btn" onclick="deleteUser('${doc.id}')" style="color:red;">삭제</button>
+651: // Global Delete User
+653: window.deleteUser = async (userId) => {
+655: if (confirm("정말 회원을 삭제하시겠습니까? (DB에서 삭제됩니다)")) {
+659: await deleteDoc(doc(db, "users", userId));
+661: alert("삭제되었습니다");
+667: alert("삭제 실패: " + e.message);
+857: // --- NEW: Delete existing products first ---
+867: batch.delete(docSnap.ref);
+897: console.error("Failed to delete old products:", delErr);
+899: throw new Error("기존 데이터를 삭제하는 중 오류가 발생했습니다.");
+1175: <button class="action-btn" style="color: red;" onclick="deleteModel('${id}')">삭제</button>
+1363: window.deleteModel = async (id) => {
+1365: if (confirm("정말 이 모델을 삭제하시겠습니까?")) {
+1369: await deleteDoc(doc(db, "products", id));
+1375: alert("삭제 실패: " + e.message);
+1610: alert("삭제되거나 존재하지 않는 신청입니다.");

@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Device Body (Silver/Titanium Frame) -->
+  <rect x="106" y="46" width="300" height="420" rx="50" fill="#E2E2E2" stroke="#BDBDBD" stroke-width="8"/>
+  
+  <!-- Screen (Black) -->
+  <rect x="122" y="62" width="268" height="388" rx="40" fill="#121212"/>
+  
+  <!-- Dynamic Island / Notch Area -->
+  <rect x="216" y="74" width="80" height="20" rx="10" fill="black"/>
+  
+  <!-- Screen Gloss Reflection (Subtle) -->
+  <path d="M122 102C122 79.9086 139.909 62 162 62H350C372.091 62 390 79.9086 390 102V300L122 450V102Z" fill="white" fill-opacity="0.05"/>
+  
+  <!-- Home Indicator -->
+  <rect x="206" y="435" width="100" height="4" rx="2" fill="white" fill-opacity="0.5"/>
+</svg>

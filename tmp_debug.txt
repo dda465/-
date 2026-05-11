@@ -1,0 +1,42 @@
+
+        document.getElementById('result-model-name').textContent = `${currentQuote.model.model} (${currentQuote.storage.size})`;
+
+
+
+        let priceDisplayStr = formatCurrency(finalPrice);
+        const gradeToCheck = (currentQuote.grade || '').toLowerCase();
+        
+        let multiplier = 0;
+        if (gradeToCheck === 'a') multiplier = 1.1;
+        else if (gradeToCheck === 'b') multiplier = 1.2;
+        else if (!['sealed', 's'].includes(gradeToCheck)) multiplier = 1.5;
+
+        if (multiplier > 0) {
+            priceDisplayStr += ' ~ ' + formatCurrency(Math.floor(finalPrice * multiplier));
+
+---
+        if (finalPrice < 0) finalPrice = 0;
+
+
+
+
+
+
+
+        currentQuote.finalPrice = finalPrice;
+
+
+
+        document.getElementById('result-model-name').textContent = `${currentQuote.model.model} (${currentQuote.storage.size})`;
+
+
+
+        let priceDisplayStr = formatCurrency(finalPrice);
+        const gradeToCheck = (currentQuote.grade || '').toLowerCase();
+        
+        let multiplier = 0;
+        if (gradeToCheck === 'a') multiplier = 1.1;
+        else if (gradeToCheck === 'b') multiplier = 1.2;
+        else if (!['sealed', 's'].includes(gradeToCheck)) multiplier = 1.5;
+
+        if (multiplier > 0) {

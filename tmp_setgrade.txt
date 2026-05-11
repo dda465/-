@@ -1,0 +1,64 @@
+
+
+
+        currentQuote.grade = grade;
+
+
+
+        // Calculate price
+
+
+
+        let price = 0;
+
+
+
+        if (currentQuote.model.prices && currentQuote.model.prices[grade]) {
+
+
+
+            price = currentQuote.model.prices[grade];
+
+
+
+        } else {
+
+
+
+            // Fallback
+
+
+
+            const base = currentQuote.model.basePrice || 0;
+
+
+
+            const rates = { s: 1, a: 0.9, b: 0.8, c: 0.6, d: 0.2 };
+
+
+
+            price = base * (rates[grade] || 0);
+
+
+
+        }
+
+
+
+
+
+
+
+        // Add storage
+
+
+
+        if (currentQuote.storage) price += (currentQuote.storage.priceAdjustment || 0);
+
+
+
+
+
+
+
+        currentQuote.finalPrice = Math.floor(price / 1000) * 1000;

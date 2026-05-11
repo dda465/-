@@ -1,0 +1,133 @@
+--- quote.html ---
+418:                     결과입니다.</p>
+419:             </div>
+420: 
+421:             <div class="result-box">
+422:                 <p>예상 매입가</p>
+423:                 <div id="final-price-display" class="estimated-price">0원</div>
+424:                 <div id="price-breakdown"
+425:                     style="text-align: left; background: white; padding: 20px; border-radius: 12px; margin-top: 20px; font-size: 0.9rem; color: #555;">
+426:                     <!-- Breakdown populated by JS -->
+427:                 </div>
+428:             </div>
+429: 
+430:             <div class="text-center">
+431:                 <button onclick="goToStep('auth')" class="btn btn-primary">이 가격으로 판매 신청</button>
+432:                 <br><br>
+433:                 <button onclick="location.reload()" class="back-btn">다시 조회하기</button>
+434:             </div>
+435:         </div>
+436: 
+437:         <!-- Step 6.5: Info (Phone Verification Temporarily Disabled) -->
+438:         <div id="wizard-step-auth" class="wizard-step">
+439:             <div class="step-header">
+440:                 <h2>접수자 정보 입력 <span style="color:red">*</span></h2>
+441:                 <p>정확한 정산 및 거래 안내를 위해 정보를 입력해주세요.</p>
+442:             </div>
+443: 
+444:             <div style="max-width: 400px; m        <!-- Terms Modal -->
+445:         <div id="termsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+446:             <div style="background: white; width: 100%; max-width: 600px; border-radius: 12px; display: flex; flex-direction: column; max-height: 90vh;">
+447:                 <div style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+448:                     <h3 style="margin: 0; font-size: 1.2rem;">이용약관 및 개인정보 처리방침</h3>
+449:                     <button onclick="closeTermsModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+450:                 </div>
+451:                 
+452:                 <div class="terms-box" style="padding: 20px; overflow-y: auto; text-align: left; font-size: 0.9rem; line-height: 1.6;">
+453:                     <h4 style="color: var(--primary-dark); margin-bottom: 10px;">[만 14세 미만 아동의 개인정보보호]</h4>
+454:                     <p>회사가 운영하는 사이트에서는 만 14세 미만 아동의 경우 거래가 불가능합니다.</p>
+455: 
+456:                     <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 8px; padding: 20px; margin: 20px 0;">
+457:                         <h4 style="color: #ef4444; margin: 0 0 15px 0; font-size: 1.1rem;">[🚨 필수: 기기 초기화 후 발송 요망 🚨]</h4>
+458:                         <p style="margin: 0; color: #333; font-weight: 500; font-size: 1.05rem;">고객님의 소중한 개인정보 보호를 위해
+
+----------------------------------------
+--- quote.html ---
+425:                     style="text-align: left; background: white; padding: 20px; border-radius: 12px; margin-top: 20px; font-size: 0.9rem; color: #555;">
+426:                     <!-- Breakdown populated by JS -->
+427:                 </div>
+428:             </div>
+429: 
+430:             <div class="text-center">
+431:                 <button onclick="goToStep('auth')" class="btn btn-primary">이 가격으로 판매 신청</button>
+432:                 <br><br>
+433:                 <button onclick="location.reload()" class="back-btn">다시 조회하기</button>
+434:             </div>
+435:         </div>
+436: 
+437:         <!-- Step 6.5: Info (Phone Verification Temporarily Disabled) -->
+438:         <div id="wizard-step-auth" class="wizard-step">
+439:             <div class="step-header">
+440:                 <h2>접수자 정보 입력 <span style="color:red">*</span></h2>
+441:                 <p>정확한 정산 및 거래 안내를 위해 정보를 입력해주세요.</p>
+442:             </div>
+443: 
+444:             <div style="max-width: 400px; m        <!-- Terms Modal -->
+445:         <div id="termsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+446:             <div style="background: white; width: 100%; max-width: 600px; border-radius: 12px; display: flex; flex-direction: column; max-height: 90vh;">
+447:                 <div style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+448:                     <h3 style="margin: 0; font-size: 1.2rem;">이용약관 및 개인정보 처리방침</h3>
+449:                     <button onclick="closeTermsModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+450:                 </div>
+451:                 
+452:                 <div class="terms-box" style="padding: 20px; overflow-y: auto; text-align: left; font-size: 0.9rem; line-height: 1.6;">
+453:                     <h4 style="color: var(--primary-dark); margin-bottom: 10px;">[만 14세 미만 아동의 개인정보보호]</h4>
+454:                     <p>회사가 운영하는 사이트에서는 만 14세 미만 아동의 경우 거래가 불가능합니다.</p>
+455: 
+456:                     <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 8px; padding: 20px; margin: 20px 0;">
+457:                         <h4 style="color: #ef4444; margin: 0 0 15px 0; font-size: 1.1rem;">[🚨 필수: 기기 초기화 후 발송 요망 🚨]</h4>
+458:                         <p style="margin: 0; color: #333; font-weight: 500; font-size: 1.05rem;">고객님의 소중한 개인정보 보호를 위해
+459:                             <strong>반드시 기기를 공장 초기화</strong>한 후 발송해 주시기 바랍니다.</p>
+460:                         <ul style="margin: 15px 0 0 0; padding-left: 20px; color: #555; line-height: 1.6;">
+461:                             <li>초기화되지 않은 기기는 검수 및 매입이 지연될 수 있습니다.</li>
+462:                             <li>발송 전 <strong>모든 계정(삼성, 애플, 구글 등) 로그아웃</strong> 필수</li>
+463:                             <li>본 약관에 동의함은 발송 전 데이터 백업 및 삭제 책임이 고객 본인에게 있음을 동의하는 것으로 간주됩니다.</li>
+464:                         </ul>
+465:                     </div>
+
+----------------------------------------
+--- script.js ---
+914:                 currentQuote.brand = newBtn.dataset.brand;
+915:                 if (typeof renderSeries === 'function') {
+916:                     renderSeries(currentQuote.brand);
+917:                     setTimeout(() => goToStep(2), 300);
+918:                 }
+919:             });
+920:         });
+921: 
+922:         // Step 6: Sell Request Button (Result -> Auth)
+923:         const reqBtn = document.getElementById('btn-sell-request');
+924:         if (reqBtn) {
+925:             // Remove old listeners
+926:             const newReqBtn = reqBtn.cloneNode(true);
+927:             reqBtn.parentNode.replaceChild(newReqBtn, reqBtn);
+928:             newReqBtn.addEventListener('click', () => {
+929:                 goToStep('auth');
+930:             });
+931:         }
+932: 
+933:         // Auth Step Listeners (Verification Temporarily Disabled)
+934:         const btnAuthNext = document.getElementById('btn-auth-next');
+935: 
+936:         if (btnAuthNext) {
+937:             btnAuthNext.addEventListener('click', () => {
+938:                 const name = document.getElementById('auth-name').value.trim();
+939:                 const phone = document.getElementById('auth-phone').value.trim();
+940: 
+941:                 if (!name || !phone) {
+942:                     alert('이름과 휴대폰 번호를 모두 입력해주세요.');
+943:                     return;
+944:                 }
+945: 
+946:                 goToStep('terms');
+947:             });
+948:         }
+949: 
+950:         // Terms Step
+951:         // Button is inline onclick="goToStep(7)" but we can add validation if needed.
+952: 
+953:         // Delivery Method Listeners
+954:         const deliveryBtns = document.querySelectorAll('.method-btn');
+
+----------------------------------------
+--- script.js ---

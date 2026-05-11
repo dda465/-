@@ -1,0 +1,40 @@
+
+
+
+
+        let breakdown = `<p><strong>판정 등급:</strong> <span style="color:var(--primary-color)">${gradeName}</span></p>`;
+
+
+
+        if (isSimpleMode) {
+
+
+
+            breakdown += `<p style="color:#888; font-size:0.8rem;">* 간편 접수(예상 최고가)</p>`;
+
+
+
+        }
+
+
+
+        breakdown += `<p>용량 옵션(${currentQuote.storage.size}): ${storageAdj > 0 ? '+' : ''}${formatCurrency(storageAdj)}</p>`;
+
+
+
+
+
+
+
+        // Debug info if price is 0
+
+
+
+        if (baseGradePrice === 0) {
+
+
+
+            breakdown += `<p style="color:red; font-size:0.8rem;">* 주의: 해당 등급의 시세 데이터가 없습니다(0원).</p>`;
+
+
+

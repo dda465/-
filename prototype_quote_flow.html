@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>내 폰 판매 시세 조회 - 쉐라폰</title>
+
+    <meta name="description" content="3분이면 끝! 내 폰의 정확한 판매 금액을 확인하고 바로 판매 신청하세요.">
+
+    <link rel="stylesheet" href="styles.css?v=8">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+
+        .wizard-container {
+
+            max-width: 800px;
+
+            margin: 100px auto;
+
+            background: white;
+
+            padding: 40px;
+
+            border-radius: 20px;
+
+            box-shadow: var(--shadow-lg);
+
+            min-height: 500px;
+
+        }
+
+
+
+        .wizard-step {
+
+            display: none;
+
+            animation: fadeIn 0.4s ease;
+
+        }
+
+
+
+        .wizard-step.active {
+
+            display: block;
+
+        }
+
+
+
+        @keyframes fadeIn {
+
+            from {
+
+                opacity: 0;
+
+                transform: translateY(10px);
+
+            }
+
+
+
+            to {
+
+                opacity: 1;
+
+                transform: translateY(0);
+
+            }
+
+        }
+
+
+
+        .step-header {
+
+            text-align: center;
+
+            margin-bottom: 40px;
+
+        }
+
+
+
+        .step-header h2 {
+
+            font-size: 2rem;
+
+            color: #2563EB;
+
+            font-weight: 700;
+
+        }
+
+
+
+        .step-header p {
+
+            color: var(--text-secondary);
+
+        }
+
+
+
+        /* Grid for options */
+
+        .option-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 20px;
+
+        }
+
+
+
+        .option-btn {
+
+            background: white;
+
+            border: 2px solid var(--border-color);
+
+            padding: 30px;
+
+            border-radius: 16px;
+
+            cursor: pointer;
+
+            text-align: center;
+
+            transition: all 0.2s;
+
+            font-size: 1.2rem;
+
+            font-weight: 600;
+
+        }
+
+
+
+        .option-btn:hover {
+
+            border-color: var(--primary-color);
+
+            background-color: #E3F2FD;
+
+        }
+
+
+
+        .option-btn svg,
+
+        .option-btn img {
+
+            display: block;
+
+            margin: 0 auto 15px;
+
+            height: 60px;
+
+            width: auto;
+
+        }
+
+
+
+        /* Result Specifics */
+
+        .result-box {
+
+            background: #F8F9FA;
+
+            padding: 40px;
+
+            border-radius: 16px;
+
+            text-align: center;
+
+            margin-bottom: 30px;
+
+        }
+
+
+
+        .estimated-price {
+
+            font-size: 3rem;
+
+            font-weight: 800;
+
+            color: #000000;
+
+            /* Black for visibility */
+
+            margin: 20px 0;
+
+        }
+
+
+
+        .condition-desc {
+
+            font-size: 0.9rem;
+
+            color: #757575;
+
+            margin-top: 5px;
+
+        }
+
+    </style>
+
+
+
+    <!-- Google tag (gtag.js) -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JWS15NH588"></script>
+
+    <script>
+
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() { dataLayer.push(arguments); }
+
+        gtag('js', new Date());
+
+
+
+        gtag('config', 'G-JWS15NH588');
+
+    </script>
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+    <nav class="navbar">
+
+        <div class="container">
+
+            <a href="index.html" class="logo">
+
+                <img src="sr_logo.png" alt="SR 로고" class="logo-icon"
+
+                    style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+
+                <span class="logo-text-wrapper"
+
+                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 24px; color: #2563EB; margin-left: 8px;">
+
+                    쉐라폰
+
+                </span>
+
+            </a>
+
+            <div class="nav-links">
+
+                <a href="quote.html">내 폰 판매</a>
+                <a href="reviews.html">이용 후기</a>
+
+                <a href="login.html" id="nav-login-link">로그인</a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+
+    <div class="wizard-container" style="position: relative;">
+
+        <!-- Loading Overlay for Data Fetching -->
+
+        <div id="wizard-loading" class="loading-overlay" style="display: none;">
+
+            <div style="text-align: center;">
+
+                <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+
+                <p>데이터를 불러오는 중입니다...</p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 1: Brand -->
+
+        <div id="wizard-step-1" class="wizard-step active">
+
+            <div class="step-header">
+
+                <h2>어떤 브랜드의 폰인가요?</h2>
+
+                <p>판매하실 제품의 제조사를 선택해주세요.</p>
+
+            </div>
+
+            <div class="selection-grid">
+
+                <div class="selection-card brand-btn" data-brand="apple">
+
+                    <img src="apple.svg" class="card-icon-img" alt="Apple">
+
+                    <div class="card-title">Apple</div>
+
+                </div>
+
+                <div class="selection-card brand-btn" data-brand="samsung">
+
+                    <img src="samsung.svg" class="card-icon-img" alt="Samsung">
+
+                    <div class="card-title">삼성</div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 2: Series -->
+
+        <div id="wizard-step-2" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>카테고리를 선택해주세요</h2>
+
+                <p>찾으시는 모델의 대표 시리즈군을 선택해주세요.</p>
+
+            </div>
+
+            <div id="series-list" class="selection-grid">
+
+                <!-- JS Populated -->
+
+            </div>
+
+            <div class="text-center" style="margin-top:30px;">
+
+                <button onclick="goToStep(1)" class="back-btn">이전 단계로</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 2-Sub: Detailed Series (For Samsung) -->
+
+        <div id="wizard-step-2-sub" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>세부 시리즈를 선택해주세요</h2>
+
+                <p>원하시는 상세 시리즈(연도/라인업)를 선택해주세요.</p>
+
+            </div>
+
+            <div id="sub-series-list" class="selection-grid">
+
+                <!-- JS Populated -->
+
+            </div>
+
+            <div class="text-center" style="margin-top:30px;">
+
+                <button onclick="goToStep(2)" class="back-btn">이전 단계로</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 3: Model -->
+
+        <div id="wizard-step-3" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>상세 모델을 선택해주세요</h2>
+
+                <p>사용하시는 휴대폰의 정확한 모델명입니다.</p>
+
+            </div>
+
+            <div id="model-list" class="selection-grid">
+
+                <!-- JS Populated -->
+
+            </div>
+
+            <div class="text-center" style="margin-top:30px;">
+
+                <button onclick="goToStep(2)" class="back-btn">이전 단계로</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 4: Storage -->
+
+        <div id="wizard-step-4" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>저장공간 용량을 선택해주세요</h2>
+
+                <p>설정 > 일반 > 정보에서 확인 가능합니다.</p>
+
+            </div>
+
+            <div id="storage-list" class="selection-grid">
+
+                <!-- JS Populated -->
+
+            </div>
+
+            <div class="text-center" style="margin-top:30px;">
+
+                <button onclick="goToStep(3)" class="back-btn">이전 단계로</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 4.5: Method Selection -->
+
+        <div id="wizard-step-method" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>판매 방법을 선택해 주세요</h2>
+
+                <p>원하시는 접수 방식을 선택해주세요.</p>
+
+            </div>
+
+
+
+            <div class="selection-grid" style="grid-template-columns: 1fr 1fr;">
+
+                <div class="selection-card method-select-btn" data-method="simple" onclick="selectMethod('simple')">
+
+                    <span class="card-icon">✨</span>
+
+                    <div class="card-title">간편 접수</div>
+
+                    <div class="card-sub" style="margin-top: 10px;">
+
+                        제품 상태 <strong>체크 없이</strong> 바로 배송<br>
+
+                        <span style="font-size: 0.8rem; color: #888;">(도착 후 검수를 통해 최종 금액 안내)</span>
+
+                    </div>
+
+                </div>
+
+                <div class="selection-card method-select-btn" data-method="self" onclick="selectMethod('self')">
+
+                    <span class="card-icon">📝</span>
+
+                    <div class="card-title">셀프 접수</div>
+
+                    <div class="card-sub" style="margin-top: 10px;">
+
+                        직접 제품 상태 <strong>체크 후</strong> 배송<br>
+
+                        <span style="font-size: 0.8rem; color: #888;">(예상 견적을 미리 확인 가능)</span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="text-center" style="margin-top: 40px;">
+
+                <button onclick="goToStep(4)" class="back-btn">이전 단계로</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 5-A: Grade Price List (For Simple Method) -->
+
+        <div id="wizard-step-grade-list" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>주요등급 예상시세</h2>
+
+                <p>현재 시세 기준 예상 매입가입니다.</p>
+
+            </div>
+
+
+
+            <div class="grade-list-container" style="max-width: 600px; margin: 0 auto;">
+
+                <div id="grade-price-list-target">
+
+                    <!-- Populated by JS -->
+
+                </div>
+
+            </div>
+
+
+
+            <div class="text-center" style="margin-top: 40px; display: flex; gap: 10px; justify-content: center;">
+
+                <button onclick="goToStep('defects')" class="btn btn-dark" style="flex: 1; max-width: 200px;">내 기기로
+
+                    등록</button>
+
+                <button onclick="goToStep('auth')" class="btn btn-primary"
+
+                    style="flex: 1; max-width: 200px;">예약하기</button>
+
+            </div>
+
+            <div class="text-center" style="margin-top: 20px;">
+
+                <button onclick="goToStep('method')" class="back-btn">이전 단계로</button>
+
+            </div>
+
+
+
+            <div
+
+                style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem; color: #666; text-align: left;">
+
+                <p><strong>📱 [내 기기로 등록]</strong>: 등록 후 변경되는 시세를 편하게 확인하세요.</p>
+
+                <p style="margin-top:5px;"><strong>👉 [예약하기]</strong>: 정확한 가격은 상품 도착 후 빠르게 검수하고 알려 드릴게요.</p>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+        <!-- Step 5: Detail Defect Checklist (Phone Gabi Style) -->
+
+        <div id="wizard-step-defects" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>제품 상태를 상세히 체크해 주세요</h2>
+
+                <p>정확하게 체크할수록 실제 매입가와 가까워집니다.</p>
+
+            </div>
+
+
+
+            <div class="checklist-container" style="text-align: left; max-width: 600px; margin: 0 auto;">
+
+
+
+                <!-- 1. Case Open -->
+
+                <div class="check-group mb-3">
+
+                    <h4 class="mb-1">케이스 개봉 여부 <span style="color:red">*</span></h4>
+
+                    <div class="selection-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+
+                        <button class="btn-check-opt" data-group="is_sealed" data-value="false"
+
+                            onclick="toggleRadioSafe(this)">개봉 (중고)</button>
+
+                        <button class="btn-check-opt" data-group="is_sealed" data-value="true"
+
+                            onclick="toggleRadioSafe(this)">미개봉 (새제품)</button>
+
+                    </div>
+
+                </div>
+
+
+
+                <div id="used-condition-options" style="display: none;">
+
+                    <!-- 2. Body Damage -->
+
+                    <div class="check-group mb-3">
+
+                        <h4 class="mb-1">파손 및 찍힘 여부 (중복 선택 가능)</h4>
+
+                        <div class="selection-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+
+                            <button class="btn-check-opt active" data-group="body_damage" data-value="none"
+
+                                onclick="toggleMulti(this, 'none')">없음</button>
+
+                            <button class="btn-check-opt" data-group="body_damage" data-value="front"
+
+                                onclick="toggleMulti(this, 'front')">전면 (유리)</button>
+
+                            <button class="btn-check-opt" data-group="body_damage" data-value="bezel"
+
+                                onclick="toggleMulti(this, 'bezel')">테두리/베젤</button>
+
+                            <button class="btn-check-opt" data-group="body_damage" data-value="rear"
+
+                                onclick="toggleMulti(this, 'rear')">후면 (카메라 포함)</button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- 3. Micro Scratches -->
+
+                    <div class="check-group mb-3">
+
+                        <h4 class="mb-1">미세 손상/생활 기스 (중복 선택 가능)</h4>
+
+                        <div class="selection-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+
+                            <button class="btn-check-opt active" data-group="micro_scratch" data-value="none"
+
+                                onclick="toggleMulti(this, 'none')">없음</button>
+
+                            <button class="btn-check-opt" data-group="micro_scratch" data-value="front"
+
+                                onclick="toggleMulti(this, 'front')">전면 (유리)</button>
+
+                            <button class="btn-check-opt" data-group="micro_scratch" data-value="bezel"
+
+                                onclick="toggleMulti(this, 'bezel')">테두리</button>
+
+                            <button class="btn-check-opt" data-group="micro_scratch" data-value="rear"
+
+                                onclick="toggleMulti(this, 'rear')">후면</button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- 4. LCD Damage (Critical) -->
+
+                    <div class="check-group mb-3">
+
+                        <h4 class="mb-1">메인 LCD 손상 여부 <span style="color:red">*</span></h4>
+
+                        <div class="selection-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+
+                            <button class="btn-check-opt active" data-group="lcd_damage" data-value="no"
+
+                                onclick="toggleRadioSafe(this)">없음</button>
+
+                            <button class="btn-check-opt" data-group="lcd_damage" data-value="yes"
+
+                                onclick="toggleRadioSafe(this)">손상 (줄/멍/파손)</button>
+
+                        </div>
+
+                        <p style="font-size: 0.8rem; color: red; margin-top: 5px;">※ LCD 손상은 차감 금액이 가장 큰 항목입니다.</p>
+
+                    </div>
+
+
+
+                    <!-- 5. Burn-in -->
+
+                    <div class="check-group mb-3">
+
+                        <h4 class="mb-1">화면 잔상 (번인) 여부</h4>
+
+                        <div class="selection-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+
+                            <button class="btn-check-opt active" data-group="burn_in" data-value="no"
+
+                                onclick="toggleRadioSafe(this)">없음</button>
+
+                            <button class="btn-check-opt" data-group="burn_in" data-value="yes"
+
+                                onclick="toggleRadioSafe(this)">있음 (잔상)</button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- 6. Functional Defects -->
+
+                    <div class="check-group mb-3">
+
+                        <h4 class="mb-1">기능 불량 (중복 선택 가능)</h4>
+
+                        <div class="selection-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+
+                            <button class="btn-check-opt active" style="grid-column: span 3;" data-group="func_defect"
+
+                                data-value="none" onclick="toggleMulti(this, 'none')">기능 이상 없음</button>
+
+
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="camera_lens"
+
+                                onclick="toggleMulti(this, 'camera_lens')">카메라 멍/기스</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="camera_fail"
+
+                                onclick="toggleMulti(this, 'camera_fail')">카메라 작동불가</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="faceid"
+
+                                onclick="toggleMulti(this, 'faceid')">페이스ID/지문</button>
+
+
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="wifi"
+
+                                onclick="toggleMulti(this, 'wifi')">Wifi/블루투스</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="compass"
+
+                                onclick="toggleMulti(this, 'compass')">나침반/GPS</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="sound"
+
+                                onclick="toggleMulti(this, 'sound')">스피커/마이크</button>
+
+
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="vibration"
+
+                                onclick="toggleMulti(this, 'vibration')">진동 불량</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="touch"
+
+                                onclick="toggleMulti(this, 'touch')">터치 불량</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="battery"
+
+                                onclick="toggleMulti(this, 'battery')">배터리성능 80%↓</button>
+
+
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="power"
+
+                                onclick="toggleMulti(this, 'power')">전원/충전 불량</button>
+
+                            <button class="btn-check-opt" data-group="func_defect" data-value="account"
+
+                                onclick="toggleMulti(this, 'account')">계정잠김</button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+
+
+            <div class="text-center" style="margin-top: 40px;">
+
+                <button onclick="calculateAndShowResult()" class="btn btn-primary" style="width: 200px;">견적
+
+                    확인하기</button>
+
+                <br><br>
+
+                <button onclick="goToStep('method')" class="back-btn">이전 단계로</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 6: Result -->
+
+        <div id="wizard-step-6" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>예상 매입가 확인</h2>
+
+                <p><span id="result-model-name" style="font-weight:bold; color:var(--primary-dark);">아이폰 15</span> 견적
+
+                    결과입니다.</p>
+
+            </div>
+
+
+
+            <div class="result-box">
+
+                <p>예상 매입가</p>
+
+                <div id="final-price-display" class="estimated-price">0원</div>
+
+                <div id="price-breakdown"
+
+                    style="text-align: left; background: white; padding: 20px; border-radius: 12px; margin-top: 20px; font-size: 0.9rem; color: #555;">
+
+                    <!-- Breakdown populated by JS -->
+
+                </div>
+
+            </div>
+
+
+
+            <div class="text-center">
+
+                <button onclick="goToStep('auth')" class="btn btn-primary">이 가격으로 판매 신청</button>
+
+                <br><br>
+
+                <button onclick="location.reload()" class="back-btn">다시 조회하기</button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 6.5: Info (Phone Verification Temporarily Disabled) -->
+
+        <div id="wizard-step-auth" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>접수자 정보 입력 <span style="color:red">*</span></h2>
+
+                <p>정확한 정산 및 거래 안내를 위해 정보를 입력해주세요.</p>
+
+            </div>
+
+
+
+            <div style="max-width: 400px; margin: 0 auto; text-align: left;">
+
+                <div class="mb-4">
+
+                    <label class="form-label">이름 <span style="color:red">*</span></label>
+
+                    <input type="text" id="auth-name" class="search-input"
+
+                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
+
+                        placeholder="실명을 입력해주세요">
+
+                </div>
+
+                <div class="mb-4">
+
+                    <label class="form-label">휴대폰 번호 (- 없이 입력) <span style="color:red">*</span></label>
+
+                    <input type="tel" id="auth-phone" class="search-input"
+
+                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
+
+                        placeholder="예) 01012345678" maxlength="11">
+
+                </div>
+
+                
+
+                <!-- Terms Agreement Checkbox -->
+
+                <div class="mb-4" style="display: flex; align-items: center; justify-content: space-between; background: #F8F9FA; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB;">
+
+                    <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.95rem; color: #333;">
+
+                        <input type="checkbox" id="agree-terms" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+
+                        <span>이용약관 및 개인정보 처리방침 동의 <span style="color:red">*</span></span>
+
+                    </label>
+
+                    <button type="button" onclick="openTermsModal()" style="background: none; border: none; color: #2563EB; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">보기</button>
+
+                </div>
+
+            </div> <!-- Close max-width 400px div -->
+
+
+
+            <div class="text-center">
+
+                <button id="btn-auth-next" class="btn btn-primary" style="width: 100%;">이 가격으로 판매 신청</button>
+
+            </div>
+
+        </div> <!-- Close wizard-step-auth div -->
+
+
+
+        <!-- Step 7: Form (Updated Delivery Methods) -->
+
+        <div id="wizard-step-7" class="wizard-step">
+
+            <div class="step-header">
+
+                <h2>거래방식 선택</h2>
+
+                <p>원하시는 수거 방식을 선택해주세요.</p>
+
+            </div>
+
+
+
+            <div class="form-container" style="max-width: 500px; margin: 0 auto;">
+
+
+
+                <!-- Delivery Method Selection -->
+
+                <div class="mb-4" style="text-align: left;">
+
+                    <div class="selection-grid" style="grid-template-columns: 1fr;">
+
+
+
+
+
+
+
+                        <div class="selection-card method-btn" data-method="cvs"
+
+                            style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
+
+                            <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
+
+                            <div>
+
+                                <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left;">편의점 택배 직접
+
+                                    발송</div>
+
+                                <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left;">가까운 편의점에서
+
+                                    택배 접수해 주세요.<br>(입금까지 1~2일 소요)</div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="selection-card method-btn active" data-method="courier"
+
+                            style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
+
+                            <div style="background: #E8F5E9; padding: 10px; border-radius: 50%;">📦</div>
+
+                            <div>
+
+                                <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left;">택배 방문수거
+
+                                </div>
+
+                                <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left;">박스 포장 후 문
+
+                                    앞에 두시면 수거해 드려요.<br>(입금까지 2~3일 소요)</div>
+
+                            </div>
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Self Info (Shown for CVS) -->
+
+                <div id="method-cvs-info"
+
+                    style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ddd;">
+
+                    <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
+
+                    <p style="font-size: 0.9rem; color: #555;">
+
+                        부산시 동천로 116 한신밴빌딩 1003호<br>
+
+                        (010-3263-5672)
+
+                    </p>
+
+                    <p style="color: blue; font-size: 0.8rem; margin-top:5px;">* 착불로 보내주세요.</p>
+
+                </div>
+
+
+
+                <!-- Common Fields -->
+
+                <div class="mb-2" style="text-align: left;">
+
+                    <label style="display:block; margin-bottom:5px; font-weight:600;">상세 주소 (수거지)</label>
+
+                    <input type="text" id="customer-address" class="search-input"
+
+                        style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
+
+                        placeholder="주소를 입력해주세요">
+
+                </div>
+
+
+
+                <div class="mb-3" style="text-align: left;">
+
+                    <label style="display:block; margin-bottom:5px; font-weight:600;">계좌 정보 (입금 받을 곳)</label>
+
+                    <div style="display: flex; gap: 10px;">
+
+                        <input type="text" id="customer-bank" class="search-input"
+
+                            style="width:30%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
+
+                            placeholder="은행명">
+
+                        <input type="text" id="customer-account" class="search-input"
+
+                            style="width:70%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
+
+                            placeholder="계좌번호 (- 없이)">
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="mb-4" style="text-align: left;">
+
+                    <label style="display:block; margin-bottom:5px; font-weight:600;">요청사항 / 메모 (선택)</label>
+
+                    <textarea id="customer-memo" class="search-input" rows="3"
+
+                        style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;"
+
+                        placeholder="택배 수거 시 요청사항이나 기타 남기실 말씀이 있다면 적어주세요."></textarea>
+
+                </div>
+
+
+
+                <div class="text-center">
+
+                    <button id="btn-submit-final" class="btn btn-primary" style="width: 100%;">신청 완료하기</button>
+
+                    <br><br>
+
+                    <button onclick="goToStep('auth')" class="back-btn">뒤로가기</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Step 8: Success -->
+
+        <div id="wizard-step-8" class="wizard-step">
+
+            <div class="step-header">
+
+                <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+
+                <h2>신청이 완료되었습니다!</h2>
+
+                <div id="success-instruction"
+
+                    style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: left;">
+
+                    <!-- Javascript will populate this based on delivery method -->
+
+                    <p>담당자가 확인 후 30분 내로 연락드리겠습니다.</p>
+
+                </div>
+
+            </div>
+
+            <div class="text-center" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+
+                <a href="index.html" class="btn" style="background-color: #e9ecef; color: #333;">홈으로 돌아가기</a>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+
+
+    <!-- Footer added for consistency -->
+
+    <footer>
+
+        <div class="container">
+
+            <div class="footer-content">
+
+                <div class="footer-col" style="flex: 2;">
+
+
+
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">
+
+                        <strong>쇼핑몰 기본정보</strong><br>
+
+                        상호명: 에스알커머스 | 대표자명: 박현용<br>
+
+                        사업장 주소: 부산시 동천로 116 한신밴빌딩 1003호<br>
+
+                        사업자 등록번호: 331-77-00487<br>
+
+                        통신판매업 신고번호: 기타 | 개인정보보호책임자: 박현용
+
+                    </div>
+                    <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
+                            <img src="sr_logo.png" alt="KG이니시스 에스크로" style="height: 38px;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                고객님의 안전거래를 위해 현금 결제 시 저희 쇼핑몰이 가입한<br>
+                                <strong>KG이니시스의 에스크로(구매안전) 서비스</strong>를 이용하실 수 있습니다.<br>
+                                <span style="color: #6b7280; text-decoration: underline;">[서비스 가입사실 확인하기]</span>
+                            </div>
+                        </div>
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
+                            <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="footer-col">
+
+                    <h4>고객센터 정보</h4>
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+
+
+
+                        상담/주문 이메일: guffyd321@naver.com<br><br>
+
+                        <strong>CS운영시간</strong><br>
+
+                        연중무휴 24시간 채널톡으로 상담가능
+
+                    </p>
+
+                </div>
+
+                <div class="footer-col">
+
+                    <h4>About</h4>
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+
+                        <a href="terms.html" style="color: inherit; text-decoration: none;">이용약관</a> |
+
+                        <a href="privacy.html"
+
+                            style="color: inherit; text-decoration: none; font-weight: bold;">개인정보처리방침</a>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="copyright">
+
+                &copy; 2024 에스알커머스. All rights reserved.
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- Pre-sale Agreement Modal -->
+
+    <div id="presale-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+
+        <div class="modal-content" style="background: white; width: 90%; max-width: 500px; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: modalSlideUp 0.3s ease-out;">
+
+            <style>
+
+                @keyframes modalSlideUp {
+
+                    from { transform: translateY(30px); opacity: 0; }
+
+                    to { transform: translateY(0); opacity: 1; }
+
+                }
+
+                .presale-step-dot {
+
+                    width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #64748b;
+
+                    display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; transition: 0.3s;
+
+                }
+
+                .presale-step-dot.active { background: #2563EB; color: white; box-shadow: 0 0 0 4px #bfdbfe; }
+
+                .presale-guide-card {
+
+                    flex: 1; background: #1e293b; border-radius: 16px; height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 15px; text-align: center;
+
+                }
+
+                .presale-action-card {
+
+                    flex: 1; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; text-align: center; background: white;
+
+                }
+
+                .presale-btn-nav {
+
+                    padding: 14px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
+
+                }
+
+                .samsung-step-box {
+
+                    background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px;
+
+                }
+
+                .samsung-step-num {
+
+                    background: #f1f5f9; color: #475569; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;
+
+                }
+
+            </style>
+
+            <div class="modal-header" style="position: relative; padding: 20px; text-align: center; border-bottom: 1px solid #f1f5f9;">
+
+                <h3 style="margin: 0; font-size: 1.2rem; color: #0f172a; font-weight:bold;">판매 사전 동의</h3>
+
+                <button onclick="closePresaleModal()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+
+            </div>
+
+
+
+            <div style="display: flex; justify-content: center; align-items: center; padding: 20px 0 10px; gap: 15px;">
+
+                <div class="presale-step-dot active" id="p-dot-1">1</div>
+
+                <div style="height: 2px; width: 60px; background: #e2e8f0;"></div>
+
+                <div class="presale-step-dot" id="p-dot-2">2</div>
+
+            </div>
+
+
+
+            <div class="modal-body" style="padding: 0 24px 24px; overflow-y: auto; flex: 1;">
+
+                
+
+                <!-- Step 1 (Apple variant) -->
+
+                <div id="presale-step-1-apple" style="display: none;">
+
+                    <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;">1. 계정 로그아웃</h4>
+
+                    <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+
+                        <strong>※ 공장 초기화 후에도 활성화 잠금이 발생할 수 있습니다.</strong><br>
+
+                        계정 암호를 입력해 <strong>'나의 iPhone 찾기'를 끄고</strong> 로그아웃합니다.<br>
+
+                        <span style="color: #2563EB; font-weight: bold;">설정 ➜ Apple 계정(사용자 이름) ➜ 로그아웃</span> 순서로 진행해주세요. <br>(휴대폰의 잠금이 해제되어야합니다)
+
+                    </div>
+
+                
+
+                    <div style="font-size: 0.85rem; color: #64748b; text-align: center; margin-bottom: 15px; font-weight: bold;">아래로 스크롤하여 다음 단계를 확인하세요 👇</div>
+
+
+
+                    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center; padding-bottom: 10px;">
+
+                        <!-- Image 1 -->
+
+                        <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+
+                            <div class="guide-image-container" style="height: auto;">
+
+                                <img src="assets/guide/apple_1.png" alt="Apple 계정" style="width: 100%; border-radius: 12px; display: block;"/>
+
+                                <!-- Pointer at 'Apple 계정' -->
+
+                                <div class="finger-pointer" style="top: 25%; left: 45%;"></div>
+
+                            </div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[Apple 계정, iCloud+ 등] 터치</div>
+
+                        </div>
+
+                    
+
+                        <!-- Image 2 -->
+
+                        <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+
+                            <div class="guide-image-container" style="height: auto;">
+
+                                <img src="assets/guide/apple_2.png" alt="로그아웃" style="width: 100%; border-radius: 12px; display: block;"/>
+
+                                <!-- Pointer at '로그아웃' -->
+
+                                <div class="finger-pointer" style="top: 85%; left: 45%;"></div>
+
+                            </div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">화면 맨 아래 [로그아웃] 터치</div>
+
+                        </div>
+
+                    
+
+                        <!-- Image 3 -->
+
+                        <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+
+                            <div class="guide-image-container" style="height: auto;">
+
+                                <img src="assets/guide/apple_3.png" alt="끄기" style="width: 100%; border-radius: 12px; display: block;"/>
+
+                                <!-- Pointer at '끄기' -->
+
+                                <div class="finger-pointer" style="top: 10%; left: 80%;"></div>
+
+                            </div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">암호 입력 후 우측 상단 [끄기] 터치</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Step 1 (Samsung variant) -->
+
+                <div id="presale-step-1-samsung" style="display: none;">
+
+                    <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;">1. 계정 로그아웃 및 초기화</h4>
+
+                    <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+
+                        초기화 시 <strong>잠금을 포함한 모든 설정</strong>을 초기화하여야 하며 구글, 삼성 등 <strong>계정 데이터도 모두 삭제</strong>됩니다.<br>
+
+                        <span style="color: #2563EB; font-weight: bold;">기기설정 ➜ 일반 ➜ 초기화 ➜ 기기전체초기화</span> 순서로 진행해주세요.
+
+                    </div>
+
+                    
+
+                    <div style="font-size: 0.85rem; color: #64748b; text-align: center; margin-bottom: 15px; font-weight: bold;">아래로 스크롤하여 다음 단계를 확인하세요 👇</div>
+
+
+
+                    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center; padding-bottom: 10px;">
+
+                        <!-- Image 1 -->
+
+                        <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+
+                            <div class="guide-image-container" style="height: auto;">
+
+                                <img src="assets/guide/samsung_1.jpg" alt="설정" style="width: 100%; border-radius: 12px; display: block;"/>
+
+                                <!-- Pointer at 'General' -->
+
+                                <div class="finger-pointer" style="top: 52%; left: 45%;"></div>
+
+                            </div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[일반] 터치</div>
+
+                        </div>
+
+                        
+
+                        <!-- Image 2 -->
+
+                        <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+
+                            <div class="guide-image-container" style="height: auto;">
+
+                                <img src="assets/guide/samsung_2.jpg" alt="초기화" style="width: 100%; border-radius: 12px; display: block;"/>
+
+                                <!-- Pointer at 'Reset' -->
+
+                                <div class="finger-pointer" style="top: 52%; left: 45%;"></div>
+
+                            </div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[초기화] 터치</div>
+
+                        </div>
+
+                        
+
+                        <!-- Image 3 -->
+
+                        <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 8px; text-align: center;">
+
+                            <div class="guide-image-container" style="height: auto;">
+
+                                <img src="assets/guide/samsung_3.jpg" alt="기기 전체 초기화" style="width: 100%; border-radius: 12px; display: block;"/>
+
+                                <!-- Pointer at 'Factory data reset' -->
+
+                                <div class="finger-pointer" style="top: 85%; left: 45%;"></div>
+
+                            </div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[기기 전체 초기화] 터치</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Step 2 (Common) -->
+
+                <div id="presale-step-2" style="display: none;">
+
+                    <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;">2. 유심(USIM)폐기 및 개인정보 삭제 동의</h4>
+
+                    <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 24px; line-height: 1.5;">
+
+                        중요한 정보는 백업해 주시고, <strong>단말기 발송 전 데이터 삭제를 권장합니다.</strong> 단말기 검수 시 개인정보 보호를 위해 담당자가 데이터를 삭제 처리하며 복구가 불가능합니다.
+
+                    </div>
+
+                    
+
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+
+                        <div class="presale-action-card">
+
+                            <div style="background: #eff6ff; color: #2563EB; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">✂️</div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">유심 폐기</div>
+
+                        </div>
+
+                        <div class="presale-action-card">
+
+                            <div style="background: #eff6ff; color: #2563EB; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">🗑️</div>
+
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">데이터 삭제</div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 16px; border-radius: 12px; font-size: 0.85rem; display: flex; gap: 12px; line-height: 1.5;">
+
+                        <div style="font-size: 1.2rem; flex-shrink: 0;">⚠️</div>
+
+                        <div>전원불량, 심각한 액정손상 등으로 화면 식별 또는 검수가 불가한 기기는 데이터 삭제가 불가하며, 이로 인한 개인정보 유출 피해에 대해서는 당사가 책임을 지지 않습니다.</div>
+
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+
+
+            <div class="modal-footer" style="padding: 20px 24px; border-top: 1px solid #f1f5f9; display: flex; gap: 12px; background: white;">
+
+                <button id="p-btn-prev" class="presale-btn-nav" style="display: none; border: 1px solid #cbd5e1; background: white; color: #475569;" onclick="presaleGoPrev()">이전</button>
+
+                <button id="p-btn-next" class="presale-btn-nav" style="flex: 1; background: #2563EB; color: white; border: none;" onclick="presaleGoNext()">동의 후 다음</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Terms Modal -->
+
+    <div id="termsModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+
+        <div class="modal-content" style="background: white; padding: 20px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; position: relative;">
+
+            <button onclick="closeTermsModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+
+            <h3 style="margin-top: 0; font-size: 1.2rem; font-weight: 700; margin-bottom: 15px;">이용약관 및 개인정보 처리방침</h3>
+
+            <div style="font-size: 0.85rem; color: #555; line-height: 1.6;">
+
+                <p><strong>[개인정보 수집 및 이용 동의]</strong></p>
+
+                <p>1. 수집 항목: 성명, 연락처, 계좌번호, 주소<br>
+
+                   2. 수집 목적: 중고폰 매입/결제 진행, 서비스 상담<br>
+
+                   3. 보유 기간: 관련 법령에 따른 보존기간 또는 목적 달성 시까지</p>
+
+                <p style="margin-top:10px;"><strong>[이용약관 주요 안내]</strong></p>
+
+                <ul style="padding-left: 20px; margin: 5px 0;">
+
+                    <li>본 견적은 기기 상태에 따라 달라질 수 있습니다.</li>
+
+                    <li>분실/도난/거래정지 등 등록 폰은 견적 및 매입이 불가하며, 관련 법적 책임은 모두 판매자에게 있습니다.</li>
+
+                </ul>
+
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+
+                <button onclick="closeTermsModal()" class="btn btn-primary" style="padding: 10px 20px; min-width: 120px; margin-bottom: 15px;">확인</button>
+
+                <div style="display: flex; gap: 10px; justify-content: center;">
+
+                    <a href="terms.html" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">이용약관 전문 보기</a>
+
+                    <a href="privacy.html" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">개인정보 처리방침 전문 보기</a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+
+    <script type="module" src="script.js?v=1774271812"></script>
+
+
+
+    <!-- Channel Plugin Scripts -->
+
+    <script>
+
+        (function () {
+
+            var w = window;
+
+            if (w.ChannelIO) {
+
+                return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.');
+
+            }
+
+            var ch = function () {
+
+                ch.c(arguments);
+
+            };
+
+            ch.q = [];
+
+            ch.c = function (args) {
+
+                ch.q.push(args);
+
+            };
+
+            w.ChannelIO = ch;
+
+            function l() {
+
+                if (w.ChannelIOInitialized) {
+
+                    return;
+
+                }
+
+                w.ChannelIOInitialized = true;
+
+                var s = document.createElement('script');
+
+                s.type = 'text/javascript';
+
+                s.async = true;
+
+                s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
+                s.charset = 'UTF-8';
+
+                var x = document.getElementsByTagName('script')[0];
+
+                x.parentNode.insertBefore(s, x);
+
+            }
+
+            if (document.readyState === 'complete') {
+
+                l();
+
+            } else if (window.attachEvent) {
+
+                window.attachEvent('onload', l);
+
+            } else {
+
+                window.addEventListener('DOMContentLoaded', l, false);
+
+                window.addEventListener('load', l, false);
+
+            }
+
+        })();
+
+        ChannelIO('boot', {
+
+            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
+
+        });
+
+    </script>
+
+</body>
+
+
+
+</html>

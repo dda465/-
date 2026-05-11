@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프리미엄 판매 견적 - 쉐라폰 프로토타입</title>
+    <!-- Use standard font -->
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-dark: #1E40AF;
+            --text-main: #0F172A;
+            --text-sub: #64748B;
+            --bg-body: #F8FAFC;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.5);
+            --shadow-soft: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 25px 50px -12px rgba(37, 99, 235, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar Mock */
+        nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;}
+        .logo-circle { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;}
+
+        /* --- Main Two-Column Layout (Responsive) --- */
+        .layout-container {
+            display: flex;
+            flex-direction: row; /* Desktop: side by side */
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        /* Left Side: Showcase Area */
+        .showcase-area {
+            flex: 1;
+            background: linear-gradient(135deg, #E0E7FF 0%, #DBEAFE 100%);
+            border-radius: 30px;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: sticky;
+            top: 100px; /* Sticks to top when scrolling */
+            height: calc(100vh - 140px);
+            overflow: hidden;
+            box-shadow: inset 0 0 100px rgba(255,255,255,0.5);
+        }
+
+        .showcase-badge {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .showcase-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: #1E3A8A;
+            margin-bottom: 16px;
+        }
+
+        .showcase-subtitle {
+            font-size: 1.1rem;
+            color: #3B82F6;
+            margin-bottom: 40px;
+            max-width: 80%;
+        }
+
+        /* Showcase Image */
+        .showcase-image-container {
+            position: relative;
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+
+        /* Right Side: Interaction Area */
+        .interaction-area {
+            flex: 1;
+            padding: 20px 0;
+            max-width: 600px;
+        }
+
+        .step-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            color: var(--text-sub);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid #E0E0E0;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            background-color: #E3F2FD;
+        }
+
+        .option-icon {
+            display: block;
+            margin: 0 auto 15px;
+            height: 60px;
+            width: auto;
+        }
+
+        .option-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .option-sub {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 5px;
+        }
+
+        /* Step Transitions */
+        .step-container {
+            display: none;
+            animation: slideUpFade 0.5s ease;
+        }
+        .step-container.active {
+            display: block;
+        }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Button */
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 30px;
+            transition: color 0.2s;
+        }
+        .btn-back:hover { color: var(--text-main); }
+        .btn-back svg { margin-right: 8px; }
+
+
+        /* ---------------------------------------------------
+           MEDIA QUERIES (Responsive Design Magic!)
+           This is how we make it perfectly fit mobile screens
+           WITHOUT creating a separate mobile website!
+           --------------------------------------------------- */
+        @media (max-width: 992px) {
+            .layout-container {
+                flex-direction: column; /* Stack vertically on mobile */
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .showcase-area {
+                height: auto;
+                position: static; /* Removes sticky behavior */
+                padding: 40px 20px;
+                border-radius: 20px;
+                /* Optional: Shrink sizes for mobile */
+            }
+
+            .showcase-title { font-size: 2.2rem; }
+            .device-art { width: 140px; height: 250px; }
+            .device-art::before { width: 120px; height: 230px; }
+
+            .interaction-area {
+                width: 100%;
+                max-width: 100%;
+                padding: 10px 0;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr; /* 1 column grid on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">
+            <div class="logo-circle">S</div>
+            쉐라폰
+        </div>
+    </nav>
+
+    <div class="layout-container">
+        
+        <!-- 좌측: 쇼케이스 뷰 (브랜드 어필 영역) -->
+        <div class="showcase-area" id="dynamic-showcase">
+            <div class="showcase-badge" id="sc-badge">가장 빠르고 높은 매입가</div>
+            <h1 class="showcase-title" id="sc-title">잠들어 있는<br>내 폰의 가치</h1>
+            <p class="showcase-subtitle" id="sc-sub">몇 번의 클릭으로 쉽고 정확하게 견적을 알아보세요.</p>
+            
+            <!-- Showcase Logo Container -->
+            <div class="showcase-image-container" id="sc-art-container">
+                <div style="opacity: 0.5; display:flex; align-items:center; justify-content:center;" id="sc-icon">
+                    <img src="icon_cash.svg" style="height: 80px; filter: grayscale(100%); mix-blend-mode: multiply;" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 사용자 인터랙션 영역 -->
+        <div class="interaction-area">
+            
+            <!-- Step 1: Manufacturer -->
+            <div id="step-1" class="step-container active">
+                <h2 class="step-title">제조사는 어디인가요?</h2>
+                <p class="step-desc">판매하실 휴대폰의 브랜드를 선택해주세요.</p>
+                
+                <div class="options-grid">
+                    <div class="option-card" onclick="nextStep(2, 'apple')">
+                        <img src="apple.svg" class="option-icon" alt="Apple">
+                        <div class="option-name">Apple</div>
+                    </div>
+                    <div class="option-card" onclick="nextStep(2, 'samsung')">
+                        <img src="samsung.svg" class="option-icon" alt="Samsung">
+                        <div class="option-name">삼성</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Series -->
+            <div id="step-2" class="step-container">
+                <button class="btn-back" onclick="prevStep(1)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    이전으로
+                </button>
+                <h2 class="step-title">시리즈를 선택해주세요</h2>
+                <p class="step-desc">대표적인 라인업을 선택해주세요.</p>
+                
+                <div class="options-grid" id="step2-options">
+                    <!-- JS Populated Option Cards -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function nextStep(step, selection) {
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('step-' + step).classList.add('active');
+
+            if(step === 2) {
+                let optionsHtml = '';
+                if(selection === 'samsung') {
+                    optionsHtml = `
+                        <div class="option-card" onclick="alert('이후 단계는 기존 로직을 연동하면 됩니다!')">
+                            <div class="option-name">갤럭시 S 시리즈</div><div class="option-sub">S24, S23, S22 등</div>
+                        </div>
+                        <div class="option-card" onclick="alert('이후 단계는 기존 로직을 연동하면 됩니다!')">
+                            <div class="option-name">갤럭시 Z 시리즈</div><div class="option-sub">폴드, 플립 시리즈</div>
+                        </div>
+                        <div class="option-card" onclick="alert('이후 단계는 기존 로직을 연동하면 됩니다!')">
+                            <div class="option-name">갤럭시 A / Note 시리즈</div><div class="option-sub">보급형 및 기타 모델</div>
+                        </div>
+                    `;
+                } else if(selection === 'apple') {
+                    optionsHtml = `
+                        <div class="option-card" onclick="alert('이후 단계는 기존 로직을 연동하면 됩니다!')">
+                            <div class="option-name">아이폰 15 / 14 시리즈</div><div class="option-sub">가장 인기있는 모델</div>
+                        </div>
+                        <div class="option-card" onclick="alert('이후 단계는 기존 로직을 연동하면 됩니다!')">
+                            <div class="option-name">아이폰 13 이하</div><div class="option-sub">이전 세대 모델</div>
+                        </div>
+                        <div class="option-card" onclick="alert('이후 단계는 기존 로직을 연동하면 됩니다!')">
+                            <div class="option-name">SE / Mini 시리즈</div><div class="option-sub">컴팩트 라인업</div>
+                        </div>
+                    `;
+                }
+                document.getElementById('step2-options').innerHTML = optionsHtml;
+            }
+
+            // 동적 쇼케이스 업데이트 (선택에 따라 좌측 뷰가 변화하는 상호작용)
+            if(selection === 'samsung') {
+                document.getElementById('dynamic-showcase').style.background = 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)';
+                document.getElementById('sc-badge').textContent = 'SAMSUNG GALAXY';
+                document.getElementById('sc-title').innerHTML = '<span style="color:white">갤럭시</span><br><span style="color:#BAE6FD">매입 단가 확인</span>';
+                document.getElementById('sc-sub').textContent = '최신 모델부터 이전 모델까지 최고가로 매입합니다.';
+                document.getElementById('sc-sub').style.color = '#7DD3FC';
+                document.getElementById('sc-icon').innerHTML = '<img src="samsung.svg" style="max-width: 250px; height: auto; filter: brightness(0) invert(1) opacity(0.8);">';
+            } else if (selection === 'apple') {
+                document.getElementById('dynamic-showcase').style.background = 'linear-gradient(135deg, #334155 0%, #0F172A 100%)';
+                document.getElementById('sc-badge').style.color = '#0F172A';
+                document.getElementById('sc-badge').textContent = 'APPLE iPhone';
+                document.getElementById('sc-title').innerHTML = '<span style="color:white">아이폰</span><br><span style="color:#94A3B8">안전한 중고거래</span>';
+                document.getElementById('sc-sub').textContent = '개인정보 완전 삭제 및 최고가 보장';
+                document.getElementById('sc-sub').style.color = '#94A3B8';
+                document.getElementById('sc-icon').innerHTML = '<img src="apple.svg" style="height: 100px; filter: brightness(0) invert(1) opacity(0.8);">';
+            }
+        }
+
+        function prevStep(step) {
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('step-' + step).classList.add('active');
+
+            // 원래 테마로 복구
+            if(step === 1) {
+                document.getElementById('dynamic-showcase').style.background = 'linear-gradient(135deg, #E0E7FF 0%, #DBEAFE 100%)';
+                document.getElementById('sc-badge').textContent = '가장 빠르고 높은 매입가';
+                document.getElementById('sc-badge').style.color = 'var(--primary)';
+                document.getElementById('sc-title').innerHTML = '<span style="color:#1E3A8A">잠들어 있는</span><br><span style="color:#1E3A8A">내 폰의 가치</span>';
+                document.getElementById('sc-sub').textContent = '몇 번의 클릭으로 쉽고 정확하게 견적을 알아보세요.';
+                document.getElementById('sc-sub').style.color = '#3B82F6';
+                document.getElementById('sc-icon').innerHTML = '<img src="icon_cash.svg" style="height: 80px; filter: grayscale(100%); mix-blend-mode: multiply;" onerror="this.style.display=\'none\'">';
+            }
+        }
+    </script>
+</body>
+</html>

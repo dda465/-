@@ -1,0 +1,13 @@
+
+        if (s.includes('S') && /[0-9]/.test(s) && !s.includes('플립') && !s.includes('폴드') && !s.includes('노트')) return 'S 시리즈';
+
+
+
+        if (s.includes('A') && /[0-9]/.test(s)) return 'A 시리즈';
+
+
+
+        return '기타 기종';
+
+
+

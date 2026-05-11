@@ -1,0 +1,15 @@
+162: <div class="selection-card brand-btn" data-brand="apple">
+163: <img src="apple.svg" class="card-icon-img" alt="Apple">
+166: <div class="selection-card brand-btn" data-brand="samsung">
+167: <img src="samsung.svg" class="card-icon-img" alt="Samsung">
+418: <p><span id="result-model-name" style="font-weight:bold; color:var(--primary-dark);">아이폰 15</span> 견적
+646: .samsung-step-box {
+649: .samsung-step-num {
+667: <div id="presale-step-1-apple" style="display: none;">
+681: <img src="assets/guide/apple_1.png" alt="Apple 계정" style="width: 100%; border-radius: 12px; display: block;"/>
+691: <img src="assets/guide/apple_2.png" alt="로그아웃" style="width: 100%; border-radius: 12px; display: block;"/>
+701: <img src="assets/guide/apple_3.png" alt="끄기" style="width: 100%; border-radius: 12px; display: block;"/>
+711: <div id="presale-step-1-samsung" style="display: none;">
+724: <img src="assets/guide/samsung_1.jpg" alt="설정" style="width: 100%; border-radius: 12px; display: block;"/>
+734: <img src="assets/guide/samsung_2.jpg" alt="초기화" style="width: 100%; border-radius: 12px; display: block;"/>
+744: <img src="assets/guide/samsung_3.jpg" alt="기기 전체 초기화" style="width: 100%; border-radius: 12px; display: block;"/>

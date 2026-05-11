@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Seed 10 More Reviews</title>
+</head>
+
+<body>
+    <h1>Seeding 10 More Reviews...</h1>
+    <div id="status"></div>
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const newReviews = [
+            {
+                text: "열심히 발품 판 결과 결국 여기는 차감없이 100퍼센트 입금 되네요!! 다른 업체는 너무 많이 차이나서 결국 돈만 물어줬었는데 여기 보내길 정말 잘 한것 같습니다 여기 특히 상담 친절히 잘해주시고 초기화된거 까지 완벽히 확인해주셔서 개인정보 걱정도 없고 돈도 차감없이 입금주셨어요!!!",
+                deviceModel: "아이폰 15 프로맥스", deviceStorage: "512GB", transactionPrice: "105만원", userName: "김시*", rating: 5, dateStr: "2025-01-25"
+            },
+            {
+                text: "찐 후기 남겨드립니다 출장 매입으로 신청했는데 촤대금앨으로 잡아주셨습니다 다른 업체는 항상 깎던데 여긴 차감도 없이 최대단가로 잡아주네요!! 다들 안심하시고 매입 맡기면 될 것 같습니다!",
+                deviceModel: "갤럭시 S24 울트라", deviceStorage: "512GB", transactionPrice: "120만원", userName: "이동*", rating: 5, dateStr: "2025-02-10"
+            },
+            {
+                text: "첫거래라 걱정했는데 처음 약속 금액 칼같이 입금 주셨어요ㅠㅠ 전 솔직히 반정도 들어올줄 알았는데 감사합니다ㅜㅜ영업 오래 해주세요 또 이용할게요!❤️",
+                deviceModel: "아이폰 14 프로", deviceStorage: "256GB", transactionPrice: "85만원", userName: "박지*", rating: 5, dateStr: "2025-02-28"
+            },
+            {
+                text: "첫 거래라 걱정했는데 이렇게 많이 주시다니ㅠㅠ 감가 전혀 없이 칼같이 보내주셔서 감사합니다 진짜 이런 업체는 널리 알려야 됩니다 돈줄나세요!!",
+                deviceModel: "Z폴드 5", deviceStorage: "512GB", transactionPrice: "95만원", userName: "최현*", rating: 5, dateStr: "2025-03-15"
+            },
+            {
+                text: "뒷판기스 있는데도 불구하고 차감없이 입금 주셨어요 계속 영업해주세요 사장님 ㅜㅜ 좋은 기억 남게 해주셔서 감사합니다 단골인데 또 이용할게요!",
+                deviceModel: "아이폰 13 미니", deviceStorage: "128GB", transactionPrice: "35만원", userName: "정다*", rating: 5, dateStr: "2025-03-22"
+            },
+            {
+                text: "완전 박살난 아이폰13프로 팔았는데 이만큼 주네요 업체 파산나는거 아니에요?ㅠㅠ 오래 영업해주세요 부탁드립니다 상품 정보가 자세히 적혀있어요.",
+                deviceModel: "아이폰 13 프로", deviceStorage: "256GB", transactionPrice: "25만원", userName: "강민*", rating: 5, dateStr: "2025-04-05"
+            },
+            {
+                text: "처음 상담했던 금액 55만원 그대로 입금해주셨습니다.. 솔직히 조금은 깎일줄 알았는데 이정도 파손은 괜찮다고 바로 입금 주셨어요 저번에 다른업체에선 30만원 깎고 줘서 불안했는데 여긴 절대 그럴일 없어요! 감사합니다ㅠㅠ",
+                deviceModel: "갤럭시 S23", deviceStorage: "256GB", transactionPrice: "55만원", userName: "조우*", rating: 5, dateStr: "2025-04-18"
+            },
+            {
+                text: "솔직하게 있는 그대로 말씀드립니다 저만 알고 싶은 업체인데..감사해서 후기남겨요 제가 처음 산 가격보다 더 비싸게 여기에 팔았어요 오히려 돈이 더 남는...? 땅파서 장사하시나요ㅠㅜ",
+                deviceModel: "아이폰 15", deviceStorage: "256GB", transactionPrice: "90만원", userName: "윤태*", rating: 5, dateStr: "2025-05-02"
+            },
+            {
+                text: "다른 업체는 감가가 심한데 여기는 감가없이 처음 상담한 90만원 그대로 입금 주셨어요!! 입금도 바로 되고 너무 감사합니다",
+                deviceModel: "갤럭시 S24+", deviceStorage: "256GB", transactionPrice: "90만원", userName: "임서*", rating: 5, dateStr: "2025-05-20"
+            },
+            {
+                text: "처음 상담했던 금액 감가 없이 그대로 입금 주셨어요 택배로 처음 보내서 불안했는데 너무 감사합니다ㅜㅜ폰가게에서 제시했던 금액에 두배 입금 받았어요!",
+                deviceModel: "Z플립 5", deviceStorage: "256GB", transactionPrice: "60만원", userName: "한유*", rating: 5, dateStr: "2025-06-12"
+            }
+        ];
+
+        async function seed() {
+            const statusDiv = document.getElementById('status');
+            for (let i = 0; i < newReviews.length; i++) {
+                const r = newReviews[i];
+                const dateObj = new Date(r.dateStr);
+                // Add some random time between 9 AM and 5 PM
+                dateObj.setHours(Math.floor(Math.random() * 8) + 9);
+                dateObj.setMinutes(Math.floor(Math.random() * 60));
+
+                const docData = {
+                    deviceModel: r.deviceModel,
+                    deviceStorage: r.deviceStorage,
+                    transactionPrice: r.transactionPrice,
+                    rating: r.rating,
+                    text: r.text,
+                    userId: "system_generated",
+                    userEmail: "",
+                    userName: r.userName,
+                    createdAt: Timestamp.fromDate(dateObj),
+                    updatedAt: Timestamp.fromDate(dateObj),
+                    imageUrl: null
+                };
+
+                try {
+                    await addDoc(collection(db, "reviews"), docData);
+                    statusDiv.innerHTML += `<p>Added Review ${i + 1}/${newReviews.length}</p>`;
+                } catch (e) {
+                    statusDiv.innerHTML += `<p style="color:red">Error on ${i + 1}: ${e.message}</p>`;
+                }
+            }
+            statusDiv.innerHTML += `<p style="color:green; font-weight:bold;">DONE!</p>`;
+        }
+
+        seed();
+    </script>
+</body>
+
+</html>

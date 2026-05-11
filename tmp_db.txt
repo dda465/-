@@ -1,0 +1,18 @@
+1470: const q = query(collection(db, "quotes"), orderBy("firebaseTimestamp", "desc"), limit(6));
+1474: const snapshot = await getDocs(q);
+1838: const q = query(collection(db, "products"), orderBy("basePrice", "desc"), limit(6));
+1842: const snapshot = await getDocs(q);
+2110: const q = query(collection(db, "products"));
+2114: const snapshot = await getDocs(q);
+3503: const q = query(collection(db, "products"));
+3507: const snapshot = await getDocs(q);
+5813: await addDoc(collection(db, "quotes"), payload);
+6167: const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(3));
+6171: const querySnapshot = await getDocs(q);
+6669: let q = query(collection(db, "quotes"), where("userId", "==", searchUid), where("status", "==", "입금완료"));
+6671: let querySnapshot = await getDocs(q);
+6679: q = query(collection(db, "quotes"), where("userId", "==", localUser.uid), where("status", "==", "입금완료"));
+6681: querySnapshot = await getDocs(q);
+6797: const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(25)); // Show max 5 pages (5 reviews per page)
+6801: const querySnapshot = await getDocs(q);
+7865: await addDoc(collection(db, "reviews"), reviewData);

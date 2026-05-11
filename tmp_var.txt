@@ -1,0 +1,88 @@
+92: grade: null, // 'sealed', 's', 'a', 'b', 'c', 'd'
+108: // DEDUCTIONS removed as we use Grade Pricing directly
+1494: // Calc Time
+1546: // Grade Map
+1550: const gradeMap = {
+1594: const conditionVal = data.grade || data.condition || data.conditionType || '확인중';
+1598: const gradeText = gradeMap[conditionVal] || conditionVal;
+1610: model: `${data.model} (${data.storage}/${gradeText})`,
+2610: // Skip checks, assume standard used grade (maybe B or A class range?)
+2622: // Let's assume standard B Grade for "Simple" estimation or just show range.
+2626: // For simplicity, let's treat "Simple" as "S Grade" but with a disclaimer?
+2634: // Let's map Simple -> 's' grade (max price) for display to attract,
+2646: calculateAndShowResult(true);
+2843: // calculateAndShowResult
+2847: window.calculateAndShowResult = (isSimpleMode = false) => {
+2851: console.log("calculateAndShowResult called. Mode:", isSimpleMode ? "Simple" : "Detail");
+3011: // Logic to Determine Grade
+3015: let grade = 's'; // Default start from Top
+3027: grade = 's'; // Show Max Price for Simple
+3075: // D Grade: Power, Account, LCD Damage ?? (Usually LCD is C or D)
+3091: // Grade Logic V1 (Conservative):
+3099: grade = 'd'; // Critical Failure
+3107: grade = 'c'; // Screen broken
+3115: grade = 'c'; // Functional issue or Burn-in -> C
+3127: grade = 'b';
+3147: grade = 's';
+3163: if (grade === 's' && defects.is_sealed) {
+3167: grade = 'sealed';
+3179: console.log("Calculated Grade:", grade);
+3183: currentQuote.grade = grade;
+3199: let baseGradePrice = 0;
+3207: if (currentQuote.model.prices && currentQuote.model.prices[grade] !== undefined && currentQuote.model.prices[grade] > 0) {
+3211: baseGradePrice = currentQuote.model.prices[grade];
+3219: // Fallback for old data or missing grade price
+3223: console.warn(`${grade} price missing or 0, using fallback`);
+3227: if (grade === 'sealed') {
+3231: // If sealed price is 0 or missing, fallback to 's' grade price
+3235: baseGradePrice = currentQuote.model.prices['s'] || currentQuote.model.basePrice || 0;
+3239: } else if (grade === 's') {
+3243: baseGradePrice = currentQuote.model.basePrice || 0;
+3279: let finalPrice = baseGradePrice + storageAdj;
+3311: const gradeNames = {
+3343: const gradeName = gradeNames[grade] || grade;
+3355: document.getElementById('final-price-display').innerText = formatCurrency(finalPrice);
+3363: let breakdown = `<p><strong>판정 등급:</strong> <span style="color:var(--primary-color)">${gradeName}</span></p>`;
+3391: if (baseGradePrice === 0) {
+3593: currentQuote.grade = 's';
+3600: if (typeof window.renderGradePriceList === 'function') window.renderGradePriceList();
+3601: if (typeof window.goToStep === 'function') window.goToStep('grade-list');
+3764: // New Function: Render Grade Price List (Read-Only)
+3765: window.renderGradePriceList = () => {
+3766: const container = document.getElementById('grade-price-list-target');
+3846: // Define Grades to show
+3850: const grades = ['s', 'a', 'b', 'c', 'd'];
+3862: grades.forEach(g => {
+3906: const gradeLabels = {
+3946: <div class="grade-list-card" style="cursor: default; pointer-events: none;">
+3950: <div class="grade-row" style="padding: 15px 20px;">
+3954: <div class="grade-info">
+3958: <h4 style="margin:0; font-size:1rem;">${gradeLabels[g].title}</h4>
+3962: <p style="margin:2px 0 0; font-size:0.8rem; color:#888;">${gradeLabels[g].desc}</p>
+3970: <div class="grade-price" style="font-size:1.1rem;">${formatCurrency(price)}</div>
+3998: window.setGradeAndGo = (grade) => {
+4002: currentQuote.grade = grade;
+4006: // Calculate price
+4014: if (currentQuote.model.prices && currentQuote.model.prices[grade]) {
+4018: price = currentQuote.model.prices[grade];
+4038: price = base * (rates[grade] || 0);
+4070: calculateAndShowResult(true); // Render Step 6
+4098: console.log("Simple Mode: Showing Grade List");
+4110: currentQuote.grade = 's'; // Default to S Grade
+4114: // Calculate S Grade Price
+4166: renderGradePriceList();
+4170: goToStep('grade-list');
+5388: function calculateFinalPrice() {
+5392: if (!currentQuote.model || !currentQuote.grade) return;
+5400: // Get the price for the specific grade
+5408: let baseGradePrice = currentQuote.model.prices[currentQuote.grade] || 0;
+5428: let finalPrice = baseGradePrice + storageAdj;
+5444: // Grade Name Mapping
+5448: const gradeNames = {
+5484: const gradeName = gradeNames[currentQuote.grade] || currentQuote.grade;
+5496: < p ><strong>선택하신 등급:</strong> <span style="color:var(--primary-color)">${gradeName}</span></p >
+5500: <p>등급 기본가: <strong>${formatCurrency(baseGradePrice)}</strong></p>
+5540: document.getElementById('final-price-display').textContent = formatCurrency(finalPrice);
+5740: grade: currentQuote.grade,
+5744: conditionType: currentQuote.grade === 'sealed' ? 'sealed' : 'used',
+5889: 💎 *등급*: ${payload.grade}

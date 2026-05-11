@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쉐라폰 - 파이널 프로토타입 (파스텔 블루 톤)</title>
+    <link rel="stylesheet" href="styles.css?v=8">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        /* 네비게이션바를 기본 스타일로 유지 */
+        
+        /* 슬라이더 배경을 투명하게 해서 기존 영롱한 배너들이 잘 작동하게 함 */
+        .hero-slider-wrapper {
+            position: relative;
+            overflow: hidden;
+            /* 여백을 줘서 하단 파스텔블루 검색창이 겹칠 수 있게 함 */
+            padding-bottom: 30px; 
+            background: #f8fafc; /* 슬라이드 밖 기본 배경 */
+        }
+
+        #hero-slider {
+            display: flex;
+            width: 200%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .hero-slide {
+            width: 50%;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 텍스트 가독성 */
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        /* =======================================================
+           파스텔 블루 톤 빠른 검색창 (Fast Search Console) 
+           - 기존의 무거운 로얄블루(#2563EB)에서 
+             화사하고 부드러운 파스텔/스카이블루 톤으로 변경
+           ======================================================= */
+        .fast-search-section {
+            position: relative;
+            z-index: 20;
+            /* 파스텔 블루 그라데이션 (부드러운 하늘색~파란색) */
+            background: linear-gradient(135deg, #7FA2FF 0%, #4D76FF 100%);
+            border-radius: 28px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(77, 118, 255, 0.35);
+            margin: -60px auto 60px; /* 배너 위로 깊게 올라타서 일체감 부여 */
+            max-width: 950px;
+            color: white;
+            width: 92%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .usc-header {
+            display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px;
+        }
+        .usc-header h2 { font-size: 1.8rem; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; margin:0; }
+        .usc-header h2 span { color: #dbeafe; } /* 조금 더 부드러운 강조색 */
+        .usc-header p { font-size: 0.95rem; color: #eff6ff; font-weight: 600; margin:0; }
+
+        /* 검색 바 디자인 */
+        .usc-search-bar {
+            display: flex; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.4); 
+            border-radius: 20px; padding: 10px 10px 10px 20px; transition: all 0.3s; margin-bottom: 30px;
+        }
+        .usc-search-bar:focus-within { background: white; border-color: white; box-shadow: 0 0 0 5px rgba(255,255,255,0.3); }
+        .usc-search-bar:focus-within input { color: #1e293b; }
+        .usc-search-bar:focus-within i { color: #4D76FF; }
+        
+        .usc-search-bar i { display: flex; align-items: center; justify-content: center; width: 40px; font-size: 1.6rem; color: #ffffff; transition: color 0.3s; }
+        .usc-search-bar input { flex: 1; border: none; outline: none; font-size: 1.15rem; color: white; background: transparent; font-weight: 500; transition: color 0.3s; padding:0 10px; }
+        .usc-search-bar input::placeholder { color: rgba(255,255,255,0.8); }
+        
+        .usc-button { 
+            background: #1e293b; /* 대비를 위해 짙은 네이비 버튼 유지 */
+            color: white; border: none; padding: 0 40px; border-radius: 14px; 
+            font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: all 0.2s; height: 55px; 
+        }
+        .usc-button:hover { background: #0f172a; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        .usc-quick-title { font-size: 0.95rem; color: #eff6ff; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .usc-quick-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.25); }
+
+        .usc-chips {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+        }
+        .usc-chip {
+            background: rgba(255,255,255,0.95); border: 1px solid rgba(255,255,255,1); border-radius: 20px;
+            padding: 20px; display: flex; align-items: center; gap: 18px;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); color: #333;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+        .usc-chip:hover {
+            transform: translateY(-5px); box-shadow: 0 20px 30px -5px rgba(0,0,0,0.15);
+            background: white;
+        }
+        .chip-icon {
+            width: 52px; height: 52px; background: #f1f5f9; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: #475569;
+        }
+        .chip-info { text-align: left; }
+        .chip-name { font-weight: 800; font-size: 1.1rem; color: #1e293b; line-height: 1.2; margin-bottom: 4px; }
+        .chip-price { font-weight: 800; font-size: 1.25rem; color: #4D76FF; margin-bottom: 6px; }
+        .chip-tag { display: inline-block; font-size: 0.75rem; background: #f1f5f9; color: #64748b; padding: 3px 8px; border-radius: 6px; line-height: 1.2; font-weight: 600;}
+
+        @media(max-width: 768px) {
+            .fast-search-section { padding: 30px 20px; margin: -40px auto 40px; border-radius: 24px; }
+            .usc-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .usc-chips { grid-template-columns: 1fr; gap: 12px; }
+            .usc-search-bar { flex-direction: column; padding: 15px; background: transparent; border: none; box-shadow: none; border-radius: 0; }
+            .usc-search-bar:focus-within { box-shadow: none; background: transparent; }
+            .usc-search-bar input { width: 100%; border: 2px solid rgba(255,255,255,0.4); border-radius: 16px; padding: 18px; background: rgba(255,255,255,0.2); margin-bottom: 12px; box-sizing: border-box;}
+            .usc-search-bar:focus-within input { background: white; color: #0f172a; border-color: white;}
+            .usc-button { width: 100%; height: 55px; border-radius: 16px; }
+            .usc-search-bar i { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" style="background: white; border-bottom: 1px solid #f1f5f9;">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="sr_logo.png" alt="SR 로고" class="logo-icon" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+                <span style="font-family: 'Pretendard', sans-serif; font-weight: 800; font-size: 24px; color: #1e293b; margin-left: 8px;">쉐라폰</span>
+            </a>
+            <div class="nav-links">
+                <a href="quote.html">내 폰 판매</a>                <a href="reviews.html">이용 후기</a>
+                <a href="login.html">로그인</a>
+            </div>
+            <a href="quote.html" class="btn btn-primary">견적 확인하기</a>
+        </div>
+    </nav>
+
+    <!-- 원본 슬라이더 영역 -->
+    <header class="hero-slider-wrapper">
+        <div id="hero-slider">
+            <!-- Slide 1 (원본 화이트/그레이 기반) -->
+            <div class="hero-slide" style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); padding-bottom: 60px;">
+                <div class="container hero-container" style="padding: 60px 20px;">
+                    <div class="hero-content-wrapper">
+                        <div class="hero-text-area">
+                            <span class="hero-badge" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; font-weight: 700;">S26 출시 기념 이벤트</span>
+                            <h1 style="font-size: 3.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px; color: #1e293b;">아이폰 & 갤럭시<br>5만원 추가 보상!</h1>
+                            <p class="hero-subtitle" style="color: #475569;">기종 상관없이 쓰던 폰 팔고<br>특별 지원금 5만원 더 챙기세요!</p>
+                            <div class="cta-group" style="display: flex; gap: 15px; margin-top: 30px;">
+                                <a href="quote.html" class="btn btn-primary btn-lg">내 폰 시세 조회</a>
+                            </div>
+                        </div>
+                        <div class="hero-image-area" style="text-align: right;">
+                            <img src="hero_bg_realistic.png" alt="스마트폰 3D 이미지" style="max-width: 90%; height: auto; display: inline-block;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 (원본 파스텔블루 스타벅스 배너) -->
+            <div class="hero-slide" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); padding-bottom: 60px;">
+                <div class="container hero-container" style="padding: 60px 20px;">
+                    <div class="hero-content-wrapper">
+                        <div class="hero-text-area">
+                            <span class="hero-badge" style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 700;">100% 당첨 리뷰 이벤트</span>
+                            <h1 style="color: #fff; font-size: 3.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">거래 후 리뷰 쓰면<br>스타벅스 커피 증정!</h1>
+                            <p class="hero-subtitle" style="color: rgba(255,255,255,0.9);">쉐라폰 이용 후기를 남겨주시면<br>아메리카노 기프티콘을 드립니다.</p>
+                            <div class="cta-group" style="display: flex; gap: 15px; margin-top: 30px;">
+                                <a href="reviews.html" class="btn btn-primary btn-lg" style="background: #fff; color: #3b82f6;">리뷰 보러가기</a>
+                            </div>
+                        </div>
+                        <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
+                            <img src="starbucks_promo.png" alt="커피 증정 리뷰 이벤트" style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slider-controls" style="position: absolute; top: 30px; right: 10%; z-index: 10; display: flex; align-items: center; background: rgba(0,0,0,0.4); border-radius: 30px; padding: 6px 18px; color: white; gap: 15px; backdrop-filter: blur(5px);">
+            <button id="slider-prev" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px;">&#10094;</button>
+            <span style="font-size: 0.95rem; font-weight: 600;"><span id="slider-current">1</span> / 2</span>
+            <button id="slider-next" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px;">&#10095;</button>
+        </div>
+    </header>
+
+    <!-- NEW FAST SEARCH UX (파스텔 블루 테마) -->
+    <section class="fast-search-section">
+        <div class="usc-header">
+            <h2><span>단 3초</span>, 내 폰 숨은 가치 찾기</h2>
+            <p>📞 24시간 실시간 특별 단가 제공</p>
+        </div>
+        
+        <div class="usc-search-bar">
+            <i class="ri-search-line"></i>
+            <input type="text" placeholder="어떤 기종을 판매할 예정이신가요? (예: 아이폰15)">
+            <button class="usc-button" onclick="location.href='quote.html'">시세 바로 시작</button>
+        </div>
+
+        <div class="usc-quick-title">오늘 쉐라폰에서 가장 많이 판매된 베스트 기종 🏆</div>
+        <div class="usc-chips">
+            <div class="usc-chip" onclick="location.href='quote.html?model=iphone15pro'">
+                <div class="chip-icon"><i class="ri-apple-fill" style="color: #111;"></i></div>
+                <div class="chip-info">
+                    <div class="chip-name">아이폰 15 Pro</div>
+                    <div class="chip-price">최고 110만원</div>
+                    <div class="chip-tag">기본 128GB 기준</div>
+                </div>
+            </div>
+            <div class="usc-chip" onclick="location.href='quote.html?model=s24ultra'">
+                <div class="chip-icon"><i class="ri-smartphone-line" style="color: #4D76FF;"></i></div>
+                <div class="chip-info">
+                    <div class="chip-name">갤럭시 S24 Ultra</div>
+                    <div class="chip-price">최고 115만원</div>
+                    <div class="chip-tag">기본 256GB 기준</div>
+                </div>
+            </div>
+            <div class="usc-chip" onclick="location.href='quote.html?model=zflip5'">
+                <div class="chip-icon"><i class="ri-cellphone-line" style="color: #0ea5e9;"></i></div>
+                <div class="chip-info">
+                    <div class="chip-name">갤럭시 Z 플립 5</div>
+                    <div class="chip-price">최고 55만원</div>
+                    <div class="chip-tag">기본 256GB 기준</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Deletion Guarantee Banner -->
+    <section class="security-banner" style="background: #1a1a1a; color: white; padding: 40px 0;">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;">
+            <div style="font-size: 2.5rem; color: #4CAF50;"><i class="ri-shield-check-fill"></i></div>
+            <div style="text-align: left;">
+                <h3 style="margin: 0 0 5px 0; color: #4CAF50;">100% 데이터 영구 삭제 보장</h3>
+                <p style="margin: 0; color: #ccc;">국제 인증 블랑코(Blancco) 솔루션으로 복구 불가능하게 완벽 삭제해드립니다.</p>
+            </div>
+            <div>
+                <a href="#" class="btn btn-primary" style="background: white; color: #333; border: none;">안심 보증서 자세히 보기</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Required Scripts -->
+    <script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" charset="utf-8"></script>
+    <script src="script.js?v=13" type="module"></script>
+    <script>
+        // 무한 롤링 슬라이더 기본 로직
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = document.getElementById('hero-slider');
+            if(!slider) return;
+            let currentSlide = 0;
+            const slides = slider.querySelectorAll('.hero-slide');
+            const totalSlides = slides.length;
+            const currentObj = document.getElementById('slider-current');
+            
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentSlide * 50}%)`;
+                if(currentObj) currentObj.innerText = currentSlide + 1;
+            }
+            
+            document.getElementById('slider-next')?.addEventListener('click', () => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlider();
+            });
+            document.getElementById('slider-prev')?.addEventListener('click', () => {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                updateSlider();
+            });
+            
+            // Auto slide
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlider();
+            }, 6000);
+        });
+    </script>
+</body>
+</html>

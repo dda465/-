@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Check Deleted</title>
+</head>
+
+<body>
+    <h1>Check Deleted Quotes</h1>
+    <div id="out">Loading...</div>
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        async function check() {
+            let out = "";
+            try {
+                const q1 = query(collection(db, "quotes"), where("customerName", "==", "조은혜"));
+                const s1 = await getDocs(q1);
+                out += `<p>Found ${s1.size} for 조은혜</p>`;
+
+                const q2 = query(collection(db, "quotes"), where("customerName", "==", "김민서"));
+                const s2 = await getDocs(q2);
+                out += `<p>Found ${s2.size} for 김민서</p>`;
+            } catch (e) {
+                out += `<p>Error: ${e.message}</p>`;
+            }
+            document.getElementById('out').innerHTML = out;
+        }
+        check();
+    </script>
+</body>
+
+</html>

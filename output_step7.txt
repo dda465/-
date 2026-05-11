@@ -1,0 +1,46 @@
+--- quote.html ---
+523: 
+524:                 <h4 style="color: var(--primary-dark); margin: 15px 0 10px;">[박스(택배상자) 포장 필수!!]</h4>
+525:                 <p>박스에 포장하지 않거나 부실 포장으로 발생된 파손, 분실의 경우 택배사와 쉐라폰 모두 책임지지 않습니다.</p>
+526: 
+527:                 <h4 style="color: red; margin: 15px 0 10px;">[거래 불가 단말기]</h4>
+528:                 <ul>
+529:                     <li>사용 및 검수불가 상태 (화면 안나옴, 심한 파손 등)</li>
+530:                     <li>계정/패스워드/패턴 잠김, 활성화 불가 폰</li>
+531:                     <li>전원, 메인보드 불량</li>
+532:                     <li>침수폰</li>
+533:                     <li>분실/도난/거래정지 등 등록 폰</li>
+534:                 </ul>
+535:             </div>
+536: 
+537:             <div class="text-center">
+538:                 <button onclick="goToStep(7)" class="btn btn-primary" style="width: 100%;">위 내용에 동의합니다</button>
+539:             </div>
+540:         </div>
+541: 
+542:         <!-- Step 7: Form (Updated Delivery Methods) -->
+543:         <div id="wizard-step-7" class="wizard-step">
+544:             <div class="step-header">
+545:                 <h2>거래방식 선택</h2>
+546:                 <p>원하시는 수거 방식을 선택해주세요.</p>
+547:             </div>
+548: 
+549:             <div class="form-container" style="max-width: 500px; margin: 0 auto;">
+550: 
+551:                 <!-- Delivery Method Selection -->
+552:                 <div class="mb-4" style="text-align: left;">
+553:                     <div class="selection-grid" style="grid-template-columns: 1fr;">
+554: 
+555: 
+556: 
+557:                         <div class="selection-card method-btn" data-method="cvs"
+558:                             style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
+559:                             <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
+560:                             <div>
+561:                                 <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left;">편의점 택배 직접
+562:                                     발송</div>
+563:                                 <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left;">가까운 편의점에서
+
+----------------------------------------
+--- quote.html ---
+--- script.js ---

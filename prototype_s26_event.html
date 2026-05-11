@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S26 출시기념 이벤트 - 히어로 배너 프로토타입</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 500;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+        }
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 700;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* ======================================== */
+        /* 프로토타입 안내 헤더                      */
+        /* ======================================== */
+        .proto-header {
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .proto-header i { color: #fbbf24; }
+
+        /* ======================================== */
+        /* 히어로 슬라이드 (S26 이벤트)              */
+        /* ======================================== */
+        .hero-slide-s26 {
+            position: relative;
+            min-height: 420px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e40af 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 배경 장식 요소 */
+        .hero-slide-s26::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatOrb 8s ease-in-out infinite;
+        }
+
+        .hero-slide-s26::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatOrb 6s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -20px) scale(1.05); }
+        }
+
+        /* 파티클 효과 */
+        .particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        .hero-container-s26 {
+            position: relative;
+            z-index: 5;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+        }
+
+        /* 텍스트 영역 */
+        .hero-text-s26 {
+            color: white;
+        }
+
+        .event-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.15));
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+        }
+
+        .hero-text-s26 h1 {
+            font-family: 'GmarketSans', 'Pretendard', sans-serif;
+            font-weight: 700;
+            font-size: 2.8rem;
+            line-height: 1.25;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+            word-break: keep-all;
+        }
+
+        .hero-text-s26 h1 .highlight {
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text-s26 h1 .price-highlight {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-text-s26 h1 .price-highlight .amount {
+            color: #fbbf24;
+            -webkit-text-fill-color: #fbbf24;
+            font-size: 3.4rem;
+            position: relative;
+        }
+
+        .hero-text-s26 h1 .price-highlight .amount::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: rgba(251, 191, 36, 0.3);
+            border-radius: 3px;
+        }
+
+        .hero-subtitle-s26 {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            margin-bottom: 28px;
+            max-width: 440px;
+            font-weight: 400;
+        }
+
+        /* 이벤트 혜택 카드들 */
+        .event-perks {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .perk-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 14px 16px;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .perk-card:hover {
+            background: rgba(255, 255, 255, 0.14);
+            transform: translateY(-2px);
+        }
+
+        .perk-icon {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .perk-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 2px;
+        }
+
+        .perk-value {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        /* CTA 버튼 */
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-s26-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 8px 25px -5px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-s26-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px -5px rgba(37, 99, 235, 0.6);
+        }
+
+        .btn-s26-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-s26-secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        /* 이벤트 기간 */
+        .event-period {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        /* 이미지 영역 */
+        .hero-image-s26 {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-showcase {
+            position: relative;
+            z-index: 2;
+        }
+
+        .phone-showcase img {
+            max-height: 380px;
+            width: auto;
+            filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
+            border-radius: 16px;
+        }
+
+        /* 5만원 플로팅 뱃지 */
+        .floating-bonus {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            z-index: 10;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.5);
+            animation: bonusBounce 2s ease-in-out infinite;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-bonus .bonus-text {
+            font-size: 0.65rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .floating-bonus .bonus-amount {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .floating-bonus .bonus-sub {
+            font-size: 0.6rem;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
+        @keyframes bonusBounce {
+            0%, 100% { transform: scale(1) rotate(-5deg); }
+            50% { transform: scale(1.08) rotate(3deg); }
+        }
+
+        /* 시리즈 태그 */
+        .series-tags {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .series-tag {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            white-space: nowrap;
+        }
+
+        /* ======================================== */
+        /* 비교: 현재 vs 제안 라벨                    */
+        /* ======================================== */
+        .compare-label {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #334155;
+            border-top: 2px dashed #e2e8f0;
+            margin-top: 40px;
+        }
+        .compare-label span { color: #2563eb; }
+
+        /* ======================================== */
+        /* 모바일 프리뷰                             */
+        /* ======================================== */
+        .mobile-frame {
+            max-width: 400px;
+            margin: 30px auto 60px;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+            border: 8px solid #1e293b;
+            background: #1e293b;
+        }
+
+        /* 모바일 버전 히어로 */
+        .hero-slide-s26-mobile {
+            position: relative;
+            min-height: 140px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e40af 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            border-radius: 16px;
+        }
+
+        .hero-slide-s26-mobile .hero-container-m {
+            position: relative;
+            z-index: 5;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .hero-text-m {
+            flex: 1;
+            color: white;
+        }
+
+        .hero-text-m .event-badge-m {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .hero-text-m h1 {
+            font-family: 'GmarketSans', sans-serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            line-height: 1.35;
+            letter-spacing: -0.5px;
+            word-break: keep-all;
+            margin: 0;
+        }
+
+        .hero-text-m h1 .amount-m {
+            color: #fbbf24;
+            font-size: 1.5rem;
+        }
+
+        .hero-image-m {
+            width: 110px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .hero-image-m img {
+            max-height: 110px;
+            width: auto;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3));
+        }
+
+        .hero-image-m .floating-bonus-m {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.4);
+            animation: bonusBounce 2s ease-in-out infinite;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .floating-bonus-m .bonus-amount-m {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .floating-bonus-m .bonus-sub-m {
+            font-size: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* 모바일 프레임 내부 배경 */
+        .mobile-frame-inner {
+            background: white;
+            padding: 10px 12px;
+        }
+
+        /* ======================================== */
+        /* 반응형 (실제 모바일)                       */
+        /* ======================================== */
+        @media (max-width: 768px) {
+            .hero-container-s26 {
+                grid-template-columns: 1fr;
+                padding: 40px 20px;
+                gap: 20px;
+            }
+
+            .hero-text-s26 h1 {
+                font-size: 2rem;
+            }
+
+            .hero-text-s26 h1 .price-highlight .amount {
+                font-size: 2.4rem;
+            }
+
+            .event-perks {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .phone-showcase img {
+                max-height: 260px;
+            }
+
+            .floating-bonus {
+                width: 75px;
+                height: 75px;
+                right: 10px;
+                top: 5px;
+            }
+
+            .floating-bonus .bonus-amount {
+                font-size: 1.1rem;
+            }
+
+            .mobile-frame {
+                margin: 20px 15px 40px;
+            }
+
+            .desktop-preview { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 프로토타입 안내 -->
+    <div class="proto-header">
+        <i class="ri-palette-line"></i>
+        히어로 배너 프로토타입 — S26 시리즈 출시기념 5만원 추가증정 이벤트
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ✅ PC 버전 프리뷰                             -->
+    <!-- =========================================== -->
+    <div class="compare-label" style="border-top:none; margin-top:0;">
+        <i class="ri-computer-line" style="color:#2563eb;"></i> <span>PC 버전</span> 미리보기
+    </div>
+
+    <div class="desktop-preview" style="max-width:1400px; margin:0 auto; border:1px solid #e2e8f0;">
+        <div class="hero-slide-s26">
+            <!-- 파티클 -->
+            <div class="particles" id="particles"></div>
+
+            <div class="hero-container-s26">
+                <!-- 왼쪽: 텍스트 -->
+                <div class="hero-text-s26">
+                    <div class="event-badge">
+                        <i class="ri-gift-2-fill"></i>
+                        S26 시리즈 출시 기념 특별 이벤트
+                    </div>
+
+                    <h1>
+                        기존 폰 보내고<br>
+                        <span class="price-highlight">
+                            <span class="amount">5만원</span>
+                        </span> 추가 증정!
+                    </h1>
+
+                    <p class="hero-subtitle-s26">
+                        갤럭시 S26으로 바꾸셨나요?<br>
+                        기존 폰을 쉐라폰에 판매하시면 매입가에 <strong style="color:#fbbf24;">5만원을 추가</strong>로 더 드립니다.
+                    </p>
+
+                    <!-- 이벤트 혜택 카드 -->
+                    <div class="event-perks">
+                        <div class="perk-card">
+                            <span class="perk-icon">📱</span>
+                            <div class="perk-label">기종별 추가보너스</div>
+                            <div class="perk-value">기종에 따라 차등 지급</div>
+                        </div>
+                        <div class="perk-card">
+                            <span class="perk-icon">📦</span>
+                            <div class="perk-label">수거 방식</div>
+                            <div class="perk-value">무료 택배</div>
+                        </div>
+                    </div>
+
+                    <div class="cta-row">
+                        <a href="quote.html" class="btn-s26-primary">
+                            <i class="ri-smartphone-line"></i>
+                            내 폰 판매하기
+                        </a>
+                    </div>
+
+                    <div class="event-period">
+                        <i class="ri-time-line"></i>
+                        이벤트 기간: 2026.04.28 ~ 2026.05.31
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 이미지 -->
+                <div class="hero-image-s26">
+                    <div class="phone-showcase">
+                        <img src="galaxy_s26_v3.png" alt="Galaxy S26 Ultra">
+                    </div>
+                    <div class="floating-bonus">
+                        <span class="bonus-text">추가증정</span>
+                        <span class="bonus-amount">5만원</span>
+                        <span class="bonus-sub">BONUS</span>
+                    </div>
+                    <div class="series-tags">
+                        <span class="series-tag">S26</span>
+                        <span class="series-tag">S26+</span>
+                        <span class="series-tag">S26 Ultra</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ✅ 모바일 버전 프리뷰                         -->
+    <!-- =========================================== -->
+    <div class="compare-label">
+        <i class="ri-smartphone-line" style="color:#2563eb;"></i> <span>모바일 버전</span> 미리보기
+    </div>
+
+    <div class="mobile-frame">
+        <!-- 간이 상태바 -->
+        <div style="background:#0f172a; color:rgba(255,255,255,0.6); padding:6px 16px; font-size:0.7rem; display:flex; justify-content:space-between;">
+            <span>9:41</span>
+            <span><i class="ri-wifi-fill"></i> <i class="ri-battery-fill"></i></span>
+        </div>
+
+        <!-- 간이 네비게이션 -->
+        <div style="background:white; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9;">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <img src="sr_logo.webp" alt="SR" style="width:28px; height:28px; border-radius:50%;">
+                <span style="font-weight:800; font-size:0.95rem; color:#1E3A8A;">쉐라폰</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <span style="font-size:0.7rem; font-weight:700; color:#2563EB; border:1px solid #2563EB; padding:2px 8px; border-radius:12px;">판매하기</span>
+            </div>
+        </div>
+
+        <!-- 모바일 히어로 배너 -->
+        <div class="mobile-frame-inner">
+            <div class="hero-slide-s26-mobile" style="margin: 5px 0;">
+                <div class="hero-container-m">
+                    <div class="hero-text-m">
+                        <div class="event-badge-m">
+                            <i class="ri-gift-2-fill"></i> S26 출시 기념
+                        </div>
+                        <h1>
+                            기존 폰 보내고<br>
+                            <span class="amount-m">5만원</span> 추가증정!
+                        </h1>
+                    </div>
+                    <div class="hero-image-m">
+                        <img src="galaxy_s26_v3.png" alt="Galaxy S26">
+                        <div class="floating-bonus-m">
+                            <span class="bonus-amount-m">5만원</span>
+                            <span class="bonus-sub-m">추가</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 슬라이더 닷 -->
+            <div style="display:flex; justify-content:center; gap:6px; margin:8px 0;">
+                <span style="width:18px; height:5px; border-radius:3px; background:#2563eb;"></span>
+                <span style="width:5px; height:5px; border-radius:50%; background:#cbd5e1;"></span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 파티클 생성 스크립트 -->
+    <script>
+        const container = document.getElementById('particles');
+        if (container) {
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (6 + Math.random() * 10) + 's';
+                p.style.animationDelay = Math.random() * 8 + 's';
+                p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+                container.appendChild(p);
+            }
+        }
+    </script>
+
+</body>
+</html>

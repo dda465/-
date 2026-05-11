@@ -1,0 +1,15 @@
+98: .estimated-price {
+139: <a href="price-list.html">매입 단가표</a>
+250: <span style="font-size: 0.8rem; color: #888;">(예상 견적을 미리 확인 가능)</span>
+260: <!-- Step 5-A: Grade Price List (For Simple Method) -->
+263: <h2>주요등급 예상시세</h2>
+264: <p>현재 시세 기준 예상 매입가입니다.</p>
+270: <div id="grade-price-list-target">
+305: <h4 class="mb-1">케이스 개봉 여부 <span style="color:red">*</span></h4>
+308: onclick="toggleRadioSafe(this)">개봉 (중고)</button>
+310: onclick="toggleRadioSafe(this)">미개봉 (새제품)</button>
+417: <h2>예상 매입가 확인</h2>
+419: 결과입니다.</p>
+423: <p>예상 매입가</p>
+424: <div id="final-price-display" class="estimated-price">0원</div>
+425: <div id="price-breakdown"

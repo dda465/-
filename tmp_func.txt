@@ -1,0 +1,21 @@
+
+        document.getElementById('result-model-name').textContent = `${currentQuote.model.model} (${currentQuote.storage.size})`;
+
+
+
+        document.getElementById('final-price-display').innerText = formatCurrency(finalPrice);
+
+
+
+
+
+
+        document.getElementById('result-model-name').textContent = `${currentQuote.model.model} (${currentQuote.storage.size})`;
+
+
+
+        document.getElementById('final-price-display').textContent = formatCurrency(finalPrice);
+
+
+
+        document.getElementById('price-breakdown').innerHTML = breakdownHtml;

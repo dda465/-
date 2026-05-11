@@ -1,0 +1,281 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쉐라폰 - 프로토타입 V2</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',sans-serif;background:#f8fafc;color:#1e293b;max-width:430px;margin:0 auto;min-height:100vh}
+/* NAV */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;position:sticky;top:0;z-index:100;border-bottom:1px solid #f1f5f9;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.logo{font-size:1.3rem;font-weight:900;color:#1E3A8A}
+.nav-sell{background:#2563EB;color:#fff;border:none;padding:7px 16px;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;text-decoration:none}
+/* TICKER */
+.ticker{background:#0f172a;color:#e2e8f0;font-size:.72rem;font-weight:600;padding:7px 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-block;animation:tick 22s linear infinite;padding-left:100%}
+@keyframes tick{to{transform:translateX(-100%)}}
+/* HERO */
+.hero{background:linear-gradient(135deg,#1E3A8A 0%,#2563EB 100%);padding:24px 16px 20px;color:#fff;position:relative}
+.hero-badge{display:inline-block;background:rgba(255,255,255,.18);color:#fff;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:12px;margin-bottom:10px}
+.hero h1{font-size:1.65rem;font-weight:900;line-height:1.3;margin-bottom:6px}
+.hero-sub{font-size:.85rem;color:rgba(255,255,255,.85);margin-bottom:16px}
+/* SEARCH IN HERO */
+.hero-search{display:flex;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.hero-search input{flex:1;border:none;outline:none;padding:13px 14px;font-size:.95rem;font-family:'Pretendard',sans-serif;color:#1e293b}
+.hero-search button{background:#2563EB;color:#fff;border:none;padding:0 18px;font-weight:700;font-size:.9rem;cursor:pointer;white-space:nowrap}
+.hero-search button:hover{background:#1d4ed8}
+.ops-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border-radius:8px;padding:5px 10px;font-size:.75rem;margin-top:12px;color:rgba(255,255,255,.9)}
+/* QUICK MENU */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 12px;background:#fff;margin-bottom:8px}
+.q-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;text-decoration:none;color:#334155}
+.q-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.q-label{font-size:.72rem;font-weight:700;text-align:center}
+/* TODAY PRICES */
+.section{background:#fff;margin-bottom:8px;padding:18px 16px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-head h2{font-size:1rem;font-weight:800}
+.see-all{font-size:.8rem;color:#2563EB;text-decoration:none;font-weight:600}
+.date-badge{font-size:.72rem;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:6px}
+.price-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.price-card{border:1.5px solid #e2e8f0;border-radius:12px;padding:12px;cursor:pointer;transition:all .2s;background:#fff}
+.price-card:hover{border-color:#2563EB;transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,99,235,.12)}
+.pc-brand{font-size:.7rem;color:#64748b;font-weight:600;margin-bottom:2px}
+.pc-model{font-size:.88rem;font-weight:800;color:#1e293b;margin-bottom:4px}
+.pc-price{font-size:1.1rem;font-weight:900;color:#2563EB}
+.pc-grade{font-size:.68rem;color:#94a3b8;margin-top:2px}
+.price-card.hot::after{content:'🔥인기';position:absolute;top:8px;right:8px;font-size:.65rem;background:#fef3c7;color:#d97706;padding:2px 6px;border-radius:6px;font-weight:700}
+.price-card{position:relative}
+/* TRUST */
+.trust{background:#fff;margin-bottom:8px;padding:18px 16px}
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.trust-num{font-size:1.4rem;font-weight:900;color:#2563EB}
+.trust-unit{font-size:.95rem;font-weight:900;color:#2563EB}
+.trust-label{font-size:.72rem;color:#64748b;margin-top:3px}
+/* VS SECTION */
+.vs-section{background:#fff;margin-bottom:8px;padding:18px 16px}
+.vs-section h2{font-size:1rem;font-weight:800;margin-bottom:14px;text-align:center}
+.vs-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.vs-table th{padding:8px;font-weight:700;font-size:.78rem}
+.vs-table td{padding:9px 6px;border-bottom:1px solid #f1f5f9;text-align:center}
+.vs-table .feature{text-align:left;font-weight:600;color:#334155}
+.v-bad{color:#ef4444;font-weight:700}
+.v-good{color:#10b981;font-weight:700}
+.vs-col-us{background:#eff6ff}
+/* BOTTOM CTA */
+.bottom-cta{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:12px 16px;background:#fff;border-top:1px solid #f1f5f9;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.cta-btn{display:block;width:100%;padding:15px;background:linear-gradient(135deg,#2563EB,#1E3A8A);color:#fff;border:none;border-radius:14px;font-size:1.05rem;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}70%{box-shadow:0 0 0 10px rgba(37,99,235,0)}}
+.pb{padding-bottom:80px}
+/* REVIEWS */
+.review-card{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px}
+.rv-header{display:flex;justify-content:space-between;margin-bottom:6px}
+.rv-name{font-weight:700;font-size:.88rem}
+.rv-stars{color:#f59e0b;font-size:.85rem}
+.rv-model{font-size:.75rem;color:#64748b;margin-bottom:6px}
+.rv-text{font-size:.85rem;color:#475569;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="logo">쉐라폰</span>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="quote.html" class="nav-sell">판매하기</a>
+    <a href="login.html" style="font-size:.82rem;color:#64748b;font-weight:600">로그인</a>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-inner">
+    🛡️ 블랑코 인증 데이터 100% 영구삭제 보장 &nbsp;|&nbsp; ⚡ 검수 완료 직후 당일 송금 원칙 &nbsp;|&nbsp; 📱 평일 09:00~18:00 접수 (토·일·공휴일 휴무) &nbsp;|&nbsp; 🏆 누적 매입 4,832건 완료 &nbsp;|&nbsp; 🛡️ 블랑코 인증 데이터 100% 영구삭제 보장 &nbsp;|&nbsp; ⚡ 검수 완료 직후 당일 송금 원칙
+  </span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">S26 출시 기념 이벤트</div>
+  <h1>내 폰,<br>얼마에 팔 수 있을까?</h1>
+  <p class="hero-sub">모델명 입력하면 3초 만에 시세 확인</p>
+  <div class="hero-search">
+    <input type="text" id="hsearch" placeholder="예: 아이폰16, 갤럭시S25">
+    <button onclick="goSearch()">시세 조회</button>
+  </div>
+  <div class="ops-badge">🕐 평일 09:00~18:00 접수 · 토·일 휴무</div>
+</div>
+
+<!-- QUICK MENU -->
+<div class="quick">
+  <a href="quote.html?brand=apple" class="q-item">
+    <div class="q-icon" style="background:#f8fafc">🍎</div>
+    <span class="q-label">아이폰<br>시세</span>
+  </a>
+  <a href="quote.html?brand=samsung" class="q-item">
+    <div class="q-icon" style="background:#f0f9ff">📱</div>
+    <span class="q-label">갤럭시<br>시세</span>
+  </a>
+  <a href="#" class="q-item" onclick="alert('블랑코 국제인증 100% 데이터 영구삭제 보장')">
+    <div class="q-icon" style="background:#f0fdf4;color:#10b981">🛡️</div>
+    <span class="q-label">데이터<br>안심</span>
+  </a>
+  <a href="#" class="q-item" onclick="alert('1.시세조회 → 2.택배발송 → 3.검수 → 4.당일입금')">
+    <div class="q-icon" style="background:#fff7ed;color:#f97316">🚀</div>
+    <span class="q-label">판매<br>절차</span>
+  </a>
+</div>
+
+<!-- TODAY PRICES -->
+<div class="section">
+  <div class="section-head">
+    <h2>📊 오늘의 매입 시세</h2>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="date-badge" id="today-date"></span>    </div>
+  </div>
+  <div class="price-cards">
+    <div class="price-card hot" onclick="location.href='quote.html?model=iphone16pro'">
+      <div class="pc-brand">Apple</div>
+      <div class="pc-model">아이폰 16 Pro</div>
+      <div class="pc-price">최고 126만원</div>
+      <div class="pc-grade">128GB S급 기준</div>
+    </div>
+    <div class="price-card hot" onclick="location.href='quote.html?model=s25ultra'">
+      <div class="pc-brand">Samsung</div>
+      <div class="pc-model">갤럭시 S25 Ultra</div>
+      <div class="pc-price">최고 138만원</div>
+      <div class="pc-grade">256GB S급 기준</div>
+    </div>
+    <div class="price-card" onclick="location.href='quote.html?model=iphone15pro'">
+      <div class="pc-brand">Apple</div>
+      <div class="pc-model">아이폰 15 Pro</div>
+      <div class="pc-price">최고 98만원</div>
+      <div class="pc-grade">128GB A급 기준</div>
+    </div>
+    <div class="price-card" onclick="location.href='quote.html?model=s25'">
+      <div class="pc-brand">Samsung</div>
+      <div class="pc-model">갤럭시 S25</div>
+      <div class="pc-price">최고 89만원</div>
+      <div class="pc-grade">256GB A급 기준</div>
+    </div>
+    <div class="price-card" onclick="location.href='quote.html?model=iphone14'">
+      <div class="pc-brand">Apple</div>
+      <div class="pc-model">아이폰 14</div>
+      <div class="pc-price">최고 54만원</div>
+      <div class="pc-grade">128GB A급 기준</div>
+    </div>
+    <div class="price-card" onclick="location.href='quote.html?model=zflip6'">
+      <div class="pc-brand">Samsung</div>
+      <div class="pc-model">Z 플립 6</div>
+      <div class="pc-price">최고 72만원</div>
+      <div class="pc-grade">256GB A급 기준</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST NUMBERS -->
+<div class="trust">
+  <div class="section-head">
+    <h2>🏆 쉐라폰 실적</h2>
+  </div>
+  <div class="trust-grid">
+    <div>
+      <div><span class="trust-num">4,832</span><span class="trust-unit">건</span></div>
+      <div class="trust-label">누적 매입 완료</div>
+    </div>
+    <div>
+      <div><span class="trust-num">4.9</span><span class="trust-unit">★</span></div>
+      <div class="trust-label">평균 고객 평점</div>
+    </div>
+    <div>
+      <div><span class="trust-num">당일</span></div>
+      <div class="trust-label">검수 후 즉시 입금</div>
+    </div>
+  </div>
+</div>
+
+<!-- VS COMPARISON -->
+<div class="vs-section">
+  <h2>🤔 당근마켓 직거래 vs 쉐라폰</h2>
+  <table class="vs-table">
+    <thead>
+      <tr>
+        <th class="feature" style="text-align:left">항목</th>
+        <th style="background:#f1f5f9">당근 직거래</th>
+        <th class="vs-col-us">쉐라폰</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="feature">사기 위험</td>
+        <td class="v-bad">⚠️ 있음</td>
+        <td class="v-good">✅ 없음</td>
+      </tr>
+      <tr>
+        <td class="feature">입금 시점</td>
+        <td class="v-bad">협의 필요</td>
+        <td class="v-good">검수 당일</td>
+      </tr>
+      <tr>
+        <td class="feature">직접 만남</td>
+        <td class="v-bad">⚠️ 필요</td>
+        <td class="v-good">✅ 불필요</td>
+      </tr>
+      <tr>
+        <td class="feature">데이터 삭제</td>
+        <td class="v-bad">직접 해야 함</td>
+        <td class="v-good">100% 보장</td>
+      </tr>
+      <tr>
+        <td class="feature">가격 협상</td>
+        <td class="v-bad">번거로움</td>
+        <td class="v-good">단가표 공개</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- REVIEWS -->
+<div class="section pb">
+  <div class="section-head">
+    <h2>💬 판매하기 실거래 리뷰</h2>
+    <a href="reviews.html" class="see-all">더보기 ›</a>
+  </div>
+  <div class="review-card">
+    <div class="rv-header">
+      <span class="rv-name">김*연</span>
+      <span class="rv-stars">★★★★★</span>
+    </div>
+    <div class="rv-model">아이폰 15 Pro · 2주 전</div>
+    <div class="rv-text">당근에서 팔려다가 사기 걱정에 쉐라폰 찾아봤는데 당일 입금 진짜로 됐어요. 연락도 친절하고 강추합니다!</div>
+  </div>
+  <div class="review-card">
+    <div class="rv-header">
+      <span class="rv-name">박*훈</span>
+      <span class="rv-stars">★★★★★</span>
+    </div>
+    <div class="rv-model">갤럭시 S24 Ultra · 1달 전</div>
+    <div class="rv-text">단가표 보고 신청했더니 그대로 입금. 다른 곳이랑 비교해도 가격이 제일 높았습니다. 데이터 걱정도 없고 좋았어요.</div>
+  </div>
+</div>
+
+<!-- FIXED CTA -->
+<div class="bottom-cta">
+  <a href="quote.html" class="cta-btn">📱 내 폰 시세 바로 조회하기</a>
+</div>
+
+<script>
+function goSearch(){
+  const q=document.getElementById('hsearch').value.trim();
+  location.href=q?'quote.html?search='+encodeURIComponent(q):'quote.html';
+}
+document.getElementById('hsearch').addEventListener('keypress',function(e){
+  if(e.key==='Enter')goSearch();
+});
+const d=new Date();
+document.getElementById('today-date').textContent=d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0')+' 기준';
+</script>
+</body>
+</html>

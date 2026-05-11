@@ -1,0 +1,71 @@
+# Python scripts (dev/maintenance only)
+*.py
+!__init__.py
+
+# Node modules
+node_modules/
+
+# JavaScript repair/recovery scripts (not needed in production)
+repair.js
+repair2.js
+recover.js
+recover2.js
+missing.js
+fix_*.js
+patch_*.js
+restore_tags.js
+restore.py
+append_modal.js
+fix_index.js
+temp_fetch.js
+test_*.js
+seed_*.js
+seed_*.mjs
+upload_*.js
+upload_*.mjs
+find_review.js
+check_deleted.js
+check_deleted2.js
+screenshot.js
+
+# Prototype/seed HTML files
+prototype_*.html
+seed*.html
+index_*.html
+check.html
+delete_reviews.html
+inject_reviews.html
+
+# Log and text files
+*.txt
+*.csv
+*.xlsx
+
+# Backup
+backup_files/
+
+# Analysis/report files
+analysis_report.txt
+deploy_log*.txt
+output*.txt
+admin_*.txt
+console_output.txt
+
+# Firebase internal
+.firebase/
+.firebaserc
+firebase.json
+firestore.indexes.json
+storage.rules
+functions/
+
+# Git
+.git/
+.gitignore
+
+# Agent workflows
+.agent/
+
+# Package files
+package.json
+package-lock.json

@@ -1,0 +1,35 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:rgb(255,240,245);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:1" />
+    </radialGradient>
+    <filter id="f1" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" />
+      <feOffset dx="5" dy="5" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="800" height="600" fill="url(#grad1)" />
+  
+  <g transform="translate(150, 50) rotate(-5)" filter="url(#f1)">
+    <rect x="0" y="0" width="240" height="500" rx="35" ry="35" fill="#Cebbb0" stroke="#8e8e8e" stroke-width="2" />
+    <rect x="10" y="10" width="220" height="480" rx="30" ry="30" fill="#1a1a1a" />
+    <rect x="70" y="25" width="80" height="25" rx="12" ry="12" fill="black" />
+    <text x="120" y="250" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="bold">iPhone 15 Pro</text>
+  </g>
+
+  <g transform="translate(420, 50) rotate(5)" filter="url(#f1)">
+    <rect x="0" y="0" width="250" height="510" rx="5" ry="5" fill="#787878" stroke="#505050" stroke-width="2" />
+    <rect x="5" y="5" width="240" height="500" rx="2" ry="2" fill="#1a1a1a" />
+    <circle cx="125" cy="30" r="8" fill="black" />
+    <text x="125" y="255" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="bold">S24 Ultra</text>
+  </g>
+</svg>

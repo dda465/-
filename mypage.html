@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+
+
+
+<html lang="ko">
+
+
+
+
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>마이페이지 - 쉐라폰</title>
+
+
+
+    <link rel="stylesheet" href="styles.css?v=8">
+
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+
+
+    <style>
+
+
+
+        .page-header {
+
+
+
+            background-color: var(--secondary-color);
+
+
+
+            padding: 60px 0;
+
+
+
+            text-align: center;
+
+
+
+        }
+
+
+
+
+
+
+
+        .page-header h1 {
+
+
+
+            font-size: 2rem;
+
+
+
+            margin-bottom: 10px;
+
+
+
+            color: var(--text-primary);
+
+
+
+        }
+
+
+
+
+
+
+
+        .dashboard-container {
+
+
+
+            background: white;
+
+
+
+            border-radius: 16px;
+
+
+
+            box-shadow: var(--shadow-md);
+
+
+
+            padding: 30px;
+
+
+
+            margin-top: -30px;
+
+
+
+            position: relative;
+
+
+
+            z-index: 10;
+
+
+
+            border: 1px solid var(--border-color);
+
+
+
+            min-height: 400px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .quote-card {
+
+
+
+            border: 1px solid #eee;
+
+
+
+            border-radius: 12px;
+
+
+
+            padding: 20px;
+
+
+
+            margin-bottom: 15px;
+
+
+
+            transition: all 0.2s;
+
+
+
+            display: flex;
+
+
+
+            justify-content: space-between;
+
+
+
+            align-items: center;
+
+
+
+        }
+
+
+
+
+
+
+
+        .quote-card:hover {
+
+
+
+            box-shadow: var(--shadow-sm);
+
+
+
+            transform: translateY(-2px);
+
+
+
+        }
+
+
+
+
+
+
+
+        .qc-info h3 {
+
+
+
+            font-size: 1.1rem;
+
+
+
+            margin-bottom: 5px;
+
+
+
+            color: var(--text-primary);
+
+
+
+        }
+
+
+
+
+
+
+
+        .qc-info p {
+
+
+
+            color: var(--text-secondary);
+
+
+
+            font-size: 0.9rem;
+
+
+
+            margin-bottom: 2px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .status-badge {
+
+
+
+            padding: 6px 12px;
+
+
+
+            border-radius: 20px;
+
+
+
+            font-size: 0.85rem;
+
+
+
+            font-weight: 600;
+
+
+
+        }
+
+
+
+
+
+
+
+        .status-badge.receipt {
+
+
+
+            background: #E3F2FD;
+
+
+
+            color: #1976D2;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 접수 */
+
+
+
+        .status-badge.pickup {
+
+
+
+            background: #FFF3E0;
+
+
+
+            color: #F57C00;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 수거중 */
+
+
+
+        .status-badge.assessing {
+
+
+
+            background: #E8F5E9;
+
+
+
+            color: #388E3C;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 검수중 */
+
+
+
+        .status-badge.complete {
+
+
+
+            background: #2196F3;
+
+
+
+            color: white;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 입금완료 */
+
+
+
+        .status-badge.cancel {
+
+
+
+            background: #FFEBEE;
+
+
+
+            color: #C62828;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 취소 */
+
+
+
+
+
+
+
+        .logout-btn {
+
+
+
+            background: none;
+
+
+
+            border: 1px solid #ddd;
+
+
+
+            padding: 8px 16px;
+
+
+
+            border-radius: 20px;
+
+
+
+            cursor: pointer;
+
+
+
+            font-size: 0.9rem;
+
+
+
+            color: #666;
+
+
+
+        }
+
+
+
+
+
+
+
+        .logout-btn:hover {
+
+
+
+            background: #f5f5f5;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Progress Stepper */
+
+
+
+        .stepper-container {
+
+
+
+            margin-top: 15px;
+
+
+
+            padding-top: 15px;
+
+
+
+            border-top: 1px solid #f0f0f0;
+
+
+
+        }
+
+
+
+
+
+
+
+        .stepper {
+
+
+
+            display: flex;
+
+
+
+            justify-content: space-between;
+
+
+
+            position: relative;
+
+
+
+        }
+
+
+
+
+
+
+
+        .stepper::before {
+
+
+
+            content: '';
+
+
+
+            position: absolute;
+
+
+
+            top: 15px;
+
+
+
+            left: 0;
+
+
+
+            width: 100%;
+
+
+
+            height: 2px;
+
+
+
+            background: #eee;
+
+
+
+            z-index: 1;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step {
+
+
+
+            position: relative;
+
+
+
+            z-index: 2;
+
+
+
+            text-align: center;
+
+
+
+            flex: 1;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step-icon {
+
+
+
+            width: 32px;
+
+
+
+            height: 32px;
+
+
+
+            background: white;
+
+
+
+            border: 2px solid #ddd;
+
+
+
+            border-radius: 50%;
+
+
+
+            margin: 0 auto 8px;
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            font-size: 0.8rem;
+
+
+
+            color: #ccc;
+
+
+
+            font-weight: bold;
+
+
+
+            transition: all 0.3s;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step-text {
+
+
+
+            font-size: 0.8rem;
+
+
+
+            color: #999;
+
+
+
+            font-weight: 500;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Active & Completed States */
+
+
+
+        .step.active .step-icon {
+
+
+
+            border-color: var(--primary-color);
+
+
+
+            background: var(--primary-color);
+
+
+
+            color: white;
+
+
+
+            box-shadow: 0 0 0 3px rgba(255, 158, 170, 0.2);
+
+
+
+        }
+
+
+
+
+
+
+
+        .step.active .step-text {
+
+
+
+            color: var(--primary-dark);
+
+
+
+            font-weight: 700;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step.completed .step-icon {
+
+
+
+            border-color: var(--primary-color);
+
+
+
+            background: white;
+
+
+
+            color: var(--primary-color);
+
+
+
+        }
+
+
+
+
+
+
+
+        .step.completed .step-text {
+
+
+
+            color: var(--primary-dark);
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Connecting Lines Color Logic would require complex CSS or JS dynamic width. 
+
+
+
+           For simplicity, we just color the icons/text. */
+
+
+
+    </style>
+
+
+
+
+
+
+
+    <!-- Google tag (gtag.js) -->
+
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JWS15NH588"></script>
+
+
+
+    <script>
+
+
+
+        window.dataLayer = window.dataLayer || [];
+
+
+
+        function gtag() { dataLayer.push(arguments); }
+
+
+
+        gtag('js', new Date());
+
+
+
+
+
+
+
+        gtag('config', 'G-JWS15NH588');
+
+
+
+    </script>
+
+
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+</head>
+
+
+
+
+
+
+
+<body>
+
+
+
+
+
+
+
+    <nav class="navbar">
+
+
+
+        <div class="container">
+
+
+
+            <a href="index.html" class="logo">
+
+
+
+                <img src="sr_logo.webp" alt="SR 로고" class="logo-icon" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+
+
+
+                <span class="logo-text-wrapper"
+
+
+
+                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 24px; color: #2563EB; margin-left: 8px;">
+
+
+
+                    쉐라폰
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+            <div class="nav-links">
+
+
+
+                <a href="quote.html">내 폰 판매</a>
+
+
+                <a href="reviews.html">이용 후기</a>
+
+
+
+                <span id="user-display" style="font-weight:bold; color:var(--primary-dark); margin-left: 10px;"></span>
+
+
+
+                <button id="nav-logout-btn" class="logout-btn" style="display:none; margin-left:10px;">로그아웃</button>
+
+
+
+                <a href="login.html" id="nav-login-link">로그인</a>
+
+
+
+            </div>
+
+
+
+            <a href="quote.html" class="btn btn-primary">판매하기</a>
+
+
+
+        </div>
+
+
+
+    </nav>
+
+
+
+
+
+
+
+    <div class="page-header">
+
+
+
+        <div class="container">
+
+
+
+            <h1>마이페이지</h1>
+
+
+
+            <p id="welcome-msg">나의 견적 신청 내역을 확인하세요</p>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <div class="container mb-3">
+
+
+
+        <div class="dashboard-container">
+
+
+
+            <h2 style="margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+
+
+
+                📋 신청 내역
+
+
+
+            </h2>
+
+
+
+            <div id="my-quotes-list">
+
+
+
+                <div style="text-align: center; padding: 40px; color: #999;">
+
+
+
+                    불러오는 중...
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <footer>
+
+
+
+        <div class="container">
+
+
+
+            <div class="footer-content">
+
+
+
+                <div class="footer-col" style="flex: 2;">
+
+
+
+
+
+
+
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">
+
+
+
+                        <strong>쇼핑몰 기본정보</strong><br>
+
+
+
+                        상호명: <span id="dyn-company-name">에스알커머스</span> | 대표자명: <span id="dyn-ceo-name">박현용</span><br>
+
+
+
+                        사업장 주소: <span id="dyn-address">부산시 동천로 116 한신밴빌딩 1003호</span><br>
+
+
+
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
+
+
+
+                        통신판매업 신고번호: 기타 | 개인정보보호책임자: <span id="dyn-ceo-name2">박현용</span>
+
+
+
+                    </div>
+                    <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
+                            <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                고객님의 안전거래를 위해 현금 결제 시 저희 쇼핑몰이 가입한<br>
+                                <strong>KG이니시스의 에스크로(구매안전) 서비스</strong>를 이용하실 수 있습니다.<br>
+                                <span style="color: #6b7280; text-decoration: underline;">[서비스 가입사실 확인하기]</span>
+                            </div>
+                        </div>
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
+                            <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>고객센터 정보</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+
+
+
+                        
+
+
+
+                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br><br>
+
+
+
+                        <strong>CS운영시간</strong><br>
+
+
+
+                        연중무휴 24시간 채널톡으로 상담가능
+
+
+
+                    </p>
+
+
+
+                </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>About</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+
+
+
+                        <a href="terms.html" style="color: inherit; text-decoration: none;">이용약관</a> |
+
+
+
+                        <a href="privacy.html"
+
+
+
+                            style="color: inherit; text-decoration: none; font-weight: bold;">개인정보처리방침</a>
+
+
+
+                    </p>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+            <div class="copyright">
+
+
+
+                &copy; <span id="current-year">2024</span> <span class="dyn-company-name">에스알커머스</span>. All rights reserved.
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </footer>
+
+
+
+
+
+
+
+    <script type="module">
+
+
+
+        import { auth, db } from './firebase-config.js';
+
+
+
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+
+
+        import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
+
+
+
+
+        const myQuotesList = document.getElementById('my-quotes-list');
+
+
+
+        const userDisplay = document.getElementById('user-display');
+
+
+
+        const logoutBtn = document.getElementById('nav-logout-btn');
+
+
+
+        const welcomeMsg = document.getElementById('welcome-msg');
+
+
+
+
+
+
+
+        function formatName(name) {
+
+
+
+            if (!name) return '고객';
+
+
+
+            if (name.startsWith('naveryuser')) return '네이버유저';
+
+
+
+            if (name.length > 8) return name.substring(0, 8) + '...';
+
+
+
+            return name;
+
+
+
+        }
+
+
+
+
+
+
+
+        // Auth Check
+
+
+
+        onAuthStateChanged(auth, async (user) => {
+
+
+
+            if (user && !user.isAnonymous) {
+
+
+
+                const dName = formatName(user.displayName || (user.email ? user.email.split('@')[0] : '사용자'));
+
+
+
+                userDisplay.textContent = `${dName}님`;
+
+
+
+                logoutBtn.style.display = 'inline-block';
+
+
+
+                welcomeMsg.textContent = `${dName}님의 신청 내역입니다.`;
+
+
+
+                const loginLink = document.getElementById('nav-login-link');
+
+
+
+                if (loginLink) loginLink.style.display = 'none';
+
+
+
+
+
+
+
+                await loadMyQuotes(user.uid);
+
+
+
+                return; // Stop here, Firebase auth is verified
+
+
+
+            } else {
+
+
+
+                const localUserStr = localStorage.getItem('user_info');
+
+
+
+                if (localUserStr) {
+
+
+
+                    try {
+
+
+
+                        const localUser = JSON.parse(localUserStr);
+
+
+
+                        if (localUser && localUser.provider) {
+
+
+
+                            const dName = formatName(localUser.nickname || localUser.email?.split('@')[0] || 'SNS유저');
+
+
+
+                            userDisplay.textContent = `${dName}님`;
+
+
+
+                            logoutBtn.style.display = 'inline-block';
+
+
+
+                            welcomeMsg.textContent = `${dName}님의 신청 내역입니다.`;
+
+
+
+                            const loginLink = document.getElementById('nav-login-link');
+
+
+
+                            if (loginLink) loginLink.style.display = 'none';
+
+
+
+
+
+
+
+                            await loadMyQuotes(localUser.uid);
+
+
+
+                            return; // Stop here, social login is verified
+
+
+
+                        }
+
+
+
+                    } catch (e) { }
+
+
+
+                }
+
+
+
+
+
+
+
+                alert("로그인이 필요한 페이지입니다.");
+
+
+
+                window.location.href = 'login.html';
+
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+
+
+        logoutBtn.addEventListener('click', async () => {
+
+
+
+            try {
+
+
+
+                const localUser = localStorage.getItem('user_info');
+
+
+
+                if (localUser && localUser.includes('kakao')) {
+
+
+
+                    if (window.Kakao && Kakao.Auth && Kakao.Auth.getAccessToken()) {
+
+
+
+                        Kakao.Auth.logout(() => {
+
+
+
+                            console.log('Kakao logged out');
+
+
+
+                        });
+
+
+
+                    }
+
+
+
+                }
+
+
+
+            } catch (e) {
+
+
+
+                console.error('Kakao logout error', e);
+
+
+
+            }
+
+
+
+            localStorage.removeItem('user_info');
+
+
+
+            try {
+
+
+
+                await signOut(auth);
+
+
+
+            } catch (e) {
+
+
+
+                console.error("Firebase logout error:", e);
+
+
+
+            }
+
+
+
+            window.location.replace('index.html');
+
+
+
+        });
+
+
+
+
+
+
+
+        async function loadMyQuotes(uid) {
+
+
+
+            try {
+
+
+
+                // Query quotes where userId == uid
+
+
+
+                const q = query(
+
+                    collection(db, "quotes"),
+
+                    where("userId", "==", uid)
+
+                );
+
+
+
+
+
+
+
+                const querySnapshot = await getDocs(q);
+
+
+
+
+
+
+
+                if (querySnapshot.empty) {
+
+
+
+                    myQuotesList.innerHTML = `
+
+
+
+                        <div style="text-align: center; padding: 50px;">
+
+
+
+                            <p style="color: #666; margin-bottom: 20px;">아직 신청한 내역이 없습니다.</p>
+
+
+
+                            <a href="quote.html" class="btn btn-primary">내 폰 견적 보러가기</a>
+
+
+
+                        </div>
+
+
+
+                    `;
+
+
+
+                    return;
+
+
+
+                }
+
+
+
+
+
+
+
+                myQuotesList.innerHTML = '';
+
+                const docs = [];
+                querySnapshot.forEach(doc => docs.push(doc));
+                docs.sort((a, b) => {
+                    const timeA = new Date(a.data().timestamp).getTime() || 0;
+                    const timeB = new Date(b.data().timestamp).getTime() || 0;
+                    return timeB - timeA;
+                });
+
+                docs.forEach((doc) => {
+
+
+
+                    const data = doc.data();
+
+
+
+                    const status = data.status || '접수완료';
+
+
+
+
+
+
+
+                    let statusClass = 'receipt';
+
+
+
+                    if (status.includes('수거')) statusClass = 'pickup';
+
+
+
+                    if (status.includes('검수')) statusClass = 'assessing';
+
+
+
+                    if (status.includes('완료') || status.includes('입금')) statusClass = 'complete';
+
+
+
+                    if (status.includes('취소')) statusClass = 'cancel';
+
+
+
+
+
+
+
+                    // Delivery Info Text
+
+
+
+                    let deliveryInfo = '';
+
+
+
+                    if (data.trackingNumber) {
+
+
+
+                        deliveryInfo = `<br><span style="font-size: 0.8rem; color: #2196F3;">운송장: ${data.courier || ''} ${data.trackingNumber}</span>`;
+
+
+
+                    }
+
+
+
+
+
+
+
+                    const formattedPrice = new Intl.NumberFormat('ko-KR').format(data.price);
+
+
+
+
+
+
+
+                    // Stepper Logic
+
+
+
+                    const steps = ['접수완료', '수거중', '검수중', '입금완료'];
+
+
+
+                    // Map current status to index
+
+
+
+                    let activeIndex = 0;
+
+
+
+                    if (status.includes('수거')) activeIndex = 1;
+
+
+
+                    if (status.includes('검수')) activeIndex = 2;
+
+
+
+                    if (status.includes('입금') || status.includes('완료')) activeIndex = 3;
+
+
+
+                    if (status.includes('취소')) activeIndex = -1; // Cancelled
+
+
+
+
+
+
+
+                    let stepperHtml = '';
+
+
+
+                    if (activeIndex > -1) {
+
+
+
+                        stepperHtml = '<div class="stepper-container"><div class="stepper">';
+
+
+
+                        steps.forEach((label, index) => {
+
+
+
+                            let stepClass = '';
+
+
+
+                            if (index < activeIndex) stepClass = 'completed';
+
+
+
+                            if (index === activeIndex) stepClass = 'active';
+
+
+
+
+
+
+
+                            // Icons mapping
+
+
+
+                            const icons = ['📝', '🚚', '🔍', '💰'];
+
+
+
+
+
+
+
+                            stepperHtml += `
+
+
+
+                                <div class="step ${stepClass}">
+
+
+
+                                    <div class="step-icon">${icons[index]}</div>
+
+
+
+                                    <div class="step-text">${label}</div>
+
+
+
+                                </div>
+
+
+
+                            `;
+
+
+
+                        });
+
+
+
+                        stepperHtml += '</div></div>';
+
+
+
+                    } else {
+
+
+
+                        stepperHtml = '<div class="stepper-container" style="text-align:center; color:#C62828; font-weight:bold; padding:10px;">🚫 취소된 신청입니다.</div>';
+
+
+
+                    }
+
+
+
+
+
+
+
+                    const el = document.createElement('div');
+
+
+
+                    el.className = 'quote-card';
+
+
+
+                    // Make it block layout to stack stepper at bottom
+
+
+
+                    el.style.display = 'block';
+
+
+
+                    el.innerHTML = `
+
+
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+
+
+
+                            <div class="qc-info">
+
+
+
+                                <h3>${data.brand} ${data.model} <span style="font-size:0.8rem; color:#888;">${data.storage || ''}</span></h3>
+
+
+
+                                <p>신청일: ${new Date(data.timestamp).toLocaleDateString()}</p>
+
+
+
+                                <p>예상 매입가: <strong>${formattedPrice}원</strong></p>
+
+
+
+                                ${deliveryInfo}
+
+
+
+                            </div>
+
+
+
+                            <div style="text-align: right;">
+
+
+
+                                 <span class="status-badge ${statusClass}">${status}</span>
+
+
+
+                            </div>
+
+
+
+                        </div>
+
+
+
+                        ${stepperHtml}
+
+
+
+                    `;
+
+
+
+                    myQuotesList.appendChild(el);
+
+
+
+                });
+
+
+
+
+
+
+
+            } catch (error) {
+
+
+
+                console.error("Error loading my quotes:", error);
+
+
+
+
+
+
+
+                // Fallback for index requirement error
+
+
+
+                if (error.code === 'failed-precondition' || error.message.includes("requires an index")) {
+
+
+
+                    const indexUrl = error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]*/);
+
+
+
+                    myQuotesList.innerHTML = `
+
+
+
+                        <div style="text-align:center; padding: 20px; color: #d9534f; background: #f9f2f4; border: 1px solid #ebccd1; border-radius: 8px;">
+
+
+
+                            <p><strong>시스템 초기화 필요</strong></p>
+
+
+
+                            <p>관리자에게 문의해주세요 (Index 설정 필요).</p>
+
+
+
+                            ${indexUrl ? `<p><a href="${indexUrl}" target="_blank" style="color: #d9534f; text-decoration: underline;">관리자: 여기를 클릭하여 인덱스 생성</a></p>` : ''}
+
+
+
+                        </div>`;
+
+
+
+                    console.error("Firestore Index Required. Create it here:", indexUrl ? indexUrl[0] : "Check console for link");
+
+
+
+                } else {
+
+
+
+                    myQuotesList.innerHTML = '<p style="text-align:center;">내역을 불러오는 중 오류가 발생했습니다.<br>' + error.message + '</p>';
+
+
+
+                }
+
+
+
+            }
+
+
+
+        }
+
+
+
+    </script>
+
+
+
+
+
+
+
+    <!-- Channel Plugin Scripts -->
+
+
+
+    <script>
+
+
+
+        (function() {
+
+
+
+            var w = window;
+
+
+
+            if (w.ChannelIO) {
+
+
+
+            return (window.console.error || window.console.log || function(){})('ChannelIO script included twice.');
+
+
+
+            }
+
+
+
+            var ch = function() {
+
+
+
+            ch.c(arguments);
+
+
+
+            };
+
+
+
+            ch.q = [];
+
+
+
+            ch.c = function(args) {
+
+
+
+            ch.q.push(args);
+
+
+
+            };
+
+
+
+            w.ChannelIO = ch;
+
+
+
+            function l() {
+
+
+
+            if (w.ChannelIOInitialized) {
+
+
+
+                return;
+
+
+
+            }
+
+
+
+            w.ChannelIOInitialized = true;
+
+
+
+            var s = document.createElement('script');
+
+
+
+            s.type = 'text/javascript';
+
+
+
+            s.async = true;
+
+
+
+            s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
+
+
+            s.charset = 'UTF-8';
+
+
+
+            var x = document.getElementsByTagName('script')[0];
+
+
+
+            x.parentNode.insertBefore(s, x);
+
+
+
+            }
+
+
+
+            if (document.readyState === 'complete') {
+
+
+
+            l();
+
+
+
+            } else if (window.attachEvent) {
+
+
+
+            window.attachEvent('onload', l);
+
+
+
+            } else {
+
+
+
+            window.addEventListener('DOMContentLoaded', l, false);
+
+
+
+            window.addEventListener('load', l, false);
+
+
+
+            }
+
+
+
+        })();
+
+
+
+        ChannelIO('boot', {
+
+
+
+            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
+
+
+
+        });
+
+
+
+    </script>
+
+
+
+</body>
+
+
+
+
+
+
+
+</html>
+
+
+

@@ -1,0 +1,7 @@
+20: const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWCf4pn7jyNSLzBAgNnDFEilE-1nKx_lIiCr1ausGHp_lkZ5Vkh7S9uruSfatRH0aB/exec";
+1446: // Wait, the previous code had 'initLandingPage' doing 'quotes' fetch.
+3427: // ... (Remainder of fetch logic) -> Keep existing listener logic or update it?
+3475: // ... (Keep existing fetch and step 1-4 logic below)
+5835: fetch(GOOGLE_SCRIPT_URL, {
+5911: fetch(`https://asia-northeast3-rejeuphone.cloudfunctions.net/telegramApi/send`, {
+8193: console.error("Error fetching review for edit:", error);

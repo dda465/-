@@ -1,0 +1,33 @@
+            priceDisplayStr += ' ~ ' + formatCurrency(Math.floor(finalPrice * multiplier));
+        }
+        document.getElementById('final-price-display').innerText = priceDisplayStr;
+
+
+
+
+
+
+
+        let breakdown = `<p><strong>판정 등급:</strong> <span style="color:var(--primary-color)">${gradeName}</span></p>`;
+
+
+
+        if (isSimpleMode) {
+
+
+---
+            priceDisplayStr += ' ~ ' + formatCurrency(Math.floor(finalPrice * multiplier));
+        }
+        document.getElementById('final-price-display').textContent = priceDisplayStr;
+
+
+
+        document.getElementById('price-breakdown').innerHTML = breakdownHtml;
+
+
+
+    }
+
+
+
+

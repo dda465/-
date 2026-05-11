@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쉐라폰 - 빠른 견적 프로토타입 (배너 포함)</title>
+    <link rel="stylesheet" href="styles.css?v=8">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        /* 추가 UI 스타일만 정의 (나머지는 styles.css 따름) */
+        .fast-search-wrapper {
+            position: relative;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            padding: 60px 20px 80px;
+            text-align: center;
+            margin-top: -30px; /* 배너 위로 살짝 겹치게 */
+            z-index: 10;
+        }
+        
+        .fast-search-box {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.15);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            position: relative;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .fs-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        .fs-subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 50px;
+            padding: 6px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .search-container:focus-within {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        .search-container input {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            background: transparent;
+        }
+        .search-container button {
+            background: #2563EB;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .search-container button:hover {
+            background: #1d4ed8;
+            transform: scale(1.02);
+        }
+
+        .quick-select-title {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: left;
+        }
+        .quick-select-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .quick-select-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .quick-select-card:hover {
+            border-color: #2563EB;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.15);
+        }
+        .quick-card-icon {
+            font-size: 2rem;
+            color: #2563EB;
+            margin-bottom: 15px;
+        }
+        .quick-card-name {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+        .quick-card-price {
+            color: #ef4444;
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        .quick-card-sub {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        @media(max-width: 768px) {
+            .fast-search-box { padding: 25px 15px; }
+            .fs-title { font-size: 1.8rem; }
+            .quick-select-grid { flex-direction: column; }
+            .search-container input { font-size: 1rem; padding: 12px 15px; }
+            .search-container button { padding: 12px 20px; font-size: 1rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="sr_logo.png" alt="SR 로고" class="logo-icon" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+                <span style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 24px; color: #2563EB; margin-left: 8px;">쉐라폰</span>
+            </a>
+            <div class="nav-links">
+                <a href="quote.html">내 폰 판매</a>                <a href="reviews.html">이용 후기</a>
+                <a href="login.html">로그인</a>
+            </div>
+            <a href="quote.html" class="btn btn-primary">견적 확인하기</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section (기존 배너 그대로 유지) -->
+    <header class="hero-slider-wrapper">
+        <div id="hero-slider">
+            <!-- Slide 1 -->
+            <div class="hero-slide">
+                <div class="container hero-container" style="padding: 60px 20px 90px;">
+                    <div class="hero-content-wrapper">
+                        <div class="hero-text-area">
+                            <span class="hero-badge" style="background: rgba(37, 99, 235, 0.1); color: #2563EB; font-weight: 700;">S26 출시 기념 이벤트</span>
+                            <h1 style="font-size: 3.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">아이폰 & 갤럭시<br>5만원 추가 보상!</h1>
+                            <p class="hero-subtitle">기종 상관없이 쓰던 폰 팔고<br>특별 지원금 5만원 더 챙기세요!</p>
+                        </div>
+                        <div class="hero-image-area" style="text-align: right;">
+                            <img src="hero_bg_realistic.png" alt="최신 스마트폰 3D 이미지" style="max-width: 90%; height: auto; display: inline-block;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="hero-slide" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);">
+                <div class="container hero-container" style="padding: 60px 20px 90px;">
+                    <div class="hero-content-wrapper">
+                        <div class="hero-text-area">
+                            <span class="hero-badge" style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 700;">100% 당첨 리뷰 이벤트</span>
+                            <h1 style="color: #fff; font-size: 3.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">거래 후 리뷰 쓰면<br>스타벅스 커피 증정!</h1>
+                            <p class="hero-subtitle" style="color: rgba(255,255,255,0.9);">쉐라폰 이용 후기를 남겨주시면<br>아메리카노 기프티콘을 드립니다.</p>
+                        </div>
+                        <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
+                            <img src="starbucks_promo.png" alt="커피 증정 리뷰 이벤트" style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slider-controls" style="position: absolute; bottom: 40px; right: 10%; z-index: 10; display: flex; align-items: center; background: rgba(0,0,0,0.5); border-radius: 30px; padding: 5px 15px; color: white; gap: 15px;">
+            <button id="slider-prev" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px;">&#10094;</button>
+            <span style="font-size: 0.9rem; font-weight: 500;"><span id="slider-current">1</span> / 2</span>
+            <button id="slider-next" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem; padding: 5px;">&#10095;</button>
+        </div>
+    </header>
+
+    <!-- NEW FAST SEARCH UX (배너 아래에 카드 형태로 돌출) -->
+    <section class="fast-search-wrapper">
+        <div class="fast-search-box">
+            <h2 class="fs-title">내 폰 가격, 지금 바로 확인하세요</h2>
+            <p class="fs-subtitle">복잡한 절차 없이 검색 한 번으로 업계 최고가를 약속드립니다.</p>
+            
+            <div class="search-container">
+                <i class="ri-search-line" style="font-size: 1.5rem; color: #94a3b8; margin-left: 20px; margin-right: 10px;"></i>
+                <input type="text" placeholder="기종명을 입력하세요 (예: 아이폰15, GOS-24)">
+                <button type="button">시세 1초만에 보기</button>
+            </div>
+
+            <div class="quick-select-title">🔥 이번 주 쉐라폰 최고가 매입 기종 TOP 3</div>
+            <div class="quick-select-grid">
+                
+                <div class="quick-select-card" onclick="alert('아이폰 15 Pro 견적 창으로 즉시 이동 (Depth 1단계)')">
+                    <i class="ri-apple-fill quick-card-icon"></i>
+                    <div class="quick-card-name">아이폰 15 Pro</div>
+                    <div class="quick-card-price">최고 1,100,000원</div>
+                    <div class="quick-card-sub">기본 128GB A급 기준</div>
+                </div>
+
+                <div class="quick-select-card" onclick="alert('갤럭시 S24 Ultra 견적 창으로 즉시 이동 (Depth 1단계)')">
+                    <i class="ri-smartphone-line quick-card-icon"></i>
+                    <div class="quick-card-name">갤럭시 S24 Ultra</div>
+                    <div class="quick-card-price">최고 1,150,000원</div>
+                    <div class="quick-card-sub">기본 256GB A급 기준</div>
+                </div>
+
+                <div class="quick-select-card" onclick="alert('Z 플립 5 견적 창으로 즉시 이동 (Depth 1단계)')">
+                    <i class="ri-smartphone-line quick-card-icon"></i>
+                    <div class="quick-card-name">갤럭시 Z 플립 5</div>
+                    <div class="quick-card-price">최고 550,000원</div>
+                    <div class="quick-card-sub">기본 256GB A급 기준</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Deletion Guarantee Banner -->
+    <section class="security-banner" style="background: #1a1a1a; color: white; padding: 40px 0;">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;">
+            <div style="font-size: 2.5rem; color: #4CAF50;"><i class="ri-shield-check-fill"></i></div>
+            <div style="text-align: left;">
+                <h3 style="margin: 0 0 5px 0; color: #4CAF50;">100% 데이터 영구 삭제 보장</h3>
+                <p style="margin: 0; color: #ccc;">국제 인증 블랑코(Blancco) 솔루션으로 복구 불가능하게 완벽 삭제해드립니다.</p>
+            </div>
+            <div>
+                <a href="#" class="btn btn-primary" style="background: white; color: #333; border: none;">안심 보증서 확인</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Naver SDK for Login Callback (REQUIRED to prevent auth.js crash) -->
+    <script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" charset="utf-8"></script>
+    <script src="script.js?v=12" type="module"></script>
+</body>
+</html>

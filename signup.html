@@ -1,0 +1,906 @@
+﻿<!DOCTYPE html>
+
+
+
+<html lang="ko">
+
+
+
+
+
+
+
+<head>
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>회원가입 - 쉐라폰</title>
+
+
+
+    <link rel="stylesheet" href="styles.css?v=8">
+
+
+
+    <style>
+
+
+
+        :root {
+
+
+
+            --primary-color: #007AFF;
+
+
+
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+
+
+        }
+
+
+
+
+
+
+
+        body {
+
+
+
+            font-family: 'Pretendard', sans-serif;
+
+
+
+            background: var(--bg-gradient);
+
+
+
+            min-height: 100vh;
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            margin: 0;
+
+
+
+            padding: 20px;
+
+
+
+            box-sizing: border-box;
+
+
+
+        }
+
+
+
+
+
+
+
+        .signup-container {
+
+
+
+            background: rgba(255, 255, 255, 0.8);
+
+
+
+            backdrop-filter: blur(20px);
+
+
+
+            padding: 40px;
+
+
+
+            border-radius: 24px;
+
+
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+
+
+            width: 100%;
+
+
+
+            max-width: 400px;
+
+
+
+            text-align: center;
+
+
+
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+
+
+        }
+
+
+
+
+
+
+
+        .signup-header h1 {
+
+
+
+            font-size: 28px;
+
+
+
+            font-weight: 700;
+
+
+
+            color: #1d1d1f;
+
+
+
+            margin-bottom: 8px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .signup-header p {
+
+
+
+            font-size: 15px;
+
+
+
+            color: #86868b;
+
+
+
+            margin-bottom: 32px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .input-group {
+
+
+
+            margin-bottom: 16px;
+
+
+
+            text-align: left;
+
+
+
+        }
+
+
+
+
+
+
+
+        .input-group label {
+
+
+
+            display: block;
+
+
+
+            font-size: 14px;
+
+
+
+            color: #1d1d1f;
+
+
+
+            margin-bottom: 8px;
+
+
+
+            font-weight: 500;
+
+
+
+        }
+
+
+
+
+
+
+
+        .input-group input {
+
+
+
+            width: 100%;
+
+
+
+            padding: 14px 16px;
+
+
+
+            border-radius: 12px;
+
+
+
+            border: 1px solid #d2d2d7;
+
+
+
+            background: #fff;
+
+
+
+            font-size: 16px;
+
+
+
+            box-sizing: border-box;
+
+
+
+            transition: border-color 0.2s;
+
+
+
+        }
+
+
+
+
+
+
+
+        .signup-btn {
+
+
+
+            width: 100%;
+
+
+
+            padding: 14px;
+
+
+
+            border-radius: 12px;
+
+
+
+            border: none;
+
+
+
+            background: var(--primary-color);
+
+
+
+            color: white;
+
+
+
+            font-size: 16px;
+
+
+
+            font-weight: 600;
+
+
+
+            cursor: pointer;
+
+
+
+            margin-top: 16px;
+
+
+
+            transition: transform 0.2s, opacity 0.2s;
+
+
+
+        }
+
+
+
+
+
+
+
+        .signup-btn:active {
+
+
+
+            transform: scale(0.98);
+
+
+
+        }
+
+
+
+
+
+
+
+        .footer-links {
+
+
+
+            margin-top: 24px;
+
+
+
+            font-size: 13px;
+
+
+
+            color: #86868b;
+
+
+
+        }
+
+
+
+
+
+
+
+        .footer-links a {
+
+
+
+            color: var(--primary-color);
+
+
+
+            text-decoration: none;
+
+
+
+            margin: 0 8px;
+
+
+
+        }
+
+
+
+    </style>
+
+
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+</head>
+
+
+
+
+
+
+
+<body>
+
+
+
+    <div class="signup-wrapper">
+
+
+
+        <div class="signup-container">
+
+
+
+            <a href="index.html" class="logo-area">
+
+
+
+                <img src="sr_logo.webp" alt="SR 로고" class="logo-text" style="height: 60px; width: auto;">
+
+
+
+                <h1
+
+
+
+                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 1.8rem; margin: 10px 0 0; color: #2563EB;">
+
+
+
+                    쉐라폰</h1>
+
+
+
+            </a>
+
+
+
+
+
+
+
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 1.2rem; color: var(--text-secondary);">회원가입
+
+
+
+            </h2>
+
+
+
+
+
+
+
+            <form id="email-signup-form">
+
+
+
+                <div class="input-group">
+
+
+
+                    <label for="nickname">이름/닉네임</label>
+
+
+
+                    <input type="text" id="nickname" placeholder="홍길동" required>
+
+
+
+                </div>
+
+
+
+                <div class="input-group">
+
+
+
+                    <label for="email">이메일</label>
+
+
+
+                    <input type="email" id="email" placeholder="example@email.com" required>
+
+
+
+                </div>
+
+
+
+                <div class="input-group">
+
+
+
+                    <label for="password">비밀번호</label>
+
+
+
+                    <input type="password" id="password" placeholder="6자리 이상 입력하세요" required minlength="6">
+
+
+
+                </div>
+
+
+
+                <button type="submit" class="signup-btn">가입하기</button>
+
+
+
+            </form>
+
+
+
+
+
+
+
+            <div class="footer-links">
+
+
+
+                이미 회원이신가요? <a href="login.html">로그인하기</a>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <footer>
+
+
+
+        <div class="footer-content">
+
+
+
+                <div class="footer-col" style="flex: 2;">
+
+
+
+
+
+
+
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">
+
+
+
+                        <strong>쇼핑몰 기본정보</strong><br>
+
+
+
+                        상호명: <span id="dyn-company-name">에스알커머스</span> | 대표자명: <span id="dyn-ceo-name">박현용</span><br>
+
+
+
+                        사업장 주소: <span id="dyn-address">부산시 동천로 116 한신밴빌딩 1003호</span><br>
+
+
+
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
+
+
+
+                        통신판매업 신고번호: 기타 | 개인정보보호책임자: <span id="dyn-ceo-name2">박현용</span>
+
+
+
+                    </div>
+                    <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
+                            <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                고객님의 안전거래를 위해 현금 결제 시 저희 쇼핑몰이 가입한<br>
+                                <strong>KG이니시스의 에스크로(구매안전) 서비스</strong>를 이용하실 수 있습니다.<br>
+                                <span style="color: #6b7280; text-decoration: underline;">[서비스 가입사실 확인하기]</span>
+                            </div>
+                        </div>
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
+                            <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>고객센터 정보</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+
+
+
+                        
+
+
+
+                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br><br>
+
+
+
+                        <strong>CS운영시간</strong><br>
+
+
+
+                        연중무휴 24시간 채널톡으로 상담가능
+
+
+
+                    </p>
+
+
+
+                </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>About</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+
+
+
+                        <a href="terms.html" style="color: inherit; text-decoration: none;">이용약관</a> |
+
+
+
+                        <a href="privacy.html"
+
+
+
+                            style="color: inherit; text-decoration: none; font-weight: bold;">개인정보처리방침</a>
+
+
+
+                    </p>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+            <div class="copyright">
+
+
+
+                &copy; <span id="current-year">2024</span> <span class="dyn-company-name">에스알커머스</span>. All rights reserved.
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </footer>
+
+
+
+    <script type="module" src="auth.js?v=9"></script>
+
+
+
+
+
+
+
+    <!-- Channel Plugin Scripts -->
+
+
+
+    <script>
+
+
+
+        (function() {
+
+
+
+            var w = window;
+
+
+
+            if (w.ChannelIO) {
+
+
+
+            return (window.console.error || window.console.log || function(){})('ChannelIO script included twice.');
+
+
+
+            }
+
+
+
+            var ch = function() {
+
+
+
+            ch.c(arguments);
+
+
+
+            };
+
+
+
+            ch.q = [];
+
+
+
+            ch.c = function(args) {
+
+
+
+            ch.q.push(args);
+
+
+
+            };
+
+
+
+            w.ChannelIO = ch;
+
+
+
+            function l() {
+
+
+
+            if (w.ChannelIOInitialized) {
+
+
+
+                return;
+
+
+
+            }
+
+
+
+            w.ChannelIOInitialized = true;
+
+
+
+            var s = document.createElement('script');
+
+
+
+            s.type = 'text/javascript';
+
+
+
+            s.async = true;
+
+
+
+            s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
+
+
+            s.charset = 'UTF-8';
+
+
+
+            var x = document.getElementsByTagName('script')[0];
+
+
+
+            x.parentNode.insertBefore(s, x);
+
+
+
+            }
+
+
+
+            if (document.readyState === 'complete') {
+
+
+
+            l();
+
+
+
+            } else if (window.attachEvent) {
+
+
+
+            window.attachEvent('onload', l);
+
+
+
+            } else {
+
+
+
+            window.addEventListener('DOMContentLoaded', l, false);
+
+
+
+            window.addEventListener('load', l, false);
+
+
+
+            }
+
+
+
+        })();
+
+
+
+        ChannelIO('boot', {
+
+
+
+            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
+
+
+
+        });
+
+
+
+    </script>
+
+
+
+</body>
+
+
+
+
+
+
+
+</html>
+
+
+

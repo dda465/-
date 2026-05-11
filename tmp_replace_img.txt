@@ -1,0 +1,22 @@
+                let imgSrc = '';
+
+
+
+                if (series === 'S 시리즈') imgSrc = 'assets/series/samsung/s시리즈.png';
+
+
+
+                else if (series === '폴드 시리즈') imgSrc = 'assets/series/samsung/폴드 시리즈.png';
+
+
+
+                else if (series === '플립 시리즈') imgSrc = 'assets/series/samsung/플립 시리즈.png';
+
+
+
+                else if (series === '노트 시리즈') imgSrc = 'assets/series/samsung/갤럭시노트.png';
+
+
+
+                
+

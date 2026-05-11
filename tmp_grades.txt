@@ -1,0 +1,36 @@
+
+        document.getElementById('result-model-name').textContent = `${currentQuote.model.model} (${currentQuote.storage.size})`;
+
+
+
+        let priceDisplayStr = formatCurrency(finalPrice);
+        const gradeToCheck = (currentQuote.grade || '').toLowerCase();
+        // B등급 미만, 개봉(중고)제품만 1.5배 가격 추가
+        if (!['sealed', 's', 'a', 'b'].includes(gradeToCheck)) {
+            priceDisplayStr += ' ~ ' + formatCurrency(Math.floor(finalPrice * 1.5));
+        }
+        document.getElementById('final-price-display').innerText = priceDisplayStr;
+
+
+
+
+
+
+---
+
+
+
+        currentQuote.finalPrice = finalPrice;
+
+
+
+        document.getElementById('result-model-name').textContent = `${currentQuote.model.model} (${currentQuote.storage.size})`;
+
+
+
+        let priceDisplayStr = formatCurrency(finalPrice);
+        const gradeToCheck = (currentQuote.grade || '').toLowerCase();
+        // B등급 미만, 개봉(중고)제품만 1.5배 가격 추가
+        if (!['sealed', 's', 'a', 'b'].includes(gradeToCheck)) {
+            priceDisplayStr += ' ~ ' + formatCurrency(Math.floor(finalPrice * 1.5));
+        }

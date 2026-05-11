@@ -1,0 +1,874 @@
+﻿<!DOCTYPE html>
+
+
+<html lang="ko">
+
+
+
+
+
+<head>
+
+
+    <meta charset="UTF-8">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>로그인 - 쉐라폰</title>
+
+
+    <link rel="stylesheet" href="styles.css?v=8">
+
+
+    <style>
+
+
+        :root {
+
+
+            --primary-color: #007AFF;
+
+
+            --kakao-color: #FEE500;
+
+
+            --naver-color: #03C75A;
+
+
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+
+        }
+
+
+
+
+
+        body {
+
+
+            font-family: 'Pretendard', sans-serif;
+
+
+            background: var(--bg-gradient);
+
+
+            min-height: 100vh;
+
+
+            display: flex;
+
+
+            align-items: center;
+
+
+            justify-content: center;
+
+
+            margin: 0;
+
+
+            padding: 20px;
+
+
+            box-sizing: border-box;
+
+
+        }
+
+
+
+
+
+        .login-container {
+
+
+            background: rgba(255, 255, 255, 0.8);
+
+
+            backdrop-filter: blur(20px);
+
+
+            padding: 40px;
+
+
+            border-radius: 24px;
+
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+
+            width: 100%;
+
+
+            max-width: 400px;
+
+
+            text-align: center;
+
+
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+
+        }
+
+
+
+
+
+        .login-header h1 {
+
+
+            font-size: 28px;
+
+
+            font-weight: 700;
+
+
+            color: #1d1d1f;
+
+
+            margin-bottom: 8px;
+
+
+        }
+
+
+
+
+
+        .login-header p {
+
+
+            font-size: 15px;
+
+
+            color: #86868b;
+
+
+            margin-bottom: 32px;
+
+
+        }
+
+
+
+
+
+        .input-group {
+
+
+            margin-bottom: 16px;
+
+
+            text-align: left;
+
+
+        }
+
+
+
+
+
+        .input-group label {
+
+
+            display: block;
+
+
+            font-size: 14px;
+
+
+            color: #1d1d1f;
+
+
+            margin-bottom: 8px;
+
+
+            font-weight: 500;
+
+
+        }
+
+
+
+
+
+        .input-group input {
+
+
+            width: 100%;
+
+
+            padding: 14px 16px;
+
+
+            border-radius: 12px;
+
+
+            border: 1px solid #d2d2d7;
+
+
+            background: #fff;
+
+
+            font-size: 16px;
+
+
+            box-sizing: border-box;
+
+
+            transition: border-color 0.2s;
+
+
+        }
+
+
+
+
+
+        .input-group input:focus {
+
+
+            outline: none;
+
+
+            border-color: var(--primary-color);
+
+
+        }
+
+
+
+
+
+        .login-btn {
+
+
+            width: 100%;
+
+
+            padding: 14px;
+
+
+            border-radius: 12px;
+
+
+            border: none;
+
+
+            background: var(--primary-color);
+
+
+            color: white;
+
+
+            font-size: 16px;
+
+
+            font-weight: 600;
+
+
+            cursor: pointer;
+
+
+            margin-top: 8px;
+
+
+            transition: transform 0.2s, opacity 0.2s;
+
+
+        }
+
+
+
+
+
+        .login-btn:active {
+
+
+            transform: scale(0.98);
+
+
+            opacity: 0.9;
+
+
+        }
+
+
+
+
+
+        .divider {
+
+
+            margin: 24px 0;
+
+
+            display: flex;
+
+
+            align-items: center;
+
+
+            color: #86868b;
+
+
+            font-size: 13px;
+
+
+        }
+
+
+
+
+
+        .divider::before,
+
+
+        .divider::after {
+
+
+            content: "";
+
+
+            flex: 1;
+
+
+            height: 1px;
+
+
+            background: #d2d2d7;
+
+
+            margin: 0 10px;
+
+
+        }
+
+
+
+
+
+        .social-btns {
+
+
+            display: flex;
+
+
+            flex-direction: column;
+
+
+            gap: 12px;
+
+
+        }
+
+
+
+
+
+        .social-btn {
+
+
+            width: 100%;
+
+
+            padding: 12px;
+
+
+            border-radius: 12px;
+
+
+            border: none;
+
+
+            font-size: 15px;
+
+
+            font-weight: 600;
+
+
+            display: flex;
+
+
+            align-items: center;
+
+
+            justify-content: center;
+
+
+            cursor: pointer;
+
+
+            gap: 10px;
+
+
+            transition: transform 0.2s;
+
+
+        }
+
+
+
+
+
+        .social-btn:active {
+
+
+            transform: scale(0.98);
+
+
+        }
+
+
+
+
+
+        .btn-kakao {
+
+
+            background: var(--kakao-color);
+
+
+            color: #3C1E1E;
+
+
+        }
+
+
+
+
+
+        .btn-naver {
+
+
+            background: var(--naver-color);
+
+
+            color: white;
+
+
+        }
+
+
+
+
+
+        .social-icon {
+
+
+            width: 20px;
+
+
+            height: 20px;
+
+
+        }
+
+
+
+
+
+        .footer-links {
+
+
+            margin-top: 24px;
+
+
+            font-size: 13px;
+
+
+            color: #86868b;
+
+
+        }
+
+
+
+
+
+        .footer-links a {
+
+
+            color: var(--primary-color);
+
+
+            text-decoration: none;
+
+
+            margin: 0 8px;
+
+
+        }
+
+
+    </style>
+
+
+
+
+
+    <!-- Google tag (gtag.js) -->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JWS15NH588"></script>
+
+
+    <script>
+
+
+        window.dataLayer = window.dataLayer || [];
+
+
+        function gtag() { dataLayer.push(arguments); }
+
+
+        gtag('js', new Date());
+
+
+
+
+
+        gtag('config', 'G-JWS15NH588');
+
+
+    </script>
+
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+</head>
+
+
+
+
+
+<body>
+
+
+    <div class="login-wrapper">
+
+
+        <div class="login-container">
+
+
+            <a href="index.html" class="logo-area">
+
+
+                <img src="sr_logo.webp" alt="SR 로고" class="logo-text" style="height: 60px; width: auto;">
+
+
+                <h1
+
+
+                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 1.8rem; margin: 10px 0 0; color: #2563EB;">
+
+
+                    쉐라폰</h1>
+
+
+            </a>
+
+
+
+
+
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 1.2rem; color: var(--text-secondary);">로그인
+
+
+            </h2>
+
+
+
+
+
+            <form id="email-login-form">
+
+
+                <div class="input-group">
+
+
+                    <label for="email">이메일</label>
+
+
+                    <input type="email" id="email" placeholder="example@email.com" required>
+
+
+                </div>
+
+
+                <div class="input-group">
+
+
+                    <label for="password">비밀번호</label>
+
+
+                    <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
+
+
+                </div>
+
+
+                <button type="submit" class="login-btn">이메일로 로그인</button>
+
+
+            </form>
+
+
+
+
+
+            <div class="divider">또는 SNS 계정으로 로그인</div>
+
+
+
+
+
+            <div class="social-btns">
+
+
+                <button class="social-btn btn-kakao" id="kakao-login">
+
+
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+
+                        <path
+
+
+                            d="M10 3C5.58172 3 2 5.68629 2 9C2 11.2091 3.54545 13.2091 5.90909 14.2727L5 17L8.18182 15C8.77273 15.1364 9.38636 15.2273 10 15.2273C14.4183 15.2273 18 12.5411 18 9.22727C18 5.91343 14.4183 3.22727 10 3.22727V3Z"
+
+
+                            fill="#3C1E1E" />
+
+
+                    </svg>
+
+
+                    카카오 로그인
+
+
+                </button>
+
+
+                <button class="social-btn btn-naver" id="naver-login">
+
+
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+
+                        <path d="M14.5 3V17L10.5 11.5L9.5 11.5V17H5.5V3L9.5 8.5L10.5 8.5V3H14.5Z" fill="white" />
+
+
+                    </svg>
+
+
+                    네이버 로그인
+
+
+                </button>
+
+
+            </div>
+
+
+
+
+
+            <div class="footer-links">
+
+
+                아직 회원이 아니신가요? <a href="signup.html">회원가입</a>
+
+
+            </div>
+
+
+            <div class="copyright">
+
+
+                &copy; 2024 에스알커머스. All rights reserved.
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- Social SDKs -->
+
+
+    <!-- Social SDKs -->
+
+
+    <!-- Kakao SDK v1 (for Kakao.Auth.login support) -->
+
+
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/v1/kakao.min.js"></script>
+
+
+    <!-- Naver SDK -->
+
+
+    <script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" charset="utf-8"></script>
+
+
+
+
+
+    <!-- Hidden Naver Login Container (Required for SDK) -->
+
+
+    <div id="naverIdLogin" style="display: none;"></div>
+
+
+
+
+
+    <script type="module" src="auth.js?v=9"></script>
+
+
+
+
+
+    <!-- Channel Plugin Scripts -->
+
+
+    <script>
+
+
+        (function() {
+
+
+            var w = window;
+
+
+            if (w.ChannelIO) {
+
+
+            return (window.console.error || window.console.log || function(){})('ChannelIO script included twice.');
+
+
+            }
+
+
+            var ch = function() {
+
+
+            ch.c(arguments);
+
+
+            };
+
+
+            ch.q = [];
+
+
+            ch.c = function(args) {
+
+
+            ch.q.push(args);
+
+
+            };
+
+
+            w.ChannelIO = ch;
+
+
+            function l() {
+
+
+            if (w.ChannelIOInitialized) {
+
+
+                return;
+
+
+            }
+
+
+            w.ChannelIOInitialized = true;
+
+
+            var s = document.createElement('script');
+
+
+            s.type = 'text/javascript';
+
+
+            s.async = true;
+
+
+            s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
+
+            s.charset = 'UTF-8';
+
+
+            var x = document.getElementsByTagName('script')[0];
+
+
+            x.parentNode.insertBefore(s, x);
+
+
+            }
+
+
+            if (document.readyState === 'complete') {
+
+
+            l();
+
+
+            } else if (window.attachEvent) {
+
+
+            window.attachEvent('onload', l);
+
+
+            } else {
+
+
+            window.addEventListener('DOMContentLoaded', l, false);
+
+
+            window.addEventListener('load', l, false);
+
+
+            }
+
+
+        })();
+
+
+        ChannelIO('boot', {
+
+
+            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
+
+
+        });
+
+
+    </script>
+
+
+</body>
+
+
+
+
+
+</html>
+
+

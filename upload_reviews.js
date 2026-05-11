@@ -1,0 +1,53 @@
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+const reviews = [
+    { date: '2024-03-12T10:00:00', userName: '김**', model: '아이폰 14 프로', rating: 5, text: '여러 사이트 다 비교해봤는데 여기서 제일 높게 쳐주셔서 바로 보냈습니다. 기스 살짝 있어서 깎일 줄 알았는데 생각보다 방어가 잘 됐어요! 입금도 진짜 30분만에 쏴주심 굿굿.' },
+    { date: '2024-03-12T14:30:00', userName: '이**', model: '갤럭시 Z플립4', rating: 5, text: '플립 액정 금가서 딴데선 완전 후려치던데ㅠㅠ 여긴 납득갈만한 가격으로 쳐주셔서 눈물...😭 상담사분 카톡도 엄청 친절하셨어요! 다음 폰 바꿀 때 또 올게요~' },
+    { date: '2024-03-12T16:15:00', userName: '박**', model: '갤럭시 S22 울트라', rating: 4, text: '택배로 보내는게 처음이라 불안했는데 안내해주신대로 착불로 보내니 알아서 다 진행되네요. 과정마다 알림톡 줘서 안심됐습니다. 가격도 동네 대리점보다 훨씬 낫네요.' },
+    { date: '2024-03-11T09:20:00', userName: '최**', model: '아이폰 12 미니', rating: 5, text: '딸내미가 여기서 팔라고 해서 보냈는데, 엄마들 쓰기에도 어렵지 않게 잘 되어있네요. 우체국 택배로 슝 보내고 다음날 바로 돈 들어왔다고 연락왔어요. 수고하세요.' },
+    { date: '2024-03-11T13:45:00', userName: '정**', model: '아이폰 13', rating: 5, text: '투명하게 어디어디 차감됐다고 사진이랑 같이 딱 보여주니까 인정할 수밖에 없네요ㅋㅋ 기계 앞에서 뻘쭘하게 서있는거보다 그냥 집에서 택배 보내는게 오백배 편합니다.' },
+    { date: '2024-03-10T11:10:00', userName: '강**', model: '갤럭시 S23', rating: 5, text: 'S24로 갈아타면서 급전 필요했는데 우체국 택배 도착하자마자 카톡오고 바로 계좌로 돈 꽂혔어요 ㄷㄷ 속도 미쳤음; 일처리 깔끔해서 지인들한테도 추천했습니다.' },
+    { date: '2024-03-10T15:50:00', userName: '조**', model: '갤럭시 A53', rating: 4, text: '상태가 좀 험해서 안받아줄까 걱정했는데 다행히 매입해주셨습니다! 용돈 번 기분이라 너무 좋아요 ㅎㅎ 입금도 빠르고 안내도 친절해요!!' },
+    { date: '2024-03-09T10:05:00', userName: '윤**', model: '아이폰 11 프로', rating: 5, text: '집에 몇 년째 굴러다니던 옛날 폰인데 생각보다 가격을 잘 받았어요~ 공기계로 두기 아까웠는데 진작 팔 걸 그랬네요. 개인정보 싹 다 초기화해서 파기해주신다고 하니 안심입니다.' },
+    { date: '2024-03-09T14:25:00', userName: '장**', model: '갤럭시 폴드3', rating: 5, text: '폴드 시리즈는 감가가 심해서 속상했는데 그래도 잘 쳐주는 곳 찾았습니다. 여기저기 알아봤는데 개인적으로 쉐라폰이 젤 깔끔하게 일처리 하시는 듯.' },
+    { date: '2024-03-08T09:40:00', userName: '임**', model: '아이폰 14', rating: 5, text: '배터리 효율 80% 밑으로 떨어져서 가격 많이 깎일 줄 알았는데 방어 엄청 잘해주셨어요👍 뽁뽁이 싸서 편의점 택배 보내고 하루만에 정산 끝남! 번창하세요~' },
+    { date: '2024-03-08T16:20:00', userName: '한**', model: '갤럭시 Z폴드4', rating: 4, text: '지방이라 택배 수거 신청했는데 기사님이 빨리 와주셔서 금방 처리됐습니다. 폰 검수 결과도 전화로 친절하게 설명해주시고 가격도 만족스럽게 받았습니다.' },
+    { date: '2024-03-07T11:15:00', userName: '오**', model: '아이폰 13 프로맥스', rating: 5, text: '다른 개인업자한테 먼저 보냈다가 말도 안 되는 트집 잡으면서 후려치길래 빡쳐서 반송받고 여기로 다시 보냈거든요? 와.. 진짜 정직하게 봐주시네요. 최고입니다 진짜.' },
+    { date: '2024-03-06T13:30:00', userName: '서**', model: '갤럭시 S21', rating: 5, text: '서랍템 정리하려고 두 대 한 번에 보냈는데 일괄 처리 싹 해주시고 현금으로 바로 입금받았습니다. 귀찮게 직거래 하느니 이게 백배 천배 낫네요.' },
+    { date: '2024-03-05T15:45:00', userName: '신**', model: '아이폰 SE3', rating: 5, text: '서브폰 팔았는데 챗봇 상담원님이 너무 친절하셨어용 ㅠㅠ 편의점 착불로 택배 보내는 방법도 하나하나 다 알려주셔서 감동쓰.. 돈도 당일 바로 들어왔어요!' },
+    { date: '2024-03-04T10:10:00', userName: '권**', model: '갤럭시 노트20', rating: 5, text: '단종된 노트 기종이라 별 기대 안 하고 보냈는데 A급 판정 받아서 기분 최고네요 ㅋㅋ 다른데서 불렀던 가격보다 3만원 더 받았습니다. 치킨 더 시켜먹어야지.' },
+    { date: '2024-03-03T14:20:00', userName: '황**', model: '갤럭시 S22', rating: 4, text: '남편 폰이랑 같이 바꾼다고 두 개 보냈습니다. 포장 꼼꼼히 하라는 안내 문자 받고 뽁뽁이로 잘 싸서 보냈더니 무사히 도착해서 당일 입금 받았습니다. 빠르고 좋당게요.' },
+    { date: '2024-03-02T09:50:00', userName: '안**', model: '아이폰 12', rating: 5, text: '초기화 제대로 된 건지 찝찝했는데 국제 인증된 곳에서 데이터 싹 지워준다고 안내해주셔서 믿음이 확 갔습니다. 일처리 확실하네요 흥하세요!' },
+    { date: '2024-03-01T16:05:00', userName: '송**', model: '아이폰 15 프로', rating: 5, text: '거의 새 폰 급이라 가격 떨어질까 조마조마했는데 S급 그대로 인정해주셨어요!! 다른데는 무조건 A급으로 깎고 본다던데 여긴 진짜 양심업체 인정합니다ㅠㅠ 대박나세여' },
+    { date: '2024-02-28T11:40:00', userName: '전**', model: '갤럭시 A32', rating: 4, text: '이런 거 인터넷으로 파는 게 영 미덥지 않았는데, 전화로 이것저것 물어봐도 자세히 설명해줘서 해봤습니다. 세상 참 편해졌네요. 고맙습니다.' },
+    { date: '2024-02-27T15:10:00', userName: '홍**', model: '갤럭시 Z플립3', rating: 5, text: '힌지 부분에 기스 좀 있었는데 그 정도는 생활 기스라고 차감 안 하고 그냥 진행해주셨어요. 대박..ㅠㅠ 여기저기 발품 팔지 마시고 그냥 쉐라폰에 정착하세요 여러분.' }
+];
+
+async function uploadReviews() {
+    const batch = db.batch();
+    for (const r of reviews) {
+        const docRef = db.collection('reviews').doc();
+        batch.set(docRef, {
+            userName: r.userName,
+            deviceModel: r.model,
+            rating: r.rating,
+            text: r.text,
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(r.date)),
+            userId: 'admin_generated', // Allows admin to edit
+            imageUrl: '',
+            deviceStorage: '',
+            transactionPrice: ''
+        });
+    }
+    await batch.commit();
+    console.log(`Successfully uploaded ${reviews.length} reviews.`);
+}
+
+uploadReviews().catch(console.error);

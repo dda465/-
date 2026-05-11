@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Seed 14 Reviews</title>
+</head>
+
+<body>
+    <h1>Seeding 14 Reviews...</h1>
+    <div id="status"></div>
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const reviews = [
+            {
+                text: "설명도 친절하고 과정도 투명해서 처음 이용하는 사람도 어렵지 않게 할 수 있을 것 같아요 믿고 맡길 수 있었어요",
+                deviceModel: "갤럭시 S23 울트라", deviceStorage: "512GB", transactionPrice: "75만원", userName: "이지*", rating: 5, dateStr: "2024-06-15"
+            },
+            {
+                text: "생각보다 금액이 괜찮게 책정돼서 놀랐습니다 문의할 때마다 답변이 빨라서 신뢰할 수 있었고 과정도 번거롭지 않았습니다",
+                deviceModel: "아이폰 13 프로", deviceStorage: "256GB", transactionPrice: "55만원", userName: "김도*", rating: 5, dateStr: "2024-06-28"
+            },
+            {
+                text: "거래 내내 불편한 점이 없었고 문의할 때마다 빠르게 답변을 주셔서 믿을 수 있었습니다. 생각보다 금액도 잘 쳐주셔서 만족스러웠습니다 감사드립니다",
+                deviceModel: "Z플립 4", deviceStorage: "256GB", transactionPrice: "40만원", userName: "박수*", rating: 5, dateStr: "2024-07-10"
+            },
+            {
+                text: "택배 보내는 것도 간단하고 상태 확인 후 바로 입금돼서 정말 좋았어요 다음에 또 이용할게요~",
+                deviceModel: "아이폰 12 미니", deviceStorage: "128GB", transactionPrice: "20만원", userName: "최지*", rating: 5, dateStr: "2024-08-05"
+            },
+            {
+                text: "다 쓰고 보관만 하던 폰이라 기대 안 했는데 생각보다 좋은 가격에 팔 수 있었고 과정도 깔끔해서 기분 좋은 경험이었넨요.",
+                deviceModel: "갤럭시 S21", deviceStorage: "256GB", transactionPrice: "18만원", userName: "정민*", rating: 5, dateStr: "2024-08-22"
+            },
+            {
+                text: "중고폰 파는 게 번거로울 줄 알았는데 생각보다 간단하더라고요 상담도 빠르고 친절해서 금방 진행했어요 입금까지 빨라서 믿음이 갔습니다",
+                deviceModel: "아이폰 14 프로", deviceStorage: "256GB", transactionPrice: "80만원", userName: "강준*", rating: 5, dateStr: "2024-09-12"
+            },
+            {
+                text: "중고폰 보내는 게 살짝 불안했는데, 중간중간 안내를 잘 해주셔서 안심됐습니다.",
+                deviceModel: "Z폴드 3", deviceStorage: "512GB", transactionPrice: "45만원", userName: "조은*", rating: 4, dateStr: "2024-09-30"
+            },
+            {
+                text: "매입가 때문에 여러 군데 비교해봤는데 여기가 가장 합리적인 가격을 제시해주더라고요. 뭔가 바가지 안 씌우고 정직하게 거래하는 느낌이 들어서 신뢰가 갔습니다. 입금도 정말 빨라서 만족해요!",
+                deviceModel: "갤럭시 S22", deviceStorage: "256GB", transactionPrice: "35만원", userName: "윤서*", rating: 5, dateStr: "2024-10-15"
+            },
+            {
+                text: "여러 군데 알아보다가 후기가 좋아서 이용했는데, 왜 사람들이 추천하는지 알겠더라고요 😊 처음부터 끝까지 친절했고, 진행 과정도 투명하게 알려주셔서 하나도 불안하지 않았습니다. 입금도 정말 빨라서 만족 100%입니다 👍",
+                deviceModel: "아이폰 15", deviceStorage: "128GB", transactionPrice: "85만원", userName: "임현*", rating: 5, dateStr: "2024-11-02"
+            },
+            {
+                text: "핸드폰 상태가 완벽하지 않아서 금액이 많이 깎일까 걱정했는데 생각보다 좋은 가격을 받을 수 있었습니다. 상담도 친절했고 처리 속도도 빨라서 기분 좋게 거래를 마무리할 수 있었습니다 😀",
+                deviceModel: "갤럭시 A53", deviceStorage: "128GB", transactionPrice: "15만원", userName: "한지*", rating: 5, dateStr: "2024-11-20"
+            },
+            {
+                text: "아이폰 14 정리하려고 망설였는데 막상 이용해보니 생각보다 훨씬 간편하고 처리도 빠르더라구요. 가격도 괜찮게 나와서 기분 좋게 거래했어요. 다음에도 필요하면 또 이용할 것 같아요!",
+                deviceModel: "아이폰 14", deviceStorage: "256GB", transactionPrice: "65만원", userName: "오태*", rating: 5, dateStr: "2024-12-05"
+            },
+            {
+                text: "매장 직접 가기 번거로워서 택배로 보냈는데 수거부터 입금까지 흐름이 진짜 깔끔했어요 설명도 자세하게 해줘서 처음 해보는 사람도 편하게 이용할 수 있을 것 같아요",
+                deviceModel: "갤럭시 S23+", deviceStorage: "256GB", transactionPrice: "60만원", userName: "서연*", rating: 5, dateStr: "2024-12-24"
+            },
+            {
+                text: "중고폰 거래가 처음이라 괜히 긴장했는데 문의할 때부터 친절하게 설명해주셔서 안심됐어요 막상 해보니까 너무 간단해서 '이럴 거면 진작 할 걸' 싶더라고요 다음에도 또 이용하고 싶어요",
+                deviceModel: "아이폰 13", deviceStorage: "128GB", transactionPrice: "45만원", userName: "신우*", rating: 5, dateStr: "2025-01-08"
+            },
+            {
+                text: "처음이라 걱정했는데, 상담할 때부터 신뢰가 느껴졌습니다. 절차가 단순해서 금방 끝났고, 입금 확인도 빠르게 돼서 편했어요",
+                deviceModel: "Z플립 5", deviceStorage: "512GB", transactionPrice: "65만원", userName: "황보*", rating: 5, dateStr: "2025-01-20"
+            }
+        ];
+
+        async function seed() {
+            const statusDiv = document.getElementById('status');
+            for (let i = 0; i < reviews.length; i++) {
+                const r = reviews[i];
+                const dateObj = new Date(r.dateStr);
+                // Add some random time to the date so they aren't all at midnight
+                dateObj.setHours(Math.floor(Math.random() * 8) + 9); // between 9 AM and 5 PM
+                dateObj.setMinutes(Math.floor(Math.random() * 60));
+
+                const docData = {
+                    deviceModel: r.deviceModel,
+                    deviceStorage: r.deviceStorage,
+                    transactionPrice: r.transactionPrice,
+                    rating: r.rating,
+                    text: r.text,
+                    userId: "system_generated",
+                    userEmail: "",
+                    userName: r.userName,
+                    createdAt: Timestamp.fromDate(dateObj),
+                    updatedAt: Timestamp.fromDate(dateObj),
+                    imageUrl: null
+                };
+
+                try {
+                    await addDoc(collection(db, "reviews"), docData);
+                    statusDiv.innerHTML += `<p>Added Review ${i + 1}/${reviews.length}</p>`;
+                } catch (e) {
+                    statusDiv.innerHTML += `<p style="color:red">Error on ${i + 1}: ${e.message}</p>`;
+                }
+            }
+            statusDiv.innerHTML += `<p style="color:green; font-weight:bold;">DONE!</p>`;
+        }
+
+        seed();
+    </script>
+</body>
+
+</html>

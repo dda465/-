@@ -1,0 +1,2 @@
+378: initPriceList();
+2066: async function initPriceList() {

@@ -1,0 +1,14 @@
+2186: let filtered = allProducts.filter(p => {
+4262: const products = allProducts.filter(p => p.brand === brand);
+4274: if (brand === 'samsung') {
+4310: if (brand === 'samsung') {
+4474: if (brand === 'apple') {
+4526: if (brand === 'samsung') {
+4566: } else if (brand === 'apple') {
+4606: if (brand === 'samsung') {
+4834: const productsInParent = allProducts.filter(p => p.brand === brand && getSamsungParentCategory(p.series) === parentCategory);
+5138: if (brand === 'samsung') {
+5146: models = allProducts.filter(p => p.brand === brand && p.series === specificSeriesOrParent);
+5166: models = allProducts.filter(p => p.brand === brand && (p.series || '기타') === specificSeriesOrParent);
+5202: if (brand === 'samsung' && item.series) {
+8458: const isApple = (currentQuote.brand === 'apple');

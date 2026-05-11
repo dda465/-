@@ -1,0 +1,8 @@
+node_modules/
+.env
+.DS_Store
+.firebase/
+.firebaserc
+.git/
+__pycache__/
+*.pyc

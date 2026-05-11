@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Migration Tool - 쉐라폰</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 20px; background: #f8fafc; }
+        .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { color: #1e293b; margin-bottom: 8px; }
+        p { color: #64748b; margin-bottom: 24px; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 10px; font-size: 0.95rem; }
+        .ok { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .err { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .info { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+        button:hover { background: #1d4ed8; }
+        button.danger { background: #dc2626; }
+        ul { margin: 0; padding-left: 20px; }
+        li { margin: 4px 0; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>🔐 관리자 권한 마이그레이션 도구</h2>
+    <p>Firestore <code>admins</code> 컬렉션에 관리자 이메일 목록을 등록합니다.<br>
+    이 페이지는 마이그레이션 후 삭제하세요.</p>
+
+    <div id="status" class="result info">Firebase 초기화 중...</div>
+
+    <button id="btn-check">현재 admins 컬렉션 확인</button>
+    <button id="btn-migrate">admins 컬렉션에 등록 실행</button>
+    <button id="btn-verify">등록 결과 확인</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCMYsqtZzHnXjMGvdum4l3SVn_MG78m0Nc",
+    authDomain: "rejeuphone.firebaseapp.com",
+    projectId: "rejeuphone",
+    storageBucket: "rejeuphone.firebasestorage.app",
+    messagingSenderId: "1401756577",
+    appId: "1:1401756577:web:d07a5f0e304ab048e749e0",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const ADMIN_EMAILS = [
+    "admin@rejuphone.com",
+    "admin@sharaphone.com",
+    "test@admin.com",
+    "dda465@hanmail.net",
+    "guffy321@naver.com",
+];
+
+const statusEl = document.getElementById('status');
+
+function setStatus(msg, type = 'info') {
+    statusEl.className = 'result ' + type;
+    statusEl.innerHTML = msg;
+}
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        setStatus(`✅ 로그인됨: ${user.email || '소셜 로그인'}<br>마이그레이션 준비 완료`, 'ok');
+    } else {
+        setStatus('⚠️ 로그인이 필요합니다. <a href="login.html">로그인 하러가기</a>', 'err');
+    }
+});
+
+document.getElementById('btn-check').addEventListener('click', async () => {
+    setStatus('admins 컬렉션 확인 중...', 'info');
+    try {
+        const snap = await getDocs(collection(db, 'admins'));
+        if (snap.empty) {
+            setStatus('❌ admins 컬렉션이 비어 있습니다. 아직 마이그레이션되지 않았습니다.', 'err');
+        } else {
+            let list = '<ul>';
+            snap.forEach(d => {
+                list += `<li>✅ ${d.id} — isAdmin: ${d.data().isAdmin}</li>`;
+            });
+            list += '</ul>';
+            setStatus('현재 admins 컬렉션:<br>' + list, 'ok');
+        }
+    } catch(e) {
+        setStatus('오류: ' + e.message, 'err');
+    }
+});
+
+document.getElementById('btn-migrate').addEventListener('click', async () => {
+    setStatus('Firestore admins 컬렉션에 등록 중...', 'info');
+    try {
+        const results = [];
+        for (const email of ADMIN_EMAILS) {
+            const docId = email.replace(/[@.]/g, '_');
+            await setDoc(doc(db, 'admins', docId), {
+                email: email,
+                isAdmin: true,
+                migratedAt: new Date().toISOString(),
+            }, { merge: true });
+            results.push(`✅ ${email}`);
+        }
+        setStatus('등록 완료!<br><ul>' + results.map(r => `<li>${r}</li>`).join('') + '</ul>', 'ok');
+    } catch(e) {
+        setStatus('❌ 오류: ' + e.message + '<br>관리자 계정으로 로그인 후 다시 시도하세요.', 'err');
+    }
+});
+
+document.getElementById('btn-verify').addEventListener('click', async () => {
+    setStatus('등록된 관리자 목록 확인 중...', 'info');
+    try {
+        const snap = await getDocs(collection(db, 'admins'));
+        if (snap.empty) {
+            setStatus('❌ 아직 등록된 관리자가 없습니다.', 'err');
+            return;
+        }
+        let list = '<ul>';
+        snap.forEach(d => {
+            const data = d.data();
+            list += `<li>📧 ${data.email} — isAdmin: <strong>${data.isAdmin}</strong></li>`;
+        });
+        list += '</ul>';
+        setStatus('✅ Firestore admins 컬렉션 확인:<br>' + list, 'ok');
+    } catch(e) {
+        setStatus('오류: ' + e.message, 'err');
+    }
+});
+</script>
+</body>
+</html>
