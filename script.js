@@ -2674,14 +2674,41 @@ async function initDeepWizard() {
             // Update progress bar
             const stepToProgress = { 1: 1, 2: 2, '2-sub': 2, 3: 3, 4: 4, method: 5, 'grade-list': 5, defects: 5, auth: 5, result: 5, 6: 5, 7: 5 };
             const currentProgressStep = stepToProgress[step] || 1;
+
+            const isSamsung = currentQuote && currentQuote.brand === 'samsung';
+            const step4Item = document.querySelector('.wiz-step-item[data-step="4"]');
+            const step4Conn = document.getElementById('wiz-conn-4');
+            const step5Circle = document.querySelector('.wiz-step-item[data-step="5"] .wiz-step-circle');
+
+            if (isSamsung) {
+                if (step4Item) step4Item.style.display = 'none';
+                if (step4Conn) step4Conn.style.display = 'none';
+                if (step5Circle) step5Circle.innerText = '4';
+            } else {
+                if (step4Item) step4Item.style.display = '';
+                if (step4Conn) step4Conn.style.display = '';
+                if (step5Circle) step5Circle.innerText = '5';
+            }
+
             document.querySelectorAll('.wiz-step-item').forEach((item) => {
                 const s = parseInt(item.dataset.step);
                 item.classList.remove('active', 'done');
-                if (s < currentProgressStep) item.classList.add('done');
-                else if (s === currentProgressStep) item.classList.add('active');
+                // 삼성이면 5단계가 활성화될 때 4단계를 건너뛰었으므로 논리 조정
+                const effectiveStep = (isSamsung && s === 5) ? 4 : s;
+                const effectiveCurrent = (isSamsung && currentProgressStep === 5) ? 4 : currentProgressStep;
+
+                if (effectiveStep < effectiveCurrent) item.classList.add('done');
+                else if (effectiveStep === effectiveCurrent) item.classList.add('active');
             });
             document.querySelectorAll('.wiz-connector').forEach((conn, i) => {
-                conn.classList.toggle('done', (i + 1) < currentProgressStep);
+                const connIndex = i + 1;
+                // 커넥터도 4번 커넥터가 숨겨지므로 인덱스를 당겨서 계산
+                let effectiveConnIndex = connIndex;
+                if (isSamsung && connIndex === 3) {
+                    effectiveConnIndex = 3; // 3번 커넥터가 3->5(실제4)를 연결
+                }
+                const effectiveCurrent = (isSamsung && currentProgressStep === 5) ? 4 : currentProgressStep;
+                conn.classList.toggle('done', effectiveConnIndex < effectiveCurrent);
             });
         }
 
