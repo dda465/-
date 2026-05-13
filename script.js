@@ -4462,8 +4462,8 @@ async function initDeepWizard() {
 
             // --- NAVER 신청완료(lead) SCRIPT ---
             if(window.wcs){
-                if(!wcs_add) var wcs_add = {};
-                wcs_add['wa'] = 's_bfc3561d569';
+                window.wcs_add = window.wcs_add || {};
+                window.wcs_add['wa'] = 's_bfc3561d569';
                 var _conv = {};
                 _conv.type = 'lead';
                 wcs.trans(_conv);

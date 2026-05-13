@@ -168,7 +168,7 @@ const logoutBtn = document.getElementById('logout-btn');
 if (logoutBtn) {
 
     logoutBtn.addEventListener('click', () => {
-
+        localStorage.removeItem('user_info');
         signOut(auth).then(() => window.location.reload());
 
     });

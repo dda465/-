@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // --- NAVER 회원가입(sign_up) SCRIPT ---
                 if(window.wcs){
-                    if(!wcs_add) var wcs_add = {};
-                    wcs_add['wa'] = 's_bfc3561d569';
+                    window.wcs_add = window.wcs_add || {};
+                    window.wcs_add['wa'] = 's_bfc3561d569';
                     var _conv = {};
                     _conv.type = 'sign_up';
                     wcs.trans(_conv);
