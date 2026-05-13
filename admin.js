@@ -136,6 +136,10 @@ function formatDate(timestamp) {
     } else {
 
         date = new Date(timestamp);
+        
+        if (isNaN(date.getTime()) && typeof timestamp === 'string') {
+            return timestamp;
+        }
 
     }
 

@@ -140,13 +140,18 @@ function renderResults(quotes) {
         }
         
         // Format Date
-        let dateStr = '날짜 정보 없음';
-        if (data.timestamp) {
-            dateStr = new Date(data.timestamp).toLocaleDateString();
-        } else if (data.firebaseTimestamp) {
+        let dateStr = '알 수 없음';
+        if (data.firebaseTimestamp) {
             try {
                 dateStr = new Date(data.firebaseTimestamp.toMillis()).toLocaleDateString();
             } catch(e) {}
+        } else if (data.timestamp) {
+            const d = new Date(data.timestamp);
+            if (!isNaN(d.getTime())) {
+                dateStr = d.toLocaleDateString();
+            } else if (typeof data.timestamp === 'string') {
+                dateStr = data.timestamp.split('오')[0].trim(); // "2026. 5. 13."
+            }
         }
         
         // Format Price

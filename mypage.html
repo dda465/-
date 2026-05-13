@@ -1558,8 +1558,10 @@ wcs_do();
                 const docs = [];
                 querySnapshot.forEach(doc => docs.push(doc));
                 docs.sort((a, b) => {
-                    const timeA = new Date(a.data().timestamp).getTime() || 0;
-                    const timeB = new Date(b.data().timestamp).getTime() || 0;
+                    const dataA = a.data();
+                    const dataB = b.data();
+                    const timeA = dataA.firebaseTimestamp ? dataA.firebaseTimestamp.toMillis() : (new Date(dataA.timestamp).getTime() || 0);
+                    const timeB = dataB.firebaseTimestamp ? dataB.firebaseTimestamp.toMillis() : (new Date(dataB.timestamp).getTime() || 0);
                     return timeB - timeA;
                 });
 
@@ -1795,7 +1797,7 @@ wcs_do();
 
 
 
-                                <p>신청일: ${new Date(data.timestamp).toLocaleDateString()}</p>
+                                <p>신청일: ${data.firebaseTimestamp ? new Date(data.firebaseTimestamp.toMillis()).toLocaleDateString() : (typeof data.timestamp === 'string' && data.timestamp.includes('오') ? data.timestamp.split('오')[0].trim() : (new Date(data.timestamp).toLocaleDateString() === 'Invalid Date' ? '알 수 없음' : new Date(data.timestamp).toLocaleDateString()))}</p>
 
 
 
