@@ -703,25 +703,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                    const adminBtn = document.createElement('a');
-
-
-
-                    adminBtn.id = 'admin-btn-nav';
-
-
-
-                    adminBtn.href = 'admin.html';
-
-
-
-                    adminBtn.className = 'btn btn-sm btn-primary'; // Use small button class
-
-
-
-                    adminBtn.textContent = '관리자';
-                    adminBtn.style.marginLeft = '10px';
-                    navLinksContainer.appendChild(adminBtn);
+                    let adminBtn = document.getElementById('admin-btn-nav');
+                    if (!adminBtn) {
+                        adminBtn = document.createElement('a');
+                        adminBtn.id = 'admin-btn-nav';
+                        adminBtn.href = 'admin.html';
+                        adminBtn.className = 'btn btn-sm btn-primary';
+                        adminBtn.textContent = '관리자';
+                        adminBtn.style.marginLeft = '10px';
+                        navLinksContainer.appendChild(adminBtn);
+                    }
 
                     const mAdmin = document.getElementById('mobile-admin-btn');
                     if (mAdmin) {
