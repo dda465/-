@@ -4413,10 +4413,16 @@ async function initDeepWizard() {
             await addDoc(collection(db, "quotes"), payload);
             window.trackFunnel("quote_complete");
 
-
+            // --- NAVER 신청완료(lead) SCRIPT ---
+            if(window.wcs){
+                if(!wcs_add) var wcs_add = {};
+                wcs_add['wa'] = 's_bfc3561d569';
+                var _conv = {};
+                _conv.type = 'lead';
+                wcs.trans(_conv);
+            }
 
             // --- GA4 Event Tracking: Quote Completed ---
-
             if (typeof gtag !== 'undefined') {
 
                 gtag('event', 'quote_completed', {

@@ -74,7 +74,7 @@
 
 
 
-    <meta property="og:description" content="매일 업데이트되는 정확한 단가표, 택배 수거, 당일 입금 원칙! 진짜 신뢰할 수 있는 쉐라폰.">
+    <meta property="og:description" content="택배 수거, 당일 입금 원칙! 진짜 신뢰할 수 있는 쉐라폰.">
 
 
 
@@ -387,6 +387,19 @@
         }
     </style>
 
+
+<!-- NAVER PV SCRIPT -->
+<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript"> 
+if (!wcs_add) var wcs_add={};
+wcs_add["wa"] = "s_bfc3561d569";
+if (!_nasa) var _nasa={};
+if(window.wcs){
+wcs.inflow();
+wcs_do();
+}
+</script>
+
 </head>
 
 
@@ -552,52 +565,129 @@
 
             
 
-            .mobile-bottom-nav {
-
-                display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
-
-                background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-
-                border-top: 1px solid rgba(0,0,0,0.05);
-
-                justify-content: space-around; align-items: center;
-
-                z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
-
-                box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
-
+            /* ============================================ */
+            /* 최종 개선안: 5-item balanced bottom nav    */
+            /* ============================================ */
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 72px;
+                background: rgba(255, 255, 255, 0.97);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(0,0,0,0.04);
+                justify-content: space-around;
+                align-items: flex-end;
+                padding: 0 8px;
+                padding-bottom: env(safe-area-inset-bottom);
+                z-index: 9999;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
             }
 
-            .bottom-nav-item {
-
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-
-                color: #94a3b8; text-decoration: none !important; flex: 1; height: 100%; transition: all 0.2s;
-
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none !important;
+                flex: 1;
+                height: 100%;
+                padding-top: 8px;
+                color: #94a3b8;
+                transition: color 0.2s ease;
+                position: relative;
+                -webkit-tap-highlight-color: transparent;
             }
 
-            .bottom-nav-item.active { color: #1E3A8A; }
-
-            .bottom-nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
-
-            .bottom-nav-item span { font-size: 0.75rem; font-weight: 700; }
-
-                        @keyframes pulseGlow {
-                0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
-                70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+            .nav-item i {
+                font-size: 1.4rem;
+                margin-bottom: 3px;
+                transition: transform 0.2s ease;
             }
-            .bottom-nav-item.sell-action { position: relative; top: -25px; transform: scale(1.1); transition: transform 0.3s; }
-            .bottom-nav-item.sell-action:active { transform: scale(0.95); }
-            .bottom-nav-item.sell-action .icon-wrap {
+
+            .nav-item span {
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: -0.3px;
+                white-space: nowrap;
+            }
+
+            .nav-item.active {
+                color: #1E3A8A;
+            }
+            .nav-item.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 3px;
+                background: #2563EB;
+                border-radius: 0 0 4px 4px;
+            }
+
+            .nav-item:active {
+                transform: scale(0.92);
+            }
+
+            .nav-item.sell-cta {
+                position: relative;
+                top: -18px;
+                flex: none;
+                width: 72px;
+                height: auto;
+                padding-top: 0;
+                color: #1e293b;
+            }
+
+            .nav-item.sell-cta .sell-icon-wrap {
+                width: 58px;
+                height: 58px;
+                border-radius: 50%;
                 background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-                color: white; width: 68px; height: 68px;
-                border-radius: 50%; display: flex; align-items: center; justify-content: center;
-                border: 5px solid white;
-                animation: pulseGlow 2s infinite;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 4px solid white;
+                box-shadow: 
+                    0 4px 15px rgba(37, 99, 235, 0.4),
+                    0 0 0 0 rgba(37, 99, 235, 0.4);
+                animation: sellPulse 2.5s ease-in-out infinite;
+                transition: transform 0.2s ease;
             }
 
-            .bottom-nav-item.sell-action i { font-size: 2rem; margin: 0; color: white; }
+            .nav-item.sell-cta .sell-icon-wrap i {
+                font-size: 1.6rem;
+                color: white;
+                margin: 0;
+            }
+
+            .nav-item.sell-cta span {
+                margin-top: 5px;
+                font-size: 0.7rem;
+                font-weight: 800;
+                color: #2563EB;
+            }
+
+            .nav-item.sell-cta:active .sell-icon-wrap {
+                transform: scale(0.9);
+            }
+
+            .nav-item.sell-cta::before {
+                display: none;
+            }
+
+            @keyframes sellPulse {
+                0% { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4), 0 0 0 0 rgba(37, 99, 235, 0.35); }
+                50% { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4), 0 0 0 10px rgba(37, 99, 235, 0); }
+                100% { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4), 0 0 0 0 rgba(37, 99, 235, 0); }
+            }
+
+
 
         }
 
@@ -1809,44 +1899,34 @@
 
     <!-- Mobile Sticky Bottom Navigation -->
 
-    <div class="mobile-bottom-nav">
-
-        <a href="index.html" class="bottom-nav-item active">
-
-            <i class="ri-home-5-line"></i>
-
+    <!-- Mobile Sticky Bottom Navigation -->
+    <div class="bottom-nav mobile-only" aria-label="하단 메뉴">
+        <a href="index.html" class="nav-item active" aria-label="홈">
+            <i class="ri-home-5-fill"></i>
             <span>홈</span>
-
         </a>
 
-        <a href="quote.html" class="bottom-nav-item sell-action">
+        <a href="mypage.html" class="nav-item" aria-label="마이페이지">
+            <i class="ri-user-3-line"></i>
+            <span>마이페이지</span>
+        </a>
 
-            <div class="icon-wrap">
-
+        <a href="quote.html" class="nav-item sell-cta" aria-label="판매하기">
+            <div class="sell-icon-wrap">
                 <i class="ri-hand-coin-line"></i>
-
             </div>
-
-            <span style="margin-top: 6px; color: #1e293b;">판매하기</span>
-
+            <span>판매하기</span>
         </a>
 
-        <a href="reviews.html" class="bottom-nav-item">
-
+        <a href="reviews.html" class="nav-item" aria-label="이용후기">
             <i class="ri-message-3-line"></i>
-
             <span>이용후기</span>
-
         </a>
 
-        <a href="javascript:void(0)" class="bottom-nav-item" onclick="ChannelIO('show')">
-
+        <a href="javascript:void(0)" class="nav-item" aria-label="고객센터" onclick="ChannelIO('show')">
             <i class="ri-customer-service-2-line"></i>
-
             <span>고객센터</span>
-
         </a>
-
     </div>
 
 
