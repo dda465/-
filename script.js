@@ -1417,8 +1417,8 @@ async function loadHomepageDynamicPrices() {
             { elId: null, tpsId: 'tps-price-zf6', keywords: ['Z 플립 6', 'Z Flip6', 'Z Flip 6', 'Z플립6'], format: null, tpsFormat: '최고 {priceMan}만원' },
         ];
 
-        // products 컬렉션에서 basePrice가 높은 순으로 충분히 가져오기
-        const q = query(collection(db, "products"), orderBy("basePrice", "desc"), limit(100));
+        // products 컬렉션에서 basePrice가 높은 순으로 충분히 가져오기 (전체 기종을 위해 500개로 확대)
+        const q = query(collection(db, "products"), orderBy("basePrice", "desc"), limit(500));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
