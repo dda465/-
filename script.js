@@ -501,10 +501,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const mobAuth = document.getElementById('mobile-auth-link');
                 if (mobAuth) {
-                    mobAuth.href = 'mypage.html';
-                    mobAuth.textContent = '마이페이지';
-                    mobAuth.style.color = '#2563EB';
-                    mobAuth.style.borderColor = '#2563EB';
+                    mobAuth.href = '#';
+                    mobAuth.textContent = '로그아웃';
+                    mobAuth.style.color = '#e11d48';
+                    mobAuth.style.borderColor = '#e11d48';
+                    mobAuth.onclick = async (e) => {
+                        e.preventDefault();
+                        if (confirm('로그아웃 하시겠습니까?')) {
+                            try {
+                                const localUser = localStorage.getItem('user_info');
+                                if (localUser && localUser.includes('kakao')) {
+                                    if (window.Kakao && Kakao.Auth && Kakao.Auth.getAccessToken()) {
+                                        Kakao.Auth.logout(() => { console.log('Kakao logged out'); });
+                                    }
+                                }
+                            } catch (err) {
+                                console.error('Kakao logout error', err);
+                            }
+                            localStorage.removeItem('user_info');
+                            try {
+                                await signOut(auth);
+                            } catch (err) {
+                                console.error("Firebase Logout Error:", err);
+                            }
+                            window.location.replace('index.html');
+                        }
+                    };
                 }
 
 
@@ -742,6 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     mobAuth.textContent = '로그인';
                     mobAuth.style.color = '#1e293b';
                     mobAuth.style.borderColor = '#e2e8f0';
+                    mobAuth.onclick = null;
                 }
                 const mAdmin = document.getElementById('mobile-admin-btn');
                 if (mAdmin) {
