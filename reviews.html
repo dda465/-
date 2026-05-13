@@ -819,6 +819,19 @@ wcs_do();
 }
 </script>
 
+
+    <!-- OpenGraph SEO Tags -->
+    <meta property="og:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
+    <meta property="og:description" content="사용하시던 중고폰, 집에서 편하게 최고가로 판매하세요. 1분만에 예상 매입가를 확인하고 당일 입금 받으세요!">
+    <meta property="og:image" content="https://rejeuphone.web.app/sr_logo.png">
+    <meta property="og:url" content="https://rejeuphone.web.app">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="쉐라폰">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
+    <meta name="twitter:description" content="사용하시던 중고폰, 집에서 편하게 최고가로 판매하세요. 1분만에 예상 매입가를 확인하고 당일 입금 받으세요!">
+    <meta name="twitter:image" content="https://rejeuphone.web.app/sr_logo.png">
+
 </head>
 
 
@@ -1363,11 +1376,11 @@ wcs_do();
 
 
 
-                        <a href="terms.html" style="color: inherit; text-decoration: none;">이용약관</a> |
+                        <a href="#" onclick="openPolicyModal('terms.html', '이용약관')" style="color: inherit; text-decoration: none;">이용약관</a> |
 
 
 
-                        <a href="privacy.html"
+                        <a href="#" onclick="openPolicyModal('privacy.html', '개인정보처리방침')"
 
 
 
@@ -1578,6 +1591,35 @@ wcs_do();
     </script>
 
 
+
+
+    <!-- Policy Modal Script -->
+    <script>
+    window.openPolicyModal = function(url, title) {
+        event.preventDefault();
+        let modal = document.getElementById('policy-modal');
+        if (!modal) {
+            document.body.insertAdjacentHTML('beforeend', `
+            <div id="policy-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
+               <div style="background:white; width:100%; max-width:800px; height:85vh; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                  <div style="padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;">
+                      <h3 id="policy-modal-title" style="margin: 0; font-size: 1.1rem; color: #333; font-weight: bold;">약관</h3>
+                      <button onclick="document.getElementById('policy-modal').style.display='none'" style="background:none; border:none; font-size: 28px; line-height:1; cursor:pointer; color: #666;">&times;</button>
+                  </div>
+                  <iframe id="policy-iframe" src="" style="flex:1; width:100%; border:none; background:white;"></iframe>
+               </div>
+            </div>
+            `);
+            modal = document.getElementById('policy-modal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+        document.getElementById('policy-modal-title').innerText = title;
+        document.getElementById('policy-iframe').src = url;
+        modal.style.display = 'flex';
+    };
+    </script>
 
 </body>
 
