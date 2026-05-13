@@ -1429,42 +1429,67 @@ async function loadHomepageDynamicPrices() {
         const products = [];
         snapshot.forEach(d => { products.push(d.data()); });
 
-        // 각 타겟에 대해 매칭되는 제품 찾기
-        targets.forEach(target => {
-            // 키워드 매칭: model 필드에 키워드가 포함되는 제품 중 basePrice가 가장 높은 것
-            let bestProduct = null;
-            for (const kw of target.keywords) {
-                const kwLower = kw.toLowerCase().replace(/\s/g, '');
-                const match = products.find(p => {
-                    if (!p.model) return false;
-                    const mLower = p.model.toLowerCase().replace(/\s/g, '');
-                    return mLower.includes(kwLower) || kwLower.includes(mLower);
-                });
-                if (match) { bestProduct = match; break; }
-            }
+        // Today's Seed
+        const d = new Date();
+        const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+        function seededRandom(s) {
+            var x = Math.sin(s) * 10000;
+            return x - Math.floor(x);
+        }
 
-            if (!bestProduct || !bestProduct.basePrice) return;
+        const appleKws = ['아이폰 14', '아이폰 15', '아이폰 16', '아이폰14', '아이폰15', '아이폰16'];
+        const sKws = ['s23', 's24', 's25'];
+        const zKws = ['플립 5', '폴드 5', '플립 6', '폴드 6', '플립 7', '폴드 7', '플립5', '폴드5', '플립6', '폴드6', '플립7', '폴드7'];
 
-            const price = bestProduct.basePrice;
-            const priceFormatted = new Intl.NumberFormat('ko-KR').format(price);
-            const priceMan = Math.round(price / 10000);
+        const appleCandidates = [];
+        const sCandidates = [];
+        const zCandidates = [];
 
-            // 인기기종 카드 업데이트
-            if (target.elId) {
-                const el = document.getElementById(target.elId);
-                if (el && target.format) {
-                    el.textContent = target.format.replace('{price}', priceFormatted);
-                }
-            }
-
-            // 오늘의 매입 시세 카드 업데이트
-            if (target.tpsId) {
-                const el = document.getElementById(target.tpsId);
-                if (el && target.tpsFormat) {
-                    el.textContent = target.tpsFormat.replace('{priceMan}', priceMan);
-                }
-            }
+        products.forEach(p => {
+            if (!p.model || !p.basePrice) return;
+            const m = p.model.toLowerCase();
+            if (appleKws.some(k => m.includes(k))) appleCandidates.push(p);
+            else if (sKws.some(k => m.includes(k))) sCandidates.push(p);
+            else if (zKws.some(k => m.includes(k))) zCandidates.push(p);
         });
+
+        // Deduplicate by model name
+        const uniqueApples = Array.from(new Map(appleCandidates.map(p => [p.model, p])).values());
+        const uniqueSs = Array.from(new Map(sCandidates.map(p => [p.model, p])).values());
+        const uniqueZs = Array.from(new Map(zCandidates.map(p => [p.model, p])).values());
+
+        const picked = [];
+        let currentSeed = seed;
+
+        if (uniqueApples.length > 0) picked.push(uniqueApples[Math.floor(seededRandom(currentSeed++) * uniqueApples.length)]);
+        if (uniqueSs.length > 0) picked.push(uniqueSs[Math.floor(seededRandom(currentSeed++) * uniqueSs.length)]);
+        if (uniqueZs.length > 0) picked.push(uniqueZs[Math.floor(seededRandom(currentSeed++) * uniqueZs.length)]);
+
+        const chipsContainer = document.querySelector('.usc-chips');
+        if (chipsContainer && picked.length > 0) {
+            chipsContainer.innerHTML = ''; // Clear hardcoded
+            picked.forEach(p => {
+                let iconSrc = 'assets/series/samsung/s시리즈.png';
+                if (p.brand === 'apple') iconSrc = 'assets/series/apple/아이폰15.png';
+                if (p.model.includes('플립') || p.model.toLowerCase().includes('flip')) iconSrc = 'assets/series/samsung/플립 시리즈.png';
+                if (p.model.includes('폴드') || p.model.toLowerCase().includes('fold')) iconSrc = 'assets/series/samsung/폴드 시리즈.png';
+
+                const priceStr = '최고 ' + new Intl.NumberFormat('ko-KR').format(p.basePrice) + '원';
+                const searchParam = encodeURIComponent(p.model);
+
+                const chipHTML = `
+                    <div class="usc-chip" onclick="location.href='quote.html?search=${searchParam}'">
+                        <div class="chip-icon"><img src="${iconSrc}" alt="${p.model}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
+                        <div class="chip-info">
+                            <div class="chip-name">${p.model}</div>
+                            <div class="chip-price">${priceStr}</div>
+                            <div class="chip-tag">기본 용량 A급 기준</div>
+                        </div>
+                    </div>
+                `;
+                chipsContainer.insertAdjacentHTML('beforeend', chipHTML);
+            });
+        }
 
         console.log('loadHomepageDynamicPrices: Prices updated from Firestore');
     } catch (e) {
