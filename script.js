@@ -264,6 +264,28 @@ function injectFloatingWidgets() {
 
 
 
+// --- Traffic Source Tracking ---
+(function initTrafficSource() {
+    if (sessionStorage.getItem('traffic_source')) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmSource = (urlParams.get('utm_source') || '').toLowerCase();
+    const referrer = (document.referrer || '').toLowerCase();
+
+    let source = 'direct';
+
+    if (utmSource.includes('naver') || referrer.includes('naver.com')) {
+        source = 'naver';
+    } else if (utmSource.includes('daangn') || utmSource.includes('karrot') || referrer.includes('daangn.com') || referrer.includes('karrotmarket')) {
+        source = 'daangn';
+    } else if (utmSource.includes('google') || referrer.includes('google.com')) {
+        source = 'google';
+    }
+
+    sessionStorage.setItem('traffic_source', source);
+    console.log('Traffic source initialized:', source);
+})();
+
 // --- Funnel Analytics ---
 window.trackFunnel = async (stepName) => {
     try {
@@ -275,9 +297,20 @@ window.trackFunnel = async (stepName) => {
         const docRefTotal = doc(db, 'analytics', 'funnel');
         const docRefDaily = doc(db, 'analytics', 'funnel_' + dateString);
         
-        await setDoc(docRefTotal, { [stepName]: increment(1) }, { merge: true });
-        await setDoc(docRefDaily, { [stepName]: increment(1) }, { merge: true });
-        console.log('Funnel tracked:', stepName, 'for', dateString);
+        const source = sessionStorage.getItem('traffic_source') || 'direct';
+        const sourceStepName = `${stepName}_${source}`;
+
+        await setDoc(docRefTotal, { 
+            [stepName]: increment(1),
+            [sourceStepName]: increment(1)
+        }, { merge: true });
+        
+        await setDoc(docRefDaily, { 
+            [stepName]: increment(1),
+            [sourceStepName]: increment(1)
+        }, { merge: true });
+        
+        console.log('Funnel tracked:', stepName, 'Source:', source, 'for', dateString);
     } catch (e) {
         console.error('Funnel error:', e);
     }
@@ -4461,10 +4494,8 @@ async function initDeepWizard() {
 
 
 
-            defectsDetails: currentQuote.defectsDetails || {}
-
-
-
+            defectsDetails: currentQuote.defectsDetails || {},
+            trafficSource: sessionStorage.getItem('traffic_source') || 'direct'
         };
 
 

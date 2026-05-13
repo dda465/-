@@ -847,7 +847,15 @@ window.loadFunnelData = async () => {
             html += dropHtml;
             html += `
                 <div style="display: flex; align-items: center; margin-bottom: 25px;">
-                    <div style="width: 260px; font-weight: 700; color: #1e293b; font-size: 1.05rem;">${step.label}</div>
+                    <div style="width: 260px; font-weight: 700; color: #1e293b; font-size: 1.05rem;">
+                        ${step.label}
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px; font-weight: normal; line-height: 1.3;">
+                            <span style="color:#10b981; font-weight: 600;">네이버 ${data[`${step.key}_naver`] || 0}</span> | 
+                            <span style="color:#f97316; font-weight: 600;">당근 ${data[`${step.key}_daangn`] || 0}</span> | 
+                            <span style="color:#3b82f6; font-weight: 600;">구글 ${data[`${step.key}_google`] || 0}</span><br>
+                            <span style="color:#64748b;">기타 ${data[`${step.key}_direct`] || 0} / 이전데이터 ${(data[step.key] || 0) - ((data[`${step.key}_naver`]||0)+(data[`${step.key}_daangn`]||0)+(data[`${step.key}_google`]||0)+(data[`${step.key}_direct`]||0)) > 0 ? (data[step.key] || 0) - ((data[`${step.key}_naver`]||0)+(data[`${step.key}_daangn`]||0)+(data[`${step.key}_google`]||0)+(data[`${step.key}_direct`]||0)) : 0}</span>
+                        </div>
+                    </div>
                     <div style="flex: 1; display: flex; align-items: center; gap: 15px;">
                         <div style="flex: 1; height: 36px; background: #f1f5f9; border-radius: 18px; overflow: hidden; position: relative; border: 1px solid #e2e8f0;">
                             <div style="width: ${Math.max(pctOfMax, parseInt(val)===0?0:1)}%; height: 100%; background: ${step.barColor}; transition: width 1s ease; position: absolute; left: 0; top: 0; border-radius: 18px;"></div>
