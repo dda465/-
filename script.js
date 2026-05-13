@@ -4266,8 +4266,13 @@ async function initDeepWizard() {
             card.innerHTML = `<div class="card-title">${item.model}</div>${subtext}`;
             card.onclick = () => {
                 currentQuote.model = item;
-                renderStorage(item);
-                goToStep(4);
+                if (brand === 'samsung') {
+                    currentQuote.storage = { size: "기본(용량무관)", priceAdjustment: 0 };
+                    goToStep('method');
+                } else {
+                    renderStorage(item);
+                    goToStep(4);
+                }
             };
             container.appendChild(card);
         });
