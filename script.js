@@ -4469,6 +4469,11 @@ async function initDeepWizard() {
                 wcs.trans(_conv);
             }
 
+            // --- DAANGN(Karrot) 신청완료 SCRIPT ---
+            if(window.karrotPixel) {
+                window.karrotPixel.track('SubmitApplication');
+            }
+
             // --- GA4 Event Tracking: Quote Completed ---
             if (typeof gtag !== 'undefined') {
 
