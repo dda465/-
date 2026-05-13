@@ -42,7 +42,7 @@ telegramApp.use(cors({ origin: true }));
 telegramApp.use(express.json());
 
 const TELEGRAM_BOT_TOKEN = "8711439716:AAFXr9QwxHTT4ZH3DWdOCySDMDU5DaYJBK4";
-const TELEGRAM_CHAT_IDS = ["6989151823", "7434861149", "8415202496"];
+const TELEGRAM_CHAT_IDS = ["6989151823", "7434861149", "8415202496", "8549949204"];
 
 telegramApp.post("/send", async (req, res) => {
     try {
