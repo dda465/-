@@ -983,12 +983,47 @@ wcs_do();
             <span class="slider-dot" data-index="1"></span>
         </div>
 
-        <!-- Hidden prev/next for JS compatibility -->
-        <button id="slider-prev" style="display:none;"></button>
-        <button id="slider-next" style="display:none;"></button>
+        <!-- Prev/Next Controls (PC Only) -->
+        <button id="slider-prev" class="slider-arrow">
+            <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <button id="slider-next" class="slider-arrow">
+            <i class="ri-arrow-right-s-line"></i>
+        </button>
         <span id="slider-current" style="display:none;">1</span>
 
         <style>
+            .slider-arrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 44px;
+                height: 44px;
+                background: rgba(0, 0, 0, 0.15);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                border: 1px solid rgba(255,255,255,0.3);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.8rem;
+                cursor: pointer;
+                z-index: 10;
+                transition: all 0.3s ease;
+                padding: 0;
+            }
+            .slider-arrow:hover {
+                background: rgba(0, 0, 0, 0.4);
+                transform: translateY(-50%) scale(1.05);
+            }
+            #slider-prev { left: 20px; }
+            #slider-next { right: 20px; }
+            @media (max-width: 768px) {
+                .slider-arrow { display: none !important; }
+            }
+
             .slider-dot {
                 width: 8px; height: 8px;
                 border-radius: 50%;
