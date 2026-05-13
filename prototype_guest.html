@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비회원 신청 조회 - 쉐라폰</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4ebf5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .guest-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .header-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-area img {
+            height: 50px;
+            margin-bottom: 15px;
+        }
+
+        .header-area h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin: 0 0 8px 0;
+        }
+
+        .header-area p {
+            font-size: 0.95rem;
+            color: #86868b;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid #d2d2d7;
+            background: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            background: #2563EB;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            color: #86868b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #1d1d1f;
+        }
+
+        /* Mock Result Area */
+        #result-area {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px dashed #d2d2d7;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quote-card {
+            border: 1px solid #eee;
+            border-radius: 16px;
+            padding: 24px;
+            background: #fafafa;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .qc-info h3 {
+            font-size: 1.15rem;
+            margin: 0 0 6px 0;
+            color: #1d1d1f;
+            font-weight: 700;
+        }
+
+        .qc-info p {
+            color: #86868b;
+            font-size: 0.9rem;
+            margin: 0 0 4px 0;
+        }
+
+        .status-badge {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .stepper-container {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #eee;
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #ccc;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .step-text {
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .step.active .step-icon, .step.completed .step-icon {
+            border-color: #2563EB;
+            color: #2563EB;
+        }
+
+        .step.active .step-icon {
+            background: #2563EB;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .step.active .step-text {
+            color: #2563EB;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="guest-container">
+        <div class="header-area">
+            <a href="index.html">
+                <img src="sr_logo.webp" alt="쉐라폰 로고">
+            </a>
+            <h1>비회원 신청 조회</h1>
+            <p>매입 신청 시 입력하신<br>이름과 연락처를 정확히 입력해 주세요.</p>
+        </div>
+
+        <div id="search-form">
+            <div class="input-group">
+                <label for="g-name">신청자명 (이름)</label>
+                <input type="text" id="g-name" placeholder="예: 홍길동">
+            </div>
+
+            <div class="input-group">
+                <label for="g-phone">연락처 (- 없이 입력)</label>
+                <input type="tel" id="g-phone" placeholder="예: 01012345678" maxlength="11">
+            </div>
+
+            <button class="submit-btn" onclick="showMockResult()">내역 조회하기</button>
+        </div>
+
+        <div id="result-area">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="font-size: 1.1rem; color: #1d1d1f; margin: 0;">조회 결과 (1건)</h2>
+                <button onclick="document.getElementById('result-area').style.display='none'" style="background:none; border:none; color:#86868b; cursor:pointer; font-size:0.9rem; text-decoration:underline;">다시 검색</button>
+            </div>
+
+            <div class="quote-card">
+                <div class="qc-info">
+                    <h3>아이폰 15 Pro (256GB)</h3>
+                    <p>예상 매입가: <span style="color: #2563EB; font-weight: 700;">850,000원</span></p>
+                    <p style="font-size: 0.8rem; margin-top: 6px;">신청일: 2026.05.13</p>
+                </div>
+                <div class="status-badge">접수 완료</div>
+            </div>
+
+            <div class="stepper-container">
+                <div class="stepper">
+                    <div class="step active">
+                        <div class="step-icon">✓</div>
+                        <div class="step-text">접수완료</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">2</div>
+                        <div class="step-text">검수중</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">3</div>
+                        <div class="step-text">검수완료</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">4</div>
+                        <div class="step-text">입금완료</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 12px; font-size: 0.85rem; color: #666; line-height: 1.5;">
+                <strong>안내사항</strong><br>
+                기기가 도착하면 검수 후 카카오톡 알림톡(또는 문자)으로 최종 견적을 안내해 드립니다.
+            </div>
+        </div>
+
+        <a href="login.html" class="back-link">로그인 화면으로 돌아가기</a>
+    </div>
+
+    <script>
+        function showMockResult() {
+            const name = document.getElementById('g-name').value.trim();
+            const phone = document.getElementById('g-phone').value.trim();
+            
+            if(!name || !phone) {
+                alert("이름과 연락처를 모두 입력해주세요.");
+                return;
+            }
+            
+            document.getElementById('result-area').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
