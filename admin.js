@@ -197,6 +197,9 @@ async function loadQuotes() {
 
 
 
+        const completedTableBody = document.getElementById('completed-table-body');
+        if (completedTableBody) completedTableBody.innerHTML = '';
+
         let pendingCount = 0;
 
         let pendingAmount = 0;
@@ -216,6 +219,7 @@ async function loadQuotes() {
         if (querySnapshot.empty) {
 
             quotesTableBody.innerHTML = '<tr><td colspan="7" class="text-center">접수된 신청이 없습니다.</td></tr>';
+            if (completedTableBody) completedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">매입 완료된 신청이 없습니다.</td></tr>';
 
             updateStats(0, 0, 0, 0);
 
@@ -253,13 +257,23 @@ async function loadQuotes() {
 
             if (status === '입금완료') {
 
-                const date = (data.timestamp && typeof data.timestamp.toDate === 'function')
+                let dateObj = new Date();
+                if (data.firebaseTimestamp) {
+                    dateObj = new Date(data.firebaseTimestamp.toMillis());
+                } else if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+                    dateObj = data.timestamp.toDate();
+                } else if (typeof data.timestamp === 'string') {
+                    let d = new Date(data.timestamp);
+                    if (!isNaN(d.getTime())) dateObj = d;
+                    else {
+                        const parts = data.timestamp.split('.');
+                        if (parts.length >= 3) {
+                            dateObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+                        }
+                    }
+                }
 
-                    ? data.timestamp.toDate()
-
-                    : (data.timestamp ? new Date(data.timestamp) : new Date());
-
-                if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                if (!isNaN(dateObj.getTime()) && dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear) {
 
                     monthlyCount++;
 
@@ -291,9 +305,7 @@ async function loadQuotes() {
 
 
 
-            const tr = document.createElement('tr');
-
-            tr.innerHTML = `
+            const trHtml = `
 
                 <td>${formattedDate}</td>
 
@@ -335,9 +347,21 @@ async function loadQuotes() {
 
             `;
 
+            const tr = document.createElement('tr');
+            tr.innerHTML = trHtml;
             quotesTableBody.appendChild(tr);
 
+            if (status === '입금완료' && completedTableBody) {
+                const trCompleted = document.createElement('tr');
+                trCompleted.innerHTML = trHtml;
+                completedTableBody.appendChild(trCompleted);
+            }
+
         });
+
+        if (completedTableBody && completedTableBody.children.length === 0) {
+            completedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">매입 완료된 신청이 없습니다.</td></tr>';
+        }
 
 
 

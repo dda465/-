@@ -257,6 +257,8 @@
 
             border-bottom: 1px solid #eee;
 
+            white-space: nowrap;
+
 
         }
 
@@ -802,6 +804,11 @@ wcs_do();
 
                 </div>
 
+                <div class="menu-item" onclick="switchTab('completed')">
+                    <span class="material-symbols-outlined">task_alt</span>
+                    매입 완료 내역
+                </div>
+
 
                                 <div class="menu-item" onclick="switchTab('analytics')">
                     <span class="material-symbols-outlined">analytics</span>
@@ -925,63 +932,69 @@ wcs_do();
                     <h3 class="mb-2" style="font-size: 1.1rem; color: var(--text-secondary);">신청 목록</h3>
 
 
-                    <table class="data-table">
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
 
+                            <thead>
 
-                        <thead>
+                                <tr>
 
+                                    <th>신청일시</th>
 
-                            <tr>
+                                    <th>고객명</th>
 
+                                    <th>모델명</th>
 
-                                <th>신청일시</th>
+                                    <th>상태/등급</th>
 
+                                    <th>예상매입가</th>
 
-                                <th>고객명</th>
+                                    <th>진행상태</th>
 
+                                    <th>관리</th>
 
-                                <th>모델명</th>
+                                </tr>
 
+                            </thead>
 
-                                <th>상태/등급</th>
+                            <tbody id="quotes-table-body">
 
+                                <!-- JS will populate -->
 
-                                <th>예상매입가</th>
+                                <tr>
 
+                                    <td colspan="7" class="text-center">로딩 중...</td>
 
-                                <th>진행상태</th>
+                                </tr>
 
+                            </tbody>
 
-                                <th>관리</th>
+                        </table>
+                    </div>
 
-
-                            </tr>
-
-
-                        </thead>
-
-
-                        <tbody id="quotes-table-body">
-
-
-                            <!-- JS will populate -->
-
-
-                            <tr>
-
-
-                                <td colspan="7" class="text-center">로딩 중...</td>
-
-
-                            </tr>
-
-
-                        </tbody>
-
-
-                    </table>
-
-
+                </div>
+                
+                <!-- Completed Tab -->
+                <div id="tab-completed" class="view-section" style="display: none;">
+                    <h2 class="mb-2">매입 완료 내역 (입금완료 건)</h2>
+                    <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">'입금완료' 상태로 변경된 매입 건들만 모아보는 목록입니다.</p>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>완료일시</th>
+                                    <th>고객명</th>
+                                    <th>모델명</th>
+                                    <th>최종 상태/등급</th>
+                                    <th>매입가</th>
+                                    <th>진행상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completed-table-body">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
 
