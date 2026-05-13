@@ -1,4 +1,4 @@
-﻿import { auth } from './firebase-config.js';
+import { auth } from './firebase-config.js';
 
 import {
 
@@ -150,11 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 ];
 
-                if (ADMIN_EMAILS.includes(cred.user.email)) {
 
-                    alert("로그인 성공!");
-
-                }
 
                 window.location.replace('index.html');
 
@@ -408,11 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             ];
 
-                            if (ADMIN_EMAILS.includes(email)) {
 
-                                alert("카카오 로그인 성공!");
-
-                            }
 
                             window.location.replace('index.html');
 
