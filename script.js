@@ -1252,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                                window.history.replaceState(null, null, window.location.pathname);
+                                window.history.replaceState(null, null, window.location.pathname + window.location.search);
 
 
 
