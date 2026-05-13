@@ -940,14 +940,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
+            // Touch Swipe support
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const threshold = 50;
+
+            slider.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+
+            slider.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+
+            const handleSwipe = () => {
+                if (touchEndX < touchStartX - threshold) {
+                    nextSlide(); // Swipe left
+                }
+                if (touchEndX > touchStartX + threshold) {
+                    prevSlide(); // Swipe right
+                }
+            };
+
             // Start auto slide
-
-
-
-            // Start auto slide
-
-
-
             resetInterval();
 
 
