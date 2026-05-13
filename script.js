@@ -4057,7 +4057,7 @@ async function initDeepWizard() {
         if (s.includes('플립') || s.includes('FLIP') || s.includes('Z FLIP')) return '플립 시리즈';
         if (s.includes('노트') || s.includes('NOTE')) return '노트 시리즈';
         if (s.includes('S') && /[0-9]/.test(s) && !s.includes('플립') && !s.includes('폴드') && !s.includes('노트')) return 'S 시리즈';
-        if ((s.includes('A') && /[0-9]/.test(s)) || s.includes('A 시리즈') || s.includes('A시리즈')) return 'A 시리즈';
+        if ((s.includes('A') && /[0-9]/.test(s)) || s.includes('A 시리즈') || s.includes('A시리즈')) return 'A 시리즈 및 기타기종';
         return '기타 기종';
     }
 
@@ -4074,7 +4074,7 @@ async function initDeepWizard() {
         }
         let seriesList;
         if (brand === 'samsung') {
-            const order = ['S 시리즈', '폴드 시리즈', '플립 시리즈', '노트 시리즈', 'A 시리즈', '기타 기종'];
+            const order = ['S 시리즈', '폴드 시리즈', '플립 시리즈', '노트 시리즈', 'A 시리즈 및 기타기종', '기타 기종'];
             seriesList = Array.from(seriesSet).sort((a, b) => {
                 let idxA = order.indexOf(a);
                 let idxB = order.indexOf(b);
@@ -4128,7 +4128,7 @@ async function initDeepWizard() {
                 else if (series === '폴드 시리즈') imgSrc = 'assets/series/samsung/폴드 시리즈.png';
                 else if (series === '플립 시리즈') imgSrc = 'assets/series/samsung/플립 시리즈.png';
                 else if (series === '노트 시리즈') imgSrc = 'assets/series/samsung/갤럭시노트.png';
-                else if (series === 'A 시리즈') imgSrc = 'assets/series/samsung/A시리즈.png';
+                else if (series === 'A 시리즈' || series === 'A 시리즈 및 기타기종') imgSrc = 'assets/series/samsung/A시리즈.png';
                 if (imgSrc) {
                     imgHtml = `<img src="${imgSrc}" style="height: 80px; object-fit: contain; margin-bottom: 8px;" alt="${series}">`;
                 }
@@ -4160,7 +4160,7 @@ async function initDeepWizard() {
         otherCard.style.display = 'flex';
         otherCard.style.alignItems = 'center';
         otherCard.style.justifyContent = 'center';
-        otherCard.innerHTML = `<div class="card-title" style="color: #555;">기타 기종 (목록에 없음)</div>`;
+        otherCard.innerHTML = `<div class="card-title" style="color: #555;">목록에 없음</div>`;
         otherCard.onclick = () => {
             currentQuote.series = '기타';
             currentQuote.model = {
