@@ -4105,13 +4105,12 @@ async function initDeepWizard() {
                 e.preventDefault();
                 savePendingQuote();
                 
-                const clientId = "2DbzH9zYF4ObguujOS0U";
-                const callbackUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-                const state = Math.random().toString(36).substring(2, 15);
-                
-                // Directly redirect to Naver login
-                const authorizeUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${clientId}&redirect_uri=${callbackUrl}&state=${state}`;
-                window.location.href = authorizeUrl;
+                const naverBtn = document.querySelector('#naverIdLogin a');
+                if (naverBtn) {
+                    naverBtn.click();
+                } else {
+                    alert("네이버 로그인 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+                }
             });
         }
 
