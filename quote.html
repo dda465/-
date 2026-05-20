@@ -635,7 +635,7 @@ wcs_do();
         <!-- Wizard Progress Bar -->
         <div id="wizard-progress" style="margin-bottom: 32px;">
             <style>
-                .wiz-steps { display: flex; align-items: center; gap: 0; margin-bottom: 10px; }
+                .wiz-steps { display: flex; align-items: flex-start; gap: 0; margin-bottom: 10px; }
                 .wiz-step-item { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
                 .wiz-step-circle {
                     width: 32px; height: 32px; border-radius: 50%;
@@ -649,9 +649,13 @@ wcs_do();
                 .wiz-step-label { font-size: 0.72rem; color: #94a3b8; margin-top: 6px; white-space: nowrap; font-weight: 600; }
                 .wiz-step-item.active .wiz-step-label { color: #2563EB; }
                 .wiz-step-item.done .wiz-step-label { color: #22c55e; }
-                .wiz-connector { flex: 1; height: 2px; background: #e2e8f0; transition: background 0.3s; margin-top: -16px; }
+                .wiz-connector { flex: 1; height: 2px; background: #e2e8f0; transition: background 0.3s; margin-top: 15px; }
                 .wiz-connector.done { background: #22c55e; }
-                @media(max-width:480px){ .wiz-step-label { display: none; } .wiz-step-circle { width: 26px; height: 26px; font-size: 0.7rem; } }
+                @media(max-width:480px){ 
+                    .wiz-step-label { display: none; } 
+                    .wiz-step-circle { width: 26px; height: 26px; font-size: 0.7rem; } 
+                    .wiz-connector { margin-top: 12px; } 
+                }
             </style>
             <div class="wiz-steps" id="wiz-steps-row">
                 <div class="wiz-step-item active" data-step="1">
