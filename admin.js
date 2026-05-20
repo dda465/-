@@ -325,6 +325,8 @@ async function loadQuotes() {
                 deliveryTag = `<br><span style="font-size: 0.75rem; background: #FFF3E0; color: #E65100; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">개인발송</span>${trackingInfo}`;
             } else if (data.deliveryMethod === 'courier') {
                 deliveryTag = `<br><span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">방문수거 (${data.pickupDate || '미정'})</span>`;
+            } else if (data.deliveryMethod === 'pending') {
+                deliveryTag = `<br><span style="font-size: 0.75rem; background: #ffe4e6; color: #e11d48; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: bold;">배송방법 미입력 (이탈)</span>`;
             }
 
             let feePaidBtn = '';
