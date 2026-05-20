@@ -2776,9 +2776,7 @@ async function initDeepWizard() {
                         isMember = true;
                     } catch(e) {}
                 }
-                if (typeof auth !== 'undefined' && auth.currentUser) {
-                    isMember = true;
-                } else if (typeof auth !== 'undefined' && auth.currentUser) {
+                if (typeof auth !== 'undefined' && auth.currentUser && !auth.currentUser.isAnonymous) {
                     isMember = true;
                 }
 
@@ -2787,7 +2785,10 @@ async function initDeepWizard() {
                 const nameInput = document.getElementById('auth-name');
                 const phoneInput = document.getElementById('auth-phone');
 
-                if (isMember) {
+                if (window.isPhoneVerified) {
+                    if (viewNonMember) viewNonMember.style.display = 'none';
+                    if (viewMember) viewMember.style.display = 'block';
+                } else if (isMember) {
                     if (viewNonMember) viewNonMember.style.display = 'none';
                     if (viewMember) viewMember.style.display = 'block';
 
