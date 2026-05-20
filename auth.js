@@ -241,6 +241,21 @@ document.addEventListener('DOMContentLoaded', () => {
                             nameInput.value = result.data.name;
                             phoneInput.value = result.data.phone;
                             
+                            // --- SAVE POTENTIAL MEMBER LEAD ---
+                            try {
+                                const guestUid = 'lead_' + result.data.phone;
+                                await setDoc(doc(db, "users", guestUid), {
+                                    email: '회원가입 중단',
+                                    nickname: result.data.name,
+                                    phone: result.data.phone,
+                                    provider: 'lead',
+                                    role: 'guest',
+                                    createdAt: new Date()
+                                }, { merge: true });
+                            } catch (e) {
+                                console.error("Failed to save lead user:", e);
+                            }
+
                             verifyBtn.textContent = "본인인증 완료";
                             verifyBtn.style.background = "#10b981";
                             alert("본인인증이 완료되었습니다.");

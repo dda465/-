@@ -366,7 +366,46 @@ window.trackFunnel = async (stepName) => {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- RESUME LOGIC ---
+    const resumeDocId = new URLSearchParams(window.location.search).get('resume_doc_id');
+    if (resumeDocId) {
+        window.currentQuoteDocId = resumeDocId;
+        try {
+            const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+            // window.db is imported at top of script.js as db
+            const docRef = doc(db, "quotes", resumeDocId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.deliveryMethod !== 'pending') {
+                    alert("이미 배송 방법이 확정된 신청건입니다.");
+                    window.location.href = "index.html";
+                    return;
+                }
+                
+                // Hide all other steps, show step 8
+                setTimeout(() => {
+                    goToStep(8);
+                    const header = document.querySelector('#wizard-step-8 h2');
+                    if (header) {
+                        header.innerHTML = `신청이 1차 완료되었습니다!<br><span style="font-size:1.2rem; color:#64748b; font-weight: 500;">(${data.brand} ${data.model})</span>`;
+                    }
+                    
+                    // We also need to pre-fill name/phone from data if possible so alimtalk works
+                    const nameInput = document.getElementById('auth-name');
+                    const phoneInput = document.getElementById('auth-phone');
+                    if (nameInput) nameInput.value = data.customerName;
+                    if (phoneInput) phoneInput.value = data.customerPhone;
+                }, 500); // slight delay to let UI init
+            } else {
+                alert("해당 신청내역을 찾을 수 없습니다.");
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
 
 
 
@@ -2664,7 +2703,7 @@ async function initDeepWizard() {
                         isMember = true;
                     } catch(e) {}
                 }
-                if (typeof window.auth !== 'undefined' && window.auth.currentUser) {
+                if (typeof auth !== 'undefined' && auth.currentUser) {
                     isMember = true;
                 } else if (typeof auth !== 'undefined' && auth.currentUser) {
                     isMember = true;
@@ -3941,9 +3980,9 @@ async function initDeepWizard() {
                                 const nickname = kakaoAccount?.profile?.nickname || `카카오유저${res.id}`;
                                 const uid = `kakao_${res.id}`;
                                 try {
-                                    if (window.db) {
+                                    if (db) {
                                         const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-                                        const docRef = doc(window.db, "users", uid);
+                                        const docRef = doc(db, "users", uid);
                                         const docSnap = await getDoc(docRef);
                                         const isNewUser = !docSnap.exists();
 
@@ -4041,6 +4080,22 @@ async function initDeepWizard() {
                                 if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
                                 
                                 window.isPhoneVerified = true;
+
+                                // --- SAVE GUEST TO USERS COLLECTION ---
+                                try {
+                                    const { doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                                    const guestUid = 'guest_' + result.data.phone;
+                                    await setDoc(doc(window.db, "users", guestUid), {
+                                        email: '비회원',
+                                        nickname: result.data.name,
+                                        phone: result.data.phone,
+                                        provider: 'guest',
+                                        role: 'guest',
+                                        createdAt: serverTimestamp()
+                                    }, { merge: true });
+                                } catch (e) {
+                                    console.error("Failed to save guest user:", e);
+                                }
                                 
                                 // Switch views
                                 document.getElementById('view-non-member').style.display = 'none';
@@ -4082,7 +4137,7 @@ async function initDeepWizard() {
 
 
         if (btnAuthNext) {
-            btnAuthNext.addEventListener('click', () => {
+            btnAuthNext.addEventListener('click', async () => {
                 const name = document.getElementById('auth-name').value.trim();
                 const phone = document.getElementById('auth-phone').value.trim();
                 const agreeTerms = document.getElementById('agree-terms').checked;
@@ -4101,8 +4156,57 @@ async function initDeepWizard() {
                     alert('이용약관 및 개인정보 처리방침에 동의해 주세요.');
                     return;
                 }
+                
+                btnAuthNext.textContent = '처리 중...';
+                btnAuthNext.disabled = true;
 
-                goToStep(7);
+                // --- 1차 접수 (리드 확보) ---
+                const payload = {
+                    timestamp: new Date().toLocaleString(),
+                    brand: currentQuote.brand,
+                    model: currentQuote.model.model,
+                    series: currentQuote.model.series || currentQuote.series,
+                    storage: currentQuote.storage.size,
+                    grade: currentQuote.grade,
+                    conditionType: currentQuote.grade === 'sealed' ? 'sealed' : 'used',
+                    price: currentQuote.finalPrice,
+                    customerName: name,
+                    customerPhone: phone,
+                    deliveryMethod: 'pending',
+                    userId: (() => {
+                        try {
+                            const localUser = JSON.parse(localStorage.getItem('user_info'));
+                            if (localUser && localUser.uid) return localUser.uid;
+                        } catch(e) {}
+                        if (auth && auth.currentUser && auth.currentUser.uid) return auth.currentUser.uid;
+                        return 'anonymous';
+                    })(),
+                    method: currentQuote.method || 'simple',
+                    defectsDetails: currentQuote.defectsDetails || {},
+                    trafficSource: sessionStorage.getItem('traffic_source') || 'direct'
+                };
+
+                try {
+                    const { collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    payload.firebaseTimestamp = serverTimestamp();
+                    
+                    if (!auth.currentUser) {
+                        const { signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                        await signInAnonymously(auth);
+                    }
+                    
+                    const docRef = await addDoc(collection(db, "quotes"), payload);
+                    window.currentQuoteDocId = docRef.id;
+                    
+                    // Proceed to step 8 (Delivery selection)
+                    goToStep(8);
+                    
+                } catch (e) {
+                    console.error("1차 접수 오류:", e);
+                    alert("접수 중 오류가 발생했습니다. 다시 시도해주세요.");
+                    btnAuthNext.textContent = '판매 신청 완료하기';
+                    btnAuthNext.disabled = false;
+                }
             });
         }
 
@@ -4624,6 +4728,107 @@ async function initDeepWizard() {
 
         document.getElementById('price-breakdown').innerHTML = breakdownHtml;
     }
+
+    
+    // --- 2차 접수 (배송 및 계좌 정보 업데이트) ---
+    const btnSubmitDelivery = document.getElementById('btn-submit-delivery');
+    if (btnSubmitDelivery) {
+        btnSubmitDelivery.addEventListener('click', async () => {
+            if (!window.currentQuoteDocId) {
+                alert("접수 내역을 찾을 수 없습니다. 처음부터 다시 시도해주세요.");
+                return;
+            }
+            
+            const address = document.getElementById('customer-address').value.trim();
+            const bankName = document.getElementById('customer-bank') ? document.getElementById('customer-bank').value.trim() : '';
+            const accountNum = document.getElementById('customer-account').value.trim();
+            const account = bankName ? `${bankName} ${accountNum}` : accountNum;
+            const memo = document.getElementById('customer-memo') ? document.getElementById('customer-memo').value.trim() : '';
+
+            let deliveryMethod = 'courier';
+            const activeBtn = document.querySelector('.method-btn.active');
+            if (activeBtn) deliveryMethod = activeBtn.dataset.method;
+
+            let pickupDate = '';
+            if (deliveryMethod === 'courier') {
+                const pickupElem = document.getElementById('courier-pickup-date');
+                if (pickupElem) pickupDate = pickupElem.value;
+            }
+
+            const needsAddress = ['courier', 'pickup'].includes(deliveryMethod);
+            if (needsAddress && !address) {
+                alert("수거를 위해 주소를 입력해주세요.");
+                return;
+            }
+            if (!accountNum) {
+                alert("정산을 위해 계좌 정보를 입력해주세요.");
+                return;
+            }
+
+            btnSubmitDelivery.textContent = '처리 중...';
+            btnSubmitDelivery.disabled = true;
+
+            try {
+                const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const docRef = doc(db, "quotes", window.currentQuoteDocId);
+                
+                const updatePayload = {
+                    customerAddress: needsAddress ? address : '편의점/직접 택배 발송',
+                    deliveryMethod: deliveryMethod,
+                    pickupDate: pickupDate,
+                    customerAccount: account,
+                    customerMemo: memo
+                };
+                
+                await updateDoc(docRef, updatePayload);
+                
+                window.trackFunnel("quote_complete");
+
+                // --- Alimtalk Trigger ---
+                const customerPhone = document.getElementById('auth-phone').value.trim();
+                const customerName = document.getElementById('auth-name').value.trim();
+                if (window.triggerFrontendAlimtalk) {
+                    if (deliveryMethod === 'courier') {
+                        window.triggerFrontendAlimtalk("quote_courier", customerPhone, {
+                            name: customerName,
+                            pickupDate: pickupDate,
+                            address: updatePayload.customerAddress
+                        });
+                    } else if (deliveryMethod === 'cvs') {
+                        window.triggerFrontendAlimtalk("quote_cvs", customerPhone, {});
+                    }
+                }
+
+                // --- NAVER 신청완료(lead) SCRIPT ---
+                if(window.wcs){
+                    if(!window.wcs_add) window.wcs_add = {};
+                    window.wcs_add["wa"] = "s_bfc3561d569";
+                    var _nasa={};
+                    if(window.wcs.inflow) window.wcs.inflow("s_bfc3561d569");
+                    _nasa["cnv"] = wcs.cnv("1","1");
+                    window.wcs_do(_nasa);
+                }
+
+                // UI Transition
+                document.getElementById('step8-delivery-section').style.display = 'none';
+                document.getElementById('step8-final-section').style.display = 'block';
+                
+                const instr = document.getElementById('success-instruction');
+                if (deliveryMethod === 'cvs') {
+                    instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-3263-5672</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
+                } else {
+                    instr.innerHTML = `<p><strong>📦 택배 방문수거 접수 완료</strong></p><p>선택하신 수거일자(${pickupDate})에 맞춰 박스를 포장해 문 앞에 두시면, 택배 기사님이 안전하게 수거해 갈 예정입니다.</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
+                }
+                
+            } catch (e) {
+                console.error("2차 접수 업데이트 오류:", e);
+                alert("저장 중 오류가 발생했습니다.");
+                btnSubmitDelivery.textContent = '기기 발송 방법 확정';
+                btnSubmitDelivery.disabled = false;
+            }
+        });
+    }
+
 
     window.executeFinalSubmit = async function() {
         const btnSubmit = document.getElementById('btn-submit-final');
