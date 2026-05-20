@@ -1250,6 +1250,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Run immediately since script.js is a module and executes after HTML parse
             if (window.location.hash.includes('access_token')) {
+                    // Force state token from URL into localStorage to ensure Naver SDK validation passes
+                    const urlStateMatch = window.location.hash.match(/state=([^&]+)/);
+                    if (urlStateMatch) {
+                        localStorage.setItem('com.naver.nid.oauth.state_token', urlStateMatch[1]);
+                        document.cookie = "com.naver.nid.oauth.state_token=" + urlStateMatch[1] + "; path=/; max-age=600";
+                    }
+
                     window.naverLoginInst.getLoginStatus(async function (status) {
                         if (status) {
                             // Some Naver accounts might not provide an email, use an empty string instead of undefined to prevent Firebase crashes.
