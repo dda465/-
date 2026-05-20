@@ -879,57 +879,90 @@ window.loadFunnelData = async () => {
         
         const maxVal = Math.max(...steps.map(s => data[s.key] || 0), 1);
         
-        let html = '';
+        let mainHtml = '<div style="display: flex; flex-direction: column; align-items: center; width: 100%;">';
+        let extraHtml = '<div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px; flex-wrap: wrap; width: 100%; border-top: 2px dashed #e2e8f0; padding-top: 30px;">';
         let prevVal = null;
         
         steps.forEach((step, idx) => {
             const val = data[step.key] || 0;
             const pctOfMax = Math.round((val / maxVal) * 100) || 0;
             
-            let dropHtml = '';
-            if (!step.isExtra && prevVal !== null && prevVal > 0) {
-                let dropPct = Math.round(((prevVal - val) / prevVal) * 100);
-                if (dropPct < 0) dropPct = 0; 
-                let convPct = Math.round((val / prevVal) * 100);
-                if (convPct > 100) convPct = 100;
-                
-                dropHtml = `
-                    <div style="padding-left: 270px; margin: -15px 0 15px 0; font-size: 0.95rem; color: #64748b; display: flex; align-items: center; gap: 5px;">
-                       <span class="material-symbols-outlined" style="font-size: 18px; transform: rotate(-90deg); color: #94a3b8;">subdirectory_arrow_right</span>
-                       전환 <strong style="color: #2563eb;">${convPct}%</strong> (이탈률 <span style="color: #ef4444;">${dropPct}%</span>)
+            const naverVal = data[`${step.key}_naver`] || 0;
+            const daangnVal = data[`${step.key}_daangn`] || 0;
+            const googleVal = data[`${step.key}_google`] || 0;
+            const directVal = data[`${step.key}_direct`] || 0;
+            const totalTracked = naverVal + daangnVal + googleVal + directVal;
+            const legacyVal = val - totalTracked > 0 ? val - totalTracked : 0;
+            const otherVal = directVal + legacyVal;
+
+            if (step.isExtra) {
+                extraHtml += `
+                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); min-width: 200px; text-align: center;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #64748b;">${step.label}</h4>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #475569;">${new Intl.NumberFormat().format(val)}<span style="font-size: 0.9rem; margin-left: 2px;">명</span></div>
                     </div>
                 `;
-            }
-            
-            html += dropHtml;
-            html += `
-                <div style="display: flex; align-items: center; margin-bottom: 25px;">
-                    <div style="width: 260px; font-weight: 700; color: #1e293b; font-size: 1.05rem;">
-                        ${step.label}
-                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px; font-weight: normal; line-height: 1.3;">
-                            <span style="color:#10b981; font-weight: 600;">네이버 ${data[`${step.key}_naver`] || 0}</span> | 
-                            <span style="color:#f97316; font-weight: 600;">당근 ${data[`${step.key}_daangn`] || 0}</span> | 
-                            <span style="color:#3b82f6; font-weight: 600;">구글 ${data[`${step.key}_google`] || 0}</span><br>
-                            <span style="color:#64748b;">기타 ${data[`${step.key}_direct`] || 0} / 이전데이터 ${(data[step.key] || 0) - ((data[`${step.key}_naver`]||0)+(data[`${step.key}_daangn`]||0)+(data[`${step.key}_google`]||0)+(data[`${step.key}_direct`]||0)) > 0 ? (data[step.key] || 0) - ((data[`${step.key}_naver`]||0)+(data[`${step.key}_daangn`]||0)+(data[`${step.key}_google`]||0)+(data[`${step.key}_direct`]||0)) : 0}</span>
+            } else {
+                let dropHtml = '';
+                if (prevVal !== null && prevVal > 0) {
+                    let dropPct = Math.round(((prevVal - val) / prevVal) * 100);
+                    if (dropPct < 0) dropPct = 0; 
+                    let convPct = Math.round((val / prevVal) * 100);
+                    if (convPct > 100) convPct = 100;
+                    
+                    dropHtml = `
+                        <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin: 10px 0;">
+                            <div style="display: flex; align-items: center; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); z-index: 2; position: relative;">
+                                <div style="display: flex; flex-direction: column; align-items: center; margin-right: 15px;">
+                                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">전환율</span>
+                                    <span style="font-size: 1.1rem; color: #2563eb; font-weight: 800;">${convPct}%</span>
+                                </div>
+                                <span class="material-symbols-outlined" style="font-size: 24px; color: #94a3b8; margin: 0 5px;">arrow_downward</span>
+                                <div style="display: flex; flex-direction: column; align-items: center; margin-left: 15px;">
+                                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">이탈률</span>
+                                    <span style="font-size: 1.1rem; color: #ef4444; font-weight: 800;">${dropPct}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                mainHtml += dropHtml;
+                mainHtml += `
+                    <div style="width: 100%; max-width: 650px; background: white; border-top: 4px solid ${step.barColor}; border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; margin: 0 auto; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; font-size: 1.2rem; color: #1e293b; font-weight: 800;">${step.label}</h3>
+                            <span style="font-size: 1.8rem; font-weight: 900; color: ${step.barColor};">${new Intl.NumberFormat().format(val)}<span style="font-size: 1rem; color: #64748b; font-weight: 700; margin-left: 4px;">명</span></span>
+                        </div>
+                        
+                        <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden; margin-bottom: 15px;">
+                            <div style="width: ${Math.max(pctOfMax, val===0?0:1)}%; height: 100%; background: ${step.barColor}; transition: width 1s ease;"></div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <div style="background: #e6f4ea; border: 1px solid #ceead6; color: #137333; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                <span style="width:8px; height:8px; background:#137333; border-radius:50%;"></span> 네이버 ${new Intl.NumberFormat().format(naverVal)}
+                            </div>
+                            <div style="background: #fff3e0; border: 1px solid #ffe0b2; color: #e65100; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                <span style="width:8px; height:8px; background:#e65100; border-radius:50%;"></span> 당근 ${new Intl.NumberFormat().format(daangnVal)}
+                            </div>
+                            <div style="background: #e8f0fe; border: 1px solid #d2e3fc; color: #1967d2; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                <span style="width:8px; height:8px; background:#1967d2; border-radius:50%;"></span> 구글 ${new Intl.NumberFormat().format(googleVal)}
+                            </div>
+                            <div style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                                <span style="width:8px; height:8px; background:#475569; border-radius:50%;"></span> 기타/이전 ${new Intl.NumberFormat().format(otherVal)}
+                            </div>
                         </div>
                     </div>
-                    <div style="flex: 1; display: flex; align-items: center; gap: 15px;">
-                        <div style="flex: 1; height: 36px; background: #f1f5f9; border-radius: 18px; overflow: hidden; position: relative; border: 1px solid #e2e8f0;">
-                            <div style="width: ${Math.max(pctOfMax, parseInt(val)===0?0:1)}%; height: 100%; background: ${step.barColor}; transition: width 1s ease; position: absolute; left: 0; top: 0; border-radius: 18px;"></div>
-                        </div>
-                        <div style="width: 90px; font-weight: 800; color: #0f172a; text-align: right; font-size: 1.25rem;">
-                            ${new Intl.NumberFormat().format(val)}명
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            if (!step.isExtra) {
+                `;
                 prevVal = val;
             }
         });
         
-        container.innerHTML = html;
+        mainHtml += '</div>';
+        extraHtml += '</div>';
+        
+        container.innerHTML = mainHtml + extraHtml;
         
         if (window.loadDailyTrendData) {
             window.loadDailyTrendData();
