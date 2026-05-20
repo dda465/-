@@ -15,13 +15,13 @@
 <!-- End Danggeun Market Code -->
 
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18157690697"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'AW-18157690697');
+  gtag('config', 'AW-18055027970');
 </script>
 
 
@@ -33,7 +33,8 @@
 
     <meta name="description" content="3분이면 끝! 내 폰의 정확한 판매 금액을 확인하고 바로 판매 신청하세요.">
 
-    <link rel="stylesheet" href="styles.css?v=1778666699">
+    <link rel="stylesheet" href="styles.css?v=1779173835">
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
@@ -319,6 +320,18 @@ wcs_do();
 
             </a>
 
+                        <!-- Custom Language Selector -->
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <div id="google_translate_element" style="display:none;"></div>
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
             <div class="nav-links">
 
                 <a href="quote.html">내 폰 판매</a>
@@ -1194,59 +1207,75 @@ wcs_do();
 
 
 
-            <div style="max-width: 400px; margin: 0 auto; text-align: left;">
+            <style>
+                /* Non-member Options Container */
+                .auth-options { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+                .divider { display: flex; align-items: center; text-align: center; margin: 25px 0; color: #94a3b8; font-size: 0.85rem; }
+                .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+                .divider:not(:empty)::before { margin-right: .5em; }
+                .divider:not(:empty)::after { margin-left: .5em; }
+            </style>
 
-                <div class="mb-4">
-
-                    <label class="form-label">이름 <span style="color:red">*</span></label>
-
-                    <input type="text" id="auth-name" class="search-input"
-
-                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
-
-                        placeholder="실명을 입력해주세요">
-
-                </div>
-
-                <div class="mb-4">
-
-                    <label class="form-label">휴대폰 번호 (- 없이 입력) <span style="color:red">*</span></label>
-
-                    <div style="display: flex; gap: 10px;">
-                        <input type="tel" id="auth-phone" class="search-input"
-                            style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"
-                            placeholder="예) 01012345678" maxlength="11">
+            <!-- 1. 비회원 접속 시 보이는 화면 -->
+            <div id="view-non-member" style="display: none; max-width: 400px; margin: 0 auto; text-align: left;">
+                <div class="auth-options">
+                    <!-- Option 1: 로그인 -->
+                    <button type="button" id="btn-auth-kakao" class="btn btn-kakao" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: #FEE500; color: #000000; border: none; font-weight: 600; padding: 14px 20px; border-radius: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 3c-5.52 0-10 3.5-10 7.82 0 2.81 1.8 5.28 4.54 6.64l-1.16 4.26c-.1.38.29.68.61.5l3.86-2.58c.68.16 1.41.24 2.15.24 5.52 0 10-3.5 10-7.82S17.52 3 12 3z"/>
+                        </svg>
+                        카카오로 3초만에 로그인하고 진행하기
+                    </button>
+                    <button type="button" id="btn-auth-naver" class="btn btn-naver" style="width: 100%; display: none !important; align-items: center; justify-content: center; gap: 10px; background: #03C75A; color: #FFFFFF; border: none; font-weight: 600; padding: 14px 20px; border-radius: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"/>
+                        </svg>
+                        네이버로 3초만에 로그인하고 진행하기
+                    </button>
+                    <button type="button" id="btn-auth-login" class="btn btn-outline" style="width: 100%; border: 1px solid #2563EB; color: #2563EB; background: white; padding: 14px 20px; border-radius: 10px; font-weight: 600;">일반 계정으로 로그인 후 진행하기</button>
+                    
+                    <div class="divider">또는</div>
+                    
+                    <!-- Option 2: 비회원 본인인증 -->
+                    <div style="background: #f1f5f9; padding: 25px 20px; border-radius: 10px; text-align: center;">
+                        <p style="margin-top: 0; color: #475569; font-size: 0.95rem; margin-bottom: 15px; font-weight: 600;">비회원으로 계속 진행하시겠습니까?</p>
+                        <p style="margin-top: 0; color: #64748b; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">매입 내역 안내 알림톡 수신을 위해<br>1회 본인인증이 필요합니다.</p>
+                        <button type="button" id="btn-auth-nonmember" class="btn" style="background: #334155; color: white; width: 100%; padding: 14px 20px; border-radius: 10px; font-weight: 600; border: none;">비회원으로 휴대폰 본인인증하기</button>
                     </div>
+                </div>
+            </div>
 
+            <!-- 2. 회원 (또는 본인인증 완료) 접속 시 보이는 화면 -->
+            <div id="view-member" style="display: none; max-width: 400px; margin: 0 auto; text-align: left;">
+                <div class="mb-4">
+                    <label class="form-label">이름 <span style="color:red">*</span></label>
+                    <input type="text" id="auth-name" class="search-input" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="실명을 입력해주세요" readonly>
                 </div>
 
-                
+                <div class="mb-4">
+                    <label class="form-label">휴대폰 번호 (- 없이 입력) <span style="color:red">*</span></label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="tel" id="auth-phone" class="search-input" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="예) 01012345678" maxlength="11" readonly>
+                        <button type="button" id="btn-verify-phone" class="btn btn-secondary" style="display: none; white-space: nowrap; padding: 0 15px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600;">본인인증</button>
+                    </div>
+                </div>
 
                 <!-- Terms Agreement Checkbox -->
-
-                <div class="mb-4" style="display: flex; align-items: center; justify-content: space-between; background: #F8F9FA; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB;">
-
+                <div class="mb-4" style="background: #F8F9FA; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB;">
                     <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.95rem; color: #333;">
-
-                        <input type="checkbox" id="agree-terms" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-
-                        <span>이용약관 및 개인정보 처리방침 동의 <span style="color:red">*</span></span>
-
+                        <input type="checkbox" id="agree-terms" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" checked>
+                        <span>
+                            <a href="terms.html" target="_blank" style="color: #2563EB; text-decoration: underline;">이용약관</a> 및 
+                            <a href="privacy.html" target="_blank" style="color: #2563EB; text-decoration: underline;">개인정보 처리방침</a> 동의 
+                            <span style="color:red">*</span>
+                        </span>
                     </label>
-
-                    <button type="button" onclick="openTermsModal()" style="background: none; border: none; color: #2563EB; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">보기</button>
-
                 </div>
-
-                
 
                 <div class="text-center" style="margin-top: 40px; margin-bottom: 20px;">
-
                     <button id="btn-auth-next" class="btn btn-primary" style="width: 100%;">이 가격으로 판매 신청</button>
-
                 </div>
-
-            </div> <!-- Close max-width 400px div -->
+            </div> <!-- Close view-member div -->
 
         </div> <!-- Close wizard-step-auth div -->
 
@@ -1283,23 +1312,12 @@ wcs_do();
 
 
                         <div class="selection-card method-btn" data-method="cvs"
-
                             style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
-
                             <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
-
                             <div>
-
-                                <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left;">편의점 택배 직접
-
-                                    발송</div>
-
-                                <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left;">가까운 편의점에서
-
-                                    택배 접수해 주세요.<br>(입금까지 1~2일 소요)</div>
-
+                                <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left;">택배비 지원받기</div>
+                                <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left;">편의점, 우체국 등 가까운 택배접수처를 통해 기기를 발송해주세요</div>
                             </div>
-
                         </div>
 
 
@@ -1322,7 +1340,7 @@ wcs_do();
 
                                 <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left; margin-top: 5px;">박스 포장 후 문 앞에 두시면 수거해 드려요.<br>
 
-                                    (입금까지 2~3일 소요)</div>
+                                    (검수 당일입금)</div>
 
                             </div>
 
@@ -1341,21 +1359,13 @@ wcs_do();
                 <!-- Self Info (Shown for CVS) -->
 
                 <div id="method-cvs-info"
-
                     style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ddd;">
-
                     <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
-
                     <p style="font-size: 0.9rem; color: #555;">
-
-                        부산시 동천로 116 한신밴빌딩 1003호<br>
-
-                        (010-3263-5672)
-
+                        받는 이: 쉐라폰<br>
+                        부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>
+                        연락처: 010-3263-5672
                     </p>
-
-                    <p style="color: blue; font-size: 0.8rem; margin-top:5px;">* 착불로 보내주세요.</p>
-
                 </div>
 
 
@@ -1599,11 +1609,11 @@ wcs_do();
 
 
 
-                        <a href="#" onclick="openPolicyModal('terms.html', '이용약관')" style="color: inherit; text-decoration: none;">이용약관</a> |
+                        <a href="terms.html" target="_blank" style="color: inherit; text-decoration: none;">이용약관</a> |
 
 
 
-                        <a href="#" onclick="openPolicyModal('privacy.html', '개인정보처리방침')"
+                        <a href="privacy.html" target="_blank"
 
 
 
@@ -2005,9 +2015,9 @@ wcs_do();
 
                 <div style="display: flex; gap: 10px; justify-content: center;">
 
-                    <a href="#" onclick="openPolicyModal('terms.html', '이용약관')" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">이용약관 전문 보기</a>
+                    <a href="terms.html" target="_blank" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">이용약관 전문 보기</a>
 
-                    <a href="#" onclick="openPolicyModal('privacy.html', '개인정보처리방침')" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">개인정보 처리방침 전문 보기</a>
+                    <a href="privacy.html" target="_blank" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">개인정보 처리방침 전문 보기</a>
 
                 </div>
 
@@ -2021,7 +2031,7 @@ wcs_do();
 
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 
-    <script type="module" src="script.js?v=1778666699"></script>
+    <script type="module" src="script.js?v=1779173835"></script>
 
 
 
@@ -2441,8 +2451,145 @@ wcs_do();
     };
     </script>
 
+    <div id="naverIdLogin" style="position: absolute; left: -9999px;"></div>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/v1/kakao.min.js"></script>
+    <script src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.2.js" charset="utf-8"></script>
+
+    <!-- Google Translate Script & Styling -->
+    <style>
+        /* Force Hide Google Translate Top Banner & Tooltips */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        
+        /* Prevent layout shift caused by Google Translate */
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        
+        /* Hide Default Widget Elements */
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        
+        /* Custom Select Styling */
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .lang-select:hover {
+            border-color: #2563EB;
+        }
+        
+        @media (max-width: 768px) {
+            /* Protect the Logo and show text comfortably */
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            
+            /* Comfortable Language Selector */
+            .lang-select { 
+                padding: 3px 12px 3px 4px; 
+                font-size: 0.75rem; 
+                width: 60px; 
+                min-width: 60px;
+                margin-right: 4px !important;
+                background-position: right 3px top 50%;
+                background-size: 6px auto;
+                letter-spacing: -0.5px;
+            }
+            
+            /* Comfortable Action Buttons & Icons in Navbar */
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            
+            /* Navbar Container Tweaks */
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru'
+            }, 'google_translate_element');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var customSelect = document.getElementById('custom_lang_select');
+            if (!customSelect) return;
+            
+            // Initial load cookie check
+            var match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+            if (match) {
+                var lang = match[1].split('/').pop();
+                if (lang && lang !== 'ko') {
+                    customSelect.value = lang;
+                }
+            } else {
+                customSelect.value = 'ko';
+            }
+
+            customSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                
+                if (targetLang === 'ko') {
+                    // Force cookie clear and reload to perfectly restore original Korean DOM
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                // Small delay to allow the Google Translate script to catch the change, else reload
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            // Mutation observer to force remove body top styling injected dynamically by google translate
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
-
-
-
-</html>

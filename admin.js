@@ -199,6 +199,12 @@ async function loadQuotes() {
 
         const completedTableBody = document.getElementById('completed-table-body');
         if (completedTableBody) completedTableBody.innerHTML = '';
+        
+        const canceledTableBody = document.getElementById('canceled-table-body');
+        if (canceledTableBody) canceledTableBody.innerHTML = '';
+        
+        const returnedTableBody = document.getElementById('returned-table-body');
+        if (returnedTableBody) returnedTableBody.innerHTML = '';
 
         let pendingCount = 0;
 
@@ -220,6 +226,8 @@ async function loadQuotes() {
 
             quotesTableBody.innerHTML = '<tr><td colspan="7" class="text-center">접수된 신청이 없습니다.</td></tr>';
             if (completedTableBody) completedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">매입 완료된 신청이 없습니다.</td></tr>';
+            if (canceledTableBody) canceledTableBody.innerHTML = '<tr><td colspan="7" class="text-center">취소된 신청이 없습니다.</td></tr>';
+            if (returnedTableBody) returnedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">반송 접수된 신청이 없습니다.</td></tr>';
 
             updateStats(0, 0, 0, 0);
 
@@ -228,6 +236,9 @@ async function loadQuotes() {
         }
 
 
+
+        const cvsRows = [];
+        const courierRows = [];
 
         querySnapshot.forEach((docSnapshot) => {
 
@@ -298,69 +309,113 @@ async function loadQuotes() {
             if (status === '수거중') statusClass = 'status-pickup';
 
             if (status.includes('검수중')) statusClass = 'status-inspection';
-
             if (status === '입금완료') statusClass = 'status-paid';
-
             if (status === '입금대기') statusClass = 'status-pickup';
 
+            let deliveryTag = '';
+            if (data.deliveryMethod === 'cvs') {
+                let trackingInfo = '';
+                if (data.trackingNumber) {
+                    if (data.trackingNumber === '미입력') {
+                        trackingInfo = `<br><span style="font-size: 0.75rem; color: #64748b; font-weight:600; display:block; margin-top:2px;">송장없이 발송완료</span>`;
+                    } else {
+                        trackingInfo = `<br><span style="font-size: 0.75rem; color: #1976D2; font-weight:600; display:block; margin-top:2px;">[운송장] ${data.trackingCarrier || ''} ${data.trackingNumber}</span>`;
+                    }
+                }
+                deliveryTag = `<br><span style="font-size: 0.75rem; background: #FFF3E0; color: #E65100; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">개인발송</span>${trackingInfo}`;
+            } else if (data.deliveryMethod === 'courier') {
+                deliveryTag = `<br><span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">방문수거 (${data.pickupDate || '미정'})</span>`;
+            }
 
+            let feePaidBtn = '';
+            if (data.deliveryMethod === 'cvs') {
+                if (data.shippingFeePaid) {
+                    feePaidBtn = `<br><button class="action-btn" style="background:#E8F5E9; color:#2E7D32; border-color:#81C784; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', false)">배송비 입금됨 ✓</button>`;
+                } else {
+                    feePaidBtn = `<br><button class="action-btn" style="background:#FFF; color:#E65100; border-color:#FFB74D; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', true)">배송비 입금확인</button>`;
+                }
+            }
+
+            let displayStatus = status;
+            if (status === '신청접수') displayStatus = '매입접수완료';
+            if (status === '수거중') displayStatus = '택배발송완료';
 
             const trHtml = `
-
-                <td>${formattedDate}</td>
-
+                <td>${formattedDate}${deliveryTag}</td>
                 <td>${data.customerName}<br><span style="font-size:0.8rem; color:#888;">${data.customerPhone}</span></td>
-
                 <td>${data.brand} ${data.model}</td>
-
                 <td>${data.condition || '-'}</td>
-
                 <td>${formatCurrency(data.price)}</td>
-
-                <td><span class="status-badge ${statusClass}">${status}</span></td>
-
+                <td><span class="status-badge ${statusClass}">${displayStatus}</span></td>
                 <td>
-
                     <button class="action-btn" onclick="viewDetail('${id}')">상세보기</button>
-
+                    <button class="action-btn" style="background:#E3F2FD; color:#1976D2; border-color:#90CAF9;" onclick="openInspectionModal('${id}')">검수서 작성</button>
                     <select onchange="updateQuoteStatus('${id}', this.value)" class="action-btn" style="width: auto;">
-
                         <option value="" disabled selected>상태변경</option>
-
-                        <option value="신청접수">신청접수</option>
-
-                        <option value="수거중">수거중</option>
-
+                        <option value="신청접수">매입접수완료</option>
+                        <option value="수거중">택배발송완료</option>
                         <option value="검수중">검수중</option>
-
                         <option value="입금대기" ${status === '입금대기' ? 'selected' : ''}>입금대기</option>
-
                         <option value="입금완료" ${status === '입금완료' ? 'selected' : ''}>입금완료</option>
-
+                        <option value="반송접수" ${status === '반송접수' ? 'selected' : ''}>반송접수</option>
                         <option value="취소" ${status === '취소' ? 'selected' : ''}>취소</option>
-
                     </select>
-
                     <button class="action-btn" style="color:red; margin-left:5px;" onclick="deleteQuote('${id}')">삭제</button>
-
+                    ${feePaidBtn}
                 </td>
-
             `;
 
             const tr = document.createElement('tr');
             tr.innerHTML = trHtml;
-            quotesTableBody.appendChild(tr);
-
-            if (status === '입금완료' && completedTableBody) {
-                const trCompleted = document.createElement('tr');
-                trCompleted.innerHTML = trHtml;
-                completedTableBody.appendChild(trCompleted);
+            
+            if (status === '입금완료') {
+                if (completedTableBody) {
+                    const trCompleted = document.createElement('tr');
+                    trCompleted.innerHTML = trHtml;
+                    completedTableBody.appendChild(trCompleted);
+                }
+            } else if (status === '취소') {
+                if (canceledTableBody) {
+                    const trCanceled = document.createElement('tr');
+                    trCanceled.innerHTML = trHtml;
+                    canceledTableBody.appendChild(trCanceled);
+                }
+            } else if (status === '반송접수') {
+                if (returnedTableBody) {
+                    const trReturned = document.createElement('tr');
+                    trReturned.innerHTML = trHtml;
+                    returnedTableBody.appendChild(trReturned);
+                }
+            } else {
+                if (data.deliveryMethod === 'cvs') {
+                    cvsRows.push(tr);
+                } else {
+                    courierRows.push(tr);
+                }
             }
-
         });
+
+        // Append sorted rows
+        cvsRows.forEach(tr => quotesTableBody.appendChild(tr));
+        
+        if (cvsRows.length > 0 && courierRows.length > 0) {
+            const divider = document.createElement('tr');
+            divider.innerHTML = `<td colspan="7" style="background: #f8fafc; text-align: center; font-weight: bold; padding: 15px; color: #475569; border-top: 2px solid #e2e8f0; border-bottom: 2px solid #e2e8f0;">🚚 방문수거 신청 건</td>`;
+            quotesTableBody.appendChild(divider);
+        }
+
+        courierRows.forEach(tr => quotesTableBody.appendChild(tr));
 
         if (completedTableBody && completedTableBody.children.length === 0) {
             completedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">매입 완료된 신청이 없습니다.</td></tr>';
+        }
+        
+        if (canceledTableBody && canceledTableBody.children.length === 0) {
+            canceledTableBody.innerHTML = '<tr><td colspan="7" class="text-center">취소된 신청이 없습니다.</td></tr>';
+        }
+
+        if (returnedTableBody && returnedTableBody.children.length === 0) {
+            returnedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">반송 접수된 신청이 없습니다.</td></tr>';
         }
 
 
@@ -1885,46 +1940,185 @@ window.saveAdminMemo = async () => {
 
 
 
-window.updateQuoteStatus = async (id, newStatus) => {
+// 알림톡 전송 도우미 함수
+async function triggerAlimtalk(quoteData, status) {
+    let templateId = "";
+    let variables = {};
+    const phone = quoteData.customerPhone ? quoteData.customerPhone.replace(/-/g, '') : '';
+    if (!phone) return;
 
-    if (!id || !newStatus) return;
-
-
-
-    if (!confirm(`해당 접수건의 상태를 \'${newStatus}\'(으)로 변경하시겠습니까?`)) {
-
-        loadQuotes(); // Revert select option if cancelled
-
-        return;
-
+    if (status === "검수중") {
+        templateId = "KA01TP260515031257493IF4F3nfSFKa";
+        variables = {
+            "#{접수계정}": quoteData.userId !== 'anonymous' ? '인증된 계정' : '미인증',
+            "#{고객성함}": quoteData.customerName || "-",
+            "#{모델}": `${quoteData.brand} ${quoteData.model}`
+        };
+    } else if (status === "입금완료") {
+        templateId = "KA01TP260515103832208FZS8FFOsPcv";
+        variables = {
+            "#{고객성함}": quoteData.customerName || "-",
+            "#{기종}": `${quoteData.brand} ${quoteData.model}`,
+            "#{입금완료일자}": new Date().toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+        };
     }
 
-
+    if (!templateId) return;
 
     try {
-
-        await updateDoc(doc(db, "quotes", id), {
-
-            status: newStatus
-
+        const response = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/alimtalkApi/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                phone: phone,
+                templateId: templateId,
+                variables: variables
+            })
         });
-
-        loadQuotes();
-
-        alert("상태가 변경되었습니다.");
-
+        const result = await response.json();
+        console.log("Alimtalk trigger result:", result);
     } catch (e) {
-
-        console.error("Status Update Error:", e);
-
-        alert("상태 변경 실패: " + e.message);
-
-        loadQuotes();
-
+        console.error("Alimtalk trigger error:", e);
     }
+}
 
+window.toggleShippingFee = async (id, isPaid) => {
+    if (!id) return;
+    try {
+        const docRef = doc(db, "quotes", id);
+        await updateDoc(docRef, { shippingFeePaid: isPaid });
+        await loadQuotes(); // Reload UI
+    } catch(e) {
+        console.error(e);
+        alert("배송비 입금 상태 변경에 실패했습니다.");
+    }
 };
 
+window.updateQuoteStatus = async (id, newStatus) => {
+    if (!id || !newStatus) return;
+
+    if (!confirm(`해당 접수건의 상태를 \'${newStatus}\'(으)로 변경하시겠습니까?\n(고객에게 알림톡이 자동 발송됩니다)`)) {
+        loadQuotes(); // Revert select option if cancelled
+        return;
+    }
+
+    try {
+        // Fetch current quote data
+        const docRef = doc(db, "quotes", id);
+        const docSnap = await getDoc(docRef);
+        let quoteData = null;
+        if(docSnap.exists()) {
+            quoteData = docSnap.data();
+        }
+
+        await updateDoc(docRef, {
+            status: newStatus
+        });
+
+        // 알림톡 발송
+        if(quoteData) {
+            triggerAlimtalk(quoteData, newStatus);
+        }
+
+        loadQuotes();
+        alert("상태가 변경되었습니다. (알림톡 발송 요청됨)");
+    } catch (e) {
+        console.error("Status Update Error:", e);
+        alert("상태 변경 실패: " + e.message);
+        loadQuotes();
+    }
+};
+
+// --- Inspection Modal (전자매매계약서) Logic ---
+window.openInspectionModal = async (id) => {
+    try {
+        const docSnap = await getDoc(doc(db, "quotes", id));
+        if (!docSnap.exists()) {
+            alert("신청 내역을 찾을 수 없습니다.");
+            return;
+        }
+        
+        const data = docSnap.data();
+        
+        document.getElementById('insp-quote-id').value = id;
+        document.getElementById('insp-customer-name').innerText = data.customerName || "-";
+        document.getElementById('insp-customer-phone').innerText = data.customerPhone || "-";
+        document.getElementById('insp-device-model').innerText = `${data.brand} ${data.model}`;
+        document.getElementById('insp-expected-price').innerText = new Intl.NumberFormat('ko-KR').format(data.price || 0) + "원";
+        
+        // Reset form
+        document.getElementById('inspection-form').reset();
+        
+        // Load existing inspection data if any
+        if (data.inspectionData) {
+            document.getElementById('insp-final-price').value = data.inspectionData.finalPrice || "";
+            document.getElementById('insp-deduction-details').value = data.inspectionData.details || "";
+            document.getElementById('insp-admin-comment').value = data.inspectionData.comment || "";
+            
+            const faults = data.inspectionData.faults || [];
+            document.querySelectorAll('input[name="insp-fault"]').forEach(cb => {
+                if(faults.includes(cb.value)) cb.checked = true;
+            });
+        }
+        
+        document.getElementById('inspection-modal').style.display = 'flex';
+    } catch(e) {
+        console.error("Open Inspection Error:", e);
+        alert("데이터를 불러오는데 실패했습니다.");
+    }
+};
+
+window.saveInspectionForm = async () => {
+    const id = document.getElementById('insp-quote-id').value;
+    const finalPrice = document.getElementById('insp-final-price').value;
+    const details = document.getElementById('insp-deduction-details').value;
+    const comment = document.getElementById('insp-admin-comment').value;
+    
+    if(!finalPrice) {
+        alert("최종 매입가를 입력해주세요.");
+        return;
+    }
+    
+    const faults = [];
+    document.querySelectorAll('input[name="insp-fault"]:checked').forEach(cb => {
+        faults.push(cb.value);
+    });
+    
+    if(!confirm("검수 결과를 저장하고 '검수완료' 상태로 변경하시겠습니까?\n(고객에게 전자매매계약서 확인 알림톡이 발송됩니다)")) {
+        return;
+    }
+    
+    const inspectionData = {
+        finalPrice: Number(finalPrice),
+        faults: faults,
+        details: details,
+        comment: comment,
+        inspectedAt: new Date().toISOString()
+    };
+    
+    try {
+        const docRef = doc(db, "quotes", id);
+        const docSnap = await getDoc(docRef);
+        const phone = docSnap.exists() ? docSnap.data().customerPhone : "";
+        const name = docSnap.exists() ? docSnap.data().customerName : "";
+
+        await updateDoc(docRef, {
+            status: "검수완료",
+            inspectionData: inspectionData
+        });
+        
+        document.getElementById('inspection-modal').style.display = 'none';
+        loadQuotes();
+        alert("검수서가 저장되었습니다. 고객의 동의 대기 중입니다.");
+        
+        if (docSnap.exists()) {
+            triggerAlimtalk(docSnap.data(), "검수완료");
+        }
+    } catch(e) {
+        console.error("Save Inspection Error:", e);
+        alert("저장 실패: " + e.message);
+    }
+};
 
 
 window.closeDetailModal = () => {

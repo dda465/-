@@ -21,13 +21,13 @@
 <!-- End Danggeun Market Code -->
 
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18157690697"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'AW-18157690697');
+  gtag('config', 'AW-18055027970');
 </script>
 
 
@@ -53,7 +53,7 @@
     <meta name="naver-site-verification" content="88cd5e4f7d21bc69a519a61b2d5c440af0f6b836" />
     <link rel="canonical" href="https://sharaphone.com">
 
-    <link rel="stylesheet" href="styles.css?v=1778666699">
+    <link rel="stylesheet" href="styles.css?v=1779173835">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <!-- OpenGraph SEO Tags -->
@@ -380,6 +380,11 @@ wcs_do();
 }
 </script>
 
+    <style>
+        @media (max-width: 768px) {
+            .desktop-only { display: none !important; }
+        }
+    </style>
 </head>
 
 
@@ -400,13 +405,13 @@ wcs_do();
 
         .app-grid-section { max-width: 1200px; margin: 0 auto 40px; padding: 0 40px; position: relative; z-index: 20; }
 
-        .app-grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        .app-grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
 
         .app-grid-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.2s; padding: 15px; border-radius: 12px; text-decoration: none !important; }
 
         .app-grid-item:hover { background: #f8fafc; transform: translateY(-5px); }
 
-        .app-grid-icon { width: 64px; height: 64px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 12px; background: #eff6ff; color: #2563eb; transition: transform 0.2s; }
+        .app-grid-icon { width: 80px; height: 80px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 12px; background: #eff6ff; color: #2563eb; transition: transform 0.2s; }
 
         .app-grid-item:hover .app-grid-icon { transform: scale(1.05); }
 
@@ -418,7 +423,7 @@ wcs_do();
 
         .app-grid-icon.watch { background: #f0fdf4; color: #059669; }
 
-        .app-grid-label { font-weight: 700; font-size: 1.05rem; color: #334155; }
+        .app-grid-label { font-weight: 700; font-size: 1.15rem; color: #334155; }
 
         .mobile-bottom-nav { display: none; }
 
@@ -468,24 +473,18 @@ wcs_do();
 
             
 
-            /* Smaller chips for swipe */
+            /* Smaller chips for swipe -> now 3 col grid to fit screen */
 
-            .fast-search-section .usc-chips { display: flex !important; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 5px; margin-right: -15px; gap: 10px; }
+            .fast-search-section .usc-chips { display: grid !important; grid-template-columns: repeat(3, 1fr); padding-bottom: 5px; gap: 6px; overflow-x: hidden; }
 
             .fast-search-section .usc-chips::-webkit-scrollbar { display: none; }
 
-            .fast-search-section .usc-chip { min-width: 140px !important; scroll-snap-align: start; margin-bottom: 0 !important; padding: 12px; flex-direction: column; align-items: center; text-align: center; border-radius: 12px; }
-
-            .chip-icon { margin-right: 0; margin-bottom: 8px; font-size: 1.2rem; }
-
-            .chip-icon img { max-width: 36px !important; max-height: 36px !important; }
-
-            .chip-name { font-size: 0.85rem; margin-bottom: 4px; font-weight: 700; }
-
-            .chip-price { font-size: 0.95rem; margin-bottom: 4px; }
-
-            .chip-tag { font-size: 0.7rem; }
-
+            .fast-search-section .usc-chip { min-width: 0 !important; width: 100% !important; margin-bottom: 0 !important; padding: 8px 4px; flex-direction: column; align-items: center; text-align: center; border-radius: 12px; }
+            .chip-icon { margin-right: 0; margin-bottom: 6px; font-size: 1.2rem; }
+            .chip-icon img { max-width: 40px !important; max-height: 40px !important; margin-bottom: 2px; }
+            .chip-name { font-size: 0.65rem; margin-bottom: 2px; font-weight: 700; word-break: break-word; line-height: 1.2; letter-spacing: -0.5px; }
+            .chip-price { font-size: 0.75rem; margin-bottom: 2px; font-weight: 800; color: #ef4444; word-break: break-word; line-height: 1.2; letter-spacing: -0.5px; }
+            .chip-tag { font-size: 0.6rem; color: #888; word-break: break-word; line-height: 1.2; letter-spacing: -0.5px; }
             .usc-quick-title { margin-bottom: 10px; font-size: 0.85rem; }
 
             
@@ -493,7 +492,7 @@ wcs_do();
             /* Compressed Grid */
 
             .app-grid-section { order: 4; padding: 0 15px; margin: 0 0 5px; }
-            .app-grid-container { padding: 8px 15px; grid-template-columns: repeat(4, 1fr); gap: 6px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
+            .app-grid-container { padding: 8px 15px; grid-template-columns: repeat(3, 1fr); gap: 6px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
             .app-grid-item { padding: 2px; }
             .app-grid-icon { width: 38px; height: 38px; font-size: 1.2rem; margin-bottom: 4px; border-radius: 12px; }
 
@@ -702,6 +701,19 @@ wcs_do();
             </a>
 
             
+
+            <!-- Custom Language Selector -->
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <div id="google_translate_element" style="display:none;"></div>
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
 
             <!-- Mobile App Actions -->
 
@@ -1258,7 +1270,7 @@ wcs_do();
 
 
 
-        <div class="usc-quick-title">✨ 지금 가장 많이 팔고 있는 인기 기종</div>
+        <div class="usc-quick-title">🔥 지금 가장 많이 팔고 있는 인기 기종</div>
 
         <div class="usc-chips">
 
@@ -1323,35 +1335,18 @@ wcs_do();
         <div class="app-grid-container">
 
             <a href="quote.html?brand=apple" class="app-grid-item">
-
-                <div class="app-grid-icon apple"><img src="apple.svg" style="width: 24px;"></div>
-
-                <div class="app-grid-label">아이폰 시세</div>
-
+                <div class="app-grid-icon apple"><img src="apple.svg" style="width: 40px;"></div>
+                <div class="app-grid-label">아이폰 팔기</div>
             </a>
 
             <a href="quote.html?brand=samsung" class="app-grid-item">
-
-                <div class="app-grid-icon samsung"><img src="samsung.svg" style="width: 32px;"></div>
-
-                <div class="app-grid-label">갤럭시 시세</div>
-
+                <div class="app-grid-icon samsung"><img src="samsung.svg" style="width: 50px;"></div>
+                <div class="app-grid-label">갤럭시 팔기</div>
             </a>
 
-            <a href="javascript:void(0)" class="app-grid-item" onclick="showInfoModal('data')">
-
-                <div class="app-grid-icon" style="background:#f0fdf4; color:#22c55e;"><i class="ri-shield-check-fill"></i></div>
-
-                <div class="app-grid-label">데이터안심</div>
-
-            </a>
-
-            <a href="javascript:void(0)" class="app-grid-item" onclick="showInfoModal('process')">
-
-                <div class="app-grid-icon" style="background:#fff7ed; color:#f97316;"><i class="ri-rocket-line"></i></div>
-
-                <div class="app-grid-label">판매절차 안내</div>
-
+            <a href="price-list.html" class="app-grid-item">
+                <div class="app-grid-icon" style="background:#f1f5f9; color:#2563eb; font-size: 36px;"><i class="ri-file-list-3-fill"></i></div>
+                <div class="app-grid-label">단가보기</div>
             </a>
 
         </div>
@@ -1840,10 +1835,19 @@ wcs_do();
 
 
                         연중무휴 24시간 채널톡으로 상담가능
-
-
-
                     </p>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                        <a href="http://pf.kakao.com/_TEvMK" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #FEE500; color: #000000; font-weight: 700; font-size: 0.95rem; padding: 12px 20px; border-radius: 12px; text-decoration: none; width: fit-content; box-shadow: 0 4px 12px rgba(254,229,0,0.3);">
+                            <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M12 3C5.9 3 1 6.9 1 11.8c0 3.2 2.1 6 5.3 7.6-.2.8-.8 2.8-.9 3.2 0 0-.1.2.1.2.2 0 2.6-1.7 3.6-2.4 1 .1 1.9.2 2.9.2 6.1 0 11-3.9 11-8.8S18.1 3 12 3z" /></svg>
+                            쉐라폰 카카오채널 소식
+                        </a>
+                        
+                        <a href="https://map.naver.com/p/entry/place/1068442824?placePath=/home" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #03C75A; color: #FFFFFF; font-weight: 700; font-size: 0.95rem; padding: 12px 20px; border-radius: 12px; text-decoration: none; width: fit-content; box-shadow: 0 4px 12px rgba(3,199,90,0.3);">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"/></svg>
+                            네이버 스마트플레이스
+                        </a>
+                    </div>
 
 
 
@@ -1863,11 +1867,11 @@ wcs_do();
 
 
 
-                        <a href="#" onclick="openPolicyModal('terms.html', '이용약관')" style="color: inherit; text-decoration: none;">이용약관</a> |
+                        <a href="terms.html" target="_blank" style="color: inherit; text-decoration: none;">이용약관</a> |
 
 
 
-                        <a href="#" onclick="openPolicyModal('privacy.html', '개인정보처리방침')"
+                        <a href="privacy.html" target="_blank"
 
 
 
@@ -1993,7 +1997,7 @@ wcs_do();
 
 
 
-    <script type="module" src="script.js?v=1778666699"></script>
+    <script type="module" src="script.js?v=1779173835"></script>
 
 
 
@@ -2329,15 +2333,141 @@ wcs_do();
         modal.style.display = 'flex';
     };
     </script>
+    <!-- Google Translate Script & Styling -->
+    <style>
+        /* Force Hide Google Translate Top Banner & Tooltips */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        
+        /* Prevent layout shift caused by Google Translate */
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        
+        /* Hide Default Widget Elements */
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        
+        /* Custom Select Styling */
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
 
+        .lang-select:hover {
+            border-color: #2563EB;
+        }
+        
+        @media (max-width: 768px) {
+            /* Protect the Logo and show text comfortably */
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            
+            /* Comfortable Language Selector */
+            .lang-select { 
+                padding: 3px 12px 3px 4px; 
+                font-size: 0.75rem; 
+                width: 60px; 
+                min-width: 60px;
+                margin-right: 4px !important;
+                background-position: right 3px top 50%;
+                background-size: 6px auto;
+                letter-spacing: -0.5px;
+            }
+            
+            /* Comfortable Action Buttons & Icons in Navbar */
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            
+            /* Navbar Container Tweaks */
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru'
+            }, 'google_translate_element');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var customSelect = document.getElementById('custom_lang_select');
+            if (!customSelect) return;
+            
+            // Initial load cookie check
+            var match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+            if (match) {
+                var lang = match[1].split('/').pop();
+                if (lang && lang !== 'ko') {
+                    customSelect.value = lang;
+                }
+            } else {
+                customSelect.value = 'ko';
+            }
+
+            customSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                
+                if (targetLang === 'ko') {
+                    // Force cookie clear and reload to perfectly restore original Korean DOM
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                // Small delay to allow the Google Translate script to catch the change, else reload
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            // Mutation observer to force remove body top styling injected dynamically by google translate
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
-
-
-
-
-
-
-
-
-
-</html>

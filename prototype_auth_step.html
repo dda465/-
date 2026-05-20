@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 단계 프로토타입</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; padding: 50px; }
+        .wizard-container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .step-header { text-align: center; margin-bottom: 30px; }
+        .step-header h2 { font-size: 1.5rem; color: #1e293b; margin-bottom: 10px; font-weight: 800; }
+        .step-header p { color: #64748b; font-size: 0.95rem; }
+        .btn { padding: 14px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; text-align: center; border: none; font-size: 1rem; transition: all 0.2s; }
+        .btn-primary { background: #2563EB; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-outline { background: white; color: #2563EB; border: 1px solid #2563EB; }
+        .btn-outline:hover { background: #eff6ff; }
+        .btn-kakao { background: #FEE500; color: #000000; border: none; }
+        .btn-kakao:hover { background: #e5ce00; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 0.9rem; }
+        .search-input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; background: #f8fafc; color: #64748b; }
+        
+        /* Non-member Options Container */
+        .auth-options { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        
+        .divider { display: flex; align-items: center; text-align: center; margin: 25px 0; color: #94a3b8; font-size: 0.85rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+        
+        /* Demo controls */
+        .demo-controls { max-width: 600px; margin: 0 auto 20px; padding: 15px; background: #e0f2fe; border-radius: 10px; display: flex; gap: 10px; justify-content: center; }
+    </style>
+
+<!-- Danggeun Market Code -->
+<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script>
+  window.karrotPixel.init('1778656966686481001');
+  window.karrotPixel.track('ViewPage');
+</script>
+<!-- End Danggeun Market Code -->
+
+</head>
+<body>
+
+    <div class="demo-controls">
+        <button class="btn btn-outline" onclick="showView('non-member')">비회원 화면 보기</button>
+        <button class="btn btn-primary" onclick="showView('member')">회원 화면 보기</button>
+    </div>
+
+    <div class="wizard-container">
+        <div class="step-header">
+            <h2>접수자 정보 입력 <span style="color:red">*</span></h2>
+            <p>정확한 정산 및 거래 안내를 위해 정보를 입력해주세요.</p>
+        </div>
+
+        <!-- 1. 비회원 접속 시 보이는 화면 -->
+        <div id="view-non-member" style="display: block;">
+            <div class="auth-options">
+                <!-- Option 1: 로그인 -->
+                <button class="btn btn-kakao" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3c-5.52 0-10 3.5-10 7.82 0 2.81 1.8 5.28 4.54 6.64l-1.16 4.26c-.1.38.29.68.61.5l3.86-2.58c.68.16 1.41.24 2.15.24 5.52 0 10-3.5 10-7.82S17.52 3 12 3z"/>
+                    </svg>
+                    카카오로 3초만에 로그인하고 진행하기
+                </button>
+                <button class="btn btn-outline" style="width: 100%;">일반 계정으로 로그인 후 진행하기</button>
+                
+                <div class="divider">또는</div>
+                
+                <!-- Option 2: 비회원 본인인증 -->
+                <div style="background: #f1f5f9; padding: 25px 20px; border-radius: 10px; text-align: center;">
+                    <p style="margin-top: 0; color: #475569; font-size: 0.95rem; margin-bottom: 15px; font-weight: 600;">비회원으로 계속 진행하시겠습니까?</p>
+                    <p style="margin-top: 0; color: #64748b; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">매입 내역 안내 알림톡 수신을 위해<br>1회 본인인증이 필요합니다.</p>
+                    <button class="btn" style="background: #334155; color: white; width: 100%;">비회원으로 휴대폰 본인인증하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 회원 (또는 본인인증 완료) 접속 시 보이는 화면 -->
+        <div id="view-member" style="display: none; max-width: 400px; margin: 0 auto; text-align: left;">
+            <div style="margin-bottom: 20px;">
+                <label class="form-label">이름 <span style="color:red">*</span></label>
+                <input type="text" class="search-input" value="박현용" readonly>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label class="form-label">휴대폰 번호 <span style="color:red">*</span></label>
+                <input type="tel" class="search-input" value="010-3263-5672" readonly>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #F8F9FA; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 30px;">
+                <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.95rem; color: #333;">
+                    <input type="checkbox" checked style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                    <span>이용약관 및 개인정보 처리방침 동의 <span style="color:red">*</span></span>
+                </label>
+                <button type="button" style="background: none; border: none; color: #2563EB; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">보기</button>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%;">이 가격으로 판매 신청</button>
+        </div>
+    </div>
+
+    <script>
+        function showView(type) {
+            document.getElementById('view-non-member').style.display = type === 'non-member' ? 'block' : 'none';
+            document.getElementById('view-member').style.display = type === 'member' ? 'block' : 'none';
+        }
+    </script>
+
+    <!-- Google Translate Script & Styling -->
+    <style>
+        /* Force Hide Google Translate Top Banner & Tooltips */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        
+        /* Prevent layout shift caused by Google Translate */
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        
+        /* Hide Default Widget Elements */
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        
+        /* Custom Select Styling */
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .lang-select:hover {
+            border-color: #2563EB;
+        }
+        
+        @media (max-width: 768px) {
+            /* Protect the Logo and show text comfortably */
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            
+            /* Comfortable Language Selector */
+            .lang-select { 
+                padding: 3px 12px 3px 4px; 
+                font-size: 0.75rem; 
+                width: 60px; 
+                min-width: 60px;
+                margin-right: 4px !important;
+                background-position: right 3px top 50%;
+                background-size: 6px auto;
+                letter-spacing: -0.5px;
+            }
+            
+            /* Comfortable Action Buttons & Icons in Navbar */
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            
+            /* Navbar Container Tweaks */
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru'
+            }, 'google_translate_element');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var customSelect = document.getElementById('custom_lang_select');
+            if (!customSelect) return;
+            
+            // Initial load cookie check
+            var match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+            if (match) {
+                var lang = match[1].split('/').pop();
+                if (lang && lang !== 'ko') {
+                    customSelect.value = lang;
+                }
+            } else {
+                customSelect.value = 'ko';
+            }
+
+            customSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                
+                if (targetLang === 'ko') {
+                    // Force cookie clear and reload to perfectly restore original Korean DOM
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                // Small delay to allow the Google Translate script to catch the change, else reload
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            // Mutation observer to force remove body top styling injected dynamically by google translate
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>

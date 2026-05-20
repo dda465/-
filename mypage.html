@@ -21,13 +21,13 @@
 <!-- End Danggeun Market Code -->
 
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18157690697"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'AW-18157690697');
+  gtag('config', 'AW-18055027970');
 </script>
 
 
@@ -45,11 +45,12 @@
 
 
 
-    <link rel="stylesheet" href="styles.css?v=1778666699">
+    <link rel="stylesheet" href="styles.css?v=1779173835">
 
 
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
 
 
@@ -908,6 +909,18 @@ wcs_do();
 
 
 
+                        <!-- Custom Language Selector -->
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <div id="google_translate_element" style="display:none;"></div>
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
             <div class="nav-links">
 
 
@@ -919,11 +932,11 @@ wcs_do();
 
 
 
-                <span id="user-display" style="font-weight:bold; color:var(--primary-dark); margin-left: 10px;"></span>
 
 
 
-                <button id="nav-logout-btn" class="logout-btn" style="display:none; margin-left:10px;">로그아웃</button>
+
+
 
 
 
@@ -981,48 +994,75 @@ wcs_do();
 
     <div class="container mb-3">
 
-
-
         <div class="dashboard-container">
-
-
 
             <h2 style="margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px;">
 
-
-
                 📋 신청 내역
-
-
 
             </h2>
 
-
-
             <div id="my-quotes-list">
-
-
 
                 <div style="text-align: center; padding: 40px; color: #999;">
 
-
-
                     불러오는 중...
-
-
 
                 </div>
 
-
-
             </div>
-
-
 
         </div>
 
+    </div>
 
-
+    <!-- 회원정보 관리 영역 -->
+    <div class="container mb-3">
+        <div class="dashboard-container" style="margin-top: 10px; min-height: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; cursor: pointer;" onclick="document.getElementById('profile-edit-form').style.display = document.getElementById('profile-edit-form').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('profile-edit-form').style.display === 'none' ? '▼' : '▲';">
+                <h2 style="font-size: 1.3rem; margin: 0;">
+                    👤 회원정보 관리
+                </h2>
+                <span class="toggle-icon" style="color: #888; font-size: 1.2rem;">▼</span>
+            </div>
+            
+            <form id="profile-edit-form" style="max-width: 500px; margin: 0 auto; display: none;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">이메일</label>
+                    <input type="text" id="profile-email" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f3f4f6; color: #666;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">이름 <span style="font-size:0.8rem; color:#888; font-weight:normal;">(수정 불가)</span></label>
+                    <input type="text" id="profile-name" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f3f4f6; color: #666;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">전화번호 <span style="font-size:0.8rem; color:#888; font-weight:normal;">(수정 불가)</span></label>
+                    <input type="text" id="profile-phone" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f3f4f6; color: #666;">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">주소 수정</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="profile-zipcode" placeholder="우편번호" readonly style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb;">
+                        <button type="button" onclick="execDaumPostcodeProfile()" style="padding: 0 15px; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #475569; white-space: nowrap;">우편번호 찾기</button>
+                    </div>
+                    <input type="text" id="profile-address" placeholder="기본주소" readonly style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb; margin-bottom: 10px;">
+                    <input type="text" id="profile-detailAddress" placeholder="상세주소 입력" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+                
+                <button type="submit" id="btn-save-profile" style="width: 100%; padding: 14px; background: #2563EB; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 30px;">
+                    회원정보 저장
+                </button>
+                
+                <div style="text-align: right; border-top: 1px solid #eee; padding-top: 15px;">
+                    <button type="button" id="btn-delete-account" style="background: none; border: none; color: #ef4444; text-decoration: underline; cursor: pointer; font-size: 0.9rem;">
+                        회원 탈퇴하기
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
 
@@ -1144,11 +1184,11 @@ wcs_do();
 
 
 
-                        <a href="#" onclick="openPolicyModal('terms.html', '이용약관')" style="color: inherit; text-decoration: none;">이용약관</a> |
+                        <a href="terms.html" target="_blank" style="color: inherit; text-decoration: none;">이용약관</a> |
 
 
 
-                        <a href="#" onclick="openPolicyModal('privacy.html', '개인정보처리방침')"
+                        <a href="privacy.html" target="_blank"
 
 
 
@@ -1200,11 +1240,8 @@ wcs_do();
 
 
 
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-
-
-        import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, orderBy, getDocs, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
 
@@ -1213,17 +1250,6 @@ wcs_do();
 
 
         const myQuotesList = document.getElementById('my-quotes-list');
-
-
-
-        const userDisplay = document.getElementById('user-display');
-
-
-
-        const logoutBtn = document.getElementById('nav-logout-btn');
-
-
-
         const welcomeMsg = document.getElementById('welcome-msg');
 
 
@@ -1276,12 +1302,6 @@ wcs_do();
 
 
 
-                userDisplay.textContent = `${dName}님`;
-
-
-
-                logoutBtn.style.display = 'inline-block';
-
 
 
                 welcomeMsg.textContent = `${dName}님의 신청 내역입니다.`;
@@ -1301,9 +1321,7 @@ wcs_do();
 
 
                 await loadMyQuotes(user.uid);
-
-
-
+                await loadUserProfile(user.uid, user.email);
                 return; // Stop here, Firebase auth is verified
 
 
@@ -1336,12 +1354,6 @@ wcs_do();
 
 
 
-                            userDisplay.textContent = `${dName}님`;
-
-
-
-                            logoutBtn.style.display = 'inline-block';
-
 
 
                             welcomeMsg.textContent = `${dName}님의 신청 내역입니다.`;
@@ -1361,9 +1373,7 @@ wcs_do();
 
 
                             await loadMyQuotes(localUser.uid);
-
-
-
+                            await loadUserProfile(localUser.uid, localUser.email);
                             return; // Stop here, social login is verified
 
 
@@ -1398,93 +1408,121 @@ wcs_do();
 
         });
 
-
-
-
-
-
-
-        logoutBtn.addEventListener('click', async () => {
-
-
-
+        // Load User Profile Data
+        async function loadUserProfile(uid, email) {
             try {
-
-
-
-                const localUser = localStorage.getItem('user_info');
-
-
-
-                if (localUser && localUser.includes('kakao')) {
-
-
-
-                    if (window.Kakao && Kakao.Auth && Kakao.Auth.getAccessToken()) {
-
-
-
-                        Kakao.Auth.logout(() => {
-
-
-
-                            console.log('Kakao logged out');
-
-
-
-                        });
-
-
-
+                // For Kakao users, docId in auth.js is 'kakao_'+localUser.kakao_uid
+                // but localUser.uid is already 'kakao_...' if they logged in via Kakao
+                // Wait, auth.js does: setDoc(doc(db, "users", 'kakao_'+id)) and localStorage saves uid: 'kakao_'+id
+                let docId = uid;
+                
+                const userDocRef = doc(db, 'users', docId);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('profile-email').value = data.email || email || '';
+                    document.getElementById('profile-name').value = data.nickname || '';
+                    document.getElementById('profile-phone').value = data.phone || '';
+                    
+                    const realName = data.nickname || data.name || email?.split('@')[0] || '고객';
+                    document.getElementById('welcome-msg').textContent = `${realName}님의 신청 내역입니다.`;
+                    const navWelcomeText = document.getElementById('nav-welcome-text');
+                    if (navWelcomeText) navWelcomeText.textContent = `${realName}님 환영합니다`;
+                    if (data.address) {
+                        document.getElementById('profile-zipcode').value = data.address.zipcode || '';
+                        document.getElementById('profile-address').value = data.address.basic || '';
+                        document.getElementById('profile-detailAddress').value = data.address.detail || '';
                     }
-
-
-
+                    
+                    // Attach save logic
+                    const profileForm = document.getElementById('profile-edit-form');
+                    profileForm.onsubmit = async (e) => {
+                        e.preventDefault();
+                        const btn = document.getElementById('btn-save-profile');
+                        btn.textContent = '저장 중...';
+                        btn.disabled = true;
+                        
+                        try {
+                            await updateDoc(userDocRef, {
+                                address: {
+                                    zipcode: document.getElementById('profile-zipcode').value,
+                                    basic: document.getElementById('profile-address').value,
+                                    detail: document.getElementById('profile-detailAddress').value
+                                }
+                            });
+                            alert('회원정보가 성공적으로 저장되었습니다.');
+                        } catch (err) {
+                            console.error('Update profile error:', err);
+                            alert('회원정보 저장 중 오류가 발생했습니다.');
+                        } finally {
+                            btn.textContent = '회원정보 저장';
+                            btn.disabled = false;
+                        }
+                    };
+                    
+                    // Attach delete logic
+                    const deleteBtn = document.getElementById('btn-delete-account');
+                    deleteBtn.onclick = async () => {
+                        if (!confirm('정말 쉐라폰을 탈퇴하시겠습니까?\n\n탈퇴 시 계정 정보가 모두 삭제됩니다.\n(단, 이미 신청된 매입 견적 데이터는 정산 확인을 위해 유지됩니다)')) return;
+                        if (!confirm('탈퇴를 진행하면 되돌릴 수 없습니다. 계속하시겠습니까?')) return;
+                        
+                        try {
+                            // 1. Delete Firestore user document
+                            await deleteDoc(userDocRef);
+                            
+                            // 2. Clear Local Storage
+                            localStorage.removeItem('user_info');
+                            
+                            // 3. Delete Firebase Auth User (if logged in via Firebase Auth)
+                            if (auth.currentUser) {
+                                await deleteUser(auth.currentUser);
+                            } else {
+                                // For Kakao only login, they don't have auth.currentUser usually, but their session is in localStorage
+                                if (window.Kakao && Kakao.Auth && Kakao.Auth.getAccessToken()) {
+                                    Kakao.API.request({
+                                        url: '/v1/user/unlink',
+                                        success: function(response) {
+                                            console.log('Kakao Unlinked', response);
+                                        },
+                                        fail: function(error) {
+                                            console.log('Kakao Unlink Error', error);
+                                        },
+                                    });
+                                }
+                            }
+                            
+                            alert('회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.');
+                            window.location.href = 'index.html';
+                            
+                        } catch (error) {
+                            console.error('Delete account error:', error);
+                            if (error.code === 'auth/requires-recent-login') {
+                                alert('보안을 위해 다시 로그인한 후 탈퇴를 진행해 주세요.');
+                                await signOut(auth);
+                                window.location.href = 'login.html';
+                            } else {
+                                alert('회원 탈퇴 중 오류가 발생했습니다: ' + error.message);
+                            }
+                        }
+                    };
+                    
+                } else {
+                    document.getElementById('profile-email').value = email || '';
                 }
-
-
-
             } catch (e) {
-
-
-
-                console.error('Kakao logout error', e);
-
-
-
+                console.error("Error loading user profile:", e);
             }
+        }
 
 
 
-            localStorage.removeItem('user_info');
 
 
 
-            try {
 
 
 
-                await signOut(auth);
-
-
-
-            } catch (e) {
-
-
-
-                console.error("Firebase logout error:", e);
-
-
-
-            }
-
-
-
-            window.location.replace('index.html');
-
-
-
-        });
 
 
 
@@ -1573,9 +1611,17 @@ wcs_do();
                 docs.sort((a, b) => {
                     const dataA = a.data();
                     const dataB = b.data();
-                    const timeA = dataA.firebaseTimestamp ? dataA.firebaseTimestamp.toMillis() : (new Date(dataA.timestamp).getTime() || 0);
-                    const timeB = dataB.firebaseTimestamp ? dataB.firebaseTimestamp.toMillis() : (new Date(dataB.timestamp).getTime() || 0);
-                    return timeB - timeA;
+                    const getMs = (data) => {
+                        if (data.firebaseTimestamp && typeof data.firebaseTimestamp.toMillis === 'function') {
+                            return data.firebaseTimestamp.toMillis();
+                        }
+                        if (data.timestamp) {
+                            const parsed = new Date(data.timestamp).getTime();
+                            if (!isNaN(parsed)) return parsed;
+                        }
+                        return 0;
+                    };
+                    return getMs(dataB) - getMs(dataA);
                 });
 
                 docs.forEach((doc) => {
@@ -1586,266 +1632,131 @@ wcs_do();
 
 
 
-                    const status = data.status || '접수완료';
-
-
-
-
-
-
-
-                    let statusClass = 'receipt';
-
-
-
-                    if (status.includes('수거')) statusClass = 'pickup';
-
-
-
-                    if (status.includes('검수')) statusClass = 'assessing';
-
-
-
-                    if (status.includes('완료') || status.includes('입금')) statusClass = 'complete';
-
-
-
-                    if (status.includes('취소')) statusClass = 'cancel';
-
-
-
-
-
-
-
-                    // Delivery Info Text
-
-
-
-                    let deliveryInfo = '';
-
-
-
-                    if (data.trackingNumber) {
-
-
-
-                        deliveryInfo = `<br><span style="font-size: 0.8rem; color: #2196F3;">운송장: ${data.courier || ''} ${data.trackingNumber}</span>`;
-
-
-
-                    }
-
-
-
-
-
-
-
-                    const formattedPrice = new Intl.NumberFormat('ko-KR').format(data.price);
-
-
-
-
-
-
-
-                    // Stepper Logic
-
-
-
-                    const steps = ['접수완료', '수거중', '검수중', '입금완료'];
-
-
-
-                    // Map current status to index
-
-
-
-                    let activeIndex = 0;
-
-
-
-                    if (status.includes('수거')) activeIndex = 1;
-
-
-
-                    if (status.includes('검수')) activeIndex = 2;
-
-
-
-                    if (status.includes('입금') || status.includes('완료')) activeIndex = 3;
-
-
-
-                    if (status.includes('취소')) activeIndex = -1; // Cancelled
-
-
-
-
-
-
-
+                    const currentStatus = data.status || 'receipt';
+                    
+                    let statusBadgeClass = '';
+                    let statusText = '';
+                    
+                    if (currentStatus === 'receipt' || currentStatus === '신청접수') { statusBadgeClass = 'receipt'; statusText = '접수 완료'; }
+                    else if (currentStatus === 'pickup' || currentStatus === '수거중') { statusBadgeClass = 'pickup'; statusText = '기기 수거중'; }
+                    else if (currentStatus === 'assessing' || currentStatus === '검수중' || currentStatus === '검수완료') { statusBadgeClass = 'assessing'; statusText = '검수 진행중'; }
+                    else if (currentStatus === 'complete' || currentStatus === '입금완료') { statusBadgeClass = 'complete'; statusText = '입금 완료'; }
+                    else if (currentStatus === '입금대기') { statusBadgeClass = 'complete'; statusText = '입금 대기 (송금예정)'; }
+                    else if (currentStatus === 'cancel' || currentStatus === '취소') { statusBadgeClass = 'cancel'; statusText = '취소됨'; }
+                    else { statusBadgeClass = 'receipt'; statusText = '접수 완료'; }
+                    
+                    const steps = [
+                        { id: 'receipt', label: '매입접수완료', idx: 1 },
+                        { id: 'pickup', label: '택배발송완료', idx: 2 },
+                        { id: 'assessing', label: '검수중', idx: 3 },
+                        { id: 'complete', label: '입금완료', idx: 4 }
+                    ];
+
+                    let currentIdx = 1;
+                    if (statusBadgeClass === 'pickup') currentIdx = 2;
+                    if (statusBadgeClass === 'assessing') currentIdx = 3;
+                    if (statusBadgeClass === 'complete') currentIdx = 4;
+                    
                     let stepperHtml = '';
-
-
-
-                    if (activeIndex > -1) {
-
-
-
+                    if (statusBadgeClass !== 'cancel') {
                         stepperHtml = '<div class="stepper-container"><div class="stepper">';
-
-
-
-                        steps.forEach((label, index) => {
-
-
-
-                            let stepClass = '';
-
-
-
-                            if (index < activeIndex) stepClass = 'completed';
-
-
-
-                            if (index === activeIndex) stepClass = 'active';
-
-
-
-
-
-
-
-                            // Icons mapping
-
-
-
-                            const icons = ['📝', '🚚', '🔍', '💰'];
-
-
-
-
-
-
-
+                        steps.forEach(step => {
+                            let stepClass = 'step';
+                            let iconContent = step.idx;
+                            
+                            if (step.idx < currentIdx) {
+                                stepClass += ' completed';
+                                iconContent = '✓';
+                            } else if (step.idx === currentIdx) {
+                                stepClass += ' active';
+                                iconContent = '✓';
+                            }
+                            
                             stepperHtml += `
-
-
-
-                                <div class="step ${stepClass}">
-
-
-
-                                    <div class="step-icon">${icons[index]}</div>
-
-
-
-                                    <div class="step-text">${label}</div>
-
-
-
+                                <div class="${stepClass}">
+                                    <div class="step-icon">${iconContent}</div>
+                                    <div class="step-text">${step.label}</div>
                                 </div>
-
-
-
                             `;
-
-
-
                         });
-
-
-
                         stepperHtml += '</div></div>';
-
-
-
                     } else {
-
-
-
                         stepperHtml = '<div class="stepper-container" style="text-align:center; color:#C62828; font-weight:bold; padding:10px;">🚫 취소된 신청입니다.</div>';
-
-
-
+                    }
+                    
+                    let dateStr = '알 수 없음';
+                    if (data.firebaseTimestamp) {
+                        try {
+                            const d = new Date(data.firebaseTimestamp.toMillis());
+                            dateStr = d.toLocaleString('ko-KR');
+                        } catch(e){}
+                    } else if (data.timestamp) {
+                        dateStr = data.timestamp;
                     }
 
+                    const price = data.expectedPrice || data.price || 0;
+                    const priceStr = new Intl.NumberFormat('ko-KR').format(price) + '원';
+                    
+                    let deliveryInfo = '';
+                    if (data.deliveryMethod === 'cvs') {
+                        deliveryInfo = '<br><span style="font-size: 0.8rem; color: #ff9800; margin-top: 4px; display: inline-block;">[직접발송]</span>';
+                        if (data.shippingFeePaid) {
+                            deliveryInfo += `<br><span style="font-size: 0.8rem; color: #2E7D32; font-weight: 600; margin-top: 4px; display: inline-block;">✅ 배송비 입금 완료</span>`;
+                        }
+                    } else if (data.deliveryMethod === 'courier') {
+                        deliveryInfo = `<br><span style="font-size: 0.8rem; color: #4CAF50; margin-top: 4px; display: inline-block;">[방문수거] (희망일: ${data.pickupDate || '미정'})</span>`;
+                    }
+                    if (data.trackingNumber) {
+                        if (data.trackingNumber === '미입력') {
+                            deliveryInfo += ` <span style="font-size: 0.8rem; color: #64748b; display: inline-block;">(송장없이 발송완료)</span>`;
+                        } else {
+                            deliveryInfo += ` <span style="font-size: 0.8rem; color: #2196F3; display: inline-block;">(운송장: ${data.trackingCarrier || ''} ${data.trackingNumber})</span>`;
+                        }
+                    }
 
+                    let dispatchBtnHtml = '';
+                    if (data.deliveryMethod === 'cvs' && currentStatus === 'receipt') {
+                        dispatchBtnHtml = `
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="window.notifyDispatch('${doc.id}')" style="width: 100%; padding: 12px; background: #fff; color: #2563EB; border: 1px solid #2563EB; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">local_shipping</span>
+                                    택배 보냈어요!
+                                </button>
+                            </div>
+                        `;
+                    }
 
-
-
-
+                    let contractBtnHtml = '';
+                    if (data.inspectionData) {
+                        const encData = encodeURIComponent(JSON.stringify({...data.inspectionData, brand: data.brand, model: data.model, name: data.customerName, phone: data.customerPhone, expected: price, docId: doc.id, status: data.status}));
+                        contractBtnHtml = `
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="openContractViewer('${encData}')" style="width: 100%; padding: 12px; background: #1d1d1f; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">receipt_long</span>
+                                    전자매매계약서(견적서) 확인
+                                </button>
+                            </div>
+                        `;
+                    }
 
                     const el = document.createElement('div');
-
-
-
                     el.className = 'quote-card';
-
-
-
-                    // Make it block layout to stack stepper at bottom
-
-
-
                     el.style.display = 'block';
-
-
-
                     el.innerHTML = `
-
-
-
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-
-
-
                             <div class="qc-info">
-
-
-
-                                <h3>${data.brand} ${data.model} <span style="font-size:0.8rem; color:#888;">${data.storage || ''}</span></h3>
-
-
-
-                                <p>신청일: ${data.firebaseTimestamp ? new Date(data.firebaseTimestamp.toMillis()).toLocaleDateString() : (typeof data.timestamp === 'string' && data.timestamp.includes('오') ? data.timestamp.split('오')[0].trim() : (new Date(data.timestamp).toLocaleDateString() === 'Invalid Date' ? '알 수 없음' : new Date(data.timestamp).toLocaleDateString()))}</p>
-
-
-
-                                <p>예상 매입가: <strong>${formattedPrice}원</strong></p>
-
-
-
+                                <h3>${data.brand || ''} ${data.model || ''} <span style="font-size:0.8rem; color:#888;">${data.storage || ''}</span></h3>
+                                <p>예상 매입가: <strong style="color: #2563EB;">${priceStr}</strong></p>
+                                <p style="font-size: 0.8rem; margin-top: 4px; color: #666;">신청일: ${dateStr}</p>
                                 ${deliveryInfo}
-
-
-
                             </div>
-
-
-
                             <div style="text-align: right;">
-
-
-
-                                 <span class="status-badge ${statusClass}">${status}</span>
-
-
-
+                                 <span class="status-badge ${statusBadgeClass}">${statusText}</span>
                             </div>
-
-
-
                         </div>
-
-
-
                         ${stepperHtml}
-
-
-
+                        ${dispatchBtnHtml}
+                        ${contractBtnHtml}
                     `;
 
 
@@ -2135,15 +2046,460 @@ wcs_do();
     };
     </script>
 
+    <!-- Contract Modal Script -->
+    <script>
+    window.openContractViewer = function(encData) {
+        try {
+            const data = JSON.parse(decodeURIComponent(encData));
+            
+            let modal = document.getElementById('contract-modal');
+            if (!modal) {
+                const modalHtml = `
+                <div id="contract-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
+                   <div style="background:white; width:100%; max-width:500px; max-height:90vh; border-radius:16px; overflow-y:auto; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                      
+                      <div style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; position: sticky; top: 0; z-index: 10;">
+                          <h3 style="margin: 0; font-size: 1.2rem; color: #1d1d1f; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                              <span class="material-symbols-outlined" style="color: #2563EB;">verified_user</span> 전자매매계약서
+                          </h3>
+                          <button onclick="document.getElementById('contract-modal').style.display='none'" style="background:none; border:none; font-size: 24px; line-height:1; cursor:pointer; color: #666;">&times;</button>
+                      </div>
+                      
+                      <div style="padding: 24px;">
+                          
+                          <!-- Greeting Box -->
+                          <div style="background: #F8FAFC; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #E2E8F0;">
+                              <div style="width: 40px; height: 40px; border-radius: 50%; background: #DBEAFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                  <span class="material-symbols-outlined" style="color: #2563EB; font-size: 1.5rem;">support_agent</span>
+                              </div>
+                              <div>
+                                  <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; color: #1E293B;">안녕하세요, 쉐라폰 검수센터입니다.</h4>
+                                  <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">고객님께서 보내주신 소중한 기기의 검수가 완료되었습니다. 아래 검수 결과와 매매계약서를 확인하신 후 서명(동의)해 주시면 신속하게 입금을 진행해 드리겠습니다.</p>
+                              </div>
+                          </div>
+                          
+                          <!-- Summary Box -->
+                          <div style="background: linear-gradient(135deg, #1d1d1f, #434345); padding: 20px; border-radius: 12px; color: white; text-align: center; margin-bottom: 24px;">
+                              <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">최종 매입 결정 금액</div>
+                              <div style="font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;" id="cv-final-price">0원</div>
+                          </div>
+
+                          <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                              거래 정보
+                          </h4>
+                          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.95rem;">
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666; width: 35%;">계약 번호</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-family: monospace; color: #888;" id="cv-contract-no"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">매도인 (고객명)</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;" id="cv-name"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">연락처</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right;" id="cv-phone"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">매매 대상 기기</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;" id="cv-model"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">매수 업체</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">쉐라폰</td>
+                              </tr>
+                          </table>
+
+                          <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                              검수 차감 내역
+                          </h4>
+                          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 24px;">
+                              <div id="cv-faults" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+                              <div id="cv-details" style="font-size: 0.9rem; color: #555; white-space: pre-wrap; line-height: 1.5; padding-top: 12px; border-top: 1px dashed #ddd;"></div>
+                          </div>
+
+                          <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                              검수자 종합 소견
+                          </h4>
+                          <div id="cv-comment" style="font-size: 0.95rem; color: #333; background: #E3F2FD; padding: 15px; border-radius: 8px; line-height: 1.6; margin-bottom: 24px;"></div>
+
+                          <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px; font-size: 0.8rem; color: #666; line-height: 1.6; margin-bottom: 10px; background: #fafafa;">
+                              <strong style="color: #333; display: block; margin-bottom: 8px; font-size: 0.85rem;">전자매매계약 약관 동의</strong>
+                              <div style="margin-bottom: 6px;"><strong>제 1조 (목적)</strong> 본 계약서는 쉐라폰과 고객 간의 중고 기기 매매에 대한 최종 합의서입니다.</div>
+                              <div style="margin-bottom: 6px;"><strong>제 2조 (소유권 이전)</strong> 명시된 최종 금액이 고객이 지정한 계좌로 입금된 시점에 단말기의 소유권은 쉐라폰으로 완전 이전됩니다.</div>
+                              <div style="margin-bottom: 6px;"><strong>제 3조 (기기 상태 보증)</strong> 매도인은 본 기기가 도난, 분실, 임대 등 불법적인 기기가 아님을 보증하며, 추후 문제 발생 시 모든 민/형사상 책임을 집니다.</div>
+                              <div><strong>제 4조 (반환 불가)</strong> 대금 송금이 완료된 이후에는 단순 변심으로 인한 거래 취소 및 기기 반환이 절대 불가함을 확인합니다.</div>
+                              
+                              <div style="text-align: center; margin-top: 24px; font-weight: 600; color: #333;">
+                                  위와 같이 확인하고 전자매매계약에 동의함<br>
+                                  <span style="font-size: 0.85rem; color: #888; margin-top: 5px; display: inline-block;" id="cv-date"></span>
+                              </div>
+                              
+                              <div style="display: flex; justify-content: space-around; margin-top: 20px; font-weight: 600; color: #444; border-top: 1px dashed #ddd; padding-top: 15px;">
+                                  <span>판매자 : <span id="cv-sign-name" style="color: #2563EB;"></span></span>
+                                  <span>구매자 : 쉐라폰</span>
+                              </div>
+                          </div>
+                          
+                          <div id="cv-action-container" style="margin-top: 24px; text-align: center;">
+                              <!-- Action button injected here -->
+                          </div>
+                          
+                          <div style="text-align: right; margin-top: 20px;">
+                              <img src="sr_logo.webp" style="height: 24px; opacity: 0.5;" alt="쉐라폰">
+                          </div>
+
+                      </div>
+                   </div>
+                </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                modal = document.getElementById('contract-modal');
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+                
+                // Need material icons if not present
+                if (!document.querySelector('link[href*="Material+Symbols+Outlined"]')) {
+                    document.head.insertAdjacentHTML('beforeend', '<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />');
+                }
+            }
+            
+            document.getElementById('cv-final-price').innerText = new Intl.NumberFormat('ko-KR').format(data.finalPrice) + "원";
+            document.getElementById('cv-contract-no').innerText = data.docId ? data.docId.substring(0,8).toUpperCase() : '-';
+            document.getElementById('cv-phone').innerText = data.phone || '-';
+            document.getElementById('cv-name').innerText = data.name;
+            document.getElementById('cv-sign-name').innerText = data.name;
+            document.getElementById('cv-date').innerText = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('cv-model').innerText = `${data.brand} ${data.model}`;
+            
+            const faultsDiv = document.getElementById('cv-faults');
+            faultsDiv.innerHTML = '';
+            if (data.faults && data.faults.length > 0) {
+                data.faults.forEach(f => {
+                    faultsDiv.innerHTML += `<span style="background: #FFEbee; color: #c62828; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">${f}</span>`;
+                });
+            } else {
+                faultsDiv.innerHTML = '<span style="color: #666; font-size: 0.9rem;">해당사항 없음 (정상 기기)</span>';
+            }
+            
+            document.getElementById('cv-details').innerText = data.details || "세부 차감 내역 없음";
+            
+            const commentDiv = document.getElementById('cv-comment');
+            if (data.comment) {
+                commentDiv.innerText = data.comment;
+                commentDiv.style.display = 'block';
+            } else {
+                commentDiv.style.display = 'none';
+            }
+            
+            const actionContainer = document.getElementById('cv-action-container');
+            if (actionContainer) {
+                if (data.status === '검수완료') {
+                    actionContainer.innerHTML = `
+                        <button onclick="agreeToContract('${data.docId}')" style="width: 100%; padding: 16px; background: #2563EB; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); transition: transform 0.2s;">
+                            <span class="material-symbols-outlined">task_alt</span>
+                            최종 매입에 동의합니다 (입금 요청)
+                        </button>
+                    `;
+                } else if (data.status === '입금대기' || data.status === '입금완료' || data.status === 'complete') {
+                    actionContainer.innerHTML = `
+                        <div style="width: 100%; padding: 16px; background: #e2e8f0; color: #475569; border-radius: 12px; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            매입 동의 완료 (${data.status === '입금대기' ? '입금 대기 중' : '입금 완료'})
+                        </div>
+                    `;
+                } else {
+                    actionContainer.innerHTML = '';
+                }
+            }
+            
+            modal.style.display = 'flex';
+            
+        } catch(e) {
+            console.error(e);
+            alert("계약서를 불러오는 중 오류가 발생했습니다.");
+        }
+    };
+    </script>
+
+    <!-- Tracking Modal -->
+    <div id="tracking-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; padding: 20px; box-sizing: border-box;">
+        <div style="background: #fff; width: 100%; max-width: 400px; border-radius: 16px; padding: 30px; position: relative;">
+            <button onclick="document.getElementById('tracking-modal').style.display='none'" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            <h3 style="margin-top:0; font-size: 1.2rem; font-weight: 700; color: #333;">📦 택배 송장번호 입력</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">보내신 택배사와 운송장 번호를 입력해주세요.</p>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">택배사 선택 <span style="color:red">*</span></label>
+                <select id="tracking-courier" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.95rem;">
+                    <option value="" disabled selected>택배사를 선택해주세요</option>
+                    <option value="CJ대한통운">CJ대한통운</option>
+                    <option value="우체국택배">우체국택배</option>
+                    <option value="로젠택배">로젠택배</option>
+                    <option value="한진택배">한진택배</option>
+                    <option value="롯데택배">롯데택배</option>
+                    <option value="편의점택배">편의점택배 (GS25, CU 등)</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">운송장 번호 <span style="color:red">*</span></label>
+                <input type="text" id="tracking-number" placeholder="- 없이 숫자만 입력" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.95rem;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="window.submitTracking(false)" style="width: 100%; padding: 14px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">송장번호 입력 완료</button>
+                <button onclick="window.submitTracking(true)" style="width: 100%; padding: 12px; background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;">송장 입력은 귀찮아요 (택배는 보냄)</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        window.agreeToContract = async function(docId) {
+            if (!docId) return;
+            
+            if (!confirm("최종 매입에 동의하십니까?\n동의하시면 거래가 확정되며, 바로 입금 대기 상태로 전환됩니다.")) {
+                return;
+            }
+            
+            try {
+                const docRef = doc(db, "quotes", docId);
+                await updateDoc(docRef, {
+                    status: "입금대기",
+                    customerAgreedAt: new Date().toISOString()
+                });
+                
+                alert("매입 동의가 완료되었습니다! 신속하게 입금 처리해드리겠습니다.");
+                document.getElementById('contract-modal').style.display = 'none';
+                
+                // Reload mypage to show updated status
+                window.location.reload();
+            } catch(e) {
+                console.error("Agreement error:", e);
+                alert("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+        };
+
+        window.currentTrackingDocId = null;
+
+        window.notifyDispatch = (docId) => {
+            window.currentTrackingDocId = docId;
+            document.getElementById('tracking-courier').value = '';
+            document.getElementById('tracking-number').value = '';
+            document.getElementById('tracking-modal').style.display = 'flex';
+        };
+
+        window.submitTracking = async (bypass = false) => {
+            if (!window.currentTrackingDocId) return;
+            
+            let courier = '미입력';
+            let trackingNum = '미입력';
+            
+            if (!bypass) {
+                courier = document.getElementById('tracking-courier').value;
+                trackingNum = document.getElementById('tracking-number').value.trim();
+                if (!courier || courier === '미입력') { alert("택배사를 선택해주세요."); return; }
+                if (!trackingNum || trackingNum === '미입력') { alert("운송장 번호를 입력해주세요."); return; }
+            } else {
+                if (!confirm("송장번호 입력 없이 발송 완료 처리하시겠습니까?\n(추후 택배 발송 여부만 확인됩니다)")) return;
+            }
+            
+            try {
+                const docRef = doc(db, "quotes", window.currentTrackingDocId);
+                await updateDoc(docRef, {
+                    status: '수거중',
+                    trackingCarrier: courier,
+                    trackingNumber: trackingNum,
+                    trackingSubmittedAt: serverTimestamp()
+                });
+                
+                alert("택배 발송 정보가 등록되었습니다!");
+                document.getElementById('tracking-modal').style.display = 'none';
+                window.location.reload();
+                
+            } catch(e) {
+                console.error(e);
+                alert("처리 중 오류가 발생했습니다.");
+            }
+        };
+    </script>
+
+    <!-- Daum Postcode API -->
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        function execDaumPostcodeProfile() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = '';
+                    var extraAddr = '';
+
+                    if (data.userSelectedType === 'R') {
+                        addr = data.roadAddress;
+                    } else {
+                        addr = data.jibunAddress;
+                    }
+
+                    if(data.userSelectedType === 'R'){
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                            extraAddr += data.bname;
+                        }
+                        if(data.buildingName !== '' && data.apartment === 'Y'){
+                            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        }
+                        if(extraAddr !== ''){
+                            extraAddr = ' (' + extraAddr + ')';
+                        }
+                        addr += extraAddr;
+                    }
+
+                    document.getElementById('profile-zipcode').value = data.zonecode;
+                    document.getElementById("profile-address").value = addr;
+                    document.getElementById("profile-detailAddress").focus();
+                }
+            }).open();
+        }
+    </script>
+
+    <!-- Google Translate Script & Styling -->
+    <style>
+        /* Force Hide Google Translate Top Banner & Tooltips */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        
+        /* Prevent layout shift caused by Google Translate */
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        
+        /* Hide Default Widget Elements */
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        
+        /* Custom Select Styling */
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .lang-select:hover {
+            border-color: #2563EB;
+        }
+        
+        @media (max-width: 768px) {
+            /* Protect the Logo and show text comfortably */
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            
+            /* Comfortable Language Selector */
+            .lang-select { 
+                padding: 3px 12px 3px 4px; 
+                font-size: 0.75rem; 
+                width: 60px; 
+                min-width: 60px;
+                margin-right: 4px !important;
+                background-position: right 3px top 50%;
+                background-size: 6px auto;
+                letter-spacing: -0.5px;
+            }
+            
+            /* Comfortable Action Buttons & Icons in Navbar */
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            
+            /* Navbar Container Tweaks */
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru'
+            }, 'google_translate_element');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var customSelect = document.getElementById('custom_lang_select');
+            if (!customSelect) return;
+            
+            // Initial load cookie check
+            var match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+            if (match) {
+                var lang = match[1].split('/').pop();
+                if (lang && lang !== 'ko') {
+                    customSelect.value = lang;
+                }
+            } else {
+                customSelect.value = 'ko';
+            }
+
+            customSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                
+                if (targetLang === 'ko') {
+                    // Force cookie clear and reload to perfectly restore original Korean DOM
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                // Small delay to allow the Google Translate script to catch the change, else reload
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            // Mutation observer to force remove body top styling injected dynamically by google translate
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
-
-
-
-
-
-
-
-</html>
-
-
-

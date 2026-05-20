@@ -1123,7 +1123,8 @@ footer {
     }
 
     .section-title {
-        font-size: 2rem;
+        font-size: 1.6rem;
+        word-break: keep-all;
     }
 
     /* Wizard Mobile Polish */
@@ -1354,7 +1355,7 @@ footer {
 /* Floating Action Buttons Container */
 .floating-buttons {
     position: fixed;
-    bottom: 30px;
+    bottom: 100px; /* Moved up to prevent overlap with Channel Talk */
     right: 30px;
     display: flex;
     flex-direction: column-reverse;
@@ -1365,7 +1366,8 @@ footer {
 
 /* Shared Button Styles */
 .float-btn,
-.kakao-chat-btn {
+.kakao-chat-btn,
+.naver-chat-btn {
     position: relative;
     bottom: auto;
     right: auto;
@@ -1400,6 +1402,18 @@ footer {
     width: 30px;
     height: 30px;
     fill: #3c1e1e;
+}
+
+/* Naver TalkTalk Button Specifics */
+.naver-chat-btn {
+    background-color: #03C75A;
+    color: #FFFFFF;
+}
+
+.naver-chat-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: #FFFFFF;
 }
 
 /* Phone Button Specifics */
@@ -1552,4 +1566,11 @@ footer {
 
 .hero-slide .hero-container {
     width: 100%;
+}
+@media (max-width: 768px) { .kakao-chat-btn { display: none !important; } }
+
+@media (max-width: 768px) {
+    .pc-only {
+        display: none !important;
+    }
 }

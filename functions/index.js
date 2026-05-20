@@ -73,3 +73,116 @@ telegramApp.post("/send", async (req, res) => {
 });
 
 exports.telegramApi = onRequest({ region: 'asia-northeast3', invoker: 'public' }, telegramApp);
+
+// ==========================================
+// 카카오 알림톡 발송 API (Solapi 연동)
+// ==========================================
+const alimtalkApp = express();
+alimtalkApp.use(cors({ origin: true }));
+alimtalkApp.use(express.json());
+
+const { SolapiMessageService } = require('solapi');
+
+const SOLAPI_API_KEY = "NCSLO3BJCMH3IEOU";
+const SOLAPI_API_SECRET = "9TQGUIT0NVVDRGKCEHC7KN0ELMOCBIH1";
+const SENDER_NUMBER = "01032635672"; 
+const PFID = "KA01PF2605140405259447PXPLyM2Hpa";
+
+const messageService = new SolapiMessageService(SOLAPI_API_KEY, SOLAPI_API_SECRET);
+
+alimtalkApp.post("/send", async (req, res) => {
+    try {
+        const { phone, templateId, variables } = req.body;
+        
+        if (!phone || !templateId) {
+            return res.status(400).send({ error: "phone and templateId are required" });
+        }
+
+        console.log(`[알림톡 발송 요청] 수신번호: ${phone}, 템플릿: ${templateId}, 변수:`, variables);
+
+        const messageData = {
+            to: phone,
+            from: SENDER_NUMBER,
+            kakaoOptions: {
+                pfId: PFID,
+                templateId: templateId,
+                variables: variables
+            }
+        };
+
+        const result = await messageService.send(messageData);
+        console.log("Solapi Send Result:", result);
+
+        res.status(200).send({ success: true, message: "Alimtalk sent successfully", result: result });
+    } catch (error) {
+        console.error("Alimtalk send error:", error);
+        res.status(500).send({ error: "Internal Server Error", details: error.message });
+    }
+});
+
+exports.alimtalkApi = onRequest({ region: 'asia-northeast3', invoker: 'public' }, alimtalkApp);
+
+// ==========================================
+// 포트원(KG이니시스) 본인인증 정보 조회 API
+// ==========================================
+const portoneApp = express();
+portoneApp.use(cors({ origin: true }));
+portoneApp.use(express.json());
+
+const PORTONE_API_KEY = "4786480776168256";
+const PORTONE_API_SECRET = "cMCLrCLk2N1qbmTBILsyeCt3eb3hPCqmah25WNwMLuPxlzNMnfm2EpCqcFfzvsOlOA8HGdTD1tKw8WxQ";
+
+portoneApp.post("/verify", async (req, res) => {
+    try {
+        const { imp_uid } = req.body;
+        if (!imp_uid) {
+            return res.status(400).send({ error: "imp_uid is required" });
+        }
+
+        // 1. 포트원 API 액세스 토큰 발급
+        const tokenResponse = await fetch("https://api.iamport.kr/users/getToken", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                imp_key: PORTONE_API_KEY,
+                imp_secret: PORTONE_API_SECRET
+            })
+        });
+        
+        const tokenData = await tokenResponse.json();
+        if (tokenData.code !== 0) {
+            console.error("포트원 토큰 발급 실패:", tokenData.message);
+            return res.status(500).send({ error: "Failed to get PortOne token" });
+        }
+        
+        const access_token = tokenData.response.access_token;
+
+        // 2. imp_uid로 본인인증 정보 조회
+        const certResponse = await fetch(`https://api.iamport.kr/certifications/${imp_uid}`, {
+            method: "GET",
+            headers: { "Authorization": access_token }
+        });
+        
+        const certData = await certResponse.json();
+        if (certData.code !== 0) {
+            console.error("포트원 인증 정보 조회 실패:", certData.message);
+            return res.status(500).send({ error: "Failed to get certification data" });
+        }
+        
+        const certInfo = certData.response;
+        
+        res.status(200).send({ 
+            success: true, 
+            data: {
+                name: certInfo.name,
+                phone: certInfo.phone
+            }
+        });
+        
+    } catch (error) {
+        console.error("포트원 연동 에러:", error);
+        res.status(500).send({ error: "Internal Server Error" });
+    }
+});
+
+exports.portoneApi = onRequest({ region: 'asia-northeast3', invoker: 'public' }, portoneApp);

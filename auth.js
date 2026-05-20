@@ -52,7 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     wcs.trans(_conv);
                 }
 
-                window.location.replace('index.html');
+                if (sessionStorage.getItem('pendingQuote')) {
+                    window.location.replace('quote.html');
+                } else {
+                    window.location.replace('index.html');
+                }
 
             }
 
@@ -152,7 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                window.location.replace('index.html');
+                if (sessionStorage.getItem('pendingQuote')) {
+                    window.location.replace('quote.html');
+                } else {
+                    window.location.replace('index.html');
+                }
 
             } catch (error) {
 
@@ -200,60 +208,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+    // 2.5 Handle PortOne Identity Verification
+    const verifyBtn = document.getElementById('verify-btn');
+    if (verifyBtn) {
+        verifyBtn.addEventListener('click', () => {
+            if (!window.IMP) {
+                alert("인증 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+                return;
+            }
+            const IMP = window.IMP;
+            IMP.init("imp25541365"); // PortOne Store ID
+
+            IMP.certification({
+                merchant_uid: "cert_" + new Date().getTime()
+            }, async function (rsp) {
+                if (rsp.success) {
+                    verifyBtn.textContent = "인증 확인 중...";
+                    verifyBtn.disabled = true;
+
+                    try {
+                        const res = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/portoneApi/verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ imp_uid: rsp.imp_uid })
+                        });
+                        const result = await res.json();
+                        
+                        if (result.success && result.data) {
+                            const nameInput = document.getElementById('nickname');
+                            const phoneInput = document.getElementById('phone');
+                            
+                            nameInput.value = result.data.name;
+                            phoneInput.value = result.data.phone;
+                            
+                            verifyBtn.textContent = "본인인증 완료";
+                            verifyBtn.style.background = "#10b981";
+                            alert("본인인증이 완료되었습니다.");
+                        } else {
+                            throw new Error(result.error || "인증 정보 조회 실패");
+                        }
+                    } catch (err) {
+                        console.error("Verification callback error:", err);
+                        alert("본인인증 처리 중 오류가 발생했습니다: " + err.message);
+                        verifyBtn.textContent = "휴대폰 본인인증하기";
+                        verifyBtn.disabled = false;
+                    }
+                } else {
+                    alert("인증에 실패하였습니다: " + rsp.error_msg);
+                }
+            });
+        });
+    }
+
     // 3. Handle Signup Form
-
     const signupForm = document.getElementById('email-signup-form');
-
     if (signupForm) {
-
         console.log("Signup Form: Found");
-
         signupForm.addEventListener('submit', async (e) => {
-
             e.preventDefault();
-
             console.log("Signup Form: Submit Detected");
 
-
-
             const email = document.getElementById('email').value;
-
             const password = document.getElementById('password').value;
-
+            const passwordConfirm = document.getElementById('passwordConfirm')?.value;
             const nickname = document.getElementById('nickname').value;
+            const phone = document.getElementById('phone')?.value || '';
+            
+            const zipcode = document.getElementById('zipcode')?.value || '';
+            const address = document.getElementById('address')?.value || '';
+            const detailAddress = document.getElementById('detailAddress')?.value || '';
 
+            if (password !== passwordConfirm) {
+                alert("비밀번호가 일치하지 않습니다.");
+                return;
+            }
 
+            if (!phone) {
+                alert("먼저 휴대폰 본인인증을 완료해주세요.");
+                return;
+            }
 
             try {
-
                 const cred = await createUserWithEmailAndPassword(auth, email, password);
-
                 console.log("Signup: Success", cred.user.email);
 
-
-
                 // Save to Firestore
-
                 try {
-
                     await setDoc(doc(db, "users", cred.user.uid), {
-
                         email: email,
-
                         nickname: nickname,
-
+                        phone: phone,
+                        address: {
+                            zipcode: zipcode,
+                            basic: address,
+                            detail: detailAddress
+                        },
                         createdAt: new Date(),
-
                         role: 'user'
-
                     });
-
                 } catch (dbError) {
-
                     console.error("Firestore Save Error:", dbError);
-
-                    // Continue even if DB save fails, as Auth is successful
-
                 }
 
 
@@ -292,7 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                window.location.replace('index.html');
+                if (sessionStorage.getItem('pendingQuote')) {
+                    window.location.replace('quote.html');
+                } else {
+                    window.location.replace('index.html');
+                }
 
             } catch (error) {
 
@@ -406,7 +464,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                            window.location.replace('index.html');
+                            if (sessionStorage.getItem('pendingQuote')) {
+                                window.location.replace('quote.html');
+                            } else {
+                                window.location.replace('index.html');
+                            }
 
                         },
 

@@ -133,10 +133,68 @@ const formatCurrency = (amount) => {
 
 };
 
+window.triggerFrontendAlimtalk = async (type, phone, payload) => {
+    if (!phone) return;
+    
+    let templateId = "";
+    let variables = {};
 
+    const cleanPhone = phone.replace(/-/g, '');
 
+    // 1. 회원가입시
+    if (type === "signup") {
+        templateId = "KA01TP260514042925080Xiepwh1IH7j";
+        variables = {
+            "#{고객명}": payload.name,
+            "#{회원가입계정플랫폼}": payload.provider === 'kakao' ? '카카오' : (payload.provider === 'naver' ? '네이버' : '본인인증'),
+            "#{회원가입일시}": new Date().toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        };
+    } 
+    // 2. 방문택배로 신청시
+    else if (type === "quote_courier") {
+        templateId = "KA01TP260514062022973Of9hrrbssgr";
+        variables = {
+            "#{고객명}": payload.name,
+            "#{방문택배수거일자}": payload.pickupDate || "미지정",
+            "#{고객계정}": payload.email || "미인증/카카오연동",
+            "#{고객연락처}": phone,
+            "#{택배사}": "CJ대한통운", // 기본 설정
+            "#{주소}": payload.address || "미입력"
+        };
+    } 
+    // 3. 직접발송으로 신청시
+    else if (type === "quote_cvs") {
+        templateId = "KA01TP260514073008756NLWPQC8W4pz";
+        const dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() + 3);
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        const targetDateStr = `${y}년 ${m}월 ${d}일`;
 
+        variables = {
+            "#{신청일자로부터3일}": targetDateStr
+        };
+    }
 
+    if (!templateId) return;
+
+    try {
+        const response = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/alimtalkApi/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                phone: cleanPhone,
+                templateId: templateId,
+                variables: variables
+            })
+        });
+        const result = await response.json();
+        console.log("Alimtalk frontend trigger result:", result);
+    } catch (e) {
+        console.error("Alimtalk frontend trigger error:", e);
+    }
+};
 
 
 // Global Auth Listener for Navigation
@@ -197,59 +255,40 @@ function injectFloatingWidgets() {
 
     // 2. Kakao Button
 
-
-
     const kakaoBtn = document.createElement('a');
 
-
-
-    kakaoBtn.href = 'https://pf.kakao.com/_BmFyn';
-
-
+    kakaoBtn.href = 'http://pf.kakao.com/_TEvMK/chat';
 
     kakaoBtn.target = '_blank';
 
-
-
-    kakaoBtn.className = 'kakao-chat-btn';
-
-
+    kakaoBtn.className = 'kakao-chat-btn pc-only';
 
     kakaoBtn.innerHTML = `
 
-
-
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-
-
 
         <path d="M12 3C5.9 3 1 6.9 1 11.8c0 3.2 2.1 6 5.3 7.6-.2.8-.8 2.8-.9 3.2 0 0-.1.2.1.2.2 0 2.6-1.7 3.6-2.4 1 .1 1.9.2 2.9.2 6.1 0 11-3.9 11-8.8S18.1 3 12 3z" />
 
-
-
         </svg>
-
-
 
     <span class="btn-label">카톡 문의</span>
 
-
-
 `;
 
-
-
-
-
-
+    // 3. Naver TalkTalk Button
+    const naverBtn = document.createElement('a');
+    naverBtn.href = 'http://talk.naver.com/W53PQQM';
+    naverBtn.target = '_blank';
+    naverBtn.className = 'naver-chat-btn pc-only';
+    naverBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"/></svg>
+    <span class="btn-label">네이버 톡톡</span>
+`;
 
     // Container appended to body
-
-
-
-    // document.body.appendChild(container); // Append to body only ONCE (Currently disabled as widgets are removed)
-
-
+    container.appendChild(naverBtn);
+    container.appendChild(kakaoBtn);
+    document.body.appendChild(container);
 
 }
 
@@ -271,12 +310,13 @@ function injectFloatingWidgets() {
     const urlParams = new URLSearchParams(window.location.search);
     const utmSource = (urlParams.get('utm_source') || '').toLowerCase();
     const referrer = (document.referrer || '').toLowerCase();
+    const ua = (navigator.userAgent || '').toLowerCase();
 
     let source = 'direct';
 
-    if (utmSource.includes('naver') || referrer.includes('naver.com')) {
+    if (utmSource.includes('naver') || referrer.includes('naver.com') || ua.includes('naver')) {
         source = 'naver';
-    } else if (utmSource.includes('daangn') || utmSource.includes('karrot') || referrer.includes('daangn.com') || referrer.includes('karrotmarket')) {
+    } else if (utmSource.includes('daangn') || utmSource.includes('karrot') || referrer.includes('daangn.com') || referrer.includes('karrotmarket') || ua.includes('daangn') || ua.includes('karrot')) {
         source = 'daangn';
     } else if (utmSource.includes('google') || referrer.includes('google.com')) {
         source = 'google';
@@ -289,6 +329,16 @@ function injectFloatingWidgets() {
 // --- Funnel Analytics ---
 window.trackFunnel = async (stepName) => {
     try {
+        // --- Admin Ignore Logic ---
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin_ignore') === 'true') {
+            localStorage.setItem('admin_ignore', 'true');
+            alert('관리자 추적 방지 모드가 활성화되었습니다. 앞으로 이 브라우저에서의 접속은 통계에 잡히지 않습니다.');
+        }
+        if (localStorage.getItem('admin_ignore') === 'true') {
+            console.log('Admin tracking ignored.');
+            return;
+        }
         const nowMs = Date.now();
         const kstOffset = 9 * 60 * 60 * 1000;
         const kstDate = new Date(nowMs + kstOffset);
@@ -505,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.querySelectorAll('#nav-logout-link').forEach(el => el.remove());
             document.querySelectorAll('#admin-btn-nav').forEach(el => el.remove());
+            document.querySelectorAll('#nav-welcome-text').forEach(el => el.remove());
 
 
 
@@ -705,22 +756,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (navLoginLink.nextSibling) {
-
-
-
                     navLinksContainer.insertBefore(logoutLink, navLoginLink.nextSibling);
-
-
-
                 } else {
-
-
-
                     navLinksContainer.appendChild(logoutLink);
-
-
-
                 }
+
+                // Add welcome text before "My Page" link
+                const welcomeText = document.createElement('span');
+                welcomeText.id = 'nav-welcome-text';
+                welcomeText.className = 'pc-only';
+                welcomeText.style.fontWeight = '700';
+                welcomeText.style.color = '#333';
+                welcomeText.style.marginRight = '15px';
+                welcomeText.textContent = `${userData.nickname}님 환영합니다`;
+                navLinksContainer.insertBefore(welcomeText, navLoginLink);
 
 
 
@@ -1104,19 +1153,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-            window.addEventListener('load', function () {
-
-
-
-                // Only process the Naver login callback if the URL indicates a return from Naver (has access_token)
-
-
-
-                // This prevents the SDK from auto-logging the user in on every page refresh after they've intentionally logged out.
-
-
-
-                if (window.location.hash.includes('access_token')) {
+            // Run immediately since script.js is a module and executes after HTML parse
+            if (window.location.hash.includes('access_token')) {
 
 
 
@@ -1189,127 +1227,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                             if (needsUpdate) {
-
-
-
                                 try {
+                                    const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                                    const docRef = doc(db, "users", uid);
+                                    const docSnap = await getDoc(docRef);
+                                    const isNewUser = !docSnap.exists();
 
-
-
-                                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-
-
-
-                                    await setDoc(doc(db, "users", uid), {
-
-
-
+                                    await setDoc(docRef, {
                                         email: email,
-
-
-
                                         nickname: nickname,
-
-
-
                                         uid: uid,
-
-
-
                                         provider: 'naver',
-
-
-
                                         createdAt: new Date(),
-
-
-
                                         role: 'user'
-
-
-
                                     }, { merge: true });
 
-
-
+                                    // 알림톡 발송 (네이버 연락처 제공 동의 시)
+                                    if (isNewUser && naverLogin.user.getMobile && naverLogin.user.getMobile() && window.triggerFrontendAlimtalk) {
+                                        let phoneRaw = naverLogin.user.getMobile();
+                                        if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
+                                        window.triggerFrontendAlimtalk("signup", phoneRaw, {
+                                            name: nickname,
+                                            provider: 'naver'
+                                        });
+                                    }
                                 } catch (e) {
-
-
-
                                     console.error('Firestore save naver user error:', e);
-
-
-
                                 }
 
-
-
-
-
-
-
-                                const userInfo = {
-
-
-
-                                    email: email,
-
-
-
-                                    nickname: nickname,
-
-
-
-                                    provider: 'naver',
-
-
-
-                                    uid: uid
-
-
-
-                                };
-
-
-
+                                const userInfo = { email, nickname, provider: 'naver', uid };
                                 localStorage.setItem('user_info', JSON.stringify(userInfo));
-
-
-
                                 updateNavbar(userInfo);
-
-
-
-
-                                // Clean up hash to prevent re-processing
-
-
-
-                                window.history.replaceState(null, null, window.location.pathname + window.location.search);
-
-
-
                             }
 
-
-
+                            // Always clean up hash and redirect, whether needsUpdate was true or false
+                            window.history.replaceState(null, null, window.location.pathname + window.location.search);
+                            
+                            if (sessionStorage.getItem('pendingQuote')) {
+                                window.location.hash = '#step-auth';
+                                window.location.reload();
+                            }
                         }
-
-
-
                     });
-
-
-
                 }
+            }
 
-
-
-            });
-
-
-
-        }
 
 
 
@@ -1497,6 +1459,17 @@ async function loadHomepageDynamicPrices() {
         if (uniqueApples.length > 0) picked.push(uniqueApples[Math.floor(seededRandom(currentSeed++) * uniqueApples.length)]);
         if (uniqueSs.length > 0) picked.push(uniqueSs[Math.floor(seededRandom(currentSeed++) * uniqueSs.length)]);
         if (uniqueZs.length > 0) picked.push(uniqueZs[Math.floor(seededRandom(currentSeed++) * uniqueZs.length)]);
+
+        // Fallback: Ensure we always show 3 items if possible
+        if (picked.length < 3 && products.length > 0) {
+            const allUnique = Array.from(new Map(products.map(p => [p.model, p])).values());
+            const remaining = allUnique.filter(p => !picked.find(pickedItem => pickedItem.model === p.model));
+            remaining.sort((a, b) => (b.basePrice || 0) - (a.basePrice || 0)); // Sort by price desc to get top phones
+            
+            while (picked.length < 3 && remaining.length > 0) {
+                picked.push(remaining.shift());
+            }
+        }
 
         const chipsContainer = document.querySelector('.usc-chips');
         if (chipsContainer && picked.length > 0) {
@@ -2320,7 +2293,8 @@ async function initPriceList() {
 
 
 
-            const searchMatch = p.model.toLowerCase().includes(filterText) || (p.series && p.series.toLowerCase().includes(filterText));
+            const cleanFilterText = filterText.replace(/\s/g, '');
+            const searchMatch = p.model.toLowerCase().replace(/\s/g, '').includes(cleanFilterText) || (p.series && p.series.toLowerCase().replace(/\s/g, '').includes(cleanFilterText));
 
 
 
@@ -2400,98 +2374,56 @@ async function initPriceList() {
 
 
 
+        // Deduplicate and calculate average
+        const modelMap = {};
         filtered.forEach(p => {
-
-
-
-            // Prices
-
-
-
+            if (!modelMap[p.model]) {
+                modelMap[p.model] = {
+                    ...p,
+                    allPrices: []
+                };
+            }
+            // Collect all valid prices for this model across all duplicated docs
             const prices = p.prices || {};
-
-
-
             const priceS = prices.s || p.basePrice || 0;
-
-
-
             const priceA = prices.a || 0;
-
-
-
             const priceB = prices.b || 0;
-
-
-
             const priceC = prices.c || prices.d || 0;
+            
+            [priceS, priceA, priceB, priceC].forEach(v => {
+                if (v > 0) modelMap[p.model].allPrices.push(v);
+            });
+        });
 
+        const uniqueModels = Object.values(modelMap);
 
-
-
-
-
-
-            // Formatting: If 0, show '-'
-
-
-
-            const fmt = (val) => val > 0 ? formatCurrency(val) : '-';
-
-
-
-
-
-
+        uniqueModels.forEach(p => {
+            const sum = p.allPrices.reduce((a, b) => a + b, 0);
+            const avg = p.allPrices.length > 0 ? Math.floor(sum / p.allPrices.length / 1000) * 1000 : 0;
+            
+            let priceText = '-';
+            if (avg > 0) {
+                priceText = `${avg.toLocaleString()}원`;
+            }
 
             const tr = document.createElement('tr');
-
-
-
             tr.innerHTML = `
-
-
-
-                <td>
-
-
-
-                    <div class="model-name">${p.model}</div>
-
-
-
-                    <span style="font-size:0.8rem; color:#888;">${p.series}</span>
-
-
-
+                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 4px; word-break: keep-all;">${p.model}</div>
+                    <span style="font-size:0.75rem; color:#64748b; background: #f8fafc; padding: 2px 6px; border-radius: 4px; word-break: keep-all;">${p.series}</span>
                 </td>
-
-
-
-                <td class="price-col text-success">${fmt(priceS)}</td>
-
-
-
-                <td class="price-col">${fmt(priceA)}</td>
-
-
-
-                <td class="price-col">${fmt(priceB)}</td>
-
-
-
-                <td class="price-col text-danger desktop-only">${fmt(priceC)}</td>
-
-
-
+                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: middle;">
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex-wrap: nowrap;">
+                        <span style="font-weight: 700; color: #3b82f6; font-size: 0.95rem; white-space: nowrap; word-break: keep-all;">
+                            ${priceText}
+                        </span>
+                        <a href="quote.html?model=${encodeURIComponent(p.model)}" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 0.75rem; font-weight: 600; padding: 5px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; flex-shrink: 0; transition: background 0.2s, transform 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#eff6ff'; this.style.transform='translateY(0)'">
+                            간편견적 <i class="ri-arrow-right-s-line"></i>
+                        </a>
+                    </div>
+                </td>
             `;
-
-
-
             tableBody.appendChild(tr);
-
-
-
         });
 
 
@@ -2536,7 +2468,7 @@ async function initPriceList() {
 
 
 
-        const clickedBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => b.getAttribute('onclick')?.includes(brand));
+        const clickedBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => b.getAttribute('onclick')?.includes(brand) || b.dataset.brand === brand);
 
 
 
@@ -2618,37 +2550,71 @@ async function initDeepWizard() {
 
     const loadingOverlay = document.getElementById('wizard-loading');
 
+    // Restore pending quote after login (skip if Naver callback is processing)
+    const pendingQuoteStr = sessionStorage.getItem('pendingQuote');
+    if (pendingQuoteStr && !window.location.hash.includes('access_token')) {
+        try {
+            currentQuote = JSON.parse(pendingQuoteStr);
+            sessionStorage.removeItem('pendingQuote');
+            // Slight delay to ensure auth state and DOM are ready before navigating
+            setTimeout(() => {
+                goToStep('auth');
+            }, 500);
+        } catch(e) {
+            console.error("Error restoring pending quote", e);
+        }
+    }    // Global Navigation
 
 
 
+    // Initialize history state on first load if not set
+    if (!history.state || !history.state.step) {
+        window.initialAdsHash = window.location.hash; // Preserve hash for Google Ads processing
+        const h = window.initialAdsHash;
+        if (h === '#apple' || h === '#samsung' || h === '#iphone' || h === '#galaxy' || h === '#step-1-apple' || h === '#step-1-samsung') {
+            history.replaceState({ step: 1 }, '', h);
+        } else {
+            history.replaceState({ step: 1 }, '', '#step-1');
+        }
+    }
 
+    // Handle browser Back/Forward buttons
+    if (!window._wizardPopStateAttached) {
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.step) {
+                // Prevent going to a step if no brand is selected, except step 1
+                if (e.state.step !== 1 && (!currentQuote || !currentQuote.brand)) {
+                    goToStep(1, true);
+                } else {
+                    goToStep(e.state.step, true);
+                }
+            } else {
+                goToStep(1, true);
+            }
+        });
+        window._wizardPopStateAttached = true;
+    }
 
-
-    // Global Navigation
-
-
-
-    window.goToStep = (step) => {
-
-
-
+    window.goToStep = (step, isHistoryNav = false) => {
         console.log("Navigating to step:", step);
 
-
+        // Update URL hash unless this was triggered by a back/forward button (popstate)
+        if (!isHistoryNav) {
+            const currentUrl = new URL(window.location.href);
+            if (currentQuote && currentQuote.brand) {
+                currentUrl.searchParams.set('brand', currentQuote.brand);
+            }
+            currentUrl.hash = 'step-' + step;
+            history.pushState({ step: step }, '', currentUrl.pathname + currentUrl.search + currentUrl.hash);
+        }
 
         document.querySelectorAll('.wizard-step').forEach(s => {
-
-
-
             s.classList.remove('active');
-
-
-
             s.style.display = 'none';
-
-
-
         });
+
+        // Scroll to top of the page when navigating between steps to prevent being stuck at the bottom
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
 
 
@@ -2683,6 +2649,54 @@ async function initDeepWizard() {
         if (target) {
             target.style.display = 'block';
             setTimeout(() => target.classList.add('active'), 10);
+            
+            if (step === 'auth') {
+                const localUserStr = localStorage.getItem('user_info');
+                let isMember = false;
+                let memberName = '';
+                let memberPhone = '';
+
+                if (localUserStr) {
+                    try {
+                        const localUser = JSON.parse(localUserStr);
+                        if (localUser.nickname) memberName = localUser.nickname;
+                        if (localUser.phone || localUser.phoneNumber) memberPhone = localUser.phone || localUser.phoneNumber;
+                        isMember = true;
+                    } catch(e) {}
+                }
+                if (typeof window.auth !== 'undefined' && window.auth.currentUser) {
+                    isMember = true;
+                } else if (typeof auth !== 'undefined' && auth.currentUser) {
+                    isMember = true;
+                }
+
+                const viewNonMember = document.getElementById('view-non-member');
+                const viewMember = document.getElementById('view-member');
+                const nameInput = document.getElementById('auth-name');
+                const phoneInput = document.getElementById('auth-phone');
+
+                if (isMember) {
+                    if (viewNonMember) viewNonMember.style.display = 'none';
+                    if (viewMember) viewMember.style.display = 'block';
+
+                    if (nameInput) { 
+                        nameInput.value = memberName; 
+                        nameInput.readOnly = false; 
+                    }
+                    if (phoneInput) { 
+                        phoneInput.value = memberPhone; 
+                        phoneInput.readOnly = false; 
+                    }
+                    window.isPhoneVerified = true;
+                } else {
+                    if (viewNonMember) viewNonMember.style.display = 'block';
+                    if (viewMember) viewMember.style.display = 'none';
+                    
+                    if (nameInput) { nameInput.value = ''; nameInput.readOnly = true; }
+                    if (phoneInput) { phoneInput.value = ''; phoneInput.readOnly = true; }
+                    window.isPhoneVerified = false;
+                }
+            }
 
             // GA4 Funnel Tracking
             if (typeof gtag !== 'undefined') {
@@ -2705,7 +2719,7 @@ async function initDeepWizard() {
             }
 
             // Update progress bar
-            const stepToProgress = { 1: 1, 2: 2, '2-sub': 2, 3: 3, 4: 4, method: 5, 'grade-list': 5, defects: 5, auth: 5, result: 5, 6: 5, 7: 5 };
+            const stepToProgress = { 1: 1, 2: 2, '2-sub': 2, 3: 3, 4: 4, method: 5, 'grade-list': 5, defects: 5, auth: 5, result: 5, 6: 5, 7: 5, 8: 6 };
             const currentProgressStep = stepToProgress[step] || 1;
 
             const isSamsung = currentQuote && currentQuote.brand === 'samsung';
@@ -3797,6 +3811,15 @@ async function initDeepWizard() {
         let fastSearch = urlParams.get('search');
         let fastBrand = urlParams.get('brand');
         
+        const preservedHash = window.initialAdsHash || window.location.hash;
+        if (!fastBrand && preservedHash) {
+            if (preservedHash.includes('apple') || preservedHash.includes('iphone')) {
+                fastBrand = 'apple';
+            } else if (preservedHash.includes('samsung') || preservedHash.includes('galaxy')) {
+                fastBrand = 'samsung';
+            }
+        }
+
         if (fastBrand) {
             setTimeout(() => {
                 const btn = document.querySelector(`.brand-btn[data-brand="${fastBrand}"]`);
@@ -3879,8 +3902,184 @@ async function initDeepWizard() {
             });
         }
 
-        // Auth Step Listeners (Verification Temporarily Disabled)
+        // Auth Step Listeners
         const btnAuthNext = document.getElementById('btn-auth-next');
+        const btnAuthNonmember = document.getElementById('btn-auth-nonmember');
+        const btnAuthLogin = document.getElementById('btn-auth-login');
+        const btnAuthKakao = document.getElementById('btn-auth-kakao');
+        const btnAuthNaver = document.getElementById('btn-auth-naver');
+
+        const savePendingQuote = () => {
+            sessionStorage.setItem('pendingQuote', JSON.stringify(currentQuote));
+        };
+
+        if (btnAuthLogin) {
+            btnAuthLogin.addEventListener('click', () => {
+                savePendingQuote();
+                window.location.href = 'login.html';
+            });
+        }
+
+        if (btnAuthKakao) {
+            btnAuthKakao.addEventListener('click', () => {
+                savePendingQuote();
+                if (!window.Kakao) {
+                    alert('카카오 SDK가 로드되지 않았습니다.');
+                    return;
+                }
+                if (!window.Kakao.isInitialized()) {
+                    window.Kakao.init('9b153d47aec7d5bcf224455284a9e715'); 
+                }
+
+                window.Kakao.Auth.login({
+                    success: function (authObj) {
+                        window.Kakao.API.request({
+                            url: '/v2/user/me',
+                            success: async function (res) {
+                                const kakaoAccount = res.kakao_account;
+                                const email = kakaoAccount?.email || `kakao_${res.id}@kakao.com`;
+                                const nickname = kakaoAccount?.profile?.nickname || `카카오유저${res.id}`;
+                                const uid = `kakao_${res.id}`;
+                                try {
+                                    if (window.db) {
+                                        const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                                        const docRef = doc(window.db, "users", uid);
+                                        const docSnap = await getDoc(docRef);
+                                        const isNewUser = !docSnap.exists();
+
+                                        await setDoc(docRef, {
+                                            email: email,
+                                            nickname: nickname,
+                                            uid: uid,
+                                            provider: 'kakao',
+                                            createdAt: new Date(),
+                                            role: 'user'
+                                        }, { merge: true });
+
+                                        // 알림톡 발송 (카카오 연락처 제공 동의 시)
+                                        if (isNewUser && kakaoAccount.phone_number && window.triggerFrontendAlimtalk) {
+                                            let phoneRaw = kakaoAccount.phone_number;
+                                            if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
+                                            window.triggerFrontendAlimtalk("signup", phoneRaw, {
+                                                name: nickname,
+                                                provider: 'kakao'
+                                            });
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Firestore save kakao user error:', e);
+                                }
+
+                                const userInfo = { email, nickname, provider: 'kakao', uid };
+                                localStorage.setItem('user_info', JSON.stringify(userInfo));
+                                if (typeof window.updateNavbar === 'function') window.updateNavbar(userInfo);
+                                
+                                goToStep('auth');
+                            },
+                            fail: function (error) {
+                                alert('카카오 정보 가져오기에 실패했습니다.');
+                            }
+                        });
+                    },
+                    fail: function (err) {
+                        alert("카카오 로그인에 실패했습니다.");
+                    }
+                });
+            });
+        }
+
+        if (btnAuthNaver) {
+            btnAuthNaver.addEventListener('click', (e) => {
+                e.preventDefault();
+                savePendingQuote();
+                
+                const clientId = "2DbzH9zYF4ObguujOS0U";
+                const callbackUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+                const state = Math.random().toString(36).substring(2, 15);
+                
+                // Directly redirect to Naver login
+                const authorizeUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=token&client_id=${clientId}&redirect_uri=${callbackUrl}&state=${state}`;
+                window.location.href = authorizeUrl;
+            });
+        }
+
+        if (btnAuthNonmember) {
+            btnAuthNonmember.addEventListener('click', () => {
+                if (!window.IMP) {
+                    alert("인증 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+                    return;
+                }
+                const IMP = window.IMP;
+                IMP.init("imp25541365");
+
+                IMP.certification({
+                    merchant_uid: "cert_" + new Date().getTime(),
+                    bypass: {
+                        inicisUnified: {
+                            directAgency: "PASS",
+                            flgFixedUser: "N"
+                        }
+                    }
+                }, async function (rsp) {
+                    if (rsp.success) {
+                        btnAuthNonmember.textContent = "인증 확인 중...";
+                        btnAuthNonmember.disabled = true;
+
+                        try {
+                            const res = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/portoneApi/verify", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ imp_uid: rsp.imp_uid })
+                            });
+                            const result = await res.json();
+                            
+                            if (result.success && result.data) {
+                                const nameInput = document.getElementById('auth-name');
+                                const phoneInput = document.getElementById('auth-phone');
+                                
+                                if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = true; }
+                                if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
+                                
+                                window.isPhoneVerified = true;
+                                
+                                // Switch views
+                                document.getElementById('view-non-member').style.display = 'none';
+                                document.getElementById('view-member').style.display = 'block';
+                                
+                                btnAuthNonmember.textContent = "비회원으로 휴대폰 본인인증하기";
+                                btnAuthNonmember.disabled = false;
+                                
+                                alert("본인인증이 완료되었습니다.");
+
+                                // --- Alimtalk Trigger (회원가입시) ---
+                                if (window.triggerFrontendAlimtalk) {
+                                    let providerStr = '본인인증';
+                                    try {
+                                        const localUser = JSON.parse(localStorage.getItem('user_info'));
+                                        if (localUser && localUser.provider) providerStr = localUser.provider;
+                                    } catch(e) {}
+                                    
+                                    window.triggerFrontendAlimtalk("signup", result.data.phone, {
+                                        name: result.data.name,
+                                        provider: providerStr
+                                    });
+                                }
+                            } else {
+                                throw new Error(result.error || "인증 정보 조회 실패");
+                            }
+                        } catch (err) {
+                            console.error("Verification error:", err);
+                            alert("본인인증 처리 중 오류가 발생했습니다: " + err.message);
+                            btnAuthNonmember.textContent = "비회원으로 휴대폰 본인인증하기";
+                            btnAuthNonmember.disabled = false;
+                        }
+                    } else {
+                        alert("인증에 실패하였습니다: " + rsp.error_msg);
+                    }
+                });
+            });
+        }
+
 
         if (btnAuthNext) {
             btnAuthNext.addEventListener('click', () => {
@@ -3889,7 +4088,12 @@ async function initDeepWizard() {
                 const agreeTerms = document.getElementById('agree-terms').checked;
 
                 if (!name || !phone) {
-                    alert('이름과 휴대폰 번호를 모두 입력해주세요.');
+                    alert('휴대폰 본인인증을 완료해주세요.');
+                    return;
+                }
+
+                if (!window.isPhoneVerified) {
+                    alert('휴대폰 본인인증을 진행해 주세요.');
                     return;
                 }
 
@@ -4275,7 +4479,12 @@ async function initDeepWizard() {
             if (p.series) specificSeriesSet.add(p.series);
         });
 
-        const specificSeriesList = Array.from(specificSeriesSet).sort((a, b) => b.localeCompare(a));
+        const specificSeriesList = Array.from(specificSeriesSet).sort((a, b) => {
+            const numA = parseInt(a.replace(/[^0-9]/g, ''), 10) || 0;
+            const numB = parseInt(b.replace(/[^0-9]/g, ''), 10) || 0;
+            if (numA !== numB) return numB - numA;
+            return b.localeCompare(a);
+        });
         if (specificSeriesList.length === 0) {
             container.innerHTML = '<div>해당 카테고리의 모델이 없습니다.</div>';
             return;
@@ -4476,11 +4685,11 @@ async function initDeepWizard() {
             customerMemo: memo,
 
             userId: (() => {
-                if (auth.currentUser && auth.currentUser.uid) return auth.currentUser.uid;
                 try {
                     const localUser = JSON.parse(localStorage.getItem('user_info'));
                     if (localUser && localUser.uid) return localUser.uid;
                 } catch(e) {}
+                if (auth.currentUser && auth.currentUser.uid) return auth.currentUser.uid;
                 return 'anonymous';
             })(),
 
@@ -4523,6 +4732,20 @@ async function initDeepWizard() {
             await addDoc(collection(db, "quotes"), payload);
             window.trackFunnel("quote_complete");
 
+            // --- Alimtalk Trigger (방문택배 or 직접발송) ---
+            if (window.triggerFrontendAlimtalk) {
+                if (payload.deliveryMethod === 'courier') {
+                    window.triggerFrontendAlimtalk("quote_courier", payload.customerPhone, {
+                        name: payload.customerName,
+                        pickupDate: payload.pickupDate,
+                        email: payload.userId !== 'anonymous' ? '인증된 계정' : '미인증',
+                        address: payload.customerAddress
+                    });
+                } else if (payload.deliveryMethod === 'cvs') {
+                    window.triggerFrontendAlimtalk("quote_cvs", payload.customerPhone, {});
+                }
+            }
+
             // --- NAVER 신청완료(lead) SCRIPT ---
             if(window.wcs){
                 window.wcs_add = window.wcs_add || {};
@@ -4547,9 +4770,36 @@ async function initDeepWizard() {
                     'event_label': payload.modelName || 'Unknown Model',
 
                     'value': payload.expectedPrice || 0
-
                 });
 
+                const isIphone = (payload.brand && payload.brand.toLowerCase() === 'apple') || 
+                                 (payload.series && payload.series.includes('아이폰')) ||
+                                 (payload.model && payload.model.includes('아이폰'));
+                const isSamsung = (payload.brand && payload.brand.toLowerCase() === 'samsung') || 
+                                  (payload.brand === '삼성') || 
+                                  (payload.series && payload.series.includes('갤럭시')) ||
+                                  (payload.model && payload.model.includes('갤럭시'));
+
+                // --- Google Ads Conversion Tracking (아이폰/삼성 개별) ---
+                if (isIphone) {
+                    console.log("🔥 [Google Ads] 아이폰 매입 신청 전환 발생 (QL8CCL-Ur68cEIK6p6FD)");
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-18055027970/QL8CCL-Ur68cEIK6p6FD',
+                        'value': payload.price || payload.expectedPrice || 1.0,
+                        'currency': 'KRW',
+                        'transaction_id': payload.orderId || ''
+                    });
+                } else if (isSamsung) {
+                    console.log("🔥 [Google Ads] 삼성(갤럭시) 매입 신청 전환 발생 (EYqmCNfnrq8cEIK6p6FD)");
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-18055027970/EYqmCNfnrq8cEIK6p6FD',
+                        'value': payload.price || payload.expectedPrice || 1.0,
+                        'currency': 'KRW',
+                        'transaction_id': payload.orderId || ''
+                    });
+                } else {
+                    console.log("⚠️ [Google Ads] 전환 트리거 스킵됨 - 알 수 없는 브랜드:", payload.brand);
+                }
             }
 
 
@@ -4675,17 +4925,8 @@ async function initDeepWizard() {
 
 
             } else if (deliveryMethod === 'cvs') {
-
-
-
                 msgTitle = "🏪 편의점/직접 택배 안내";
-
-
-
-                msgDesc = "아래 주소로 기기를 <strong>착불</strong>로 보내주세요.";
-
-
-
+                msgDesc = "아래 주소로 기기를 발송해 주세요.";
             }
 
 
@@ -4706,18 +4947,10 @@ async function initDeepWizard() {
 
 
 
-                <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0;">
-
-
-
-                    <strong>부산시 동천로 116 한신밴빌딩 1003호</strong><br>
-
-
-
-                    <span style="font-size: 0.9rem; color: #666;">Tel: 010-3263-5672</span>
-
-
-
+                <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0; font-size: 0.95rem; line-height: 1.6;">
+                    받는 이: <strong>쉐라폰</strong><br>
+                    주소: <strong>부산시 부산진구 동천로 116 한신밴빌딩 1003호</strong><br>
+                    연락처: <span style="color: #666;">010-3263-5672</span>
                 </div>
 
 
@@ -5673,9 +5906,6 @@ async function renderReviews(page) {
 
 
         const safeName = data.userName || '익명'; // Restore the missing variable
-
-
-
         let displayTitle = safeName; // Default to user name
 
 
@@ -6033,30 +6263,18 @@ function renderPagination() {
 
 
 
-    for (let i = 1; i <= totalPages; i++) {
+    let startPage = Math.max(1, currentReviewPage - 1);
+    let endPage = Math.min(totalPages, startPage + 2);
+    if (endPage - startPage < 2 && startPage > 1) {
+        startPage = Math.max(1, endPage - 2);
+    }
 
-
-
+    for (let i = startPage; i <= endPage; i++) {
         const pageBtn = document.createElement('button');
-
-
-
         pageBtn.className = `page-btn ${i === currentReviewPage ? 'active' : ''}`;
-
-
-
         pageBtn.textContent = i;
-
-
-
         pageBtn.onclick = () => goToReviewPage(i);
-
-
-
         paginationContainer.appendChild(pageBtn);
-
-
-
     }
 
 
@@ -7296,5 +7514,79 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (e) {
         console.error("Failed to fetch global popup data:", e);
+    }
+});
+
+// Added for individual shipping notification
+window.notifyDispatch = async function(docId) {
+    const trackingNumber = prompt("택배 발송을 완료하셨나요?\\n원활한 확인을 위해 운송장 번호를 입력해 주세요.\\n(입력을 생략하고 확인을 누르셔도 발송 완료 처리가 됩니다.)", "");
+    if (trackingNumber === null) return; // User cancelled
+    
+    try {
+        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+        const docRef = doc(db, "quotes", docId);
+        
+        let updateData = { status: 'pickup' };
+        if (trackingNumber.trim() !== '') {
+            updateData.trackingNumber = trackingNumber.trim();
+        }
+        
+        await updateDoc(docRef, updateData);
+        alert("발송 알림이 성공적으로 처리되었습니다. (상태가 '수거중'으로 변경됩니다.)");
+        
+        location.reload();
+    } catch(e) {
+        console.error("Failed to update dispatch status:", e);
+        alert("처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    }
+};
+
+window.initPriceList = initPriceList;
+
+
+// --- Exchange Form Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    const exchangeForm = document.getElementById('exchangeForm');
+    if (exchangeForm) {
+        exchangeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!auth.currentUser) {
+                alert('로그인이 필요한 서비스입니다.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const submitBtn = exchangeForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerText = '신청 접수 중...';
+
+            try {
+                const docData = {
+                    uid: auth.currentUser.uid,
+                    my_name: document.getElementById('ex_my_name').value,
+                    my_phone: document.getElementById('ex_my_phone').value,
+                    my_device: document.getElementById('ex_my_device').value,
+                    partner_name: document.getElementById('ex_partner_name').value,
+                    partner_phone: document.getElementById('ex_partner_phone').value,
+                    partner_device: document.getElementById('ex_partner_device').value,
+                    diff_type: document.getElementById('ex_diff_type').value,
+                    diff_amount: document.getElementById('ex_diff_amount') ? (document.getElementById('ex_diff_amount').value || 0) : 0,
+                    memo: document.getElementById('ex_memo') ? document.getElementById('ex_memo').value : '',
+                    status: 'pending_deposit',
+                    createdAt: serverTimestamp()
+                };
+
+                await addDoc(collection(db, "exchange_applications"), docData);
+                
+                alert('안심 교환 신청이 완료되었습니다! 전문 상담원이 곧 해피콜을 드릴 예정입니다.');
+                window.location.href = 'mypage.html';
+            } catch (error) {
+                console.error("Error adding exchange document: ", error);
+                alert('신청 중 오류가 발생했습니다. 고객센터로 문의해주세요.');
+                submitBtn.disabled = false;
+                submitBtn.innerText = '안심 교환 신청하기';
+            }
+        });
     }
 });
