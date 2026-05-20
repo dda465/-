@@ -367,6 +367,80 @@ window.trackFunnel = async (stepName) => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- Mobile Auth Callback Handler ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const impUid = urlParams.get('imp_uid');
+    const authStep = urlParams.get('step');
+    
+    if (impUid && authStep === 'auth_callback') {
+        try {
+            const res = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/portoneApi/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imp_uid: impUid })
+            });
+            const result = await res.json();
+            
+            if (result.success && result.data) {
+                // Remove imp_uid from URL to prevent infinite reloads if refreshed
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Wait for elements to be ready
+                setTimeout(async () => {
+                    const nameInput = document.getElementById('auth-name');
+                    const phoneInput = document.getElementById('auth-phone');
+                    
+                    if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = true; }
+                    if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
+                    
+                    window.isPhoneVerified = true;
+
+                    // --- SAVE GUEST TO USERS COLLECTION ---
+                    try {
+                        const { doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const guestUid = 'guest_' + result.data.phone;
+                        await setDoc(doc(window.db || db, "users", guestUid), {
+                            email: '비회원',
+                            nickname: result.data.name,
+                            phone: result.data.phone,
+                            provider: 'guest',
+                            role: 'guest',
+                            createdAt: serverTimestamp()
+                        }, { merge: true });
+                    } catch (e) {
+                        console.error("Failed to save guest user:", e);
+                    }
+                    
+                    // Switch views
+                    const viewNonMember = document.getElementById('view-non-member');
+                    const viewMember = document.getElementById('view-member');
+                    if (viewNonMember) viewNonMember.style.display = 'none';
+                    if (viewMember) viewMember.style.display = 'block';
+                    
+                    const btnAuthNonmember = document.getElementById('btn-auth-nonmember');
+                    if (btnAuthNonmember) {
+                        btnAuthNonmember.textContent = "비회원으로 휴대폰 본인인증하기";
+                        btnAuthNonmember.disabled = false;
+                    }
+                    
+                    alert("본인인증이 완료되었습니다.");
+                    
+                    // Restore quote state if exists
+                    const savedQuote = sessionStorage.getItem('pendingQuote');
+                    if (savedQuote) {
+                        currentQuote = JSON.parse(savedQuote);
+                        window.goToStep(7); // Jump to auth step
+                    }
+                }, 500);
+                return; // Stop further initialization for this flow until timeout completes
+            } else {
+                alert("본인인증을 실패했거나 취소되었습니다.");
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } catch (e) {
+            console.error("Mobile auth verify error:", e);
+        }
+    }
     // --- RESUME LOGIC ---
     const resumeDocId = new URLSearchParams(window.location.search).get('resume_doc_id');
     if (resumeDocId) {
@@ -4044,6 +4118,7 @@ async function initDeepWizard() {
 
         if (btnAuthNonmember) {
             btnAuthNonmember.addEventListener('click', () => {
+                savePendingQuote(); // Save state before redirecting on mobile!
                 if (!window.IMP) {
                     alert("인증 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
                     return;
@@ -4053,6 +4128,7 @@ async function initDeepWizard() {
 
                 IMP.certification({
                     merchant_uid: "cert_" + new Date().getTime(),
+                    m_redirect_url: window.location.origin + window.location.pathname + "?step=auth_callback",
                     bypass: {
                         inicisUnified: {
                             directAgency: "PASS",
