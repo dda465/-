@@ -4106,19 +4106,7 @@ async function initDeepWizard() {
                                 
                                 alert("본인인증이 완료되었습니다.");
 
-                                // --- Alimtalk Trigger (회원가입시) ---
-                                if (window.triggerFrontendAlimtalk) {
-                                    let providerStr = '본인인증';
-                                    try {
-                                        const localUser = JSON.parse(localStorage.getItem('user_info'));
-                                        if (localUser && localUser.provider) providerStr = localUser.provider;
-                                    } catch(e) {}
-                                    
-                                    window.triggerFrontendAlimtalk("signup", result.data.phone, {
-                                        name: result.data.name,
-                                        provider: providerStr
-                                    });
-                                }
+
                             } else {
                                 throw new Error(result.error || "인증 정보 조회 실패");
                             }
