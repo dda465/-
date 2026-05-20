@@ -848,43 +848,25 @@ wcs_do();
 
 
 
+    <style>
+        .mobile-only { display: none !important; }
+        .pc-only { display: inline-flex; }
+        @media (max-width: 768px) {
+            .mobile-only { display: flex !important; }
+            .pc-only { display: none !important; }
+            
+            .navbar { order: 1; position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
+            .navbar .container { padding: 8px 15px; display: flex; flex-direction: row !important; justify-content: space-between; align-items: center; width: 100%;}
+        }
+    </style>
     <nav class="navbar">
-
-
-
-        <div class="container">
-
-
-
+        <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <a href="index.html" class="logo">
-
-
-
                 <img src="sr_logo.webp" alt="SR 로고" class="logo-icon" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
-
-
-
-                <span class="logo-text-wrapper"
-
-
-
-                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 24px; color: #2563EB; margin-left: 8px;">
-
-
-
-                    쉐라폰
-
-
-
-                </span>
-
-
-
+                <span class="logo-text-wrapper" style="font-family: 'Pretendard', sans-serif; font-weight: 800; font-size: 24px; color: #1E3A8A; margin-left: 8px; letter-spacing: -1px;">쉐라폰</span>
             </a>
 
-
-
-                        <!-- Custom Language Selector -->
+            <!-- Custom Language Selector -->
             <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom_lang_select" class="lang-select notranslate">
@@ -896,33 +878,21 @@ wcs_do();
                     <option value="ru">Русский</option>
                 </select>
             </div>
-            <div class="nav-links">
 
-
-
-                <a href="quote.html">내 폰 판매</a>
-
-
-                <a href="reviews.html" class="active">이용 후기</a>
-
-
-
-                <a href="login.html" id="nav-login-link">로그인</a>
-
-
-
+            <!-- Mobile App Actions -->
+            <div class="mobile-only" style="align-items:center;">
+                <a href="quote.html" style="font-size:0.8rem; font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:3px 8px; border-radius:16px; margin-right:6px; white-space:nowrap; flex-shrink:0; min-width:max-content;">판매하기</a>
+                <a href="login.html" id="mobile-auth-link" style="font-size:0.8rem; font-weight:700; color:#1e293b; border: 1px solid #e2e8f0; padding:3px 8px; border-radius:16px; white-space:nowrap; flex-shrink:0; min-width:max-content;">로그인</a>
+                <a href="admin.html" id="mobile-admin-btn" style="font-size:1.4rem; color:#e11d48; display:none; margin-left:6px;"><i class="ri-dashboard-2-line"></i></a>
             </div>
 
-
-
-            <a href="quote.html" class="btn btn-primary">판매하기</a>
-
-
-
+            <div class="nav-links pc-only">
+                <a href="quote.html">내 폰 판매</a>
+                <a href="reviews.html" class="active">이용 후기</a>
+                <a href="login.html" id="nav-login-link">로그인</a>
+            </div>
+            <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
         </div>
-
-
-
     </nav>
 
 

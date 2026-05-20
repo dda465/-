@@ -452,7 +452,17 @@ wcs_do();
 
 
 <body>
-    <!-- Navbar -->
+    <style>
+        .mobile-only { display: none !important; }
+        .pc-only { display: inline-flex; }
+        @media (max-width: 768px) {
+            .mobile-only { display: flex !important; }
+            .pc-only { display: none !important; }
+            
+            .navbar { order: 1; position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
+            .navbar .container { padding: 8px 15px; display: flex; flex-direction: row !important; justify-content: space-between; align-items: center; width: 100%;}
+        }
+    </style>
     <nav class="navbar">
         <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
             <a href="index.html" class="logo">
@@ -472,6 +482,14 @@ wcs_do();
                     <option value="ru">Русский</option>
                 </select>
             </div>
+
+            <!-- Mobile App Actions -->
+            <div class="mobile-only" style="align-items:center;">
+                <a href="quote.html" style="font-size:0.8rem; font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:3px 8px; border-radius:16px; margin-right:6px; white-space:nowrap; flex-shrink:0; min-width:max-content;">판매하기</a>
+                <a href="login.html" id="mobile-auth-link" style="font-size:0.8rem; font-weight:700; color:#1e293b; border: 1px solid #e2e8f0; padding:3px 8px; border-radius:16px; white-space:nowrap; flex-shrink:0; min-width:max-content;">로그인</a>
+                <a href="admin.html" id="mobile-admin-btn" style="font-size:1.4rem; color:#e11d48; display:none; margin-left:6px;"><i class="ri-dashboard-2-line"></i></a>
+            </div>
+
             <div class="nav-links pc-only">
                 <a href="quote.html">내 폰 판매</a>
                 <a href="reviews.html">이용 후기</a>
