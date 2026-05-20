@@ -4072,7 +4072,12 @@ async function initDeepWizard() {
                 savePendingQuote();
                 
                 if (window.naverLoginInst && typeof window.naverLoginInst.generateAuthorizeUrl === 'function') {
-                    window.location.href = window.naverLoginInst.generateAuthorizeUrl();
+                    const url = window.naverLoginInst.generateAuthorizeUrl();
+                    const stateMatch = url.match(/state=([^&]+)/);
+                    if (stateMatch) {
+                        localStorage.setItem('com.naver.nid.oauth.state_token', stateMatch[1]);
+                    }
+                    window.location.href = url;
                 } else {
                     const naverBtn = document.querySelector('#naverIdLogin a') || document.querySelector('#naverIdLogin_loginButton');
                     if (naverBtn && naverBtn.href) {
@@ -4131,10 +4136,10 @@ async function initDeepWizard() {
                                 try {
                                     const { doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                                     const guestUid = 'guest_' + result.data.phone;
-                                    await setDoc(doc(window.db, "users", guestUid), {
+                                    await setDoc(doc(db, "users", guestUid), {
                                         email: '비회원',
                                         nickname: result.data.name,
-                                        phone: result.data.phone,
+                                        phoneNumber: result.data.phone,
                                         provider: 'guest',
                                         role: 'guest',
                                         createdAt: serverTimestamp()
