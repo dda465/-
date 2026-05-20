@@ -1233,31 +1233,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-            const naverLogin = new naver.LoginWithNaverId({
-
-
-
+            window.naverLoginInst = new naver.LoginWithNaverId({
                 clientId: "2DbzH9zYF4ObguujOS0U",
-
-
-
-                callbackUrl: window.location.origin + "/index.html",
-
-
-
+                callbackUrl: window.location.origin + window.location.pathname,
                 isPopup: false,
-
-
-
+                loginButton: { color: "green", type: 3, height: 40 },
                 callbackHandle: true
-
-
-
             });
-
-
-
-            naverLogin.init();
+            window.naverLoginInst.init();
 
 
 
@@ -1267,30 +1250,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Run immediately since script.js is a module and executes after HTML parse
             if (window.location.hash.includes('access_token')) {
-
-
-
-                    naverLogin.getLoginStatus(async function (status) {
-
-
-
+                    window.naverLoginInst.getLoginStatus(async function (status) {
                         if (status) {
-
-
-
                             // Some Naver accounts might not provide an email, use an empty string instead of undefined to prevent Firebase crashes.
-
-
-
-                            const email = naverLogin.user.getEmail() || "";
-
-
-
-                            const nickname = naverLogin.user.getNickName() || naverLogin.user.getName() || `naveryuser${naverLogin.user.getId()}`;
-
-
-
-                            const uid = `naver_${naverLogin.user.getId()}`;
+                            const email = window.naverLoginInst.user.getEmail() || "";
+                            const nickname = window.naverLoginInst.user.getNickName() || window.naverLoginInst.user.getName() || `naveryuser${window.naverLoginInst.user.getId()}`;
+                            const uid = `naver_${window.naverLoginInst.user.getId()}`;
 
 
 
@@ -1355,8 +1320,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     }, { merge: true });
 
                                     // 알림톡 발송 (네이버 연락처 제공 동의 시)
-                                    if (isNewUser && naverLogin.user.getMobile && naverLogin.user.getMobile() && window.triggerFrontendAlimtalk) {
-                                        let phoneRaw = naverLogin.user.getMobile();
+                                    if (isNewUser && window.naverLoginInst.user.getMobile && window.naverLoginInst.user.getMobile() && window.triggerFrontendAlimtalk) {
+                                        let phoneRaw = window.naverLoginInst.user.getMobile();
                                         if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
                                         window.triggerFrontendAlimtalk("signup", phoneRaw, {
                                             name: nickname,
@@ -4106,11 +4071,17 @@ async function initDeepWizard() {
                 e.preventDefault();
                 savePendingQuote();
                 
-                const naverBtn = document.querySelector('#naverIdLogin a');
-                if (naverBtn) {
-                    naverBtn.click();
+                if (window.naverLoginInst && typeof window.naverLoginInst.generateAuthorizeUrl === 'function') {
+                    window.location.href = window.naverLoginInst.generateAuthorizeUrl();
                 } else {
-                    alert("네이버 로그인 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+                    const naverBtn = document.querySelector('#naverIdLogin a') || document.querySelector('#naverIdLogin_loginButton');
+                    if (naverBtn && naverBtn.href) {
+                        window.location.href = naverBtn.href;
+                    } else if (naverBtn && naverBtn.click) {
+                        naverBtn.click();
+                    } else {
+                        alert("네이버 로그인 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+                    }
                 }
             });
         }
