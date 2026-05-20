@@ -1705,6 +1705,8 @@ wcs_do();
                         }
                     } else if (data.deliveryMethod === 'courier') {
                         deliveryInfo = `<br><span style="font-size: 0.8rem; color: #4CAF50; margin-top: 4px; display: inline-block;">[방문수거] (희망일: ${data.pickupDate || '미정'})</span>`;
+                    } else if (data.deliveryMethod === 'pending') {
+                        deliveryInfo = `<br><span style="font-size: 0.85rem; color: #e11d48; font-weight: 700; margin-top: 4px; display: inline-block;">[배송 방법 미입력]</span>`;
                     }
                     if (data.trackingNumber) {
                         if (data.trackingNumber === '미입력') {
@@ -1715,7 +1717,16 @@ wcs_do();
                     }
 
                     let dispatchBtnHtml = '';
-                    if (data.deliveryMethod === 'cvs' && currentStatus === 'receipt') {
+                    if (data.deliveryMethod === 'pending') {
+                        dispatchBtnHtml = `
+                            <div style="margin-top: 15px; text-align: center;">
+                                <a href="quote.html?resume_doc_id=${doc.id}" style="width: 100%; padding: 12px; background: #e11d48; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 6px rgba(225, 29, 72, 0.2);">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">local_shipping</span>
+                                    기기 발송 방법 확정하기
+                                </a>
+                            </div>
+                        `;
+                    } else if (data.deliveryMethod === 'cvs' && currentStatus === 'receipt') {
                         dispatchBtnHtml = `
                             <div style="margin-top: 15px; text-align: center;">
                                 <button onclick="window.notifyDispatch('${doc.id}')" style="width: 100%; padding: 12px; background: #fff; color: #2563EB; border: 1px solid #2563EB; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
