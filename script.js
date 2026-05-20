@@ -432,7 +432,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         window.goToStep(7); // Jump to auth step
                     }
                 }, 500);
-                return; // Stop further initialization for this flow until timeout completes
             } else {
                 alert("본인인증을 실패했거나 취소되었습니다.");
                 window.history.replaceState({}, document.title, window.location.pathname);
