@@ -460,9 +460,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Hide all other steps, show step 8
                 setTimeout(() => {
                     goToStep(8);
-                    const header = document.querySelector('#wizard-step-8 h2');
-                    if (header) {
-                        header.innerHTML = `신청이 1차 완료되었습니다!<br><span style="font-size:1.2rem; color:#64748b; font-weight: 500;">(${data.brand} ${data.model})</span>`;
+                    const priceEl = document.getElementById('step8-expected-price');
+                    if (priceEl) {
+                        priceEl.innerHTML = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(data.price)}원`;
                     }
                     
                     // We also need to pre-fill name/phone from data if possible so alimtalk works
@@ -4262,6 +4262,12 @@ async function initDeepWizard() {
                         }).catch(e => console.error("Telegram Error:", e));
                     } catch(e) {}
                     
+                    // Set expected price
+                    const priceEl = document.getElementById('step8-expected-price');
+                    if (priceEl) {
+                        priceEl.innerHTML = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원`;
+                    }
+                    
                     // Proceed to step 8 (Delivery selection)
                     goToStep(8);
                     
@@ -4819,13 +4825,26 @@ async function initDeepWizard() {
                 if (pickupElem) pickupDate = pickupElem.value;
             }
 
+            const errorMsg = document.getElementById('delivery-error-msg');
+            if (errorMsg) errorMsg.style.display = 'none';
+
             const needsAddress = ['courier', 'pickup'].includes(deliveryMethod);
             if (needsAddress && !address) {
-                alert("수거를 위해 주소를 입력해주세요.");
+                if (errorMsg) {
+                    errorMsg.innerText = "상세 주소가 입력되지 않았습니다.";
+                    errorMsg.style.display = 'block';
+                } else {
+                    alert("수거를 위해 주소를 입력해주세요.");
+                }
                 return;
             }
             if (!accountNum) {
-                alert("정산을 위해 계좌 정보를 입력해주세요.");
+                if (errorMsg) {
+                    errorMsg.innerText = "계좌 정보(은행명 및 계좌번호)가 입력되지 않았습니다.";
+                    errorMsg.style.display = 'block';
+                } else {
+                    alert("정산을 위해 계좌 정보를 입력해주세요.");
+                }
                 return;
             }
 
