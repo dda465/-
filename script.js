@@ -462,7 +462,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     goToStep(8);
                     const priceEl = document.getElementById('step8-expected-price');
                     if (priceEl) {
-                        priceEl.innerHTML = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(data.price)}원`;
+                        let html = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(data.price)}원`;
+                        if (data.priceRangeText) {
+                            html += `<br><span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">${data.priceRangeText}</span>`;
+                        }
+                        priceEl.innerHTML = html;
                     }
                     
                     // We also need to pre-fill name/phone from data if possible so alimtalk works
@@ -3556,16 +3560,44 @@ async function initDeepWizard() {
 
 
         let priceDisplayStr = formatCurrency(finalPrice);
-        const gradeToCheck = (currentQuote.grade || '').toLowerCase();
-        
-        let multiplier = 0;
-        if (gradeToCheck === 'a') multiplier = 1.1;
-        else if (gradeToCheck === 'b') multiplier = 1.2;
-        else if (!['sealed', 's'].includes(gradeToCheck)) multiplier = 1.5;
+        let rangeStr = "";
 
-        if (multiplier > 0) {
-            priceDisplayStr += ' ~ ' + formatCurrency(Math.floor(finalPrice * multiplier));
+        if (isSimpleMode) {
+            let dPrice = 0;
+            let sPrice = 0;
+            if (currentQuote.model.prices) {
+                dPrice = currentQuote.model.prices['d'] || (currentQuote.model.basePrice * 0.2);
+                sPrice = currentQuote.model.prices['s'] || currentQuote.model.basePrice;
+            } else {
+                dPrice = (currentQuote.model.basePrice || 0) * 0.2;
+                sPrice = currentQuote.model.basePrice || 0;
+            }
+            if (currentQuote.storage) {
+                dPrice += (currentQuote.storage.priceAdjustment || 0);
+                sPrice += (currentQuote.storage.priceAdjustment || 0);
+            }
+            dPrice = Math.max(0, Math.floor(dPrice / 1000) * 1000);
+            sPrice = Math.max(0, Math.floor(sPrice / 1000) * 1000);
+            
+            rangeStr = `(${formatCurrency(dPrice)}원 ~ ${formatCurrency(sPrice)}원)`;
+            currentQuote.priceRangeText = rangeStr;
+        } else {
+            const gradeToCheck = (currentQuote.grade || '').toLowerCase();
+            let multiplier = 0;
+            if (gradeToCheck === 'a') multiplier = 1.1;
+            else if (gradeToCheck === 'b') multiplier = 1.2;
+            else if (!['sealed', 's'].includes(gradeToCheck)) multiplier = 1.5;
+
+            if (multiplier > 0) {
+                const maxPrice = Math.floor(finalPrice * multiplier);
+                rangeStr = `(${formatCurrency(finalPrice)}원 ~ ${formatCurrency(maxPrice)}원)`;
+                priceDisplayStr += ' ~ ' + formatCurrency(maxPrice);
+                currentQuote.priceRangeText = rangeStr;
+            } else {
+                currentQuote.priceRangeText = "";
+            }
         }
+        
         document.getElementById('final-price-display').innerText = priceDisplayStr;
 
 
@@ -4099,6 +4131,7 @@ async function initDeepWizard() {
                     grade: currentQuote.grade,
                     conditionType: currentQuote.grade === 'sealed' ? 'sealed' : 'used',
                     price: currentQuote.finalPrice,
+                    priceRangeText: currentQuote.priceRangeText || "",
                     customerName: name,
                     customerPhone: phone,
                     deliveryMethod: 'pending',
@@ -4148,7 +4181,11 @@ async function initDeepWizard() {
                     // Set expected price
                     const priceEl = document.getElementById('step8-expected-price');
                     if (priceEl) {
-                        priceEl.innerHTML = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원`;
+                        let html = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원`;
+                        if (payload.priceRangeText) {
+                            html += `<br><span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">${payload.priceRangeText}</span>`;
+                        }
+                        priceEl.innerHTML = html;
                     }
                     
                     // Proceed to step 8 (Delivery selection)
