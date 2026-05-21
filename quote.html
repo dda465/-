@@ -33,7 +33,7 @@
 
     <meta name="description" content="3분이면 끝! 내 폰의 정확한 판매 금액을 확인하고 바로 판매 신청하세요.">
 
-    <link rel="stylesheet" href="styles.css?v=20260521_1239">
+    <link rel="stylesheet" href="styles.css?v=20260521_1243">
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -1290,13 +1290,13 @@ wcs_do();
         <!-- Step 8: Success & Delivery Selection -->
         <div id="wizard-step-8" class="wizard-step">
             <div id="step8-delivery-section">
-                <div class="step-header">
-                    <h2 style="font-size: 1.3rem; color: #1e293b; margin-bottom: 5px;">배송 전달방법을 선택해주세요</h2>
+                <div class="step-header" style="margin-bottom: 10px; padding-bottom: 0;">
+                    <h2 style="font-size: 1.25rem; color: #1e293b; margin-bottom: 0;">배송 전달방법을 선택해주세요</h2>
                     <div id="step8-expected-price" style="font-size: 1.2rem; color: #2563eb; font-weight: 800; margin-top: 5px; text-align: center;"></div>
                 </div>
                 
                 <!-- Insert Delivery Form from Step 7 here -->
-                <div class="form-container" style="max-width: 500px; margin: 0 auto; margin-top: 10px;">
+                <div class="form-container" style="max-width: 500px; margin: 0 auto; margin-top: 5px;">
                     <!-- Delivery Method Selection -->
                     <div style="margin-bottom: 15px; text-align: left;">
                         <div class="selection-grid" style="grid-template-columns: 1fr;">
@@ -1350,18 +1350,18 @@ wcs_do();
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 15px; text-align: left;">
+                    <div class="text-center">
+                        <div id="delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; font-weight: 700;"></div>
+                        <button id="btn-submit-delivery" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px; margin-bottom: 15px;">기기 발송 방법 확정</button>
+                    </div>
+
+                    <div style="margin-bottom: 10px; text-align: left;">
                         <label style="display:flex; align-items:center; margin-bottom:5px; font-weight:600; cursor:pointer;" onclick="const container = document.getElementById('memo-container'); const isChecked = document.getElementById('memo-toggle').checked; container.style.display = isChecked ? 'block' : 'none';">
                             <input type="checkbox" id="memo-toggle" style="margin-right: 8px; transform: scale(1.2);"> 요청사항 / 메모 남기기 (선택)
                         </label>
                         <div id="memo-container" style="display: none; margin-top: 10px;">
                             <textarea id="customer-memo" class="search-input" rows="3" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;" placeholder="택배 수거 시 요청사항이나 기타 남기실 말씀이 있다면 적어주세요."></textarea>
                         </div>
-                    </div>
-
-                    <div class="text-center">
-                        <div id="delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 15px; display: none; font-weight: 700;"></div>
-                        <button id="btn-submit-delivery" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;">기기 발송 방법 확정</button>
                     </div>
                 </div>
             </div>
@@ -1927,7 +1927,7 @@ wcs_do();
 
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 
-    <script type="module" src="script.js?v=20260521_1239"></script>
+    <script type="module" src="script.js?v=20260521_1243"></script>
 
 
 
