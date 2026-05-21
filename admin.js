@@ -328,7 +328,7 @@ async function loadQuotes() {
             } else if (data.deliveryMethod === 'pending') {
                 deliveryTag = `<br>
                 <span style="font-size: 0.75rem; background: #ffe4e6; color: #e11d48; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: bold;">배송방법 미입력 (이탈)</span>
-                <button onclick="alert('알림톡 발송 기능은 현재 솔라피 연동 개발 중입니다.')" style="font-size: 0.75rem; background: #FEE500; color: #391B1B; padding: 2px 8px; border-radius: 4px; margin-top: 4px; margin-left: 5px; border: none; font-weight: bold; cursor: pointer; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">알림톡 보내기</button>`;
+                <button onclick="sendDropoffAlert('${id}')" style="font-size: 0.75rem; background: #FEE500; color: #391B1B; padding: 2px 8px; border-radius: 4px; margin-top: 4px; margin-left: 5px; border: none; font-weight: bold; cursor: pointer; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">알림톡 보내기</button>`;
             }
 
             let feePaidBtn = '';
@@ -2018,6 +2018,53 @@ async function triggerAlimtalk(quoteData, status) {
         console.error("Alimtalk trigger error:", e);
     }
 }
+
+window.sendDropoffAlert = async (docId) => {
+    if(!confirm("해당 고객에게 이탈 알림톡(이어서 작성하기)을 발송하시겠습니까?")) return;
+    try {
+        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        const docRef = doc(db, "quotes", docId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const phone = data.customerPhone ? data.customerPhone.replace(/-/g, '') : '';
+            if (!phone) {
+                alert("고객 연락처가 없습니다.");
+                return;
+            }
+            
+            const templateId = "KA01TP260521050226974gQEcmCPehop";
+            const resumeLink = `https://sharaphone.com/quote.html?resume_doc_id=${docId}`;
+            
+            // 예상 변수들 포함
+            const variables = {
+                "#{고객명}": data.customerName || "고객",
+                "#{링크}": resumeLink,
+                "#{이어서하기링크}": resumeLink
+            };
+
+            const response = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/alimtalkApi/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone: phone,
+                    templateId: templateId,
+                    variables: variables
+                })
+            });
+            const result = await response.json();
+            if (result.success || (result.data && result.data.messageId)) {
+                alert("이탈 알림톡이 발송되었습니다!");
+            } else {
+                alert("알림톡 발송 실패: " + (result.error || JSON.stringify(result)));
+                console.error(result);
+            }
+        }
+    } catch(e) {
+        alert("알림톡 발송 중 오류 발생: " + e.message);
+        console.error(e);
+    }
+};
 
 window.toggleShippingFee = async (id, isPaid) => {
     if (!id) return;
