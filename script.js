@@ -462,11 +462,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     goToStep(8);
                     const priceEl = document.getElementById('step8-expected-price');
                     if (priceEl) {
-                        let html = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(data.price)}원`;
+                        let mainPriceText = `${new Intl.NumberFormat('ko-KR').format(data.price)}원`;
                         if (data.priceRangeText) {
-                            html += `<br><span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">${data.priceRangeText}</span>`;
+                            mainPriceText = data.priceRangeText.replace(/[()]/g, '');
                         }
-                        priceEl.innerHTML = html;
+                        priceEl.innerHTML = `예상 매입가: ${mainPriceText}`;
                     }
                     
                     // We also need to pre-fill name/phone from data if possible so alimtalk works
@@ -4181,11 +4181,11 @@ async function initDeepWizard() {
                     // Set expected price
                     const priceEl = document.getElementById('step8-expected-price');
                     if (priceEl) {
-                        let html = `예상 매입가: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원`;
+                        let mainPriceText = `${new Intl.NumberFormat('ko-KR').format(payload.price)}원`;
                         if (payload.priceRangeText) {
-                            html += `<br><span style="font-size: 0.9rem; color: #64748b; font-weight: 500;">${payload.priceRangeText}</span>`;
+                            mainPriceText = payload.priceRangeText.replace(/[()]/g, '');
                         }
-                        priceEl.innerHTML = html;
+                        priceEl.innerHTML = `예상 매입가: ${mainPriceText}`;
                     }
                     
                     // Proceed to step 8 (Delivery selection)
