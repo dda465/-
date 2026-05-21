@@ -3559,43 +3559,35 @@ async function initDeepWizard() {
 
 
 
-        let priceDisplayStr = formatCurrency(finalPrice);
+        let priceDisplayStr = "";
         let rangeStr = "";
 
         if (isSimpleMode) {
-            let dPrice = 0;
+            let cPrice = 0;
             let sPrice = 0;
             if (currentQuote.model.prices) {
-                dPrice = currentQuote.model.prices['d'] || (currentQuote.model.basePrice * 0.2);
+                cPrice = currentQuote.model.prices['c'] || (currentQuote.model.basePrice * 0.6);
                 sPrice = currentQuote.model.prices['s'] || currentQuote.model.basePrice;
             } else {
-                dPrice = (currentQuote.model.basePrice || 0) * 0.2;
+                cPrice = (currentQuote.model.basePrice || 0) * 0.6;
                 sPrice = currentQuote.model.basePrice || 0;
             }
             if (currentQuote.storage) {
-                dPrice += (currentQuote.storage.priceAdjustment || 0);
+                cPrice += (currentQuote.storage.priceAdjustment || 0);
                 sPrice += (currentQuote.storage.priceAdjustment || 0);
             }
-            dPrice = Math.max(0, Math.floor(dPrice / 1000) * 1000);
+            cPrice = Math.max(0, Math.floor(cPrice / 1000) * 1000);
             sPrice = Math.max(0, Math.floor(sPrice / 1000) * 1000);
             
-            rangeStr = `(${formatCurrency(dPrice)}원 ~ ${formatCurrency(sPrice)}원)`;
+            rangeStr = `${formatCurrency(cPrice)}원 ~ ${formatCurrency(sPrice)}원`;
+            priceDisplayStr = rangeStr;
             currentQuote.priceRangeText = rangeStr;
         } else {
-            const gradeToCheck = (currentQuote.grade || '').toLowerCase();
-            let multiplier = 0;
-            if (gradeToCheck === 'a') multiplier = 1.1;
-            else if (gradeToCheck === 'b') multiplier = 1.2;
-            else if (!['sealed', 's'].includes(gradeToCheck)) multiplier = 1.5;
-
-            if (multiplier > 0) {
-                const maxPrice = Math.floor(finalPrice * multiplier);
-                rangeStr = `(${formatCurrency(finalPrice)}원 ~ ${formatCurrency(maxPrice)}원)`;
-                priceDisplayStr += ' ~ ' + formatCurrency(maxPrice);
-                currentQuote.priceRangeText = rangeStr;
-            } else {
-                currentQuote.priceRangeText = "";
-            }
+            const minPrice = Math.floor(finalPrice / 100000) * 100000;
+            const maxPrice = minPrice + 99000;
+            rangeStr = `${formatCurrency(minPrice)}원 ~ ${formatCurrency(maxPrice)}원`;
+            priceDisplayStr = rangeStr;
+            currentQuote.priceRangeText = rangeStr;
         }
         
         document.getElementById('final-price-display').innerText = priceDisplayStr;
