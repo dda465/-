@@ -2036,9 +2036,18 @@ window.sendDropoffAlert = async (docId) => {
             const templateId = "KA01TP260521050226974gQEcmCPehop";
             const resumeLink = `https://sharaphone.com/quote.html?resume_doc_id=${docId}`;
             
-            // 예상 변수들 포함
+            // 모든 가능성이 있는 변수들 포함 (알림톡 템플릿에 등록된 정확한 변수명 매칭을 위함)
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+            
             const variables = {
                 "#{고객명}": data.customerName || "고객",
+                "#{고객성함}": data.customerName || "고객",
+                "#{이름}": data.customerName || "고객",
+                "#{기종}": `${data.brand} ${data.model} ${data.storage}`,
+                "#{모델}": `${data.brand} ${data.model} ${data.storage}`,
+                "#{신청일자}": dateStr,
+                "#{접수일자}": dateStr,
                 "#{링크}": resumeLink,
                 "#{이어서하기링크}": resumeLink
             };
