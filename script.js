@@ -2802,6 +2802,15 @@ async function initDeepWizard() {
                window.__funnel_visited[fStep] = true;
                window.trackFunnel(fStep);
             }
+            // Hide progress bar entirely on step 8 to save vertical space
+            const progressWrapper = document.getElementById('wizard-progress');
+            if (progressWrapper) {
+                if (step === 8) {
+                    progressWrapper.style.display = 'none';
+                } else {
+                    progressWrapper.style.display = 'block';
+                }
+            }
 
             // Update progress bar
             const stepToProgress = { 1: 1, 2: 2, '2-sub': 2, 3: 3, 4: 4, method: 5, 'grade-list': 5, defects: 5, auth: 5, result: 5, 6: 5, 7: 5, 8: 6 };
