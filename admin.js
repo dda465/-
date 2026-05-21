@@ -2046,8 +2046,10 @@ window.sendDropoffAlert = async (docId) => {
                 "#{이름}": data.customerName || "고객",
                 "#{기종}": `${data.brand} ${data.model} ${data.storage}`,
                 "#{모델}": `${data.brand} ${data.model} ${data.storage}`,
+                "#{매입신청한기종}": `${data.brand} ${data.model} ${data.storage}`,
                 "#{신청일자}": dateStr,
                 "#{접수일자}": dateStr,
+                "#{매입신청일자}": dateStr,
                 "#{링크}": resumeLink,
                 "#{이어서하기링크}": resumeLink
             };
