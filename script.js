@@ -5860,61 +5860,8 @@ function initReviews() {
 
 
         if (!isAdmin) {
-
-            // Check if user has at least one completed quote
-
-            try {
-
-                // If the user submitted via kakao/naver, they might have an anonymous Firebase session
-
-                // BUT if they cleared cache, the anonymous session is lost, although localUser might be restored if they log in again.
-
-                // However, quotes are usually saved with auth.currentUser.uid or 'anonymous'.
-
-                // If they have auth.currentUser (anonymous or email), check currentUser.uid.
-
-                // If they don't have auth.currentUser but have localUser, check localUser.uid.
-
-                let searchUid = currentUser ? currentUser.uid : localUser.uid;
-
-
-
-                let q = query(collection(db, "quotes"), where("userId", "==", searchUid), where("status", "==", "입금완료"));
-
-                let querySnapshot = await getDocs(q);
-
-
-
-                // Fallback: Check if they have auth.currentUser AND localUser, and check both UIDs just in case
-
-                if (querySnapshot.empty && currentUser && localUser && currentUser.uid !== localUser.uid) {
-
-                    q = query(collection(db, "quotes"), where("userId", "==", localUser.uid), where("status", "==", "입금완료"));
-
-                    querySnapshot = await getDocs(q);
-
-                }
-
-
-
-                if (querySnapshot.empty) {
-
-                    alert("매입이 완료된 고객만 후기를 작성하실 수 있습니다.");
-
-                    return;
-
-                }
-
-            } catch (error) {
-
-                console.error("Error checking quote status:", error);
-
-                alert("작성 권한을 확인하는 중 오류가 발생했습니다.");
-
-                return;
-
-            }
-
+            alert("리뷰 작성 권한이 없습니다. (관리자 전용)");
+            return;
         }
 
 
