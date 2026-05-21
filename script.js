@@ -1344,12 +1344,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 updateNavbar(userInfo);
                             }
 
-                            // Always clean up hash and redirect, whether needsUpdate was true or false
+                            // Always clean up hash after Naver callback
                             window.history.replaceState(null, null, window.location.pathname + window.location.search);
                             
-                            if (sessionStorage.getItem('pendingQuote')) {
-                                window.location.hash = '#step-auth';
-                                window.location.reload();
+                            // Restore pending quote directly without reload to avoid history re-init race
+                            const pendingQuote = sessionStorage.getItem('pendingQuote');
+                            if (pendingQuote) {
+                                try {
+                                    window._naverQuoteRestored = true;
+                                    currentQuote = JSON.parse(pendingQuote);
+                                    sessionStorage.removeItem('pendingQuote');
+                                } catch(e) {
+                                    console.error('Error restoring pending quote after Naver login:', e);
+                                }
+                                // Small delay to ensure DOM and auth state are ready
+                                setTimeout(() => {
+                                    goToStep('auth');
+                                }, 300);
                             }
                         }
                     });
@@ -2634,9 +2645,9 @@ async function initDeepWizard() {
 
     const loadingOverlay = document.getElementById('wizard-loading');
 
-    // Restore pending quote after login (skip if Naver callback is processing)
+    // Restore pending quote after login (skip if Naver callback is processing or already restored)
     const pendingQuoteStr = sessionStorage.getItem('pendingQuote');
-    if (pendingQuoteStr && !window.location.hash.includes('access_token')) {
+    if (pendingQuoteStr && !window.location.hash.includes('access_token') && !window._naverQuoteRestored) {
         try {
             currentQuote = JSON.parse(pendingQuoteStr);
             sessionStorage.removeItem('pendingQuote');
