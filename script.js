@@ -4397,7 +4397,7 @@ async function initDeepWizard() {
 
         const titleTarget = document.getElementById('simple-quote-model-title');
         if (titleTarget && currentQuote.model && currentQuote.storage) {
-            titleTarget.innerHTML = `<span style="color:var(--primary-color)">${currentQuote.model.model} (${currentQuote.storage.size})</span> 모델 예상 매입가입니다.`;
+            titleTarget.innerHTML = `<span style="color:var(--primary-color)">${currentQuote.model.model} (${currentQuote.storage.size})</span> 예상 매입가`;
         }
 
         if (currentQuote.model.model === '기타 기종') {
