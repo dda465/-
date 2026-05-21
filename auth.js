@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const path = window.location.pathname;
 
             if (path.endsWith('login.html') || path.endsWith('signup.html')) {
+                // Skip redirect if Naver callback is being processed
+                if (window.location.hash.includes('access_token')) return;
 
                 console.log("Auth State: Redirecting to index.html");
 
@@ -517,62 +519,108 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Handle Naver Login
 
-    const naverBtn = document.getElementById('naver-login');
-
-    if (naverBtn) {
-
-        // Initialize Naver Login SDK
-
+    if (window.naver && window.naver.LoginWithNaverId) {
         try {
-
             const naverLogin = new naver.LoginWithNaverId({
-
                 clientId: "2DbzH9zYF4ObguujOS0U",
-
-                callbackUrl: window.location.origin + "/index.html", // Or a dedicated callback page
-
-                isPopup: false, // Set to true if you want a popup
-
-                loginButton: { color: "green", type: 1, height: 40 } // Required by SDK to build a button inside naverIdLogin
-
+                callbackUrl: window.location.origin + "/login.html",
+                isPopup: false,
+                loginButton: { color: "green", type: 1, height: 40 },
+                callbackHandle: true
             });
-
             naverLogin.init();
 
-
-
-            // When custom button is clicked, trigger the hidden SDK button
-
-            naverBtn.addEventListener('click', (e) => {
-
-                e.preventDefault();
-
-                const hiddenNaverBtn = document.querySelector('#naverIdLogin a');
-
-                if (hiddenNaverBtn) {
-
-                    hiddenNaverBtn.click();
-
-                } else {
-
-                    alert("네이버 로그인을 초기화하는 중입니다. 잠시 후 다시 시도해주세요.");
-
+            // --- Handle Naver Callback (when redirected back with access_token) ---
+            if (window.location.hash.includes('access_token')) {
+                const urlStateMatch = window.location.hash.match(/state=([^&]+)/);
+                if (urlStateMatch) {
+                    localStorage.setItem('com.naver.nid.oauth.state_token', urlStateMatch[1]);
+                    document.cookie = "com.naver.nid.oauth.state_token=" + urlStateMatch[1] + "; path=/; max-age=600";
                 }
 
-            });
+                naverLogin.getLoginStatus(async function (status) {
+                    if (status) {
+                        const email = naverLogin.user.getEmail() || "";
+                        const nickname = naverLogin.user.getNickName() || naverLogin.user.getName() || `naveruser${naverLogin.user.getId()}`;
+                        const uid = `naver_${naverLogin.user.getId()}`;
 
+                        try {
+                            const docRef = doc(db, "users", uid);
+                            const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                            const docSnap = await getDoc(docRef);
+                            const isNewUser = !docSnap.exists();
+
+                            await setDoc(docRef, {
+                                email: email,
+                                nickname: nickname,
+                                uid: uid,
+                                provider: 'naver',
+                                createdAt: new Date(),
+                                role: 'user'
+                            }, { merge: true });
+
+                            // 알림톡 발송 (신규 가입 + 연락처 제공 동의 시)
+                            if (isNewUser && naverLogin.user.getMobile && naverLogin.user.getMobile() && window.triggerFrontendAlimtalk) {
+                                let phoneRaw = naverLogin.user.getMobile();
+                                if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
+                                window.triggerFrontendAlimtalk("signup", phoneRaw, {
+                                    name: nickname,
+                                    provider: 'naver'
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Firestore save naver user error:', e);
+                        }
+
+                        const userInfo = { email, nickname, provider: 'naver', uid };
+                        localStorage.setItem('user_info', JSON.stringify(userInfo));
+
+                        // Clean hash
+                        window.history.replaceState(null, null, window.location.pathname + window.location.search);
+
+                        // Redirect
+                        if (sessionStorage.getItem('pendingQuote')) {
+                            window.location.replace('quote.html');
+                        } else {
+                            window.location.replace('index.html');
+                        }
+                    } else {
+                        console.error("Naver login callback status false");
+                    }
+                });
+            }
+
+            // --- Handle Click on Naver Button ---
+            const naverBtn = document.getElementById('naver-login');
+            if (naverBtn) {
+                naverBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (typeof naverLogin.generateAuthorizeUrl === 'function') {
+                        const url = naverLogin.generateAuthorizeUrl();
+                        const stateMatch = url.match(/state=([^&]+)/);
+                        if (stateMatch) {
+                            localStorage.setItem('com.naver.nid.oauth.state_token', stateMatch[1]);
+                        }
+                        window.location.href = url;
+                    } else {
+                        const hiddenNaverBtn = document.querySelector('#naverIdLogin a');
+                        if (hiddenNaverBtn) {
+                            hiddenNaverBtn.click();
+                        } else {
+                            alert("네이버 로그인을 초기화하는 중입니다. 잠시 후 다시 시도해주세요.");
+                        }
+                    }
+                });
+            }
         } catch (e) {
-
             console.error("Naver SDK Init Error:", e);
-
-            naverBtn.addEventListener('click', () => {
-
-                alert("네이버 로그인 초기화에 실패했습니다. 관리자에게 문의해주세요.");
-
-            });
-
+            const naverBtn = document.getElementById('naver-login');
+            if (naverBtn) {
+                naverBtn.addEventListener('click', () => {
+                    alert("네이버 로그인 초기화에 실패했습니다. 관리자에게 문의해주세요.");
+                });
+            }
         }
-
     }
 
 });
