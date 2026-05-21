@@ -1351,8 +1351,12 @@ wcs_do();
                     </div>
 
                     <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">요청사항 / 메모 (선택)</label>
-                        <textarea id="customer-memo" class="search-input" rows="3" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;" placeholder="택배 수거 시 요청사항이나 기타 남기실 말씀이 있다면 적어주세요."></textarea>
+                        <label style="display:flex; align-items:center; margin-bottom:5px; font-weight:600; cursor:pointer;" onclick="const container = document.getElementById('memo-container'); const isChecked = document.getElementById('memo-toggle').checked; container.style.display = isChecked ? 'block' : 'none';">
+                            <input type="checkbox" id="memo-toggle" style="margin-right: 8px; transform: scale(1.2);"> 요청사항 / 메모 남기기 (선택)
+                        </label>
+                        <div id="memo-container" style="display: none; margin-top: 10px;">
+                            <textarea id="customer-memo" class="search-input" rows="3" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;" placeholder="택배 수거 시 요청사항이나 기타 남기실 말씀이 있다면 적어주세요."></textarea>
+                        </div>
                     </div>
 
                     <div class="text-center">

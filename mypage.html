@@ -1669,6 +1669,16 @@ wcs_do();
                         if (data.shippingFeePaid) {
                             deliveryInfo += `<br><span style="font-size: 0.8rem; color: #2E7D32; font-weight: 600; margin-top: 4px; display: inline-block;">✅ 배송비 입금 완료</span>`;
                         }
+                        
+                        // Add return address box for direct delivery users
+                        deliveryInfo += `
+                            <div style="margin-top: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #475569; text-align: left;">
+                                <strong style="color: #1e293b; display: block; margin-bottom: 5px;">[보내실 곳]</strong>
+                                받는 이: 쉐라폰<br>
+                                연락처: 010-3263-5672<br>
+                                주소: 부산시 부산진구 동천로 116 한신밴빌딩 1003호
+                            </div>
+                        `;
                     } else if (data.deliveryMethod === 'courier') {
                         deliveryInfo = `<br><span style="font-size: 0.8rem; color: #4CAF50; margin-top: 4px; display: inline-block;">[방문수거] (희망일: ${data.pickupDate || '미정'})</span>`;
                     } else if (data.deliveryMethod === 'pending') {
