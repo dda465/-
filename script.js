@@ -3563,23 +3563,23 @@ async function initDeepWizard() {
         let rangeStr = "";
 
         if (isSimpleMode) {
-            let cPrice = 0;
+            let bPrice = 0;
             let sPrice = 0;
             if (currentQuote.model.prices) {
-                cPrice = currentQuote.model.prices['c'] || (currentQuote.model.basePrice * 0.6);
+                bPrice = currentQuote.model.prices['b'] || (currentQuote.model.basePrice * 0.8);
                 sPrice = currentQuote.model.prices['s'] || currentQuote.model.basePrice;
             } else {
-                cPrice = (currentQuote.model.basePrice || 0) * 0.6;
+                bPrice = (currentQuote.model.basePrice || 0) * 0.8;
                 sPrice = currentQuote.model.basePrice || 0;
             }
             if (currentQuote.storage) {
-                cPrice += (currentQuote.storage.priceAdjustment || 0);
+                bPrice += (currentQuote.storage.priceAdjustment || 0);
                 sPrice += (currentQuote.storage.priceAdjustment || 0);
             }
-            cPrice = Math.max(0, Math.floor(cPrice / 1000) * 1000);
+            bPrice = Math.max(0, Math.floor(bPrice / 1000) * 1000);
             sPrice = Math.max(0, Math.floor(sPrice / 1000) * 1000);
             
-            rangeStr = `${formatCurrency(cPrice)}원 ~ ${formatCurrency(sPrice)}원`;
+            rangeStr = `${formatCurrency(bPrice)} ~ ${formatCurrency(sPrice)}`;
             priceDisplayStr = rangeStr;
             currentQuote.priceRangeText = rangeStr;
         } else {
