@@ -4443,7 +4443,7 @@ async function initDeepWizard() {
             // Read-Only List Item
             html += `
             <div class="grade-list-card" style="cursor: default; pointer-events: none;">
-                <div class="grade-row" style="padding: 15px 20px;">
+                <div class="grade-row" style="padding: 10px 15px;">
                     <div class="grade-info">
                         <h4 style="margin:0; font-size:1rem;">${gradeLabels[g].title}</h4>
                         <p style="margin:2px 0 0; font-size:0.8rem; color:#888;">${gradeLabels[g].desc}</p>

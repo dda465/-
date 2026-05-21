@@ -1140,7 +1140,7 @@ footer {
     }
 
     .selection-card {
-        padding: 15px;
+        padding: 12px;
         /* Compact cards */
     }
 
@@ -1195,15 +1195,15 @@ footer {
 /* PhoneGabi Style Selection Cards */
 .selection-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
 }
 
 .selection-card {
     background: white;
     border: 2px solid #E0E0E0;
     border-radius: 12px;
-    padding: 24px;
+    padding: 16px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
