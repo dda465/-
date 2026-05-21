@@ -33,7 +33,7 @@
 
     <meta name="description" content="3분이면 끝! 내 폰의 정확한 판매 금액을 확인하고 바로 판매 신청하세요.">
 
-    <link rel="stylesheet" href="styles.css?v=20260521_1250">
+    <link rel="stylesheet" href="styles.css?v=20260521_1253">
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -1316,6 +1316,11 @@ wcs_do();
                         </div>
                     </div>
 
+                    <div class="text-center" style="margin-top: 15px; margin-bottom: 20px;">
+                        <div id="delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; font-weight: 700;"></div>
+                        <button id="btn-submit-delivery" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;">기기 발송 방법 확정</button>
+                    </div>
+
                     <!-- Self Info (Shown for CVS) -->
                     <div id="method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ddd;">
                         <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
@@ -1346,10 +1351,7 @@ wcs_do();
                         </div>
                     </div>
 
-                    <div class="text-center">
-                        <div id="delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; font-weight: 700;"></div>
-                        <button id="btn-submit-delivery" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px; margin-bottom: 15px;">기기 발송 방법 확정</button>
-                    </div>
+                    <!-- Submit button moved up -->
 
                     <div style="margin-bottom: 10px; text-align: left;">
                         <label style="display:flex; align-items:center; margin-bottom:5px; font-weight:600; cursor:pointer;" onclick="const container = document.getElementById('memo-container'); const isChecked = document.getElementById('memo-toggle').checked; container.style.display = isChecked ? 'block' : 'none';">
@@ -1923,7 +1925,7 @@ wcs_do();
 
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 
-    <script type="module" src="script.js?v=20260521_1250"></script>
+    <script type="module" src="script.js?v=20260521_1253"></script>
 
 
 
