@@ -1195,20 +1195,30 @@ footer {
 /* PhoneGabi Style Selection Cards */
 .selection-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
 }
 
 .selection-card {
     background: white;
     border: 2px solid #E0E0E0;
     border-radius: 12px;
-    padding: 16px;
+    padding: 24px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     position: relative;
     overflow: visible;
+}
+
+@media (max-width: 768px) {
+    .selection-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    .selection-card {
+        padding: 12px !important;
+    }
 }
 
 .selection-card:hover {
