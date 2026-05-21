@@ -152,7 +152,7 @@ window.triggerFrontendAlimtalk = async (type, phone, payload) => {
     } 
     // 2. 방문택배로 신청시
     else if (type === "quote_courier") {
-        templateId = "KA01TP260514062022973Of9hrrbssgr";
+        templateId = "KA01TP260519020631601tko6atKgMI4";
         variables = {
             "#{고객명}": payload.name,
             "#{방문택배수거일자}": payload.pickupDate || "미지정",
@@ -164,7 +164,7 @@ window.triggerFrontendAlimtalk = async (type, phone, payload) => {
     } 
     // 3. 직접발송으로 신청시
     else if (type === "quote_cvs") {
-        templateId = "KA01TP260514073008756NLWPQC8W4pz";
+        templateId = "KA01TP260519013835863h7hpYzMO26t";
         const dateObj = new Date();
         dateObj.setDate(dateObj.getDate() + 3);
         const y = dateObj.getFullYear();

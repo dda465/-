@@ -1985,14 +1985,14 @@ async function triggerAlimtalk(quoteData, status) {
     if (!phone) return;
 
     if (status === "검수중") {
-        templateId = "KA01TP260515031257493IF4F3nfSFKa";
+        templateId = "KA01TP260519014412721iV2S1wOUL0b";
         variables = {
             "#{접수계정}": quoteData.userId !== 'anonymous' ? '인증된 계정' : '미인증',
             "#{고객성함}": quoteData.customerName || "-",
             "#{모델}": `${quoteData.brand} ${quoteData.model}`
         };
     } else if (status === "입금완료") {
-        templateId = "KA01TP260515103832208FZS8FFOsPcv";
+        templateId = "KA01TP260519020029152DuoB5fUdLPL";
         variables = {
             "#{고객성함}": quoteData.customerName || "-",
             "#{기종}": `${quoteData.brand} ${quoteData.model}`,
