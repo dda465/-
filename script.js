@@ -1221,154 +1221,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-
-
-
-
-        // --- Naver Login Callback Handling ---
-
-
-
+        // --- Naver Login SDK Init (callback is handled by login.html/auth.js) ---
         if (window.naver && window.naver.LoginWithNaverId) {
-
-
-
             window.naverLoginInst = new naver.LoginWithNaverId({
                 clientId: "2DbzH9zYF4ObguujOS0U",
-                callbackUrl: window.location.origin + window.location.pathname,
+                callbackUrl: window.location.origin + "/login.html",
                 isPopup: false,
                 loginButton: { color: "green", type: 3, height: 40 },
                 callbackHandle: true
             });
             window.naverLoginInst.init();
-
-
-
-
-
-
-
-            // Run immediately since script.js is a module and executes after HTML parse
-            if (window.location.hash.includes('access_token')) {
-                    // Force state token from URL into localStorage to ensure Naver SDK validation passes
-                    const urlStateMatch = window.location.hash.match(/state=([^&]+)/);
-                    if (urlStateMatch) {
-                        localStorage.setItem('com.naver.nid.oauth.state_token', urlStateMatch[1]);
-                        document.cookie = "com.naver.nid.oauth.state_token=" + urlStateMatch[1] + "; path=/; max-age=600";
-                    }
-
-                    window.naverLoginInst.getLoginStatus(async function (status) {
-                        if (status) {
-                            // Some Naver accounts might not provide an email, use an empty string instead of undefined to prevent Firebase crashes.
-                            const email = window.naverLoginInst.user.getEmail() || "";
-                            const nickname = window.naverLoginInst.user.getNickName() || window.naverLoginInst.user.getName() || `naveryuser${window.naverLoginInst.user.getId()}`;
-                            const uid = `naver_${window.naverLoginInst.user.getId()}`;
-
-
-
-
-
-
-
-                            // Check if already logged in locally to avoid infinite loops and re-saving
-
-
-
-                            const currentLocalUser = localStorage.getItem('user_info');
-
-
-
-                            let needsUpdate = true;
-
-
-
-                            if (currentLocalUser) {
-
-
-
-                                try {
-
-
-
-                                    const parsed = JSON.parse(currentLocalUser);
-
-
-
-                                    if (parsed.uid === uid) needsUpdate = false;
-
-
-
-                                } catch (e) { }
-
-
-
-                            }
-
-
-
-
-
-
-
-                            if (needsUpdate) {
-                                try {
-                                    const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-                                    const docRef = doc(db, "users", uid);
-                                    const docSnap = await getDoc(docRef);
-                                    const isNewUser = !docSnap.exists();
-
-                                    await setDoc(docRef, {
-                                        email: email,
-                                        nickname: nickname,
-                                        uid: uid,
-                                        provider: 'naver',
-                                        createdAt: new Date(),
-                                        role: 'user'
-                                    }, { merge: true });
-
-                                    // 알림톡 발송 (네이버 연락처 제공 동의 시)
-                                    if (isNewUser && window.naverLoginInst.user.getMobile && window.naverLoginInst.user.getMobile() && window.triggerFrontendAlimtalk) {
-                                        let phoneRaw = window.naverLoginInst.user.getMobile();
-                                        if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
-                                        window.triggerFrontendAlimtalk("signup", phoneRaw, {
-                                            name: nickname,
-                                            provider: 'naver'
-                                        });
-                                    }
-                                } catch (e) {
-                                    console.error('Firestore save naver user error:', e);
-                                }
-
-                                const userInfo = { email, nickname, provider: 'naver', uid };
-                                localStorage.setItem('user_info', JSON.stringify(userInfo));
-                                updateNavbar(userInfo);
-                            }
-
-                            // Always clean up hash after Naver callback
-                            window.history.replaceState(null, null, window.location.pathname + window.location.search);
-                            
-                            // Restore pending quote directly without reload to avoid history re-init race
-                            const pendingQuote = sessionStorage.getItem('pendingQuote');
-                            if (pendingQuote) {
-                                try {
-                                    window._naverQuoteRestored = true;
-                                    currentQuote = JSON.parse(pendingQuote);
-                                    sessionStorage.removeItem('pendingQuote');
-                                } catch(e) {
-                                    console.error('Error restoring pending quote after Naver login:', e);
-                                }
-                                // Small delay to ensure DOM and auth state are ready
-                                setTimeout(() => {
-                                    goToStep('auth');
-                                }, 300);
-                            }
-                        }
-                    });
-                }
-            }
-
-
-
+        }
 
         // -------------------------------------
 
