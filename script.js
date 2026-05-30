@@ -4154,13 +4154,23 @@ async function initDeepWizard() {
                     
                     // --- 1차 접수 완료 텔레그램 알림 ---
                     try {
+                        const trafficSourceMap = {
+                            'daangn': '당근마켓 🥕',
+                            'naver': '네이버 🟢',
+                            'google': '구글 🔵',
+                            'direct': '직접 유입/기타 📱'
+                        };
+                        const trafficSource = trafficSourceMap[sessionStorage.getItem('traffic_source')] || '직접 유입/기타 📱';
+
                         const tgMessage = `
 🔔 *새로운 매입 신청 알림 (배송지 미입력)*
-
+━━━━━━━━━━━━━━
 👤 *신청자*: ${payload.customerName}
 📞 *연락처*: ${payload.customerPhone}
 📱 *모델*: ${payload.brand} ${payload.model} (${payload.storage})
 💰 *예상가*: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원
+🔍 *유입 경로*: ${trafficSource}
+━━━━━━━━━━━━━━
 ⚠️ *상태*: 배송 방법 미입력 (고객 이탈 시 해피콜 필요)
 `.trim();
                         fetch(`https://asia-northeast3-rejeuphone.cloudfunctions.net/telegramApi/send`, {
@@ -4814,28 +4824,111 @@ async function initDeepWizard() {
                             headers: { 'Content-Type': 'text/plain' },
                             body: JSON.stringify(fullData)
                         }).catch(e => console.error("Google Sheet Fetch Error:", e));
+
+                        // --- 배송 방법 확정 텔레그램 알림 (상세 내용 포함) ---
+                        try {
+                            const trafficSourceMap = {
+                                'daangn': '당근마켓 🥕',
+                                'naver': '네이버 🟢',
+                                'google': '구글 🔵',
+                                'direct': '직접 유입/기타 📱'
+                            };
+                            const trafficSource = trafficSourceMap[fullData.trafficSource || sessionStorage.getItem('traffic_source')] || '직접 유입/기타 📱';
+
+                            const methodKo = fullData.method === 'simple' ? '간편견적 📝' : '셀프견적 🔍';
+                            const gradeMap = {
+                                'sealed': '미개봉 📦',
+                                's': 'S급 ✨',
+                                'a': 'A급 🟢',
+                                'b': 'B급 🟡',
+                                'c': 'C급 🟠',
+                                'd': 'D급 🔴'
+                            };
+                            const gradeKo = gradeMap[fullData.grade] || fullData.grade || '알수없음';
+                            
+                            const mapValueToKo = (val) => {
+                                const dict = {
+                                    'true': '미개봉',
+                                    'false': '개봉',
+                                    'yes': '있음/불량',
+                                    'no': '없음/정상',
+                                    'scratch': '흠집',
+                                    'dent': '찍힘',
+                                    'break': '파손',
+                                    'lcd_broken': '액정파손/LCD불량',
+                                    'lcd_backlight': '백라이트 불량',
+                                    'burn_in_mild': '미세 잔상',
+                                    'burn_in_severe': '심한 잔상',
+                                    'camera': '카메라 불량',
+                                    'wifi': '와이파이 불량',
+                                    'power': '전원 버튼 불량',
+                                    'volume': '볼륨 버튼 불량',
+                                    'speaker': '스피커 불량',
+                                    'mic': '마이크 불량',
+                                    'charge': '충전 불량',
+                                    'biometrics': '생체인식 불량',
+                                    'gps': 'GPS 불량',
+                                    'network': '네트워크(유심) 불량',
+                                    'account': '계정 잠김(매입불가)'
+                                };
+                                return dict[val] || val;
+                            };
+
+                            const formatDefects = (defects) => {
+                                if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
+                                let parts = [];
+                                if (defects.is_sealed !== undefined) parts.push(`미개봉 여부: ${defects.is_sealed ? '미개봉 📦' : '개봉 📱'}`);
+                                if (defects.lcd_damage !== undefined) parts.push(`액정 파손/LCD 불량: ${defects.lcd_damage ? '있음 ❌' : '정상/없음 ✅'}`);
+                                if (defects.burn_in !== undefined) parts.push(`화면 잔상: ${defects.burn_in ? '있음 ❌' : '정상/없음 ✅'}`);
+                                
+                                for (const key in defects) {
+                                    if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
+                                    if (Array.isArray(defects[key]) && defects[key].length > 0) {
+                                        const mappedValues = defects[key].map(mapValueToKo).join(', ');
+                                        let groupName = key;
+                                        if (key === 'func_defect') groupName = '기능 고장';
+                                        else if (key === 'body_defect' || key === 'body') groupName = '외관 상태';
+                                        parts.push(`${groupName}: ${mappedValues}`);
+                                    }
+                                }
+                                return parts.length > 0 ? parts.join('\n') : '없음';
+                            };
+
+                            const defectInfo = formatDefects(fullData.defectsDetails);
+
+                            const tgMessage = `
+✅ *배송 방법 확정 알림*
+━━━━━━━━━━━━━━
+👤 *신청자*: ${fullData.customerName}
+📞 *연락처*: ${fullData.customerPhone}
+🚚 *배송 방식*: ${fullData.deliveryMethod === 'courier' ? '택배 방문수거 📦 (희망일: ' + (fullData.pickupDate || '미정') + ')' : '직접 발송 (편의점/우체국 등) 🏪'}
+📍 *수거 주소*: ${fullData.customerAddress || '해당없음 (직접 발송)'}
+💳 *계좌 정보*: ${fullData.customerAccount || '미입력'}
+━━━━━━━━━━━━━━
+📱 *기종*: ${fullData.brand} ${fullData.model} (${fullData.storage})
+📝 *견적 구분*: ${methodKo}
+💎 *결정 등급*: ${gradeKo}
+💰 *최종 예상가*: ${new Intl.NumberFormat('ko-KR').format(fullData.price)}원
+🔍 *유입 경로*: ${trafficSource}
+━━━━━━━━━━━━━━
+🛠️ *선택한 하자 정보*:
+${defectInfo}
+━━━━━━━━━━━━━━
+📝 *고객 메모*: ${fullData.customerMemo || '없음'}
+`.trim();
+
+                            fetch(`https://asia-northeast3-rejeuphone.cloudfunctions.net/telegramApi/send`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: tgMessage })
+                            }).catch(e => console.error("Telegram Error:", e));
+                        } catch (e) {
+                            console.error("Telegram send error inside submitAuthDelivery:", e);
+                        }
                     }
                 } catch(e) {
                     console.error("Google Sheet Integration Error:", e);
                 }
-                
-                window.trackFunnel("quote_complete");
-
-                // --- 배송 방법 확정 텔레그램 알림 ---
-                try {
-                    const tgMessage = `
-✅ *배송 방법 확정 알림*
-
-👤 *신청자*: ${document.getElementById('auth-name').value.trim()}
-📞 *연락처*: ${document.getElementById('auth-phone').value.trim()}
-🚚 *방식*: ${deliveryMethod === 'courier' ? '방문수거 (희망일: ' + pickupDate + ')' : '직접발송'}
-`.trim();
-                    fetch(`https://asia-northeast3-rejeuphone.cloudfunctions.net/telegramApi/send`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: tgMessage })
-                    }).catch(e => console.error("Telegram Error:", e));
-                } catch(e) {}
                 
                 // --- Alimtalk Trigger ---
                 const customerPhone = document.getElementById('auth-phone').value.trim();
@@ -5090,53 +5183,95 @@ async function initDeepWizard() {
 
 
 
+            const trafficSourceMap = {
+                'daangn': '당근마켓 🥕',
+                'naver': '네이버 🟢',
+                'google': '구글 🔵',
+                'direct': '직접 유입/기타 📱'
+            };
+            const trafficSource = trafficSourceMap[payload.trafficSource || sessionStorage.getItem('traffic_source')] || '직접 유입/기타 📱';
+
+            const methodKo = payload.method === 'simple' ? '간편견적 📝' : '셀프견적 🔍';
+            const gradeMap = {
+                'sealed': '미개봉 📦',
+                's': 'S급 ✨',
+                'a': 'A급 🟢',
+                'b': 'B급 🟡',
+                'c': 'C급 🟠',
+                'd': 'D급 🔴'
+            };
+            const gradeKo = gradeMap[payload.grade] || payload.grade || '알수없음';
+            
+            const mapValueToKo = (val) => {
+                const dict = {
+                    'true': '미개봉',
+                    'false': '개봉',
+                    'yes': '있음/불량',
+                    'no': '없음/정상',
+                    'scratch': '흠집',
+                    'dent': '찍힘',
+                    'break': '파손',
+                    'lcd_broken': '액정파손/LCD불량',
+                    'lcd_backlight': '백라이트 불량',
+                    'burn_in_mild': '미세 잔상',
+                    'burn_in_severe': '심한 잔상',
+                    'camera': '카메라 불량',
+                    'wifi': '와이파이 불량',
+                    'power': '전원 버튼 불량',
+                    'volume': '볼륨 버튼 불량',
+                    'speaker': '스피커 불량',
+                    'mic': '마이크 불량',
+                    'charge': '충전 불량',
+                    'biometrics': '생체인식 불량',
+                    'gps': 'GPS 불량',
+                    'network': '네트워크(유심) 불량',
+                    'account': '계정 잠김(매입불가)'
+                };
+                return dict[val] || val;
+            };
+
+            const formatDefects = (defects) => {
+                if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
+                let parts = [];
+                if (defects.is_sealed !== undefined) parts.push(`미개봉 여부: ${defects.is_sealed ? '미개봉 📦' : '개봉 📱'}`);
+                if (defects.lcd_damage !== undefined) parts.push(`액정 파손/LCD 불량: ${defects.lcd_damage ? '있음 ❌' : '정상/없음 ✅'}`);
+                if (defects.burn_in !== undefined) parts.push(`화면 잔상: ${defects.burn_in ? '있음 ❌' : '정상/없음 ✅'}`);
+                
+                for (const key in defects) {
+                    if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
+                    if (Array.isArray(defects[key]) && defects[key].length > 0) {
+                        const mappedValues = defects[key].map(mapValueToKo).join(', ');
+                        let groupName = key;
+                        if (key === 'func_defect') groupName = '기능 고장';
+                        else if (key === 'body_defect' || key === 'body') groupName = '외관 상태';
+                        parts.push(`${groupName}: ${mappedValues}`);
+                    }
+                }
+                return parts.length > 0 ? parts.join('\n') : '없음';
+            };
+
+            const defectInfo = formatDefects(payload.defectsDetails);
+
             const tgMessage = `
-
-
-
-🔔 *새로운 매입 신청 알림*
-
-
-
+🔔 *새로운 매입 신청 완료 알림*
 ━━━━━━━━━━━━━━
-
-
-
 👤 *신청자*: ${payload.customerName}
-
-
-
 📞 *연락처*: ${payload.customerPhone}
-
-
-
-📱 *모델*: ${payload.brand} ${payload.model} (${payload.storage})
-
-
-
-💎 *등급*: ${payload.grade}
-
-
-
-💰 *예상가*: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원
-
-
-
-🚚 *방식*: ${payload.deliveryMethod === 'courier' ? '택배 방문수거 (희망일: ' + payload.pickupDate + ')' : '편의점 택배'}
-
-
-
-📝 *메모*: ${payload.customerMemo || '없음'}
-
-
-
+🚚 *배송 방식*: ${payload.deliveryMethod === 'courier' ? '택배 방문수거 📦 (희망일: ' + (payload.pickupDate || '미정') + ')' : '직접 발송 (편의점/우체국 등) 🏪'}
+📍 *수거 주소*: ${payload.customerAddress || '해당없음 (직접 발송)'}
+💳 *계좌 정보*: ${payload.customerAccount || '미입력'}
 ━━━━━━━━━━━━━━
-
-
-
-            `.trim();
-
-
+📱 *기종*: ${payload.brand} ${payload.model} (${payload.storage})
+📝 *견적 구분*: ${methodKo}
+💎 *결정 등급*: ${gradeKo}
+💰 *최종 예상가*: ${new Intl.NumberFormat('ko-KR').format(payload.price)}원
+🔍 *유입 경로*: ${trafficSource}
+━━━━━━━━━━━━━━
+🛠️ *선택한 하자 정보*:
+${defectInfo}
+━━━━━━━━━━━━━━
+📝 *고객 메모*: ${payload.customerMemo || '없음'}
+`.trim();
 
             fetch(`https://asia-northeast3-rejeuphone.cloudfunctions.net/telegramApi/send`, {
                 method: 'POST',
@@ -6551,15 +6686,39 @@ window.goToReviewPage = (page) => {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    const dateSelect = document.getElementById('courier-pickup-date');
-    if (dateSelect) {
+    const populatePickupDates = (elementId) => {
+        const selectEl = document.getElementById(elementId);
+        if (!selectEl) return;
+        
+        const koreanHolidays = [
+            '2025-01-01', '2025-01-28', '2025-01-29', '2025-01-30',
+            '2025-03-01', '2025-05-05', '2025-05-06', '2025-06-06',
+            '2025-08-15', '2025-10-03',
+            '2025-10-05', '2025-10-06', '2025-10-07', '2025-10-08',
+            '2025-10-09', '2025-12-25',
+            '2026-01-01', '2026-02-15', '2026-02-16', '2026-02-17', '2026-02-18',
+            '2026-03-01', '2026-03-02', '2026-05-05', '2026-05-24', '2026-05-25',
+            '2026-06-03', '2026-06-06', '2026-08-15',
+            '2026-09-24', '2026-09-25', '2026-09-26',
+            '2026-10-03', '2026-10-09', '2026-12-25',
+        ];
+        
+        const isWeekendOrHoliday = (date) => {
+            const day = date.getDay();
+            if (day === 0 || day === 6) return true; // 일요일(0), 토요일(6) 제외
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return koreanHolidays.includes(`${yyyy}-${mm}-${dd}`);
+        };
+
         const validDates = [];
         let currentDate = new Date();
         
-        // 일요일(0)을 제외하고 가장 빠른 2일 찾기
-        while (validDates.length < 2) {
+        // 최소 5일치 날짜를 채움 (토/일/공휴일 및 6/3 제외)
+        while (validDates.length < 5) {
             currentDate.setDate(currentDate.getDate() + 1);
-            if (currentDate.getDay() !== 0) { 
+            if (!isWeekendOrHoliday(currentDate)) {
                 validDates.push(new Date(currentDate));
             }
         }
@@ -6572,8 +6731,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<option value="${m}/${d}">${m}/${d} (${dayName})</option>`;
         };
         
-        dateSelect.innerHTML = formatOption(validDates[0]) + formatOption(validDates[1]);
-    }
+        selectEl.innerHTML = validDates.map(formatOption).join('');
+    };
+
+    populatePickupDates('courier-pickup-date');
+    populatePickupDates('auth-courier-pickup-date');
 
     document.querySelectorAll('.method-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
