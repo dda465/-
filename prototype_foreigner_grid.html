@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀵메뉴 프로토타입 - Foreigner 버튼</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; }
+        
+        .demo-label {
+            text-align: center; padding: 15px; background: #1e293b; color: white; 
+            font-size: 0.85rem; font-weight: 600;
+        }
+        .demo-label span { color: #60a5fa; }
+
+        /* === 현재 그리드 스타일 (기존과 동일) === */
+        .app-grid-section { max-width: 1200px; margin: 0 auto 40px; padding: 0 40px; }
+        .app-grid-container { 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; 
+            background: white; padding: 30px; border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; 
+        }
+        .app-grid-item { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            text-align: center; cursor: pointer; transition: all 0.2s; padding: 15px; 
+            border-radius: 12px; text-decoration: none !important; 
+        }
+        .app-grid-item:hover { background: #f8fafc; transform: translateY(-5px); }
+        .app-grid-icon { 
+            width: 80px; height: 80px; border-radius: 28px; display: flex; 
+            align-items: center; justify-content: center; font-size: 2rem; 
+            margin-bottom: 12px; background: #eff6ff; color: #2563eb; transition: transform 0.2s; 
+        }
+        .app-grid-item:hover .app-grid-icon { transform: scale(1.05); }
+        .app-grid-icon.samsung { background: #f0f9ff; color: #0284c7; }
+        .app-grid-icon.apple { background: #f8fafc; color: #0f172a; }
+        .app-grid-icon.foreigner { background: linear-gradient(135deg, #dbeafe, #e0f2fe); color: #2563eb; }
+        .app-grid-label { font-weight: 700; font-size: 1.15rem; color: #334155; }
+
+        /* 모바일 반응형 — 2x2 그리드 */
+        @media (max-width: 768px) {
+            .app-grid-section { padding: 0 15px; margin: 0 0 5px; }
+            .app-grid-container { 
+                padding: 12px 15px; 
+                grid-template-columns: repeat(4, 1fr); 
+                gap: 6px; border-radius: 15px; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            }
+            .app-grid-item { padding: 2px; }
+            .app-grid-icon { width: 38px; height: 38px; font-size: 1.2rem; margin-bottom: 4px; border-radius: 12px; }
+            .app-grid-icon img { width: 24px !important; }
+            .app-grid-label { font-size: 0.7rem; font-weight: 600; letter-spacing: -0.5px; white-space: nowrap; }
+        }
+
+        /* 비교 섹션 */
+        .compare-section {
+            max-width: 500px; margin: 30px auto; padding: 0 15px;
+        }
+        .compare-title {
+            text-align: center; font-size: 0.9rem; color: #94a3b8; margin-bottom: 15px;
+            padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 안내 -->
+    <div class="demo-label">📱 <span>모바일 기준</span> 퀵메뉴 프로토타입 — 아래 두 가지 안 비교</div>
+
+    <!-- ===== 안 1: 4열 한줄 (기존 3개 + Foreigner) ===== -->
+    <div class="compare-section">
+        <div class="compare-title">✅ <strong>안 1:</strong> 4열 한 줄 (기존 스타일 유지)</div>
+    </div>
+
+    <section class="app-grid-section">
+        <div class="app-grid-container">
+            <a href="quote.html?brand=apple" class="app-grid-item">
+                <div class="app-grid-icon apple"><img src="apple.svg" style="width: 40px;"></div>
+                <div class="app-grid-label">아이폰 팔기</div>
+            </a>
+            <a href="quote.html?brand=samsung" class="app-grid-item">
+                <div class="app-grid-icon samsung"><img src="samsung.svg" style="width: 50px;"></div>
+                <div class="app-grid-label">갤럭시 팔기</div>
+            </a>
+            <a href="price-list.html" class="app-grid-item">
+                <div class="app-grid-icon" style="background:#f1f5f9; color:#2563eb; font-size: 36px;"><i class="ri-file-list-3-fill"></i></div>
+                <div class="app-grid-label">단가보기</div>
+            </a>
+            <a href="quote-foreigner.html" class="app-grid-item">
+                <div class="app-grid-icon foreigner" style="font-size: 30px;">🌍</div>
+                <div class="app-grid-label">Foreigner</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== 안 2: 2x2 그리드 ===== -->
+    <div class="compare-section">
+        <div class="compare-title">✅ <strong>안 2:</strong> 2×2 그리드 (넉넉한 공간)</div>
+    </div>
+
+    <section class="app-grid-section">
+        <div class="app-grid-container" style="grid-template-columns: repeat(2, 1fr); gap: 12px;">
+            <a href="quote.html?brand=apple" class="app-grid-item" style="padding: 12px;">
+                <div class="app-grid-icon apple" style="width: 50px; height: 50px; border-radius: 16px;"><img src="apple.svg" style="width: 30px;"></div>
+                <div class="app-grid-label" style="font-size: 0.85rem;">아이폰 팔기</div>
+            </a>
+            <a href="quote.html?brand=samsung" class="app-grid-item" style="padding: 12px;">
+                <div class="app-grid-icon samsung" style="width: 50px; height: 50px; border-radius: 16px;"><img src="samsung.svg" style="width: 35px;"></div>
+                <div class="app-grid-label" style="font-size: 0.85rem;">갤럭시 팔기</div>
+            </a>
+            <a href="price-list.html" class="app-grid-item" style="padding: 12px;">
+                <div class="app-grid-icon" style="background:#f1f5f9; color:#2563eb; width: 50px; height: 50px; border-radius: 16px; font-size: 24px;"><i class="ri-file-list-3-fill"></i></div>
+                <div class="app-grid-label" style="font-size: 0.85rem;">단가보기</div>
+            </a>
+            <a href="quote-foreigner.html" class="app-grid-item" style="padding: 12px;">
+                <div class="app-grid-icon foreigner" style="width: 50px; height: 50px; border-radius: 16px; font-size: 24px;">🌍</div>
+                <div class="app-grid-label" style="font-size: 0.85rem;">Foreigner</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== 안 3: 기존 3열 유지 + 아래 배너형 ===== -->
+    <div class="compare-section">
+        <div class="compare-title">✅ <strong>안 3:</strong> 기존 3열 유지 + 아래 배너형 버튼</div>
+    </div>
+
+    <section class="app-grid-section">
+        <div class="app-grid-container" style="grid-template-columns: repeat(3, 1fr);">
+            <a href="quote.html?brand=apple" class="app-grid-item">
+                <div class="app-grid-icon apple"><img src="apple.svg" style="width: 40px;"></div>
+                <div class="app-grid-label">아이폰 팔기</div>
+            </a>
+            <a href="quote.html?brand=samsung" class="app-grid-item">
+                <div class="app-grid-icon samsung"><img src="samsung.svg" style="width: 50px;"></div>
+                <div class="app-grid-label">갤럭시 팔기</div>
+            </a>
+            <a href="price-list.html" class="app-grid-item">
+                <div class="app-grid-icon" style="background:#f1f5f9; color:#2563eb; font-size: 36px;"><i class="ri-file-list-3-fill"></i></div>
+                <div class="app-grid-label">단가보기</div>
+            </a>
+        </div>
+        <!-- 배너형 Foreigner 버튼 -->
+        <a href="quote-foreigner.html" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; padding: 14px 20px; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: white; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.2);">
+            <span style="font-size: 1.3rem;">🌍</span>
+            <span>Sell Your Phone — For Foreigners in Korea</span>
+            <span style="font-size: 1.1rem;">→</span>
+        </a>
+    </section>
+
+</body>
+</html>

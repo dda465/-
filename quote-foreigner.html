@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Your Phone in Korea - SharaPhone</title>
+    <meta name="description" content="Sell your used phone in Korea. Get the best price for your iPhone or Samsung Galaxy. Fast payment, free shipping.">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-18055027970');
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JWS15NH588"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-JWS15NH588');
+    </script>
+    <link rel="stylesheet" href="styles.css?v=20260526_fg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        
+        .fg-wizard {
+            max-width: 600px;
+            margin: 80px auto 40px;
+            background: white;
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            min-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .fg-wizard { margin: 70px auto 30px; padding: 20px 16px; border-radius: 0; box-shadow: none; }
+        }
+        
+        .fg-step { display: none; animation: fadeIn 0.4s ease; }
+        .fg-step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .fg-header { text-align: center; margin-bottom: 30px; }
+        .fg-header h2 { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+        .fg-header p { color: #64748b; font-size: 0.95rem; }
+        
+        /* 언어 선택 카드 */
+        .lang-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .lang-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-decoration: none;
+        }
+        .lang-card:hover { border-color: #2563eb; background: #eff6ff; transform: translateY(-2px); }
+        .lang-card.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .lang-flag { font-size: 1.8rem; line-height: 1; }
+        .lang-info { text-align: left; }
+        .lang-name { font-weight: 700; font-size: 0.95rem; color: #1e293b; }
+        .lang-native { font-size: 0.8rem; color: #64748b; }
+        
+        /* 브랜드/시리즈/모델 카드 */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .selection-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-align: center;
+            min-height: 100px;
+        }
+        .selection-card:hover { border-color: #2563eb; background: #eff6ff; transform: translateY(-2px); }
+        .selection-card.selected { border-color: #2563eb; background: #eff6ff; }
+        .selection-card img { height: 50px; object-fit: contain; margin-bottom: 8px; }
+        .card-title { font-weight: 700; font-size: 0.95rem; color: #1e293b; }
+        .card-subtitle { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+        
+        /* 진행 바 */
+        .fg-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 25px;
+        }
+        .fg-progress-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .fg-progress-dot.active { width: 24px; border-radius: 4px; background: #2563eb; }
+        .fg-progress-dot.done { background: #2563eb; }
+        
+        /* 뒤로가기 */
+        .fg-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            border: none;
+            background: none;
+            padding: 6px 0;
+        }
+        .fg-back:hover { color: #2563eb; }
+        
+        /* 하자 체크리스트 */
+        .defect-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .defect-item:hover { border-color: #cbd5e1; }
+        .defect-item.checked { border-color: #fca5a5; background: #fef2f2; }
+        .defect-label { font-weight: 600; font-size: 0.9rem; color: #1e293b; }
+        .defect-desc { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+        .defect-toggle {
+            width: 44px; height: 24px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            position: relative;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .defect-toggle::after {
+            content: '';
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+            top: 2px; left: 2px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .defect-item.checked .defect-toggle { background: #ef4444; }
+        .defect-item.checked .defect-toggle::after { left: 22px; }
+        
+        /* 결과 */
+        .fg-result-box {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .fg-result-price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 10px 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .fg-btn-primary {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .fg-btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+        
+        .fg-notice {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 0.85rem;
+            color: #1e40af;
+            line-height: 1.5;
+            margin-top: 15px;
+        }
+
+        /* 로고 바 */
+        .fg-topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: white; border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .fg-topbar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .fg-topbar-logo img { height: 28px; }
+        .fg-topbar-logo span { font-weight: 800; font-size: 1.1rem; color: #1e293b; }
+        .fg-topbar-lang {
+            font-size: 0.8rem; color: #64748b; font-weight: 600;
+            background: #f1f5f9; padding: 4px 10px; border-radius: 6px;
+            cursor: pointer; border: 1px solid #e2e8f0;
+        }
+    </style>
+
+    <!-- Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+        function triggerGoogleTranslate(langCode) {
+            const gtLangMap = { en: 'en', zh: 'zh-CN', vi: 'vi', ja: 'ja', ru: 'ru', ko: 'ko' };
+            const gtLang = gtLangMap[langCode] || 'en';
+            // googtrans 쿠키 설정 후 리로드
+            document.cookie = 'googtrans=/ko/' + gtLang + ';path=/;';
+            document.cookie = 'googtrans=/ko/' + gtLang + ';path=/;domain=' + location.hostname;
+            // lang 파라미터로 리로드
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', langCode);
+            window.location.href = url.toString();
+        }
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+        /* Google Translate 배너 숨기기 */
+        .goog-te-banner-frame, .skiptranslate { display: none !important; }
+        body { top: 0 !important; }
+    </style>
+</head>
+<body style="background: #f8fafc;">
+
+    <!-- 상단 바 -->
+    <div class="fg-topbar">
+        <a href="index.html" class="fg-topbar-logo">
+            <img src="sr_logo.png" alt="SharaPhone" onerror="this.style.display='none'">
+            <span>SharaPhone</span>
+        </a>
+        <span class="fg-topbar-lang" id="current-lang-badge" onclick="goToStep(0)">🌍 Language</span>
+    </div>
+
+    <div class="fg-wizard">
+
+        <!-- Step 0: 언어 선택 -->
+        <div class="fg-step active" id="fg-step-0">
+            <div class="fg-header">
+                <h2>🌍 Select Your Language</h2>
+                <p>Choose your preferred language to continue</p>
+            </div>
+            <div class="lang-grid">
+                <div class="lang-card" onclick="selectLang('en')">
+                    <span class="lang-flag">🇺🇸</span>
+                    <div class="lang-info">
+                        <div class="lang-name">English</div>
+                        <div class="lang-native">영어</div>
+                    </div>
+                </div>
+                <div class="lang-card" onclick="selectLang('zh')">
+                    <span class="lang-flag">🇨🇳</span>
+                    <div class="lang-info">
+                        <div class="lang-name">中文</div>
+                        <div class="lang-native">중국어</div>
+                    </div>
+                </div>
+                <div class="lang-card" onclick="selectLang('vi')">
+                    <span class="lang-flag">🇻🇳</span>
+                    <div class="lang-info">
+                        <div class="lang-name">Tiếng Việt</div>
+                        <div class="lang-native">베트남어</div>
+                    </div>
+                </div>
+                <div class="lang-card" onclick="selectLang('ja')">
+                    <span class="lang-flag">🇯🇵</span>
+                    <div class="lang-info">
+                        <div class="lang-name">日本語</div>
+                        <div class="lang-native">일본어</div>
+                    </div>
+                </div>
+                <div class="lang-card" onclick="selectLang('ru')">
+                    <span class="lang-flag">🇷🇺</span>
+                    <div class="lang-info">
+                        <div class="lang-name">Русский</div>
+                        <div class="lang-native">러시아어</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Step 0.5: Action 선택 -->
+        <div class="fg-step" id="fg-step-0-5">
+            <button class="fg-back" onclick="window.location.href='quote-foreigner.html'">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="action_title">What would you like to do?</h2>
+                <p data-i18n="action_desc">Please select an option below.</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 30px;">
+                <button onclick="goToStep(1)" style="padding: 24px; background: white; border: 2px solid #e2e8f0; border-radius: 16px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 16px;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
+                    <span style="font-size: 2.2rem;">📱</span>
+                    <div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #1e293b; margin-bottom: 4px;" data-i18n="action_new">Sell my phone</div>
+                        <div style="font-size: 0.85rem; color: #64748b;" data-i18n="action_new_desc">Get a quote and submit a new application.</div>
+                    </div>
+                </button>
+                <button onclick="window.location.href='foreigner-status.html'" style="padding: 24px; background: white; border: 2px solid #e2e8f0; border-radius: 16px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 16px;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
+                    <span style="font-size: 2.2rem;">🔍</span>
+                    <div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #1e293b; margin-bottom: 4px;" data-i18n="check_status_btn">Check Application Status</div>
+                        <div style="font-size: 0.85rem; color: #64748b;" data-i18n="check_status_desc">Already applied? Check your application status here.</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 1: 브랜드 선택 -->
+        <div class="fg-step" id="fg-step-1">
+            <div class="fg-progress">
+                <div class="fg-progress-dot active"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+            </div>
+            <button class="fg-back" onclick="goToStep(0)">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="brand_title">What brand is your phone?</h2>
+                <p data-i18n="brand_desc">Select your phone's manufacturer</p>
+            </div>
+            <div class="selection-grid">
+                <div class="selection-card" onclick="selectBrand('apple')">
+                    <img src="apple.svg" alt="Apple">
+                    <div class="card-title">Apple</div>
+                </div>
+                <div class="selection-card" onclick="selectBrand('samsung')">
+                    <img src="samsung.svg" alt="Samsung">
+                    <div class="card-title">Samsung</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: 시리즈 선택 -->
+        <div class="fg-step" id="fg-step-2">
+            <div class="fg-progress">
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot active"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+            </div>
+            <button class="fg-back" onclick="goToStep(1)">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="series_title">Select your series</h2>
+                <p data-i18n="series_desc">Choose the model line</p>
+            </div>
+            <div class="selection-grid" id="fg-series-grid">
+                <!-- JS가 채워줌 -->
+            </div>
+        </div>
+
+        <!-- Step 2-sub: 삼성 서브시리즈 -->
+        <div class="fg-step" id="fg-step-2sub">
+            <div class="fg-progress">
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot active"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+            </div>
+            <button class="fg-back" onclick="goToStep(2)">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="subseries_title">Select your model line</h2>
+            </div>
+            <div class="selection-grid" id="fg-subseries-grid">
+                <!-- JS가 채워줌 -->
+            </div>
+        </div>
+
+        <!-- Step 3: 모델 선택 -->
+        <div class="fg-step" id="fg-step-3">
+            <div class="fg-progress">
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot active"></div>
+                <div class="fg-progress-dot"></div>
+                <div class="fg-progress-dot"></div>
+            </div>
+            <button class="fg-back" id="fg-back-model">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="model_title">Select your model</h2>
+                <p data-i18n="model_desc">Choose the exact model</p>
+            </div>
+            <div class="selection-grid" id="fg-model-grid" style="grid-template-columns: 1fr;">
+                <!-- JS가 채워줌 -->
+            </div>
+        </div>
+
+        <!-- Step 4: 용량 선택 -->
+        <div class="fg-step" id="fg-step-4">
+            <div class="fg-progress">
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot active"></div>
+                <div class="fg-progress-dot"></div>
+            </div>
+            <button class="fg-back" onclick="goToStep(3)">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="storage_title">Select storage capacity</h2>
+            </div>
+            <div class="selection-grid" id="fg-storage-grid">
+                <!-- JS가 채워줌 -->
+            </div>
+        </div>
+
+        <!-- Step 5: 하자 체크 -->
+        <div class="fg-step" id="fg-step-5">
+            <div class="fg-progress">
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot active"></div>
+            </div>
+            <button class="fg-back" onclick="goToStep(4)">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="defect_title">Check your phone's condition</h2>
+                <p data-i18n="defect_desc">Toggle ON for any issues your phone has</p>
+            </div>
+            <div id="fg-defect-list">
+                <!-- JS가 채워줌 -->
+            </div>
+            <button class="fg-btn-primary" style="margin-top: 20px;" onclick="showResult()" data-i18n="see_price">See Estimated Price →</button>
+        </div>
+
+        <!-- Step 6: 연락처 입력 -->
+        <div class="fg-step" id="fg-step-6">
+            <div class="fg-progress">
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot done"></div>
+                <div class="fg-progress-dot active"></div>
+            </div>
+            <button class="fg-back" onclick="goToStep(5)">← <span data-i18n="back">Back</span></button>
+            <div class="fg-header">
+                <h2 data-i18n="contact_title">📋 Your Information</h2>
+                <p data-i18n="contact_desc">We'll contact you through the info below</p>
+            </div>
+
+            <!-- 예상 단가 미리보기 -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 0.85rem; color: #3b82f6; font-weight: 600; margin-bottom: 4px;" data-i18n="preview_price_label">Estimated Price</div>
+                <div id="fg-preview-price" style="font-size: 1.5rem; font-weight: 800; color: #1e3a8a;">0 ₩</div>
+                <div id="fg-preview-model" style="font-size: 0.8rem; color: #64748b; margin-top: 4px;"></div>
+                <div style="font-size: 0.75rem; color: #ef4444; margin-top: 8px; font-weight: 600;" data-i18n="preview_price_notice">* This is an estimated price. The final price may change after device inspection.</div>
+            </div>
+
+            <!-- 이름 -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px;">
+                    <span data-i18n="contact_name">Your Name</span> <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" id="fg-name" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" placeholder="John / 홍길동" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+            </div>
+
+            <!-- 국적 (Nationality) -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px;">
+                    <span data-i18n="contact_nationality">Nationality</span> <span style="color: #ef4444;">*</span>
+                </label>
+                <select id="fg-nationality" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; box-sizing: border-box; background-color: white; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+                    <option value="" disabled selected data-i18n="nationality_placeholder">Select your nationality</option>
+                    <option value="USA / English">USA / English (영어권)</option>
+                    <option value="China">China (중국)</option>
+                    <option value="Vietnam">Vietnam (베트남)</option>
+                    <option value="Japan">Japan (일본)</option>
+                    <option value="Russia / CIS">Russia / CIS (러시아/독립국가연합)</option>
+                    <option value="Philippines">Philippines (필리핀)</option>
+                    <option value="Thailand">Thailand (태국)</option>
+                    <option value="Indonesia">Indonesia (인도네시아)</option>
+                    <option value="Malaysia">Malaysia (말레이시아)</option>
+                    <option value="India">India (인도)</option>
+                    <option value="Bangladesh">Bangladesh (방글라데시)</option>
+                    <option value="Pakistan">Pakistan (파키스탄)</option>
+                    <option value="Uzbekistan">Uzbekistan (우즈베키스탄)</option>
+                    <option value="Kazakhstan">Kazakhstan (카자흐스탄)</option>
+                    <option value="Mongolia">Mongolia (몽골)</option>
+                    <option value="Nepal">Nepal (네팔)</option>
+                    <option value="Sri Lanka">Sri Lanka (스리랑카)</option>
+                    <option value="Myanmar">Myanmar (미얀마)</option>
+                    <option value="Cambodia">Cambodia (캄보디아)</option>
+                    <option value="Other">Other (기타)</option>
+                </select>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;" data-i18n="nationality_notice">* This information is used to provide better language support when we contact you.</div>
+            </div>
+
+            <!-- Terms Agreement Checkboxes (Split) -->
+            <div style="margin-bottom: 16px; background: #F8F9FA; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 8px;">
+                <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.85rem; color: #333;">
+                    <input type="checkbox" id="fg-agree-privacy" style="margin-right: 10px; width: 16px; height: 16px; cursor: pointer;">
+                    <span>
+                        [필수] <a href="privacy.html" target="_blank" style="color: #2563EB; text-decoration: underline;">개인정보 수집 및 이용 동의</a> 
+                        <span style="color:red">*</span>
+                    </span>
+                </label>
+                <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.85rem; color: #333;">
+                    <input type="checkbox" id="fg-agree-terms" style="margin-right: 10px; width: 16px; height: 16px; cursor: pointer;">
+                    <span>
+                        [필수] <a href="terms.html" target="_blank" style="color: #2563EB; text-decoration: underline;">이용약관 동의</a> 
+                        <span style="color:red">*</span>
+                    </span>
+                </label>
+            </div>
+
+            <!-- 연락 방법 선택 -->
+            <div style="margin-bottom: 12px;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px;">
+                    <span data-i18n="contact_method">Contact Method</span> <span style="color: #ef4444;">*</span>
+                </label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;" id="fg-contact-methods">
+                    <div class="contact-method-btn selected" data-method="phone" onclick="selectContactMethod('phone')" style="padding: 10px 8px; border: 2px solid #2563eb; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: #eff6ff;">
+                        <div style="font-size: 1.2rem;">📱</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #1e293b; margin-top: 2px;">Phone</div>
+                    </div>
+                    <div class="contact-method-btn" data-method="line" onclick="selectContactMethod('line')" style="padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: white;">
+                        <div style="font-size: 1.2rem;">🟩</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #1e293b; margin-top: 2px;">LINE</div>
+                    </div>
+                    <div class="contact-method-btn" data-method="kakaotalk" onclick="selectContactMethod('kakaotalk')" style="padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: white;">
+                        <div style="font-size: 1.2rem;">💛</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #1e293b; margin-top: 2px;">KakaoTalk</div>
+                    </div>
+                    <div class="contact-method-btn" data-method="email" onclick="selectContactMethod('email')" style="padding: 10px 8px; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: white;">
+                        <div style="font-size: 1.2rem;">📧</div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #1e293b; margin-top: 2px;">Email</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 연락처 입력 -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px;">
+                    <span id="fg-contact-label" data-i18n="contact_input_phone">Phone Number</span> <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" id="fg-contact-value" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" placeholder="+82 010-1234-5678" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+            </div>
+
+            <!-- 배송 방법 안내 (주소 입력 제거) -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px;">
+                    <span data-i18n="contact_delivery">Delivery Method</span>
+                </label>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px;">
+                    <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin-bottom: 4px;" data-i18n="delivery_direct">Direct Shipping (Convenience Store)</div>
+                    <div style="font-size: 0.85rem; color: #64748b; line-height: 1.5;"><span data-i18n="delivery_direct_desc">For safety and identity verification reasons, we only accept devices shipped directly via CU, GS25, 7-Eleven, or Emart24 convenience store delivery. A shipping guide will be shown on the next page.</span><br><br><span style="color: #d97706; font-weight: 600;" data-i18n="delivery_visit_notice">※ If you want a delivery driver to visit your address, please contact customer service after applying.</span></div>
+                </div>
+            </div>
+
+            <!-- 계좌정보 (필수) -->
+            <div id="fg-bank-account-div" style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px;">
+                    <span data-i18n="bank_account">Bank Account Details</span> <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" id="fg-bank-account" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" placeholder="Bank Name, Account Number" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+                <div style="margin-top: 6px; font-size: 0.8rem; color: #ef4444; font-weight: 600;" data-i18n="bank_warning">⚠️ Korean Bank Account Only. Account holder name MUST match your ID.</div>
+            </div>
+
+            <button class="fg-btn-primary" onclick="submitContact()" data-i18n="see_price">See Estimated Price →</button>
+
+            <div class="fg-notice" data-i18n="contact_notice">
+                🔒 Your information is safe. We only use it to contact you about your phone sale.
+            </div>
+        </div>
+
+        <!-- Step 7: 결과 (가격 + 접수 완료) -->
+        <div class="fg-step" id="fg-step-7">
+            <div class="fg-header">
+                <h2 data-i18n="result_title">Your Estimated Price</h2>
+            </div>
+            <div class="fg-result-box">
+                <div style="font-size: 0.9rem; opacity: 0.8;" data-i18n="result_label">Estimated buyback price</div>
+                <div class="fg-result-price" id="fg-price">0 ₩</div>
+                <div style="font-size: 0.85rem; opacity: 0.7;" id="fg-model-summary"></div>
+            </div>
+
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-weight: 700; color: #166534; margin-bottom: 8px;" data-i18n="result_submitted">✅ Your application has been received!</div>
+                <div style="font-size: 0.85rem; color: #15803d; line-height: 1.5;" data-i18n="result_submitted_desc">We will contact you shortly through your preferred method. Please keep your messenger/phone available.</div>
+            </div>
+
+            <div style="background: #f1f5f9; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-weight: 700; color: #1e293b; margin-bottom: 10px;" data-i18n="result_summary">📝 Application Summary</div>
+                <div id="fg-summary-details" style="font-size: 0.85rem; color: #475569; line-height: 1.8;"></div>
+            </div>
+
+            <div class="fg-notice" data-i18n="result_notice">
+                💡 This is an estimated price. The final price will be determined after our team inspects your device. We'll contact you via your preferred messenger.
+            </div>
+
+            <div style="margin-top: 16px; text-align: center;">
+                <a href="index.html" class="fg-btn-primary" style="display: inline-block; text-decoration: none; text-align: center;" data-i18n="go_home">← Back to Home</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMYsqtZzHnXjMGvdum4l3SVn_MG78m0Nc",
+            authDomain: "rejeuphone.firebaseapp.com",
+            projectId: "rejeuphone",
+            storageBucket: "rejeuphone.firebasestorage.app",
+            messagingSenderId: "1401756577",
+            appId: "1:1401756577:web:d07a5f0e304ab048e749e0",
+            measurementId: "G-JWS15NH588"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // ─── 다국어 번역 ───
+        const T = {
+            en: {
+                back: "Back", brand_title: "What brand is your phone?", brand_desc: "Select your phone's manufacturer",
+                series_title: "Select your series", series_desc: "Choose the model line",
+                subseries_title: "Select your model line",
+                model_title: "Select your model", model_desc: "Choose the exact model",
+                storage_title: "Select storage capacity",
+                defect_title: "Check your phone's condition", defect_desc: "Toggle ON for any issues your phone has",
+                see_price: "See Estimated Price →",
+                result_title: "Your Estimated Price", result_label: "Estimated buyback price",
+                apply_now: "Apply Now →",
+                result_notice: "💡 This is an estimated price. The final price will be determined after our team inspects your device.",
+                apply_title: "📝 Submit Your Application", apply_desc: "This section is coming soon.",
+                apply_coming_soon: "The foreigner application form is being prepared.\nFor now, please contact us through the chat button below\nor send us an email.",
+                opened: "Opened/Unsealed", opened_d: "Box has been opened",
+                crack: "Cracks / Dents", crack_d: "Any physical damage on body",
+                lcd: "LCD Damage", lcd_d: "Screen burn, dead pixels, lines",
+                back_crack: "Back Glass Crack", back_crack_d: "Rear glass is cracked",
+                camera: "Camera Issue", camera_d: "Lens crack, blur, malfunction",
+                battery: "Battery Swollen", battery_d: "Battery is expanded/bulging",
+                power: "Won't Turn On", power_d: "Device does not power on",
+                contact_title: "📋 Your Information", contact_desc: "We'll contact you through the info below",
+                contact_name: "Your Name", contact_method: "Contact Method",
+                contact_notice: "🔒 Your information is safe. We only use it to contact you about your phone sale.",
+                preview_price_label: "Estimated Price",
+                result_submitted: "✅ Your application has been received!",
+                result_submitted_desc: "We will contact you shortly through your preferred method. Please keep your messenger/phone available.",
+                result_summary: "📝 Application Summary", go_home: "← Back to Home",
+                contact_address: "Pick-up Address", contact_payment: "Payment Method",
+                pay_cash: "Cash (KRW)", pay_bank: "Bank Transfer",
+                bank_account: "Bank Account Details", bank_account_ph: "Bank Name, Account Number, Account Holder",
+                action_title: "What would you like to do?", action_desc: "Please select an option below.",
+                action_new: "Sell my phone", action_new_desc: "Get a quote and submit a new application.",
+                check_status_btn: "Check Application Status", check_status_desc: "Already applied? Check your application status here."
+            },
+            zh: {
+                back: "返回", brand_title: "你的手机是什么品牌？", brand_desc: "选择手机制造商",
+                series_title: "选择系列", series_desc: "选择型号系列",
+                subseries_title: "选择子系列",
+                model_title: "选择型号", model_desc: "选择具体型号",
+                storage_title: "选择存储容量",
+                defect_title: "检查手机状况", defect_desc: "有问题请打开开关",
+                see_price: "查看预估价格 →",
+                result_title: "预估回收价格", result_label: "预估回收价",
+                apply_now: "立即申请 →",
+                result_notice: "💡 这是预估价格。最终价格将在我们检查您的设备后确定。",
+                apply_title: "📝 提交申请", apply_desc: "此部分即将推出。",
+                apply_coming_soon: "外国人申请表正在准备中。\n请通过下方聊天按钮或电子邮件联系我们。",
+                opened: "已拆封", opened_d: "包装已打开",
+                crack: "裂纹/凹痕", crack_d: "机身有物理损伤",
+                lcd: "LCD损坏", lcd_d: "烧屏、坏点、线条",
+                back_crack: "后盖碎裂", back_crack_d: "后玻璃碎裂",
+                camera: "摄像头问题", camera_d: "镜头碎、模糊、故障",
+                battery: "电池膨胀", battery_d: "电池膨胀/鼓包",
+                power: "无法开机", power_d: "设备无法开机",
+                contact_title: "📋 您的信息", contact_desc: "我们将通过以下信息联系您",
+                contact_name: "您的姓名", contact_method: "联系方式",
+                contact_notice: "🔒 您的信息是安全的。我们仅用于联系您进行手机交易。",
+                preview_price_label: "预估价格",
+                result_submitted: "✅ 您的申请已收到！",
+                result_submitted_desc: "我们将尽快通过您选择的方式联系您。请保持联系畅通。",
+                result_summary: "📝 申请摘要", go_home: "← 返回首页",
+                contact_address: "取件地址", contact_payment: "收款方式",
+                pay_cash: "现金 (韩元)", pay_bank: "银行转账",
+                bank_account: "银行账户信息", bank_account_ph: "银行名称，账号，开户人",
+                action_title: "您想做什么？", action_desc: "请在下方选择一个选项。",
+                action_new: "卖掉我的手机", action_new_desc: "获取预估价格并提交新申请。",
+                check_status_btn: "查看申请状态", check_status_desc: "已经申请？在这里查看您的申请状态。"
+            },
+            vi: {
+                back: "Quay lại", brand_title: "Điện thoại của bạn hãng nào?", brand_desc: "Chọn nhà sản xuất",
+                series_title: "Chọn dòng sản phẩm", series_desc: "Chọn dòng máy",
+                subseries_title: "Chọn dòng phụ",
+                model_title: "Chọn model", model_desc: "Chọn model cụ thể",
+                storage_title: "Chọn dung lượng",
+                defect_title: "Kiểm tra tình trạng điện thoại", defect_desc: "Bật ON nếu có vấn đề",
+                see_price: "Xem giá ước tính →",
+                result_title: "Giá thu mua ước tính", result_label: "Giá thu mua ước tính",
+                apply_now: "Đăng ký ngay →",
+                result_notice: "💡 Đây là giá ước tính. Giá cuối cùng sẽ được xác định sau khi kiểm tra thiết bị.",
+                apply_title: "📝 Gửi đơn đăng ký", apply_desc: "Phần này sắp ra mắt.",
+                apply_coming_soon: "Biểu mẫu đăng ký cho người nước ngoài đang được chuẩn bị.\nVui lòng liên hệ qua chat hoặc email.",
+                opened: "Đã mở hộp", opened_d: "Hộp đã được mở",
+                crack: "Vết nứt/lõm", crack_d: "Hư hỏng vật lý trên thân máy",
+                lcd: "Hỏng LCD", lcd_d: "Cháy màn, điểm chết",
+                back_crack: "Nứt mặt lưng", back_crack_d: "Kính sau bị nứt",
+                camera: "Lỗi camera", camera_d: "Ống kính nứt, mờ",
+                battery: "Pin phồng", battery_d: "Pin bị phồng",
+                power: "Không bật được", power_d: "Máy không lên nguồn",
+                contact_title: "📋 Thông tin của bạn", contact_desc: "Chúng tôi sẽ liên hệ qua thông tin bên dưới",
+                contact_name: "Tên của bạn", contact_method: "Phương thức liên lạc",
+                contact_notice: "🔒 Thông tin của bạn được bảo mật. Chúng tôi chỉ dùng để liên hệ về việc bán điện thoại.",
+                preview_price_label: "Giá dự kiến",
+                result_submitted: "✅ Đơn đăng ký đã được nhận!",
+                result_submitted_desc: "Chúng tôi sẽ sớm liên hệ qua phương thức bạn chọn. Vui lòng giữ liên lạc.",
+                result_summary: "📝 Tóm tắt đăng ký", go_home: "← Quay về trang chủ",
+                contact_address: "Địa chỉ nhận máy", contact_payment: "Phương thức thanh toán",
+                pay_cash: "Tiền mặt (KRW)", pay_bank: "Chuyển khoản",
+                bank_account: "Thông tin tài khoản ngân hàng", bank_account_ph: "Tên ngân hàng, Số tài khoản, Tên chủ tài khoản",
+                action_title: "Bạn muốn làm gì?", action_desc: "Vui lòng chọn một tùy chọn bên dưới.",
+                action_new: "Bán điện thoại của tôi", action_new_desc: "Nhận báo giá và gửi đơn đăng ký mới.",
+                check_status_btn: "Kiểm tra trạng thái đơn", check_status_desc: "Đã đăng ký? Kiểm tra trạng thái đơn tại đây."
+            },
+            ja: {
+                back: "戻る", brand_title: "お使いのスマホのブランドは？", brand_desc: "メーカーを選択してください",
+                series_title: "シリーズを選択", series_desc: "モデルラインを選択",
+                subseries_title: "サブシリーズを選択",
+                model_title: "モデルを選択", model_desc: "正確なモデルを選択",
+                storage_title: "ストレージ容量を選択",
+                defect_title: "端末の状態を確認", defect_desc: "問題がある場合はONにしてください",
+                see_price: "見積もり価格を見る →",
+                result_title: "見積もり買取価格", result_label: "見積もり買取価格",
+                apply_now: "今すぐ申し込む →",
+                result_notice: "💡 これは見積もり価格です。最終価格は検品後に決定されます。",
+                apply_title: "📝 申請を送信", apply_desc: "このセクションは準備中です。",
+                apply_coming_soon: "外国人用の申請フォームを準備中です。\nチャットまたはメールでお問い合わせください。",
+                opened: "開封済み", opened_d: "箱が開封されている",
+                crack: "ヒビ・へこみ", crack_d: "本体の物理的損傷",
+                lcd: "LCD損傷", lcd_d: "焼き付き、ドット抜け",
+                back_crack: "背面ガラス割れ", back_crack_d: "背面ガラスにヒビ",
+                camera: "カメラ不良", camera_d: "レンズ割れ、ぼやけ",
+                battery: "バッテリー膨張", battery_d: "バッテリーが膨らんでいる",
+                power: "電源が入らない", power_d: "起動しない",
+                contact_title: "📋 お客様の情報", contact_desc: "以下の情報でご連絡いたします",
+                contact_name: "お名前", contact_method: "連絡方法",
+                contact_notice: "🔒 お客様の情報は安全です。携帯電話の売却に関する連絡にのみ使用します。",
+                preview_price_label: "予想買取価格",
+                result_submitted: "✅ お申し込みを受け付けました！",
+                result_submitted_desc: "ご希望の方法で近日中にご連絡いたします。連絡手段をご確認ください。",
+                result_summary: "📝 申請概要", go_home: "← ホームに戻る",
+                contact_address: "集荷先住所", contact_payment: "支払方法",
+                pay_cash: "現金 (ウォン)", pay_bank: "銀行振込",
+                bank_account: "口座情報", bank_account_ph: "銀行名、口座番号、名義人",
+                action_title: "ご希望のメニューを選択してください", action_desc: "以下のオプションからお選びください。",
+                action_new: "スマホを売る", action_new_desc: "見積もりを取得し、新規申し込みを行います。",
+                check_status_btn: "申込状況を確認する", check_status_desc: "申込済みですか？こちらから状況をご確認ください。"
+            },
+            ru: {
+                back: "Назад", brand_title: "Какой бренд вашего телефона?", brand_desc: "Выберите производителя",
+                series_title: "Выберите серию", series_desc: "Выберите линейку моделей",
+                subseries_title: "Выберите подсерию",
+                model_title: "Выберите модель", model_desc: "Выберите точную модель",
+                storage_title: "Выберите объём памяти",
+                defect_title: "Проверьте состояние телефона", defect_desc: "Включите при наличии проблем",
+                see_price: "Узнать цену →",
+                result_title: "Оценочная цена", result_label: "Оценочная цена выкупа",
+                apply_now: "Подать заявку →",
+                result_notice: "💡 Это оценочная цена. Окончательная цена определяется после осмотра устройства.",
+                apply_title: "📝 Подать заявку", apply_desc: "Этот раздел скоро будет готов.",
+                apply_coming_soon: "Форма заявки для иностранцев готовится.\nПожалуйста, свяжитесь с нами через чат или email.",
+                opened: "Вскрыта упаковка", opened_d: "Коробка была вскрыта",
+                crack: "Трещины/вмятины", crack_d: "Физические повреждения корпуса",
+                lcd: "Повреждение LCD", lcd_d: "Выгорание, битые пиксели",
+                back_crack: "Трещина задней панели", back_crack_d: "Заднее стекло разбито",
+                camera: "Проблема с камерой", camera_d: "Трещина объектива, размытие",
+                battery: "Вздутие батареи", battery_d: "Батарея вздулась",
+                power: "Не включается", power_d: "Устройство не включается",
+                contact_title: "📋 Ваши данные", contact_desc: "Мы свяжемся с вами по указанным данным",
+                contact_name: "Ваше имя", contact_method: "Способ связи",
+                contact_notice: "🔒 Ваши данные в безопасности. Мы используем их только для связи по продаже телефона.",
+                preview_price_label: "Примерная цена",
+                result_submitted: "✅ Ваша заявка принята!",
+                result_submitted_desc: "Мы свяжемся с вами в ближайшее время через выбранный способ. Будьте на связи.",
+                result_summary: "📝 Итог заявки", go_home: "← На главную",
+                contact_address: "Адрес забора", contact_payment: "Способ оплаты",
+                pay_cash: "Наличные (KRW)", pay_bank: "Банковский перевод",
+                bank_account: "Реквизиты банковского счета", bank_account_ph: "Название банка, номер счета, владелец",
+                action_title: "Что бы вы хотели сделать?", action_desc: "Пожалуйста, выберите вариант ниже.",
+                action_new: "Продать мой телефон", action_new_desc: "Получить оценку и подать новую заявку.",
+                check_status_btn: "Проверить статус заявки", check_status_desc: "Уже подали заявку? Проверьте её статус здесь."
+            },
+            ko: {
+                back: "이전", brand_title: "어떤 브랜드의 폰인가요?", brand_desc: "판매하실 제품의 제조사를 선택해주세요",
+                series_title: "시리즈를 선택해주세요", series_desc: "모델 라인을 선택해주세요",
+                subseries_title: "세부 시리즈를 선택해주세요",
+                model_title: "모델을 선택해주세요", model_desc: "정확한 모델을 선택해주세요",
+                storage_title: "용량을 선택해주세요",
+                defect_title: "폰 상태를 확인해주세요", defect_desc: "해당 사항이 있으면 ON으로 전환해주세요",
+                see_price: "예상 매입가 확인 →",
+                result_title: "예상 매입가", result_label: "예상 매입 금액",
+                apply_now: "매입 신청하기 →",
+                result_notice: "💡 이 가격은 예상 금액입니다. 최종 가격은 검수 후 확정됩니다.",
+                apply_title: "📝 매입 신청", apply_desc: "이 섹션은 준비 중입니다.",
+                apply_coming_soon: "외국인 신청 양식을 준비 중입니다.\n아래 채팅이나 이메일로 문의해주세요.",
+                opened: "개봉 여부", opened_d: "박스 개봉 상태",
+                crack: "파손/찍힘", crack_d: "외관 물리적 손상",
+                lcd: "LCD 손상", lcd_d: "번인, 불량 화소, 줄 생김",
+                back_crack: "후면 유리 파손", back_crack_d: "뒷면 유리 깨짐",
+                camera: "카메라 불량", camera_d: "렌즈 파손, 흐림, 고장",
+                battery: "배터리 부풀음", battery_d: "배터리 팽창",
+                power: "전원 불량", power_d: "전원이 켜지지 않음",
+                action_title: "어떤 작업을 원하시나요?", action_desc: "아래 옵션 중 하나를 선택해주세요.",
+                action_new: "내 폰 판매하기", action_new_desc: "예상 매입가를 확인하고 새 신청서를 접수합니다.",
+                check_status_btn: "신청 내역 조회하기", check_status_desc: "이미 신청하셨나요? 여기서 진행 상태를 확인하세요."
+            }
+        };
+        
+        let currentLang = 'en';
+        let currentStep = 0;
+        let phoneData = {};
+        let allPrices = [];
+        let selectedQuote = { brand: '', series: '', parentCategory: '', model: '', storage: '', defects: {} };
+        
+        // ─── 언어 적용 ───
+        function applyLang(lang) {
+            currentLang = lang;
+            const t = T[lang] || T['en'];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (t[key]) el.textContent = t[key];
+            });
+            const badge = document.getElementById('current-lang-badge');
+            const flags = { en: '🇺🇸', zh: '🇨🇳', vi: '🇻🇳', ja: '🇯🇵', ru: '🇷🇺', ko: '🇰🇷' };
+            badge.textContent = `${flags[lang] || '🌍'} ${lang.toUpperCase()}`;
+        }
+        window.selectLang = function(lang) {
+            applyLang(lang);
+            // Google Translate 자동 적용 (쿠키 설정)
+            if (lang !== 'ko') {
+                triggerGoogleTranslate(lang);
+            }
+            goToStep(0.5);
+            buildDefectList();
+        };
+        
+        // ─── 페이지 로드 시 lang 파라미터 확인 ───
+        function checkUrlLang() {
+            const params = new URLSearchParams(window.location.search);
+            const lang = params.get('lang');
+            if (lang && T[lang]) {
+                currentLang = lang;
+                applyLang(lang);
+                buildDefectList();
+                goToStep(0.5); // 언어 선택 후 액션 선택으로
+            }
+        }
+        
+        // ─── 스텝 이동 ───
+        window.goToStep = function(step) {
+            document.querySelectorAll('.fg-step').forEach(s => s.classList.remove('active'));
+            const stepMap = { 0: 'fg-step-0', 0.5: 'fg-step-0-5', 1: 'fg-step-1', 2: 'fg-step-2', '2sub': 'fg-step-2sub', 3: 'fg-step-3', 4: 'fg-step-4', 5: 'fg-step-5', 6: 'fg-step-6', 7: 'fg-step-7' };
+            const el = document.getElementById(stepMap[step]);
+            if (el) el.classList.add('active');
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        
+        // ─── Firestore 데이터 로드 ───
+        async function loadPhoneData() {
+            try {
+                const snap = await getDocs(collection(db, 'products'));
+                snap.forEach(doc => {
+                    allPrices.push({ id: doc.id, ...doc.data() });
+                });
+                console.log(`Loaded ${allPrices.length} products for foreigner page`);
+                // 삼성 카테고리 분류 함수
+                function getSamsungParentCategory(seriesName) {
+                    if (!seriesName) return 'Others';
+                    const s = seriesName.toUpperCase();
+                    if (s.includes('폴드') || s.includes('FOLD') || s.includes('Z FOLD')) return 'Fold Series';
+                    if (s.includes('플립') || s.includes('FLIP') || s.includes('Z FLIP')) return 'Flip Series';
+                    if (s.includes('노트') || s.includes('NOTE')) return 'Note Series';
+                    if (s.includes('S') && /[0-9]/.test(s) && !s.includes('플립') && !s.includes('폴드') && !s.includes('노트')) return 'S Series';
+                    if ((s.includes('A') && /[0-9]/.test(s)) || s.includes('A 시리즈') || s.includes('A시리즈')) return 'A Series & Others';
+                    return 'Others';
+                }
+                // 브랜드별 시리즈 추출
+                phoneData.apple = {};
+                phoneData.samsung = {};
+                phoneData._samsungCatFn = getSamsungParentCategory;
+                allPrices.forEach(p => {
+                    const brand = (p.brand || '').toLowerCase();
+                    const series = p.series || '';
+                    if (brand === 'apple') {
+                        if (!phoneData.apple[series]) phoneData.apple[series] = [];
+                        phoneData.apple[series].push(p);
+                    } else if (brand === 'samsung' || brand === '삼성') {
+                        const parentCat = getSamsungParentCategory(series);
+                        if (!phoneData.samsung[parentCat]) phoneData.samsung[parentCat] = {};
+                        if (!phoneData.samsung[parentCat][series]) phoneData.samsung[parentCat][series] = [];
+                        phoneData.samsung[parentCat][series].push(p);
+                    }
+                });
+                console.log('Apple series:', Object.keys(phoneData.apple));
+                console.log('Samsung categories:', Object.keys(phoneData.samsung));
+            } catch (e) {
+                console.error('Failed to load phone data:', e);
+            }
+        }
+        
+        // ─── 브랜드 선택 ───
+        window.selectBrand = function(brand) {
+            selectedQuote.brand = brand;
+            renderSeries(brand);
+            goToStep(2);
+        };
+        
+        // ─── 시리즈 렌더 ───
+        function renderSeries(brand) {
+            const grid = document.getElementById('fg-series-grid');
+            grid.innerHTML = '';
+            if (brand === 'apple') {
+                const seriesList = Object.keys(phoneData.apple || {});
+                seriesList.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'selection-card';
+                    card.innerHTML = `<div class="card-title">${s}</div>`;
+                    card.onclick = () => { selectedQuote.series = s; renderModels(brand, s); goToStep(3); };
+                    grid.appendChild(card);
+                });
+            } else {
+                const cats = Object.keys(phoneData.samsung || {}).filter(c => c !== 'Others');
+                cats.forEach(cat => {
+                    const card = document.createElement('div');
+                    card.className = 'selection-card';
+                    card.innerHTML = `<div class="card-title">${cat}</div>`;
+                    card.onclick = () => { selectedQuote.parentCategory = cat; renderSubSeries(cat); goToStep('2sub'); };
+                    grid.appendChild(card);
+                });
+            }
+            // 뒤로가기
+            document.getElementById('fg-back-model').onclick = () => {
+                if (brand === 'samsung') goToStep('2sub');
+                else goToStep(2);
+            };
+        }
+        
+        function renderSubSeries(parentCat) {
+            const grid = document.getElementById('fg-subseries-grid');
+            grid.innerHTML = '';
+            const subSeries = Object.keys(phoneData.samsung[parentCat] || {});
+            subSeries.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'selection-card';
+                card.innerHTML = `<div class="card-title">${s}</div>`;
+                card.onclick = () => { selectedQuote.series = s; renderModels('samsung', s, parentCat); goToStep(3); };
+                grid.appendChild(card);
+            });
+        }
+        
+        // ─── 모델 렌더 ───
+        function renderModels(brand, series, parentCat) {
+            const grid = document.getElementById('fg-model-grid');
+            grid.innerHTML = '';
+            let items = [];
+            if (brand === 'apple') {
+                items = phoneData.apple[series] || [];
+            } else {
+                const cat = parentCat || selectedQuote.parentCategory;
+                items = (phoneData.samsung[cat] || {})[series] || [];
+            }
+            // 모델별 그룹 (같은 모델명이면 하나로)
+            const modelMap = {};
+            items.forEach(p => {
+                const model = p.model || p.name || '';
+                if (!modelMap[model]) modelMap[model] = p;
+            });
+            // 가격순 정렬
+            const sorted = Object.entries(modelMap).sort((a, b) => (b[1].basePrice || 0) - (a[1].basePrice || 0));
+            sorted.forEach(([model, p]) => {
+                const card = document.createElement('div');
+                card.className = 'selection-card';
+                card.style.flexDirection = 'row';
+                card.style.justifyContent = 'space-between';
+                card.style.padding = '16px 20px';
+                const priceText = p.basePrice ? new Intl.NumberFormat('ko-KR').format(p.basePrice) + '₩~' : '';
+                card.innerHTML = `<div><div class="card-title">${model}</div></div>${priceText ? '<div style="font-size:0.8rem;color:#2563eb;font-weight:700;">' + priceText + '</div>' : ''}`;
+                card.onclick = () => {
+                    selectedQuote.model = model;
+                    selectedQuote._modelData = p;
+                    const storageOpts = p.storageOptions || [];
+                    if (brand === 'samsung' && storageOpts.length === 0) {
+                        // 삼성은 용량 옵션 없으면 바로 하자로
+                        selectedQuote.storage = '기본';
+                        selectedQuote._storageAdj = 0;
+                        selectedQuote._priceData = p;
+                        goToStep(5);
+                    } else if (storageOpts.length === 0) {
+                        // 애플도 옵션 없으면 바로 하자로
+                        selectedQuote.storage = '기본';
+                        selectedQuote._storageAdj = 0;
+                        selectedQuote._priceData = p;
+                        goToStep(5);
+                    } else {
+                        renderStorage(p);
+                        goToStep(4);
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+        
+        // ─── 용량 렌더 (storageOptions 기반) ───
+        function renderStorage(modelData) {
+            const grid = document.getElementById('fg-storage-grid');
+            grid.innerHTML = '';
+            const options = modelData.storageOptions || [{ size: 'Default', priceAdjustment: 0 }];
+            options.forEach(opt => {
+                const card = document.createElement('div');
+                card.className = 'selection-card';
+                const adjText = opt.priceAdjustment > 0 ? `+${new Intl.NumberFormat('ko-KR').format(opt.priceAdjustment)}₩` : 
+                               opt.priceAdjustment < 0 ? `${new Intl.NumberFormat('ko-KR').format(opt.priceAdjustment)}₩` : '';
+                const totalPrice = (modelData.basePrice || 0) + (opt.priceAdjustment || 0);
+                card.innerHTML = `
+                    <div class="card-title">${opt.size}</div>
+                    ${adjText ? '<div style="font-size:0.75rem;color:#64748b;margin-top:4px;">' + adjText + '</div>' : ''}
+                    <div style="font-size:0.85rem;color:#2563eb;font-weight:700;margin-top:6px;">${new Intl.NumberFormat('ko-KR').format(totalPrice)}₩</div>
+                `;
+                card.onclick = () => {
+                    selectedQuote.storage = opt.size;
+                    selectedQuote._storageAdj = opt.priceAdjustment || 0;
+                    selectedQuote._priceData = modelData;
+                    goToStep(5);
+                };
+                grid.appendChild(card);
+            });
+        }
+        
+        // ─── 하자 체크리스트 ───
+        function buildDefectList() {
+            const t = T[currentLang] || T['en'];
+            const defects = [
+                { key: 'opened', label: t.opened, desc: t.opened_d },
+                { key: 'crack', label: t.crack, desc: t.crack_d },
+                { key: 'lcd', label: t.lcd, desc: t.lcd_d },
+                { key: 'back_crack', label: t.back_crack, desc: t.back_crack_d },
+                { key: 'camera', label: t.camera, desc: t.camera_d },
+                { key: 'battery', label: t.battery, desc: t.battery_d },
+                { key: 'power', label: t.power, desc: t.power_d }
+            ];
+            const container = document.getElementById('fg-defect-list');
+            container.innerHTML = '';
+            selectedQuote.defects = {};
+            defects.forEach(d => {
+                selectedQuote.defects[d.key] = false;
+                const item = document.createElement('div');
+                item.className = 'defect-item';
+                item.innerHTML = `
+                    <div>
+                        <div class="defect-label">${d.label}</div>
+                        <div class="defect-desc">${d.desc}</div>
+                    </div>
+                    <div class="defect-toggle"></div>
+                `;
+                item.onclick = () => {
+                    item.classList.toggle('checked');
+                    selectedQuote.defects[d.key] = item.classList.contains('checked');
+                };
+                container.appendChild(item);
+            });
+        }
+        
+        // ─── 하자 → 연락처 페이지로 ───
+        let selectedMethod = 'phone';
+        
+        window.showResult = function() {
+            // 가격 미리 계산
+            const p = selectedQuote._priceData;
+            let price = 0;
+            if (p) {
+                price = (p.basePrice || 0) + (selectedQuote._storageAdj || 0);
+                const defectCount = Object.values(selectedQuote.defects).filter(v => v).length;
+                if (defectCount > 0) price = Math.round(price * (1 - defectCount * 0.08));
+                if (price < 0) price = 0;
+                price = Math.floor(price / 1000) * 1000;
+            }
+            
+            document.getElementById('fg-preview-price').textContent = new Intl.NumberFormat('ko-KR').format(price) + ' ₩';
+            document.getElementById('fg-preview-model').textContent = `${selectedQuote.brand === 'apple' ? 'Apple' : 'Samsung'} ${selectedQuote.model} ${selectedQuote.storage}`;
+            
+            goToStep(6);
+        };
+        
+        // ─── 연락 방법 선택 ───
+        window.selectContactMethod = function(method) {
+            selectedMethod = method;
+            const methods = document.querySelectorAll('#fg-contact-methods .contact-method-btn');
+            methods.forEach(m => {
+                if (m.dataset.method === method) {
+                    m.style.borderColor = '#2563eb';
+                    m.style.background = '#eff6ff';
+                    m.classList.add('selected');
+                } else {
+                    m.style.borderColor = '#e2e8f0';
+                    m.style.background = 'white';
+                    m.classList.remove('selected');
+                }
+            });
+            // 라벨 & placeholder 변경
+            const label = document.getElementById('fg-contact-label');
+            const input = document.getElementById('fg-contact-value');
+            const placeholders = {
+                phone: { label: 'Phone Number', ph: '+82 010-1234-5678' },
+                whatsapp: { label: 'WhatsApp Number', ph: '+82 010-1234-5678' },
+                wechat: { label: 'WeChat ID', ph: 'Your WeChat ID' },
+                line: { label: 'LINE ID', ph: 'Your LINE ID' },
+                kakaotalk: { label: 'KakaoTalk ID', ph: 'Your KakaoTalk ID or phone number' },
+                email: { label: 'Email Address', ph: 'your@email.com' }
+            };
+            const info = placeholders[method] || placeholders.phone;
+            label.textContent = info.label;
+            input.placeholder = info.ph;
+            input.type = method === 'email' ? 'email' : 'text';
+        };
+        
+        // ─── 결제 방법 선택 ───
+        let selectedPaymentMethod = 'cash';
+        window.selectPaymentMethod = function(method) {
+            selectedPaymentMethod = method;
+            const methods = document.querySelectorAll('#fg-payment-methods .payment-method-btn');
+            methods.forEach(m => {
+                if (m.dataset.method === method) {
+                    m.style.borderColor = '#2563eb';
+                    m.style.background = '#eff6ff';
+                    m.classList.add('selected');
+                } else {
+                    m.style.borderColor = '#e2e8f0';
+                    m.style.background = 'white';
+                    m.classList.remove('selected');
+                }
+            });
+            
+            // 계좌 입력창 보이기/숨기기
+            const bankDiv = document.getElementById('fg-bank-account-div');
+            const bankInput = document.getElementById('fg-bank-account');
+            if (method === 'bank') {
+                bankDiv.style.display = 'block';
+                const t = T[currentLang] || T['en'];
+                bankInput.placeholder = t.bank_account_ph || "Bank Name, Account Number, Account Holder";
+            } else {
+                bankDiv.style.display = 'none';
+                bankInput.value = ''; // 초기화
+            }
+        };
+        
+        // ─── 연락처 제출 → 결과 ───
+        window.submitContact = async function() {
+            const name = document.getElementById('fg-name').value.trim();
+            const contact = document.getElementById('fg-contact-value').value.trim();
+            const nationality = document.getElementById('fg-nationality').value.trim();
+            
+            if (!name) {
+                document.getElementById('fg-name').style.borderColor = '#ef4444';
+                document.getElementById('fg-name').focus();
+                return;
+            }
+            if (!nationality) {
+                document.getElementById('fg-nationality').style.borderColor = '#ef4444';
+                document.getElementById('fg-nationality').focus();
+                return;
+            }
+            if (!contact) {
+                document.getElementById('fg-contact-value').style.borderColor = '#ef4444';
+                document.getElementById('fg-contact-value').focus();
+                return;
+            }
+            
+            const bankAccount = document.getElementById('fg-bank-account').value.trim();
+            if (!bankAccount) {
+                document.getElementById('fg-bank-account').style.borderColor = '#ef4444';
+                document.getElementById('fg-bank-account').focus();
+                return;
+            }
+            
+            const agreePrivacy = document.getElementById('fg-agree-privacy');
+            const agreeTerms = document.getElementById('fg-agree-terms');
+            
+            if (agreePrivacy && !agreePrivacy.checked) {
+                const privacyAlertMsg = {
+                    ko: '개인정보 수집 및 이용 동의에 체크해 주세요.',
+                    en: 'You must agree to the Privacy Policy.',
+                    zh: '您必须同意个人信息收集和使用条款。',
+                    vi: 'Bạn phải đồng ý với Chính sách Bảo mật.',
+                    ja: '個人情報収集・利用規約に同意する必要があります。',
+                    ru: 'Вы должны согласиться с Политикой конфиденциальности.'
+                };
+                alert(privacyAlertMsg[currentLang] || privacyAlertMsg['en']);
+                return;
+            }
+            if (agreeTerms && !agreeTerms.checked) {
+                const termsAlertMsg = {
+                    ko: '이용약관 동의에 체크해 주세요.',
+                    en: 'You must agree to the Terms of Service.',
+                    zh: '您必须同意服务条款。',
+                    vi: 'Bạn phải đồng ý với Điều khoản Dịch vụ.',
+                    ja: '利用規約에 동의해야 합니다.',
+                    ru: 'Вы должны согласиться с Условиями предоставления услуг.'
+                };
+                alert(termsAlertMsg[currentLang] || termsAlertMsg['en']);
+                return;
+            }
+            
+            // Show modal instead of submitting directly
+            const modal = document.getElementById('presale-modal');
+            if (modal) {
+                const isApple = selectedQuote.brand === 'apple';
+                document.getElementById('presale-step-1-apple').style.display = isApple ? 'block' : 'none';
+                document.getElementById('presale-step-1-samsung').style.display = isApple ? 'none' : 'block';
+                
+                // Reset dots
+                document.getElementById('p-dot-1').classList.add('active');
+                document.getElementById('p-dot-2').classList.remove('active');
+                document.getElementById('p-dot-3').classList.remove('active');
+                
+                // Reset sections
+                document.getElementById('presale-section-1').style.display = 'block';
+                document.getElementById('presale-section-2').style.display = 'none';
+                document.getElementById('presale-section-3').style.display = 'none';
+                
+                document.getElementById('p-btn-prev').style.display = 'none';
+                document.getElementById('p-btn-next').style.display = 'block';
+                document.getElementById('p-btn-next').textContent = 'Next';
+                document.getElementById('p-btn-submit').style.display = 'none';
+                
+                window.presaleCurrentStep = 1;
+                modal.style.display = 'flex';
+            }
+        };
+
+        window.closePresaleModal = function() {
+            document.getElementById('presale-modal').style.display = 'none';
+        };
+
+        window.presaleCurrentStep = 1;
+        window.presaleGoNext = function() {
+            if (window.presaleCurrentStep === 1) {
+                document.getElementById('presale-section-1').style.display = 'none';
+                document.getElementById('presale-section-2').style.display = 'block';
+                document.getElementById('presale-section-3').style.display = 'none';
+                document.getElementById('p-dot-1').classList.remove('active');
+                document.getElementById('p-dot-2').classList.add('active');
+                document.getElementById('p-dot-3').classList.remove('active');
+                document.getElementById('p-btn-prev').style.display = 'block';
+                window.presaleCurrentStep = 2;
+            } else if (window.presaleCurrentStep === 2) {
+                document.getElementById('presale-section-1').style.display = 'none';
+                document.getElementById('presale-section-2').style.display = 'none';
+                document.getElementById('presale-section-3').style.display = 'block';
+                document.getElementById('p-dot-1').classList.remove('active');
+                document.getElementById('p-dot-2').classList.remove('active');
+                document.getElementById('p-dot-3').classList.add('active');
+                document.getElementById('p-btn-next').style.display = 'none';
+                document.getElementById('p-btn-submit').style.display = 'block';
+                window.presaleCurrentStep = 3;
+            }
+        };
+
+        window.presaleGoPrev = function() {
+            if (window.presaleCurrentStep === 3) {
+                document.getElementById('presale-section-1').style.display = 'none';
+                document.getElementById('presale-section-2').style.display = 'block';
+                document.getElementById('presale-section-3').style.display = 'none';
+                document.getElementById('p-dot-1').classList.remove('active');
+                document.getElementById('p-dot-2').classList.add('active');
+                document.getElementById('p-dot-3').classList.remove('active');
+                document.getElementById('p-btn-next').style.display = 'block';
+                document.getElementById('p-btn-next').textContent = 'Next';
+                document.getElementById('p-btn-submit').style.display = 'none';
+                window.presaleCurrentStep = 2;
+            } else if (window.presaleCurrentStep === 2) {
+                document.getElementById('presale-section-1').style.display = 'block';
+                document.getElementById('presale-section-2').style.display = 'none';
+                document.getElementById('presale-section-3').style.display = 'none';
+                document.getElementById('p-dot-1').classList.add('active');
+                document.getElementById('p-dot-2').classList.remove('active');
+                document.getElementById('p-dot-3').classList.remove('active');
+                document.getElementById('p-btn-prev').style.display = 'none';
+                window.presaleCurrentStep = 1;
+            }
+        };
+
+        window.confirmAndSubmit = async function() {
+            const name = document.getElementById('fg-name').value.trim();
+            const contact = document.getElementById('fg-contact-value').value.trim();
+            const nationality = document.getElementById('fg-nationality').value.trim();
+            const bankAccount = document.getElementById('fg-bank-account').value.trim();
+
+            // 버튼 상태 변경 (로딩 중)
+            const submitBtn = document.getElementById('p-btn-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
+            // 가격 계산
+            const p = selectedQuote._priceData;
+            let price = 0;
+            if (p) {
+                price = (p.basePrice || 0) + (selectedQuote._storageAdj || 0);
+                const defectCount = Object.values(selectedQuote.defects).filter(v => v).length;
+                if (defectCount > 0) price = Math.round(price * (1 - defectCount * 0.08));
+                if (price < 0) price = 0;
+                price = Math.floor(price / 1000) * 1000;
+            }
+            document.getElementById('fg-price').textContent = new Intl.NumberFormat('ko-KR').format(price) + ' ₩';
+            document.getElementById('fg-model-summary').textContent = `${selectedQuote.brand === 'apple' ? 'Apple' : 'Samsung'} ${selectedQuote.model} ${selectedQuote.storage}`;
+            
+            // 요약 정보
+            const defectList = Object.entries(selectedQuote.defects).filter(([k,v]) => v).map(([k]) => k);
+            const methodIcons = { phone: '📱', whatsapp: '💬', wechat: '🟢', line: '🟩', kakaotalk: '💛', email: '📧' };
+            const paymentIcon = '🏦';
+            const paymentText = 'Bank Transfer (' + bankAccount + ')';
+
+            document.getElementById('fg-summary-details').innerHTML = `
+                <div>📱 <strong>Device:</strong> ${selectedQuote.brand === 'apple' ? 'Apple' : 'Samsung'} ${selectedQuote.model} ${selectedQuote.storage}</div>
+                <div>🔍 <strong>Issues:</strong> ${defectList.length === 0 ? 'None' : defectList.join(', ')}</div>
+                <div>👤 <strong>Name:</strong> ${name}</div>
+                <div>${methodIcons[selectedMethod] || '📱'} <strong>${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}:</strong> ${contact}</div>
+                <div>📍 <strong>Delivery:</strong> Convenience Store Shipping</div>
+                <div>${paymentIcon} <strong>Payment:</strong> ${paymentText}</div>
+            `;
+
+            const payload = {
+                timestamp: new Date().toLocaleString(),
+                brand: selectedQuote.brand === 'apple' ? 'Apple' : 'Samsung',
+                model: selectedQuote.model,
+                series: 'Foreigner',
+                storage: selectedQuote.storage,
+                grade: 'B', // default for foreigner
+                conditionType: 'used',
+                price: price,
+                customerName: name,
+                customerPhone: `${contact} (${selectedMethod})`,
+                customerAddress: 'Foreigner Convenience Store Shipping',
+                deliveryMethod: 'Foreigner Pickup',
+                pickupDate: '',
+                customerAccount: bankAccount,
+                customerMemo: `Language: ${currentLang}\nDefects: ${defectList.length === 0 ? 'None' : defectList.join(', ')}`,
+                userId: auth.currentUser ? auth.currentUser.uid : 'anonymous',
+                method: 'foreigner',
+                
+                // Additional fields for foreigner specifically
+                nationality: nationality,
+                language: currentLang,
+                status: 'pending',
+                isForeigner: true,
+                paymentMethod: 'bank',
+                contactMethod: selectedMethod,
+                finalPrice: price
+            };
+            
+            try {
+                // 익명 로그인 후 Firestore 저장
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+                await addDoc(collection(db, 'quotes'), payload);
+                
+                // Telegram 알림 전송
+                const telegramMsg = `
+[🌍 외국인 매입 신청]
+👤 이름: ${payload.customerName}
+🎌 국적: ${payload.nationality}
+${methodIcons[selectedMethod] || '📱'} 연락처(${selectedMethod}): ${payload.customerPhone}
+📍 배송방식: 편의점 택배 직접 발송
+${paymentIcon} 입금방식: ${paymentText}
+🗣️ 언어: ${payload.language.toUpperCase()}
+
+📱 기종: ${payload.brand} ${payload.model} (${payload.storage})
+💰 예상매입가: ${new Intl.NumberFormat('ko-KR').format(price)} 원
+🔍 체크된 하자: ${defectList.length === 0 ? '없음' : defectList.join(', ')}
+`;
+                fetch('https://asia-northeast3-rejeuphone.cloudfunctions.net/telegramApi/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: telegramMsg })
+                }).catch(e => console.error('Telegram API Error:', e));
+
+                // Google Ads Conversion Events
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-18055027970/QL8CCL-Ur68cEIK6p6FD',
+                        'value': price || 0,
+                        'currency': 'KRW'
+                    });
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-18055027970/EYqmCNfnrq8cEIK6p6FD',
+                        'value': price || 0,
+                        'currency': 'KRW'
+                    });
+                }
+
+                goToStep(7);
+            } catch (error) {
+                console.error('Submission failed:', error);
+                alert('Submission failed: ' + (error.message || JSON.stringify(error)));
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                closePresaleModal();
+            }
+        };
+
+        // ─── 초기화 ───
+        loadPhoneData().then(() => {
+            checkUrlLang();
+        });
+    </script>
+
+    <!-- Presale Modal (Reset & Delivery Guide) -->
+    <div id="presale-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: white; border-radius: 12px; width: 90%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column;">
+            <style>
+                .presale-step-dot { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; color: #475569; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: 0.3s; }
+                .presale-step-dot.active { background: #2563eb; color: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+                .guide-image-container { position: relative; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #f8fafc; }
+                .finger-pointer { position: absolute; width: 30px; height: 30px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%232563eb"><path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v3.74c1.21-.81 2-2.14 2-3.74a4.5 4.5 0 0 0-9 0c0 1.6.79 2.93 2 3.74zm9.75 3.31a5.47 5.47 0 0 0-2.3-3.69l-1.37-.92a2.5 2.5 0 0 1-5.16 0l-1.37.92a5.47 5.47 0 0 0-2.3 3.69 1.48 1.48 0 0 0 .54 1.77L11.5 20.3a2.5 2.5 0 0 0 2.83 0l4.71-3.98a1.48 1.48 0 0 0 .71-1.77z"/></svg>') no-repeat center; background-size: contain; animation: pointBounce 1.5s infinite; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+                @keyframes pointBounce { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-5px,-5px); } }
+                .presale-action-card { flex: 1; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; text-align: center; background: white; }
+                .presale-btn-nav { padding: 14px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+            </style>
+            
+            <div class="modal-header" style="position: relative; padding: 20px; text-align: center; border-bottom: 1px solid #f1f5f9;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #0f172a; font-weight:bold;" data-i18n="presale_title">Before You Submit</h3>
+                <button onclick="closePresaleModal()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div style="display: flex; justify-content: center; align-items: center; padding: 20px 0 10px; gap: 15px;">
+                <div class="presale-step-dot active" id="p-dot-1">1</div>
+                <div style="height: 2px; width: 40px; background: #e2e8f0;"></div>
+                <div class="presale-step-dot" id="p-dot-2">2</div>
+                <div style="height: 2px; width: 40px; background: #e2e8f0;"></div>
+                <div class="presale-step-dot" id="p-dot-3">3</div>
+            </div>
+
+            <div class="modal-body" style="padding: 0 24px 24px; overflow-y: auto; flex: 1;">
+                
+                <!-- Section 1: Factory Reset -->
+                <div id="presale-section-1">
+                    <div id="presale-step-1-apple" style="display: none;">
+                        <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;" data-i18n="presale_apple_title">1. Sign out & Factory Reset</h4>
+                        <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+                            <strong>※ Activation lock may still remain even after reset.</strong><br>
+                            Please turn off 'Find My iPhone' and sign out completely.<br>
+                            <span style="color: #2563EB; font-weight: bold;">Settings ➜ Apple ID ➜ Sign Out</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                            <div style="width: 100%; max-width: 320px; text-align: center;">
+                                <div class="guide-image-container">
+                                    <img src="assets/guide/apple_1.png" style="width: 100%; display: block;"/>
+                                </div>
+                                <div style="font-size: 0.95rem; font-weight: 700; margin-top: 5px;">Tap [Apple ID]</div>
+                            </div>
+                            <div style="width: 100%; max-width: 320px; text-align: center;">
+                                <div class="guide-image-container">
+                                    <img src="assets/guide/apple_2.png" style="width: 100%; display: block;"/>
+                                </div>
+                                <div style="font-size: 0.95rem; font-weight: 700; margin-top: 5px;">Scroll down and tap [Sign Out]</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="presale-step-1-samsung" style="display: none;">
+                        <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;" data-i18n="presale_samsung_title">1. Factory Data Reset</h4>
+                        <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+                            All accounts including Samsung/Google must be removed.<br>
+                            <span style="color: #2563EB; font-weight: bold;">Settings ➜ General management ➜ Reset ➜ Factory data reset</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                            <div style="width: 100%; max-width: 320px; text-align: center;">
+                                <div class="guide-image-container">
+                                    <img src="assets/guide/samsung_1.jpg" style="width: 100%; display: block;"/>
+                                </div>
+                                <div style="font-size: 0.95rem; font-weight: 700; margin-top: 5px;">Tap [General management]</div>
+                            </div>
+                            <div style="width: 100%; max-width: 320px; text-align: center;">
+                                <div class="guide-image-container">
+                                    <img src="assets/guide/samsung_3.jpg" style="width: 100%; display: block;"/>
+                                </div>
+                                <div style="font-size: 0.95rem; font-weight: 700; margin-top: 5px;">Tap [Factory data reset]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Data Deletion & SIM -->
+                <div id="presale-section-2" style="display: none;">
+                    <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;" data-i18n="presale_data_title">2. SIM Card & Data Policy</h4>
+                    <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 24px; line-height: 1.5;">
+                        Please backup your important data and remove your SIM card before shipping. <strong>We will permanently erase all remaining data upon inspection.</strong>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <div class="presale-action-card">
+                            <div style="background: #eff6ff; color: #2563EB; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">✂️</div>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;" data-i18n="presale_sim">Remove SIM</div>
+                        </div>
+                        <div class="presale-action-card">
+                            <div style="background: #eff6ff; color: #2563EB; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">🗑️</div>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;" data-i18n="presale_data">Data Wiped</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Delivery Guide -->
+                <div id="presale-section-3" style="display: none;">
+                    <h4 style="margin: 0 0 15px; font-size: 1.15rem; color: #0f172a;" data-i18n="presale_shipping_title">3. Shipping Guide</h4>
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #92400e; margin-bottom: 16px; line-height: 1.5;">
+                        <strong>⚠️ You must ship your phone to us directly.</strong><br>
+                        Please securely pack your phone and drop it off at any <strong>CU</strong> or <strong>GS25</strong> convenience store using their parcel service (Postpaid/Receiver pays).
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px;">
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: bold; margin-bottom: 4px;">Shipping Address (Receiver):</div>
+                        <div style="font-size: 0.95rem; color: #0f172a; font-weight: 600; line-height: 1.5;">
+                            Busan, Busanjin-gu, Dongcheon-ro 116<br>
+                            Hanshin Van Building #1003<br>
+                            (Sharaphone)<br>
+                            <span style="color:#2563EB;">010-3263-5672</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: bold; margin-top: 10px; margin-bottom: 4px;">Korean Address (Show to clerk):</div>
+                        <div translate="no" class="notranslate" style="font-size: 0.95rem; color: #0f172a; font-weight: 600; line-height: 1.5; background: #f1f5f9; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                            부산시 부산진구 동천로 116<br>
+                            한신밴빌딩 1003호 (쉐라폰)<br>
+                            010-3263-5672
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer" style="padding: 20px 24px; border-top: 1px solid #f1f5f9; display: flex; gap: 12px; background: white; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <button id="p-btn-prev" class="presale-btn-nav" style="display: none; border: 1px solid #cbd5e1; background: white; color: #475569;" onclick="presaleGoPrev()">Back</button>
+                <button id="p-btn-next" class="presale-btn-nav" style="flex: 1; background: #2563EB; color: white; border: none;" onclick="presaleGoNext()">Next</button>
+                <button id="p-btn-submit" class="presale-btn-nav" style="display: none; flex: 1; background: #16a34a; color: white; border: none;" onclick="confirmAndSubmit()">I Understand & Submit</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

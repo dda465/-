@@ -1013,11 +1013,11 @@ wcs_do();
                         <button class="btn-check-opt active" data-group="body_damage" data-value="none"
                             onclick="toggleMulti(this, 'none')">✅ 없음</button>
                         <button class="btn-check-opt" data-group="body_damage" data-value="front"
-                            onclick="toggleMulti(this, 'front')">전면 (유리)</button>
+                            onclick="toggleMulti(this, 'front')">전면 (액정)</button>
                         <button class="btn-check-opt" data-group="body_damage" data-value="bezel"
                             onclick="toggleMulti(this, 'bezel')">테두리/베젤</button>
                         <button class="btn-check-opt" data-group="body_damage" data-value="rear"
-                            onclick="toggleMulti(this, 'rear')">후면 (카메라 포함)</button>
+                            onclick="toggleMulti(this, 'rear')">후면 (유리)</button>
                     </div>
                 </div>
             </div>
@@ -1033,7 +1033,7 @@ wcs_do();
                         <button class="btn-check-opt active" data-group="micro_scratch" data-value="none"
                             onclick="toggleMulti(this, 'none')">✅ 없음</button>
                         <button class="btn-check-opt" data-group="micro_scratch" data-value="front"
-                            onclick="toggleMulti(this, 'front')">전면 (유리)</button>
+                            onclick="toggleMulti(this, 'front')">전면 (액정)</button>
                         <button class="btn-check-opt" data-group="micro_scratch" data-value="bezel"
                             onclick="toggleMulti(this, 'bezel')">테두리</button>
                         <button class="btn-check-opt" data-group="micro_scratch" data-value="rear"
@@ -1045,17 +1045,19 @@ wcs_do();
             <!-- Sub-step 4: LCD 손상 -->
             <div class="defect-sub-step" data-defect-step="4" style="display:none;">
                 <div class="step-header">
-                    <h2>메인 LCD 손상 여부</h2>
+                    <h2>액정상태 불량 여부</h2>
                     <p>화면에 줄, 멍, 깨짐 등의 손상이 있나요? <span style="color:red">*필수</span></p>
                 </div>
                 <div class="checklist-container" style="text-align: left; max-width: 600px; margin: 0 auto;">
-                    <div class="selection-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="selection-grid" style="grid-template-columns: 1fr; gap: 12px;">
                         <button class="btn-check-opt active" data-group="lcd_damage" data-value="no"
                             onclick="toggleRadioSafe(this)">✅ 없음</button>
-                        <button class="btn-check-opt" data-group="lcd_damage" data-value="yes"
-                            onclick="toggleRadioSafe(this)">⚠️ 손상 (줄/멍/파손)</button>
+                        <button class="btn-check-opt" data-group="lcd_damage" data-value="light"
+                            onclick="toggleRadioSafe(this)">⚠️ 액정불량(줄/멍)</button>
+                        <button class="btn-check-opt" data-group="lcd_damage" data-value="heavy"
+                            onclick="toggleRadioSafe(this)">⚠️ 액정불량(완전안보임)</button>
                     </div>
-                    <p style="font-size: 0.8rem; color: red; margin-top: 10px;">※ LCD 손상은 차감 금액이 가장 큰 항목입니다.</p>
+                    
                 </div>
             </div>
 
@@ -1097,6 +1099,8 @@ wcs_do();
                             onclick="toggleMulti(this, 'wifi')">Wifi/블루투스</button>
                         <button class="btn-check-opt" data-group="func_defect" data-value="compass"
                             onclick="toggleMulti(this, 'compass')">나침반/GPS</button>
+                        <button class="btn-check-opt" data-group="func_defect" data-value="unknown_part"
+                            onclick="toggleMulti(this, \'unknown_part\')">알수없는부품오류</button>
                         <button class="btn-check-opt" data-group="func_defect" data-value="sound"
                             onclick="toggleMulti(this, 'sound')">스피커/마이크</button>
 
@@ -1261,22 +1265,139 @@ wcs_do();
                     </div>
                 </div>
 
-                <!-- Terms Agreement Checkbox -->
+                <!-- Terms Agreement Checkboxes (분리) -->
                 <div class="mb-4" style="background: #F8F9FA; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB;">
-                    <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.95rem; color: #333;">
-                        <input type="checkbox" id="agree-terms" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" checked>
+                    <label style="display: flex; align-items: center; cursor: pointer; margin: 0 0 10px 0; font-size: 0.95rem; color: #333;">
+                        <input type="checkbox" id="agree-privacy" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                         <span>
-                            <a href="terms.html" target="_blank" style="color: #2563EB; text-decoration: underline;">이용약관</a> 및 
-                            <a href="privacy.html" target="_blank" style="color: #2563EB; text-decoration: underline;">개인정보 처리방침</a> 동의 
+                            [필수] <a href="privacy.html" target="_blank" style="color: #2563EB; text-decoration: underline;">개인정보 수집·이용</a> 동의
+                            <span style="color:red">*</span>
+                        </span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer; margin: 0; font-size: 0.95rem; color: #333;">
+                        <input type="checkbox" id="agree-terms" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                        <span>
+                            [필수] <a href="terms.html" target="_blank" style="color: #2563EB; text-decoration: underline;">이용약관</a> 동의
                             <span style="color:red">*</span>
                         </span>
                     </label>
                 </div>
 
                 <div class="text-center" style="margin-top: 40px; margin-bottom: 20px;">
-                    <button id="btn-auth-next" class="btn btn-primary" style="width: 100%;">판매 신청 완료하기</button>
+                    <button id="btn-auth-next" class="btn btn-primary" style="width: 100%;">다음 단계로 →</button>
+                    <p style="margin-top: 8px; font-size: 0.8rem; color: #94a3b8; text-align: center;">배송방법과 계좌 정보를 입력하시면 접수가 완료됩니다</p>
                 </div>
             </div> <!-- Close view-member div -->
+
+                <!-- Auth 완료 후 펼쳐지는 배송+주소+계좌 영역 -->
+                <div id="auth-delivery-panel" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease, opacity 0.4s ease, padding 0.4s ease; opacity: 0; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 15px;">
+                    <!-- 인증 완료 배지 -->
+                    <div style="display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 12px 16px; border-radius: 10px; border: 1px solid #86efac; margin-bottom: 15px;">
+                        <div style="width: 28px; height: 28px; border-radius: 50%; background: #22c55e; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">✓</div>
+                        <div>
+                            <div style="font-weight: 700; color: #15803d; font-size: 0.9rem;">접수자 확인 완료!</div>
+                            <div style="font-size: 0.78rem; color: #16a34a;">아래에서 배송방법만 선택하면 끝이에요</div>
+                        </div>
+                    </div>
+
+                    <!-- 배송 방법 선택 -->
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📦 배송 방법 선택<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
+                    <div style="display: grid; gap: 10px; margin-bottom: 12px;">
+                        <div class="selection-card method-btn" data-method="cvs" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
+                            <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
+                            <div>
+                                <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배비 입금받기 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
+                                <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">편의점/우체국에서 직접 발송</div>
+                            </div>
+                        </div>
+                        <div class="selection-card method-btn active" data-method="courier" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
+                            <div style="background: #E8F5E9; padding: 10px; border-radius: 50%;">📦</div>
+                            <div>
+                                <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배 방문수거 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
+                                <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">문 앞에 두시면 수거 (검수 당일입금)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CVS 보내실 곳 -->
+                    <div id="auth-method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
+                        <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
+                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-3263-5672</p>
+                        <p style="font-size: 0.8rem; color: #2563eb; margin-top: 8px; font-weight: 600;">💡 보내실 곳 정보는 마이페이지에서도 확인하실 수 있습니다.</p>
+                    </div>
+
+                    <!-- 수거일자 -->
+                    <div id="auth-method-courier-date" style="display: block; background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: left; border: 1px solid #ddd;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600;">희망 수거일자 <span style="color:red">*</span></label>
+                        <select id="auth-courier-pickup-date" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; appearance: none; -webkit-appearance: none; background-color: #f8fafc; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232563eb%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 12px top 50%; background-size: 12px auto;"></select>
+                    </div>
+
+                    <!-- 주소 (카카오 API) -->
+                    <div id="auth-address-label" style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📍 수거 주소<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
+                    <div id="auth-address-section" style="margin-bottom: 10px; text-align: left;">
+                        <button type="button" onclick="openKakaoAddress()" class="btn" style="width: 100%; background: #2563eb; color: white; border: none; padding: 14px 16px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px; box-sizing: border-box;">📍 주소 검색하기</button>
+                        <input type="hidden" id="auth-customer-postcode">
+                        <input type="text" id="auth-customer-address" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; margin-bottom: 8px; box-sizing: border-box;" placeholder="주소 검색 버튼을 눌러주세요" readonly>
+                        <input type="text" id="auth-customer-address-detail" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;" placeholder="상세주소 입력 (동/호수)">
+                    </div>
+
+                    <!-- 계좌 정보 -->
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">💳 계좌 정보<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
+                    <div style="margin-bottom: 10px; text-align: left;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 0.85rem;">은행 선택 <span style="color:red">*</span></label>
+                        <select id="auth-customer-bank" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" onchange="document.getElementById('auth-bank-direct-input').style.display = this.value==='direct' ? 'block' : 'none'; if(this.value==='direct') document.getElementById('auth-bank-direct-text').focus();">
+                            <option value="">-- 은행을 선택해주세요 --</option>
+                            <option value="direct">✏️ 직접입력</option>
+                            <option value="KB국민은행">KB국민은행</option>
+                            <option value="신한은행">신한은행</option>
+                            <option value="하나은행">하나은행</option>
+                            <option value="우리은행">우리은행</option>
+                            <option value="NH농협은행">NH농협은행</option>
+                            <option value="카카오뱅크">카카오뱅크</option>
+                            <option value="토스뱅크">토스뱅크</option>
+                            <option value="케이뱅크">케이뱅크</option>
+                            <option value="IBK기업은행">IBK기업은행</option>
+                            <option value="SC제일은행">SC제일은행</option>
+                            <option value="대구은행">대구은행</option>
+                            <option value="부산은행">부산은행</option>
+                            <option value="경남은행">경남은행</option>
+                            <option value="광주은행">광주은행</option>
+                            <option value="전북은행">전북은행</option>
+                            <option value="제주은행">제주은행</option>
+                            <option value="수협은행">수협은행</option>
+                            <option value="신협">신협</option>
+                            <option value="새마을금고">새마을금고</option>
+                            <option value="우체국">우체국</option>
+                        </select>
+                        <div id="auth-bank-direct-input" style="display: none; margin-top: 8px;">
+                            <input type="text" id="auth-bank-direct-text" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="은행/금융기관명 직접 입력">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 4px; text-align: left;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 0.85rem;">계좌번호 <span style="color:red">*</span></label>
+                        <input type="text" id="auth-customer-account" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="계좌번호 (- 없이)">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 10px 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
+                        <span style="font-size: 1rem;">🔒</span>
+                        <span style="font-size: 0.75rem; color: #15803d; line-height: 1.4;">계좌 정보는 안전하게 관리되며, 검수 완료 후 <strong>즉시 입금</strong>됩니다.</span>
+                    </div>
+
+                    <!-- 메모 -->
+                    <div style="margin-top: 14px; margin-bottom: 10px; text-align: left;">
+                        <label style="display:flex; align-items:center; margin-bottom:5px; font-weight:600; cursor:pointer;" onclick="const c = document.getElementById('auth-memo-container'); const cb = document.getElementById('auth-memo-toggle'); c.style.display = cb.checked ? 'block' : 'none';">
+                            <input type="checkbox" id="auth-memo-toggle" style="margin-right: 8px; transform: scale(1.2);"> 요청사항 / 메모 남기기 (선택)
+                        </label>
+                        <div id="auth-memo-container" style="display: none; margin-top: 10px;">
+                            <textarea id="auth-customer-memo" class="search-input" rows="3" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit;" placeholder="택배 수거 시 요청사항이나 기타 남기실 말씀이 있다면 적어주세요."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 에러 + 완료 버튼 -->
+                    <div style="margin-top: 18px;">
+                        <div id="auth-delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; font-weight: 700; text-align: center;"></div>
+                        <button id="btn-auth-delivery-submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;">접수 완료하기 ✅</button>
+                    </div>
+                </div>
 
         </div> <!-- Close wizard-step-auth div -->
 
@@ -1287,76 +1408,114 @@ wcs_do();
         <!-- Step 8: Success -->
 
         
-        <!-- Step 8: Success & Delivery Selection -->
         <div id="wizard-step-8" class="wizard-step">
             <div id="step8-delivery-section">
+                <!-- 진행률 표시 -->
+                <div style="display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 12px 16px; border-radius: 10px; border: 1px solid #86efac; margin-bottom: 15px;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #22c55e; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">✓</div>
+                    <div>
+                        <div style="font-weight: 700; color: #15803d; font-size: 0.9rem;">접수자 확인 완료!</div>
+                        <div style="font-size: 0.78rem; color: #16a34a;">아래에서 배송방법만 선택하면 끝이에요</div>
+                    </div>
+                </div>
+
                 <div class="step-header" style="margin-bottom: 10px; padding-bottom: 0;">
                     <h2 style="font-size: 1.25rem; color: #1e293b; margin-bottom: 0;">배송 전달방법을 선택해주세요</h2>
                     <div id="step8-expected-price" style="font-size: 1.2rem; color: #2563eb; font-weight: 800; margin-top: 5px; text-align: center;"></div>
                 </div>
                 
-                <!-- Insert Delivery Form from Step 7 here -->
                 <div class="form-container" style="max-width: 500px; margin: 0 auto; margin-top: 5px;">
-                    <!-- Delivery Method Selection -->
+                    <!-- 배송 방법 선택 -->
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📦 배송 방법 선택<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
                     <div style="margin-bottom: 15px; text-align: left;">
-                        <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                             <div class="selection-card method-btn" data-method="cvs" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
                                 <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
                                 <div>
-                                    <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left;">택배비 입금받기 (직접 발송)</div>
-                                    <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left;">편의점, 우체국 등 가까운 택배접수처를 통해 기기를 발송해주세요</div>
+                                    <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배비 입금받기 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
+                                    <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">편의점/우체국에서 직접 발송</div>
                                 </div>
                             </div>
                             <div class="selection-card method-btn active" data-method="courier" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
                                 <div style="background: #E8F5E9; padding: 10px; border-radius: 50%;">📦</div>
                                 <div>
-                                    <div class="card-title" style="font-size: 1rem; margin: 0; text-align: left; display: flex; align-items: center;">
-                                        택배 방문수거
-                                        <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; margin-left: 8px; font-weight: 800; box-shadow: 0 2px 5px rgba(255, 65, 108, 0.3);">택배비 무료 🆓</span>
-                                    </div>
-                                    <div class="card-sub" style="font-size: 0.8rem; margin: 0; text-align: left; margin-top: 5px;">박스 포장 후 문 앞에 두시면 수거해 드려요.<br>(검수 당일입금)</div>
+                                    <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배 방문수거 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
+                                    <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">문 앞에 두시면 수거 (검수 당일입금)</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="text-center" style="margin-top: 15px; margin-bottom: 20px;">
-                        <div id="delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; font-weight: 700;"></div>
-                        <button id="btn-submit-delivery" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;">기기 발송 방법 확정</button>
-                    </div>
-
-                    <!-- Self Info (Shown for CVS) -->
-                    <div id="method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ddd;">
+                    <!-- CVS 보내실 곳 -->
+                    <div id="method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
                         <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
-                        <p style="font-size: 0.9rem; color: #555;">
-                            받는 이: 쉐라폰<br>
-                            부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>
-                            연락처: 010-3263-5672
-                        </p>
+                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-3263-5672</p>
+                        <p style="font-size: 0.8rem; color: #2563eb; margin-top: 8px; font-weight: 600;">💡 보내실 곳 정보는 마이페이지에서도 확인하실 수 있습니다.</p>
                     </div>
 
-                    <!-- Courier Info (Shown by default) -->
-                    <div id="method-courier-date" style="display: block; background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
+                    <!-- 수거일자 -->
+                    <div id="method-courier-date" style="display: block; background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: left; border: 1px solid #ddd;">
                         <label style="display:block; margin-bottom:5px; font-weight:600;">희망 수거일자 <span style="color:red">*</span></label>
-                        <select id="courier-pickup-date" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"></select>
+                        <select id="courier-pickup-date" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; appearance: none; -webkit-appearance: none; background-color: #f8fafc; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232563eb%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 12px top 50%; background-size: 12px auto;"></select>
                     </div>
 
-                    <!-- Common Fields -->
+                    <!-- 주소 (카카오 API) -->
+                    <div id="step8-address-label" style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📍 수거 주소<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
+                    <div id="step8-address-section" style="margin-bottom: 10px; text-align: left;">
+                        <button type="button" onclick="openStep8KakaoAddress()" class="btn" style="width: 100%; background: #2563eb; color: white; border: none; padding: 14px 16px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px; box-sizing: border-box;">📍 주소 검색하기</button>
+                        <input type="hidden" id="step8-customer-postcode">
+                        <input type="text" id="customer-address" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; margin-bottom: 8px; box-sizing: border-box;" placeholder="주소 검색 버튼을 눌러주세요" readonly>
+                        <input type="text" id="step8-customer-address-detail" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;" placeholder="상세주소 입력 (동/호수)">
+                    </div>
+
+                    <!-- 계좌 정보 -->
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">💳 계좌 정보<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
                     <div style="margin-bottom: 10px; text-align: left;">
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">상세 주소 (수거지)</label>
-                        <input type="text" id="customer-address" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="주소를 입력해주세요">
-                    </div>
-
-                    <div class="mb-3" style="text-align: left;">
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">계좌 정보 (입금 받을 곳)</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="customer-bank" class="search-input" style="width:30%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="은행명">
-                            <input type="text" id="customer-account" class="search-input" style="width:70%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="계좌번호 (- 없이)">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 0.85rem;">은행 선택 <span style="color:red">*</span></label>
+                        <select id="customer-bank" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" onchange="document.getElementById('step8-bank-direct-input').style.display = this.value==='direct' ? 'block' : 'none'; if(this.value==='direct') document.getElementById('step8-bank-direct-text').focus();">
+                            <option value="">-- 은행을 선택해주세요 --</option>
+                            <option value="direct">✏️ 직접입력</option>
+                            <option value="KB국민은행">KB국민은행</option>
+                            <option value="신한은행">신한은행</option>
+                            <option value="하나은행">하나은행</option>
+                            <option value="우리은행">우리은행</option>
+                            <option value="NH농협은행">NH농협은행</option>
+                            <option value="카카오뱅크">카카오뱅크</option>
+                            <option value="토스뱅크">토스뱅크</option>
+                            <option value="케이뱅크">케이뱅크</option>
+                            <option value="IBK기업은행">IBK기업은행</option>
+                            <option value="SC제일은행">SC제일은행</option>
+                            <option value="대구은행">대구은행</option>
+                            <option value="부산은행">부산은행</option>
+                            <option value="경남은행">경남은행</option>
+                            <option value="광주은행">광주은행</option>
+                            <option value="전북은행">전북은행</option>
+                            <option value="제주은행">제주은행</option>
+                            <option value="수협은행">수협은행</option>
+                            <option value="신협">신협</option>
+                            <option value="새마을금고">새마을금고</option>
+                            <option value="우체국">우체국</option>
+                        </select>
+                        <div id="step8-bank-direct-input" style="display: none; margin-top: 8px;">
+                            <input type="text" id="step8-bank-direct-text" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="은행/금융기관명 직접 입력">
                         </div>
                     </div>
+                    <div style="margin-bottom: 4px; text-align: left;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 0.85rem;">계좌번호 <span style="color:red">*</span></label>
+                        <input type="text" id="customer-account" class="search-input" style="width:100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="계좌번호 (- 없이)">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 10px 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;">
+                        <span style="font-size: 1rem;">🔒</span>
+                        <span style="font-size: 0.75rem; color: #15803d; line-height: 1.4;">계좌 정보는 안전하게 관리되며, 검수 완료 후 <strong>즉시 입금</strong>됩니다.</span>
+                    </div>
 
-                    <!-- Submit button moved up -->
+                    <!-- 에러 + 확정 버튼 -->
+                    <div class="text-center" style="margin-top: 18px; margin-bottom: 20px;">
+                        <div id="delivery-error-msg" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 10px; display: none; font-weight: 700;"></div>
+                        <button id="btn-submit-delivery" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;">접수 완료하기 ✅</button>
+                    </div>
 
+                    <!-- 메모 -->
                     <div style="margin-bottom: 10px; text-align: left;">
                         <label style="display:flex; align-items:center; margin-bottom:5px; font-weight:600; cursor:pointer;" onclick="const container = document.getElementById('memo-container'); const isChecked = document.getElementById('memo-toggle').checked; container.style.display = isChecked ? 'block' : 'none';">
                             <input type="checkbox" id="memo-toggle" style="margin-right: 8px; transform: scale(1.2);"> 요청사항 / 메모 남기기 (선택)
@@ -1370,15 +1529,17 @@ wcs_do();
             
             <div id="step8-final-section" style="display: none;">
                 <div class="step-header">
-                    <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-                    <h2>배송 접수가 완료되었습니다!</h2>
-                    <div id="success-instruction" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: left;">
-                        <!-- Javascript will populate this based on delivery method -->
+                    <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <h2 style="font-size: 1.3rem; color: #1e293b;">매입 접수가 완료되었습니다!</h2>
+                    <p style="color: #64748b; font-size: 0.9rem; margin-top: 8px;">담당자가 확인 후 안내 드리겠습니다</p>
+                    <div id="success-instruction" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 12px; text-align: left; border: 1px solid #e5e7eb;">
                         <p>담당자가 확인 후 연락드리겠습니다.</p>
                     </div>
                 </div>
                 <div class="text-center" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                    <a href="index.html" class="btn" style="background-color: #e9ecef; color: #333;">홈으로 돌아가기</a>
+                    <a href="index.html" class="btn" style="background-color: #e9ecef; color: #333; border-radius: 10px; padding: 12px 24px;">홈으로 돌아가기</a>
                 </div>
             </div>
         </div>
@@ -1434,7 +1595,7 @@ wcs_do();
 
 
 
-                        통신판매업 신고번호: 기타 | 개인정보보호책임자: <span id="dyn-ceo-name2">박현용</span>
+                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
 
 
 
@@ -1475,7 +1636,8 @@ wcs_do();
 
 
 
-                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br><br>
+                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
+                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
 
 
 
@@ -1535,7 +1697,7 @@ wcs_do();
 
 
 
-                &copy; <span id="current-year">2024</span> <span class="dyn-company-name">에스알커머스</span>. All rights reserved.
+                &copy; 2026 HooPak all rights reserved
 
 
 
@@ -1650,6 +1812,7 @@ wcs_do();
                         <span style="color: #2563EB; font-weight: bold;">설정 ➜ Apple 계정(사용자 이름) ➜ 로그아웃</span> 순서로 진행해주세요. <br>(휴대폰의 잠금이 해제되어야합니다)
 
                     </div>
+                    <p style="font-size: 0.8rem; color: red; margin-bottom: 20px; text-align: center; word-break: keep-all;">※ 화면 및 터치 불량으로 초기화가 되지 않은경우 개인정보초기화를 고객님의 잠금 비밀번호, 애플ID 및 비밀번호를 필요로 할 수 있습니다.</p>
 
                 
 
@@ -1736,6 +1899,7 @@ wcs_do();
                         <span style="color: #2563EB; font-weight: bold;">기기설정 ➜ 일반 ➜ 초기화 ➜ 기기전체초기화</span> 순서로 진행해주세요.
 
                     </div>
+                    <p style="font-size: 0.8rem; color: red; margin-bottom: 20px; text-align: center; word-break: keep-all;">※ 화면 및 터치 불량으로 초기화가 되지 않은경우 개인정보초기화를 고객님의 잠금 비밀번호, 구글/삼성 계정 및 비밀번호를 필요로 할 수 있습니다.</p>
 
                     
 
@@ -1900,8 +2064,11 @@ wcs_do();
                 <ul style="padding-left: 20px; margin: 5px 0;">
 
                     <li>본 견적은 기기 상태에 따라 달라질 수 있습니다.</li>
-
                     <li>분실/도난/거래정지 등 등록 폰은 견적 및 매입이 불가하며, 관련 법적 책임은 모두 판매자에게 있습니다.</li>
+                    <li><strong>입금 완료 후에는 단순 변심에 의한 거래 취소 및 기기 반환이 불가합니다.</strong></li>
+                    <li><strong>검수 결과에 대한 이의는 안내일로부터 3일(영업일) 이내에 제기해야 합니다.</strong></li>
+                    <li><strong>방문 수거 노쇼(미배출) 시 위약금(5,000~10,000원)이 청구될 수 있습니다.</strong></li>
+                    <li>반송 통보 후 14일 내 미응답 시 기기 소유권이 포기된 것으로 간주됩니다.</li>
 
                 </ul>
 
@@ -1929,7 +2096,35 @@ wcs_do();
 
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 
-    <script type="module" src="script.js?v=1779351162_1305"></script>
+    <!-- 카카오 주소 검색 API (무료, API키 불필요) -->
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        function openKakaoAddress() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById('auth-customer-postcode').value = data.zonecode;
+                    document.getElementById('auth-customer-address').value = data.roadAddress || data.jibunAddress;
+                    setTimeout(() => {
+                        document.getElementById('auth-customer-address-detail').focus();
+                    }, 100);
+                }
+            }).open();
+        }
+        // Step 8 (이탈 복귀용) 카카오 주소 검색
+        function openStep8KakaoAddress() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById('step8-customer-postcode').value = data.zonecode;
+                    document.getElementById('customer-address').value = data.roadAddress || data.jibunAddress;
+                    setTimeout(() => {
+                        document.getElementById('step8-customer-address-detail').focus();
+                    }, 100);
+                }
+            }).open();
+        }
+    </script>
+
+    <script type="module" src="script.js?v=1780109837"></script>
 
 
 

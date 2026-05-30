@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     wcs.trans(_conv);
                 }
 
-                if (sessionStorage.getItem('pendingQuote')) {
+                if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
                     window.location.replace('quote.html');
                 } else {
                     window.location.replace('index.html');
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                if (sessionStorage.getItem('pendingQuote')) {
+                if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
                     window.location.replace('quote.html');
                 } else {
                     window.location.replace('index.html');
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                if (sessionStorage.getItem('pendingQuote')) {
+                if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
                     window.location.replace('quote.html');
                 } else {
                     window.location.replace('index.html');
@@ -423,24 +423,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+                            let phone = kakaoAccount?.phone_number || '';
+                            if (phone.startsWith('+82 ')) phone = '0' + phone.substring(4).replace(/-/g, '');
+                            else if (phone.startsWith('+82')) phone = '0' + phone.substring(3).replace(/-/g, '');
+                            phone = phone.replace(/-/g, '');
+
                             try {
-
                                 // Save to Firestore
-
                                 await setDoc(doc(db, "users", `kakao_${res.id}`), {
-
                                     email: email,
-
                                     nickname: nickname,
-
                                     uid: `kakao_${res.id}`,
-
                                     provider: 'kakao',
-
+                                    phone: phone,
                                     createdAt: new Date(),
-
                                     role: 'user'
-
                                 }, { merge: true }); // Use merge to update existings
 
                             } catch (e) {
@@ -481,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-                            if (sessionStorage.getItem('pendingQuote')) {
+                            if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
                                 window.location.replace('quote.html');
                             } else {
                                 window.location.replace('index.html');
@@ -550,11 +547,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             const docSnap = await getDoc(docRef);
                             const isNewUser = !docSnap.exists();
 
+                            let phone = '';
+                            if (naverLogin.user.getMobile && naverLogin.user.getMobile()) {
+                                let phoneRaw = naverLogin.user.getMobile();
+                                if (phoneRaw.startsWith('+82 ')) phone = '0' + phoneRaw.substring(4).replace(/-/g, '');
+                                else if (phoneRaw.startsWith('+82')) phone = '0' + phoneRaw.substring(3).replace(/-/g, '');
+                                else phone = phoneRaw.replace(/-/g, '');
+                            }
+
                             await setDoc(docRef, {
                                 email: email,
                                 nickname: nickname,
                                 uid: uid,
                                 provider: 'naver',
+                                phone: phone,
                                 createdAt: new Date(),
                                 role: 'user'
                             }, { merge: true });
@@ -579,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.history.replaceState(null, null, window.location.pathname + window.location.search);
 
                         // Redirect
-                        if (sessionStorage.getItem('pendingQuote')) {
+                        if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
                             window.location.replace('quote.html');
                         } else {
                             window.location.replace('index.html');

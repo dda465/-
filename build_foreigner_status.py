@@ -1,0 +1,172 @@
+html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Status - SharaPhone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: #f8fafc; margin: 0; }
+        .fg-wizard {
+            max-width: 500px; margin: 80px auto 40px; background: white; padding: 30px 25px;
+            border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); min-height: 300px;
+        }
+        @media (max-width: 768px) {
+            .fg-wizard { margin: 70px auto 30px; padding: 20px 16px; border-radius: 0; box-shadow: none; min-height: 100vh; }
+        }
+        .fg-header { text-align: center; margin-bottom: 30px; }
+        .fg-header h2 { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+        .fg-header p { color: #64748b; font-size: 0.95rem; }
+        .fg-topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: white; border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .fg-topbar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .fg-topbar-logo img { height: 28px; }
+        .fg-topbar-logo span { font-weight: 800; font-size: 1.1rem; color: #1e293b; }
+        .btn-primary {
+            width: 100%; padding: 14px; background: #2563eb; color: white;
+            border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; margin-top: 10px;
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-weight: 700; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px; }
+        .input-group input { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; outline: none; transition: 0.2s; box-sizing: border-box; }
+        .input-group input:focus { border-color: #2563eb; }
+        .status-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: #fff; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; }
+        .status-badge.pending { background: #fef3c7; color: #b45309; }
+        .status-badge.inspected { background: #eff6ff; color: #1d4ed8; }
+        .status-badge.completed { background: #dcfce3; color: #166534; }
+    </style>
+</head>
+<body>
+    <div class="fg-topbar">
+        <a href="quote-foreigner.html" class="fg-topbar-logo">
+            <img src="sr_logo.png" alt="SharaPhone" onerror="this.style.display='none'">
+            <span>SharaPhone</span>
+        </a>
+    </div>
+
+    <div class="fg-wizard">
+        <div class="fg-header">
+            <h2>Check Status</h2>
+            <p>Enter your details to track your application.</p>
+        </div>
+
+        <div id="search-form">
+            <div class="input-group">
+                <label>Your Name</label>
+                <input type="text" id="status-name" placeholder="John / 홍길동">
+            </div>
+            <div class="input-group">
+                <label>Contact (Phone/Messenger ID)</label>
+                <input type="text" id="status-contact" placeholder="010-1234-5678 or ID">
+            </div>
+            <button class="btn-primary" onclick="checkStatus()" id="search-btn">Search</button>
+        </div>
+
+        <div id="results-area" style="display: none; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b;">Your Applications</h3>
+                <button onclick="resetSearch()" style="background: none; border: none; color: #64748b; font-size: 0.85rem; cursor: pointer; text-decoration: underline;">Back</button>
+            </div>
+            <div id="results-list"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMYsqtZzHnXjMGvdum4l3SVn_MG78m0Nc",
+            authDomain: "rejeuphone.firebaseapp.com",
+            projectId: "rejeuphone",
+            storageBucket: "rejeuphone.firebasestorage.app",
+            messagingSenderId: "1401756577",
+            appId: "1:1401756577:web:d07a5f0e304ab048e749e0",
+            measurementId: "G-JWS15NH588"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.checkStatus = async function() {
+            const name = document.getElementById('status-name').value.trim();
+            const contact = document.getElementById('status-contact').value.trim();
+            const btn = document.getElementById('search-btn');
+
+            if (!name || !contact) {
+                alert('Please enter both Name and Contact.');
+                return;
+            }
+
+            btn.textContent = 'Searching...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            try {
+                // query
+                const q = query(
+                    collection(db, 'quotes'),
+                    where('customerName', '==', name),
+                    where('isForeigner', '==', true)
+                );
+
+                const snapshot = await getDocs(q);
+                let html = '';
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // Firebase query logic is limited, so we filter contact string locally
+                    if (data.customerPhone && data.customerPhone.includes(contact)) {
+                        let statusText = 'Pending';
+                        let statusClass = 'pending';
+                        if (data.status === 'inspected') { statusText = 'Inspected'; statusClass = 'inspected'; }
+                        if (data.status === 'paid' || data.status === 'completed') { statusText = 'Completed'; statusClass = 'completed'; }
+                        
+                        const priceFmt = new Intl.NumberFormat('ko-KR').format(data.finalPrice || data.price) + ' ₩';
+
+                        html += `
+                        <div class="status-card">
+                            <div class="status-badge ${statusClass}">${statusText}</div>
+                            <div style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">${data.brand} ${data.model} (${data.storage})</div>
+                            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">Date: ${data.timestamp}</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #2563eb;">${priceFmt}</div>
+                        </div>`;
+                    }
+                });
+
+                if (!html) {
+                    html = '<div style="text-align:center; color:#64748b; padding: 20px 0;">No application found.</div>';
+                }
+
+                document.getElementById('search-form').style.display = 'none';
+                document.getElementById('results-list').innerHTML = html;
+                document.getElementById('results-area').style.display = 'block';
+
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while searching.');
+            } finally {
+                btn.textContent = 'Search';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        };
+
+        window.resetSearch = function() {
+            document.getElementById('search-form').style.display = 'block';
+            document.getElementById('results-area').style.display = 'none';
+        };
+    </script>
+</body>
+</html>"""
+
+with open("foreigner-status.html", "w", encoding="utf-8") as f:
+    f.write(html_content)

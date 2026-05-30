@@ -3154,7 +3154,7 @@ async function initDeepWizard() {
 
 
 
-                if (group === 'lcd_damage') defects.lcd_damage = (val === 'yes');
+                if (group === 'lcd_damage') defects.lcd_damage = val;
 
 
 
@@ -3242,7 +3242,7 @@ async function initDeepWizard() {
 
 
 
-            const isLcdDamaged = defects.lcd_damage;
+            const isLcdDamaged = (defects.lcd_damage === 'yes' || defects.lcd_damage === 'light' || defects.lcd_damage === 'heavy' || defects.lcd_damage === true);
 
 
 
@@ -3282,62 +3282,64 @@ async function initDeepWizard() {
 
 
 
-            if (defects.func_defect?.includes('power') || defects.func_defect?.includes('account') || defects.func_defect?.includes('network')) {
+            let bGradeCount = 0;
+            let cGradeCount = 0;
+            let hasDGrade = false;
 
+            // 1. LCD Damage
+            if (defects.lcd_damage === 'heavy') {
+                hasDGrade = true;
+            } else if (defects.lcd_damage === 'light' || defects.lcd_damage === 'yes' || defects.lcd_damage === true) {
+                cGradeCount++;
+            }
 
+            // 2. Burn-in -> B grade
+            if (defects.burn_in === true || defects.burn_in === 'yes') {
+                bGradeCount++;
+            }
 
-                grade = 'd'; // Critical Failure
+            // 3. Body Damage (1=A, 2+=B)
+            let bodyCount = 0;
+            if (defects.body_damage && Array.isArray(defects.body_damage)) {
+                bodyCount = defects.body_damage.filter(x => x !== 'none').length;
+            }
+            if (bodyCount >= 2) {
+                bGradeCount++;
+            }
 
+            // 4. Micro Scratch (1~2=A, 3+=B)
+            let scratchCount = 0;
+            if (defects.micro_scratch && Array.isArray(defects.micro_scratch)) {
+                scratchCount = defects.micro_scratch.filter(x => x !== 'none').length;
+            }
+            if (scratchCount >= 3) {
+                bGradeCount++;
+            }
 
+            // 5. Functional Defects
+            if (defects.func_defect && Array.isArray(defects.func_defect)) {
+                const validFuncs = defects.func_defect.filter(x => x !== 'none');
+                const dFuncs = ['power']; // D급
+                const cFuncs = ['camera_fail', 'faceid', 'wifi', 'compass', 'unknown_part', 'touch', 'account', 'network']; // C급
+                const bFuncs = ['camera_lens', 'vibration', 'sound', 'battery']; // B급
+                
+                for (let f of validFuncs) {
+                    if (dFuncs.includes(f)) hasDGrade = true;
+                    else if (cFuncs.includes(f)) cGradeCount++;
+                    else if (bFuncs.includes(f)) bGradeCount++;
+                }
+            }
 
-            } else if (isLcdDamaged) {
-
-
-
-                grade = 'c'; // Screen broken
-
-
-
-            } else if (hasFuncDefect || hasBurnIn) {
-
-
-
-                grade = 'c'; // Functional issue or Burn-in -> C
-
-
-
-            } else if (hasBodyDamage) {
-
-
-
-                // Physical damage -> B
-
-
-
+            // 6. Calculate Final Grade
+            grade = 's';
+            if (hasDGrade || cGradeCount >= 2) {
+                grade = 'd';
+            } else if (cGradeCount === 1 || bGradeCount >= 3) {
+                grade = 'c';
+            } else if (bGradeCount > 0) {
                 grade = 'b';
-
-
-
-            } else if (hasMicroScratch) {
-
-
-
-                // Just scratches -> A
-
-
-
-            } else {
-
-
-
-                // No defects found -> S
-
-
-
-                grade = 's';
-
-
-
+            } else if (bodyCount === 1 || (scratchCount > 0 && scratchCount <= 2)) {
+                grade = 'a';
             }
 
 
@@ -4004,6 +4006,7 @@ async function initDeepWizard() {
             btnAuthNext.addEventListener('click', () => {
                 const name = document.getElementById('auth-name').value.trim();
                 const phone = document.getElementById('auth-phone').value.trim();
+                const agreePrivacy = document.getElementById('agree-privacy').checked;
                 const agreeTerms = document.getElementById('agree-terms').checked;
 
                 if (!name || !phone) {
@@ -4016,8 +4019,13 @@ async function initDeepWizard() {
                     return;
                 }
 
+                if (!agreePrivacy) {
+                    alert('개인정보 수집·이용 동의에 체크해 주세요.');
+                    return;
+                }
+
                 if (!agreeTerms) {
-                    alert('이용약관 및 개인정보 처리방침에 동의해 주세요.');
+                    alert('이용약관 동의에 체크해 주세요.');
                     return;
                 }
 
@@ -4108,6 +4116,15 @@ async function initDeepWizard() {
                 }
 
                 const needsAddress = ['courier', 'pickup'].includes(deliveryMethod);
+                if (deliveryMethod === 'courier' && !pickupDate) {
+                    if (errorMsg) {
+                        errorMsg.innerText = "방문날짜를 선택해주세요.";
+                        errorMsg.style.display = 'block';
+                    } else {
+                        alert("방문날짜를 선택해주세요.");
+                    }
+                    return;
+                }
                 if (needsAddress && !address) {
                     alert("수거를 위해 주소를 입력해주세요.");
                     return;
@@ -4568,7 +4585,16 @@ async function initDeepWizard() {
         }
 
         const needsAddress = ['courier', 'pickup'].includes(deliveryMethod);
-        if (needsAddress && !address) {
+                if (deliveryMethod === 'courier' && !pickupDate) {
+                    if (errorMsg) {
+                        errorMsg.innerText = "방문날짜를 선택해주세요.";
+                        errorMsg.style.display = 'block';
+                    } else {
+                        alert("방문날짜를 선택해주세요.");
+                    }
+                    return;
+                }
+                if (needsAddress && !address) {
             alert("수거를 위해 주소를 입력해주세요.");
             return;
         }

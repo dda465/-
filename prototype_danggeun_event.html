@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Danggeun Market Code -->
+    <script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+    <script>
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    </script>
+    <!-- End Danggeun Market Code -->
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-18055027970');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>당근 보고 오신 분들을 위한 특별 혜택 - 쉐라폰</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 500;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+        }
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 700;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+        }
+
+        :root {
+            --primary-blue: #2563EB;
+            --primary-blue-dark: #1D4ED8;
+            --carrot-orange: #FF6F0F;
+            --carrot-orange-light: #FF8A3D;
+            --dark-navy: #0F172A;
+            --light-bg: #F8FAFC;
+            --text-main: #334155;
+            --border-color: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F8FAFC;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ======================================== */
+        /* 프로토타입 안내 헤더                      */
+        /* ======================================== */
+        .proto-header {
+            background: #1E293B;
+            color: white;
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            z-index: 1000;
+            position: relative;
+        }
+        .proto-header div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .proto-header i { color: #FBBF24; }
+        .proto-header .badge-tag {
+            background: #EF4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* ======================================== */
+        /* 히어로 슬라이드 (당근 이벤트)              */
+        /* ======================================== */
+        .hero-slide-danggeun {
+            position: relative;
+            min-height: 480px;
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #FFEBE0 100%);
+            border-bottom: 1px solid #E2E8F0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 배경 장식 요소 */
+        .hero-slide-danggeun::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -10%;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, rgba(255, 111, 15, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatOrb 10s ease-in-out infinite;
+        }
+
+        .hero-slide-danggeun::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: -5%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatOrb 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(25px, -25px) scale(1.08); }
+        }
+
+        /* 파티클 효과 */
+        .particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(37, 99, 235, 0.15);
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .hero-container-danggeun {
+            position: relative;
+            z-index: 5;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+        }
+
+        /* 텍스트 영역 */
+        .hero-text-danggeun {
+            color: #0F172A;
+        }
+
+        .event-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(255, 111, 15, 0.12), rgba(255, 138, 61, 0.08));
+            border: 1px solid rgba(255, 111, 15, 0.35);
+            color: #FF8A3D;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 111, 15, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 111, 15, 0); }
+        }
+
+        .hero-text-danggeun h1 {
+            font-family: 'GmarketSans', 'Pretendard', sans-serif;
+            font-weight: 700;
+            font-size: 2.8rem;
+            line-height: 1.25;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+            word-break: keep-all;
+        }
+
+        .hero-text-danggeun h1 .highlight-orange {
+            background: linear-gradient(90deg, #FF8A3D, #FFBF00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text-danggeun h1 .price-highlight {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-text-danggeun h1 .price-highlight .amount {
+            color: #FF8A3D;
+            -webkit-text-fill-color: #FF8A3D;
+            font-size: 3.3rem;
+            position: relative;
+            font-weight: 800;
+        }
+
+        .hero-text-danggeun h1 .price-highlight .amount::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: rgba(255, 111, 15, 0.4);
+            border-radius: 3px;
+        }
+
+        .hero-subtitle-danggeun {
+            font-size: 1.05rem;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            max-width: 500px;
+            font-weight: 400;
+        }
+
+        /* 이벤트 혜택 카드들 */
+        .event-perks {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .perk-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 111, 15, 0.15);
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+            border-radius: 12px;
+            padding: 14px 16px;
+            flex: 1;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .perk-card:hover {
+            background: #FFFFFF;
+            transform: translateY(-3px);
+            border-color: rgba(255, 111, 15, 0.35);
+            box-shadow: 0 8px 25px rgba(255, 111, 15, 0.08);
+        }
+
+        .perk-icon {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .perk-label {
+            font-size: 0.75rem;
+            color: #64748B;
+            margin-bottom: 2px;
+        }
+
+        .perk-value {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #0F172A;
+        }
+
+        /* CTA 버튼 */
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-danggeun-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #FF6F0F, #FF8A3D);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 8px 25px -5px rgba(255, 111, 15, 0.5);
+        }
+
+        .btn-danggeun-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px -5px rgba(255, 111, 15, 0.7);
+        }
+
+        .btn-danggeun-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 24px;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-danggeun-secondary:hover {
+            background: #F8FAFC;
+            transform: translateY(-2px);
+            border-color: #94A3B8;
+        }
+
+        /* 이벤트 기간 */
+        .event-period {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: #64748B;
+        }
+
+        /* 이미지 영역 */
+        .hero-image-danggeun {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-showcase {
+            position: relative;
+            z-index: 2;
+        }
+
+        .phone-showcase img {
+            max-height: 380px;
+            width: auto;
+            filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
+            border-radius: 16px;
+        }
+
+        /* 2만원 플로팅 뱃지 */
+        .floating-bonus {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            width: 105px;
+            height: 105px;
+            background: linear-gradient(135deg, #FF6F0F, #E65F00);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(255, 111, 15, 0.5);
+            animation: bonusBounce 2s ease-in-out infinite;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-bonus .bonus-text {
+            font-size: 0.65rem;
+            font-weight: 600;
+            opacity: 0.9;
+            letter-spacing: -0.5px;
+        }
+
+        .floating-bonus .bonus-amount {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            line-height: 1;
+            margin: 2px 0;
+        }
+
+        .floating-bonus .bonus-sub {
+            font-size: 0.6rem;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
+        @keyframes bonusBounce {
+            0%, 100% { transform: scale(1) rotate(-5deg); }
+            50% { transform: scale(1.08) rotate(3deg); }
+        }
+
+        /* 스마트폰 태그 */
+        .series-tags {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .series-tag {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+            white-space: nowrap;
+        }
+
+        /* ======================================== */
+        /* 구분선 & 모바일 프리뷰                    */
+        /* ======================================== */
+        .compare-label {
+            text-align: center;
+            padding: 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1E293B;
+            background: #F1F5F9;
+            border-top: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .compare-label span { color: var(--primary-blue); }
+
+        .mobile-frame {
+            max-width: 400px;
+            margin: 30px auto;
+            border-radius: 36px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+            border: 12px solid #1E293B;
+            background: #1E293B;
+        }
+
+        /* 모바일 버전 히어로 */
+        .hero-slide-danggeun-mobile {
+            position: relative;
+            min-height: 145px;
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #FFEBE0 100%);
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            border-radius: 16px;
+        }
+
+        .hero-slide-danggeun-mobile .hero-container-m {
+            position: relative;
+            z-index: 5;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .hero-text-m {
+            flex: 1.2;
+            color: #0F172A;
+        }
+
+        .hero-text-m .event-badge-m {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 138, 61, 0.05));
+            border: 1px solid rgba(255, 111, 15, 0.3);
+            color: #FF8A3D;
+            font-weight: 700;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+        }
+
+        .hero-text-m h1 {
+            font-family: 'GmarketSans', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            line-height: 1.35;
+            letter-spacing: -0.5px;
+            word-break: keep-all;
+            margin: 0;
+        }
+
+        .hero-text-m h1 .amount-m {
+            color: #FF8A3D;
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .hero-image-m {
+            width: 105px;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-image-m img {
+            max-height: 105px;
+            width: auto;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
+        }
+
+        .hero-image-m .floating-bonus-m {
+            position: absolute;
+            top: -5px;
+            right: -2px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #FF6F0F, #E65F00);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(255,111,15,0.4);
+            animation: bonusBounce 2s ease-in-out infinite;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .floating-bonus-m .bonus-amount-m {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .floating-bonus-m .bonus-sub-m {
+            font-size: 0.45rem;
+            font-weight: 600;
+        }
+
+        .mobile-frame-inner {
+            background: white;
+            padding: 10px 12px;
+        }
+
+        /* ======================================== */
+        /* 🥕 이벤트 상세 랜딩페이지                 */
+        /* ======================================== */
+        .event-landing-page {
+            max-width: 1000px;
+            margin: 50px auto 100px;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 2.1rem;
+            color: var(--dark-navy);
+            margin-bottom: 40px;
+            position: relative;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 45px;
+            height: 4px;
+            background: var(--carrot-orange);
+            margin: 12px auto 0;
+            border-radius: 2px;
+        }
+
+        .section-title span {
+            color: var(--carrot-orange);
+        }
+
+        /* 혜택 카드 그리드 */
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .benefit-detail-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-detail-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            border-color: rgba(255, 111, 15, 0.2);
+        }
+
+        .benefit-detail-card.span-2 {
+            grid-column: span 2;
+        }
+
+        .benefit-number {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 3rem;
+            color: rgba(255, 111, 15, 0.12);
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-weight: 800;
+        }
+
+        .benefit-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .benefit-icon-wrapper {
+            width: 46px;
+            height: 46px;
+            background: rgba(255, 111, 15, 0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--carrot-orange);
+            font-size: 1.4rem;
+        }
+
+        .benefit-header h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+        }
+
+        .benefit-main-value {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 1.8rem;
+            color: var(--carrot-orange);
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .benefit-desc {
+            font-size: 0.95rem;
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        /* 대상 기종 등급표 */
+        .device-tier-table {
+            background: white;
+            border-radius: 20px;
+            padding: 36px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+            margin-bottom: 60px;
+        }
+
+        .tier-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .tier-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #94A3B8;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .tier-tab-btn.active {
+            color: var(--primary-blue);
+        }
+
+        .tier-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -13px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-blue);
+            border-radius: 2px;
+        }
+
+        .tier-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .tier-list-box {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            background: #F8FAFC;
+        }
+
+        .tier-list-box h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tier-list-box h4 .bonus-badge {
+            background: var(--carrot-orange);
+            color: white;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-family: 'Pretendard', sans-serif;
+        }
+        
+        .tier-list-box h4 .bonus-badge.double {
+            background: linear-gradient(135deg, #FF6F0F, #FF2E93);
+        }
+
+        .device-items {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .device-items li {
+            font-size: 0.95rem;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .device-items li i {
+            color: #10B981;
+            font-size: 1.1rem;
+        }
+
+        /* 참여 프로세스 (3-Step) */
+        .process-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+            margin-bottom: 60px;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            position: relative;
+        }
+
+        .process-card {
+            text-align: center;
+            position: relative;
+        }
+
+        .process-step-num {
+            width: 36px;
+            height: 36px;
+            background: var(--carrot-orange);
+            color: white;
+            font-family: 'GmarketSans', sans-serif;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            border: 4px solid #FFEBE0;
+        }
+
+        .process-card h4 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 8px;
+        }
+
+        .process-card p {
+            font-size: 0.88rem;
+            color: #64748B;
+            line-height: 1.5;
+        }
+
+        /* 유의사항 */
+        .terms-section {
+            background: #F1F5F9;
+            border-radius: 16px;
+            padding: 30px 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .terms-section h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark-navy);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terms-section h4 i { color: #64748B; }
+
+        .terms-list {
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .terms-list li {
+            font-size: 0.85rem;
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        /* 하단 고정 CTA 바 */
+        .bottom-sticky-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color);
+            padding: 16px 20px;
+            z-index: 100;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: center;
+        }
+
+        .bottom-cta-btn {
+            max-width: 600px;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #FF6F0F, #FF8A3D);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(255, 111, 15, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .bottom-cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 111, 15, 0.5);
+        }
+
+        /* ======================================== */
+        /* 반응형 (실제 모바일)                       */
+        /* ======================================== */
+        @media (max-width: 768px) {
+            .hero-container-danggeun {
+                grid-template-columns: 1fr;
+                padding: 40px 20px;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .hero-text-danggeun {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-text-danggeun h1 {
+                font-size: 2.1rem;
+            }
+
+            .hero-text-danggeun h1 .price-highlight .amount {
+                font-size: 2.5rem;
+            }
+
+            .event-perks {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .perk-card {
+                text-align: center;
+            }
+
+            .cta-row {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-danggeun-primary, .btn-danggeun-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .phone-showcase img {
+                max-height: 260px;
+            }
+
+            .floating-bonus {
+                width: 80px;
+                height: 80px;
+                right: 5px;
+                top: 5px;
+            }
+
+            .floating-bonus .bonus-amount {
+                font-size: 1.15rem;
+            }
+
+            .benefit-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .benefit-detail-card.span-2 {
+                grid-column: span 1;
+            }
+
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .section-title {
+                font-size: 1.7rem;
+            }
+
+            .device-tier-table {
+                padding: 24px 16px;
+            }
+
+            .process-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 프로토타입 안내 -->
+    <div class="proto-header">
+        <div>
+            <i class="ri-palette-line"></i>
+            <strong>[프로토타입] 당근마켓 광고 유입 혜택 이벤트 페이지</strong>
+        </div>
+        <span class="badge-tag">검수용</span>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ✅ Part 1: PC 버전 배너 프리뷰                -->
+    <!-- =========================================== -->
+    <div class="compare-label" style="background:#0F172A; color:white; border:none; padding:16px;">
+        <i class="ri-computer-line" style="color:#FF8A3D;"></i> <span>PC 슬라이더 배너</span> 미리보기 (적용 예정 화면)
+    </div>
+
+    <div class="hero-slide-danggeun">
+        <!-- 파티클 -->
+        <div class="particles" id="particles"></div>
+
+        <div class="hero-container-danggeun">
+            <!-- 왼쪽: 텍스트 -->
+            <div class="hero-text-danggeun">
+                <div class="event-badge">
+                    <i class="ri-car-fill"></i>
+                    당근마켓 광고 보고 오신 분들을 위한 특별 혜택
+                </div>
+
+                <h1>
+                    당근 보고 오셨나요?<br>
+                    <span class="highlight-orange">최대 2만원</span> 추가 증정!
+                </h1>
+
+                <p class="hero-subtitle-danggeun">
+                    중고폰 판매 신청 시 당근 특별 혜택 자동 적용!<br>
+                    2대 이상 묶어 팔면 추가 2만원 보너스와 매주 5만원 상품권(2명) 당첨의 기회까지!
+                </p>
+
+                <!-- 이벤트 혜택 카드 -->
+                <div class="event-perks">
+                    <div class="perk-card">
+                        <span class="perk-icon" style="margin-bottom:2px;"><img src="carrot_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="당근"></span>
+                        <div class="perk-label">유입 특별 보너스</div>
+                        <div class="perk-value">최대 +20,000원 추가</div>
+                    </div>
+                    <div class="perk-card">
+                        <span class="perk-icon" style="margin-bottom:2px;"><img src="phones_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="폰"></span>
+                        <div class="perk-label">2대 이상 묶음 판매</div>
+                        <div class="perk-value">+20,000원 무조건 합산</div>
+                    </div>
+                    <div class="perk-card">
+                        <span class="perk-icon" style="margin-bottom:2px;"><img src="gift_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="선물"></span>
+                        <div class="perk-label">매주 럭키드로우</div>
+                        <div class="perk-value">신세계 상품권 5만원 (2명)</div>
+                    </div>
+                </div>
+
+                <div class="cta-row">
+                    <a href="#event-landing-page" class="btn-danggeun-primary" id="btn-scroll-landing">
+                        <i class="ri-gift-2-line"></i>
+                        나의 추가 혜택 확인하기
+                    </a>
+                </div>
+
+                <div class="event-period">
+                    <i class="ri-time-line"></i>
+                    이벤트 기간: 상시 진행 (매주 럭키드로우 진행)
+                </div>
+            </div>
+
+            <!-- 오른쪽: 이미지 -->
+            <div class="hero-image-danggeun">
+                <div class="phone-showcase">
+                    <img src="danggeun_hero.png" alt="Smartphones Showcase" style="max-height:360px; border-radius: 0; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15));">
+                </div>
+                <div class="floating-bonus">
+                    <span class="bonus-text">당근회원</span>
+                    <span class="bonus-amount">+2만원</span>
+                    <span class="bonus-sub">MAX BONUS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ✅ Part 2: 모바일 버전 배너 프리뷰              -->
+    <!-- =========================================== -->
+    <div class="compare-label">
+        <i class="ri-smartphone-line"></i> <span>모바일 슬라이더 배너</span> 미리보기 (375px 모바일 뷰 최적화)
+    </div>
+
+    <div class="mobile-frame">
+        <!-- 간이 상태바 -->
+        <div style="background:#0b0f19; color:rgba(255,255,255,0.6); padding:6px 16px; font-size:0.7rem; display:flex; justify-content:space-between;">
+            <span>9:41</span>
+            <span><i class="ri-wifi-fill"></i> <i class="ri-battery-fill"></i></span>
+        </div>
+
+        <!-- 간이 네비게이션 -->
+        <div style="background:white; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9;">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <img src="sr_logo.webp" alt="SR" style="width:26px; height:26px; border-radius:50%;">
+                <span style="font-weight:800; font-size:0.95rem; color:#1E3A8A;">쉐라폰</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <span style="font-size:0.65rem; font-weight:700; color:#FF6F0F; border:1px solid #FF6F0F; padding:2px 8px; border-radius:12px;">당근혜택중</span>
+            </div>
+        </div>
+
+        <!-- 모바일 히어로 배너 -->
+        <div class="mobile-frame-inner">
+            <div class="hero-slide-danggeun-mobile" style="margin: 5px 0;">
+                <div class="hero-container-m">
+                    <div class="hero-text-m">
+                        <div class="event-badge-m">
+                            <i class="ri-car-fill"></i> 당근회원전용
+                        </div>
+                        <h1>
+                            당근 고객 한정<br>
+                            <span class="amount-m">최대 2만원</span> 추가!
+                        </h1>
+                    </div>
+                    <div class="hero-image-m">
+                        <img src="danggeun_hero.png" alt="Smartphones" style="max-height:95px;">
+                        <div class="floating-bonus-m">
+                            <span class="bonus-amount-m">+2만</span>
+                            <span class="bonus-sub-m">추가</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 슬라이더 닷 -->
+            <div style="display:flex; justify-content:center; gap:6px; margin:8px 0;">
+                <span style="width:18px; height:5px; border-radius:3px; background:#FF6F0F;"></span>
+                <span style="width:5px; height:5px; border-radius:50%; background:#cbd5e1;"></span>
+                <span style="width:5px; height:5px; border-radius:50%; background:#cbd5e1;"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================== -->
+    <!-- ✅ Part 3: 이벤트 상세 랜딩페이지              -->
+    <!-- =========================================== -->
+    <div class="compare-label" style="background:#FFF0E6; color:#FF6F0F; border:none; margin-top:20px;">
+        <i class="ri-file-text-line"></i> <span>이벤트 상세 랜딩 페이지</span> 전체 디자인 미리보기
+    </div>
+
+    <div class="event-landing-page" id="event-landing-page">
+        
+        <h2 class="section-title">당근마켓 광고 유입 <span>특별 혜택</span></h2>
+
+        <!-- 혜택 카드 리스트 -->
+        <div class="benefit-grid">
+            
+            <!-- 혜택 1: 기본 보너스 -->
+            <div class="benefit-detail-card">
+                <div class="benefit-number">01</div>
+                <div class="benefit-header">
+                    <div class="benefit-icon-wrapper" style="background:none;">
+                        <img src="carrot_3d.png" style="width:40px; height:40px; object-fit:contain;" alt="당근">
+                    </div>
+                    <h3>기본 추가 보너스</h3>
+                </div>
+                <div class="benefit-main-value">+10,000원 추가 지급</div>
+                <p class="benefit-desc">
+                    아이폰 11 이상, 갤럭시 S20 이상, 갤럭시 폴드/플립 4 이상 기종을 판매하시면 등급이나 상태와 무관하게 정상 매입가에 1만원을 즉시 더해 드립니다.
+                </p>
+            </div>
+
+            <!-- 혜택 2: 프리미엄 보너스 -->
+            <div class="benefit-detail-card">
+                <div class="benefit-number">02</div>
+                <div class="benefit-header">
+                    <div class="benefit-icon-wrapper" style="background:none;">
+                        <img src="phones_3d.png" style="width:40px; height:40px; object-fit:contain;" alt="프리미엄 폰">
+                    </div>
+                    <h3>프리미엄 추가 보너스</h3>
+                </div>
+                <div class="benefit-main-value">총 +20,000원 추가 지급</div>
+                <p class="benefit-desc">
+                    최신 기종(아이폰 14 이상, 갤럭시 S23 이상, 갤럭시 폴드/플립 5 이상) 판매 시 기본 보너스에 1만원이 추가되어 총 2만원의 보너스를 드립니다.
+                </p>
+            </div>
+
+            <!-- 혜택 3: 묶음 판매 보너스 -->
+            <div class="benefit-detail-card">
+                <div class="benefit-number">03</div>
+                <div class="benefit-header">
+                    <div class="benefit-icon-wrapper" style="background:none;">
+                        <img src="phones_3d.png" style="width:40px; height:40px; object-fit:contain;" alt="묶음 폰">
+                    </div>
+                    <h3>2대 이상 묶음 보너스</h3>
+                </div>
+                <div class="benefit-main-value">+20,000원 추가 지급</div>
+                <p class="benefit-desc">
+                    서랍 속 안 쓰던 기기나 가족의 폰을 모아 2대 이상 동시에 판매 신청하고 거래 완료 시, 정산 총액에 2만원을 무조건 보너스로 합산해 입금해 드립니다.
+                </p>
+            </div>
+
+            <!-- 혜택 4: 럭키드로우 추첨 -->
+            <div class="benefit-detail-card">
+                <div class="benefit-number">04</div>
+                <div class="benefit-header">
+                    <div class="benefit-icon-wrapper" style="background:none;">
+                        <img src="gift_3d.png" style="width:40px; height:40px; object-fit:contain;" alt="선물">
+                    </div>
+                    <h3>매주 2명 럭키드로우</h3>
+                </div>
+                <div class="benefit-main-value">신세계 상품권 5만원권</div>
+                <p class="benefit-desc">
+                    당근 광고를 통해 들어와서 판매 완료하신 모든 분들은 자동으로 응모됩니다. 매주 추첨을 통해 2분께 신세계 백화점 상품권 5만원권을 드립니다.<br>
+                    <strong>* 5만원 이하 경품이므로 제세공과금이 부과되지 않습니다.</strong>
+                </p>
+            </div>
+
+        </div>
+
+        <!-- 탭 형식의 대상 기종 리스트 -->
+        <h2 class="section-title">이벤트 <span>대상 기종</span> 안내</h2>
+        <div class="device-tier-table">
+            <div class="tier-tabs">
+                <button class="tier-tab-btn active" onclick="switchTab('apple')">
+                    <i class="ri-apple-fill"></i> 애플 아이폰
+                </button>
+                <button class="tier-tab-btn" onclick="switchTab('samsung')">
+                    <i class="ri-android-fill"></i> 삼성 갤럭시
+                </button>
+            </div>
+
+            <div class="tier-grid" id="apple-tiers">
+                <!-- 아이폰 기본 보너스 -->
+                <div class="tier-list-box">
+                    <h4>기본 1만원 추가 <span class="bonus-badge">+1만원</span></h4>
+                    <ul class="device-items">
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone 11 / 11 Pro / 11 Pro Max</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone 12 / 12 Pro / 12 Pro Max / 12 mini</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone 13 / 13 Pro / 13 Pro Max / 13 mini</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone SE (3세대)</li>
+                    </ul>
+                </div>
+                <!-- 아이폰 프리미엄 보너스 -->
+                <div class="tier-list-box" style="border-color: rgba(255, 46, 147, 0.3);">
+                    <h4>프리미엄 2만원 추가 <span class="badge double bonus-badge double">+2만원</span></h4>
+                    <ul class="device-items">
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone 14 / 14 Plus / 14 Pro / 14 Pro Max</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone 15 / 15 Plus / 15 Pro / 15 Pro Max</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> iPhone 16 / 16 Plus / 16 Pro / 16 Pro Max</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tier-grid" id="samsung-tiers" style="display:none;">
+                <!-- 갤럭시 기본 보너스 -->
+                <div class="tier-list-box">
+                    <h4>기본 1만원 추가 <span class="bonus-badge">+1만원</span></h4>
+                    <ul class="device-items">
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S20 / S20+ / S20 Ultra / S20 FE</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S21 / S21+ / S21 Ultra / S21 FE</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S22 / S22+ / S22 Ultra</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy Z Fold 4 / Z Flip 4</li>
+                    </ul>
+                </div>
+                <!-- 갤럭시 프리미엄 보너스 -->
+                <div class="tier-list-box" style="border-color: rgba(255, 46, 147, 0.3);">
+                    <h4>프리미엄 2만원 추가 <span class="badge double bonus-badge double">+2만원</span></h4>
+                    <ul class="device-items">
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S23 / S23+ / S23 Ultra / S23 FE</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S24 / S24+ / S24 Ultra</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S25 / S25+ / S25 Ultra</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy S26 / S26+ / S26 Ultra</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy Z Fold 5 / Z Flip 5</li>
+                        <li><i class="ri-checkbox-circle-fill"></i> Galaxy Z Fold 6 / Z Flip 6</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 참여 방법 3단계 -->
+        <h2 class="section-title">쉬운 <span>참여 방법</span></h2>
+        <div class="process-section">
+            <div class="process-grid">
+                <div class="process-card">
+                    <div class="process-step-num">1</div>
+                    <h4>당근 혜택 적용</h4>
+                    <p>당근마켓의 광고를 통해 쉐라폰에 접속하면 보너스 혜택 조건이 자동으로 셋팅됩니다.</p>
+                </div>
+                <div class="process-card">
+                    <div class="process-step-num">2</div>
+                    <h4>내 폰 매입 신청</h4>
+                    <p>간편하게 폰 정보를 입력하고 매입을 신청합니다. (배송비 전액 쉐라폰 왕복 부담)</p>
+                </div>
+                <div class="process-card">
+                    <div class="process-step-num">3</div>
+                    <h4>보너스 정산 & 입금</h4>
+                    <p>도착한 기기 검수 완료 즉시 약정된 추가금과 함께 당일 정산금 입금 및 럭키드로우 자동 응모!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 이벤트 유의사항 -->
+        <div class="terms-section">
+            <h4><i class="ri-error-warning-line"></i> 이벤트 유의사항</h4>
+            <ul class="terms-list">
+                <li>본 이벤트는 당근마켓 광고 funnel(유입링크)을 통해 들어오신 고객 및 당근마켓 유입 코드를 보유하신 분께 적용됩니다.</li>
+                <li>기본 보너스 및 프리미엄 보너스는 정상 매입 처리 및 최종 정산금액 동의가 완료된 기기에 한하여 지급됩니다.</li>
+                <li>묶음 보너스는 동일 주소, 동일 입금 계좌 및 접수건으로 2대 이상의 스마트폰이 동시 거래 완료된 경우 정산 총액에 2만 원이 1회 일괄 합산 지급됩니다.</li>
+                <li>기본/프리미엄 추가 보너스 혜택과 2대 이상 묶음 판매 보너스 혜택은 중복 지급이 불가능하며, 두 조건이 모두 충족될 경우 고객님께 가장 유리한 더 큰 금액의 혜택 하나만 최종 적용되어 정산됩니다.</li>
+                <li>럭키드로우(신세계 상품권 5만원)는 매주 월요일 거래 완료 고객 중 추첨(2명)을 통해 개별 통보 및 발송됩니다.</li>
+                <li>**5만원 이하 경품(신세계 상품권 5만원)이므로 제세공과금이 발생하지 않아, 당첨 고객에게 추가적인 세금 부담이나 번거로운 세무 신고 절차가 없습니다.**</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- 하단 고정 CTA 바 -->
+    <div class="bottom-sticky-cta">
+        <a href="quote.html" class="bottom-cta-btn">
+            <i class="ri-smartphone-line"></i>
+            지금 바로 내 폰 시세 조회하고 혜택 받기
+        </a>
+    </div>
+
+    <!-- 파티클 생성 스크립트 -->
+    <script>
+        const container = document.getElementById('particles');
+        if (container) {
+            for (let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (8 + Math.random() * 12) + 's';
+                p.style.animationDelay = Math.random() * 8 + 's';
+                p.style.width = p.style.height = (2.5 + Math.random() * 3.5) + 'px';
+                
+                // 일부 파티클은 약간 주황빛을 돌게 만듦
+                if (Math.random() > 0.5) {
+                    p.style.background = 'rgba(255, 111, 15, 0.45)';
+                }
+                
+                container.appendChild(p);
+            }
+        }
+
+        // 스무스 스크롤 효과
+        document.getElementById('btn-scroll-landing').addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+
+        // 탭 전환 함수
+        function switchTab(brand) {
+            const btns = document.querySelectorAll('.tier-tab-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            const appleSection = document.getElementById('apple-tiers');
+            const samsungSection = document.getElementById('samsung-tiers');
+
+            if (brand === 'apple') {
+                document.querySelector('[onclick="switchTab(\'apple\')"]').classList.add('active');
+                appleSection.style.display = 'grid';
+                samsungSection.style.display = 'none';
+            } else if (brand === 'samsung') {
+                document.querySelector('[onclick="switchTab(\'samsung\')"]').classList.add('active');
+                appleSection.style.display = 'none';
+                samsungSection.style.display = 'grid';
+            }
+        }
+    </script>
+
+    <!-- Google Translate Script & Styling -->
+    <style>
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+    </style>
+</body>
+</html>

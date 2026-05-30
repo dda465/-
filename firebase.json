@@ -6,7 +6,22 @@
       "**/.*",
       "**/node_modules/**",
       ".agent/**",
-      "*.bat"
+      "*.bat",
+      "*.py",
+      "*.txt",
+      "google-sheets-key.json",
+      "serviceAccountKey.json",
+      "package.json",
+      "package-lock.json",
+      "firestore.indexes.json",
+      "test.js",
+      "test_*.js",
+      "check_*.js",
+      "upload_*.js",
+      "find_*.js",
+      "seed_*.js",
+      "recover*.js",
+      "repair*.js"
     ],
     "headers": [
       {
@@ -24,6 +39,7 @@
     "source": "functions"
   },
   "firestore": {
+    "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   }
 }

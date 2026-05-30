@@ -53,7 +53,7 @@
     <meta name="naver-site-verification" content="88cd5e4f7d21bc69a519a61b2d5c440af0f6b836" />
     <link rel="canonical" href="https://sharaphone.com">
 
-    <link rel="stylesheet" href="styles.css?v=1779173835">
+    <link rel="stylesheet" href="styles.css?v=20260529_5">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <!-- OpenGraph SEO Tags -->
@@ -167,201 +167,180 @@
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
 
-    <!-- S26 Event Hero Banner Styles -->
+    <!-- Danggeun Ad Funnel Event Hero Banner Styles -->
     <style>
-        /* S26 이벤트 히어로 슬라이드 */
-        .hero-slide.s26-event {
+        .hero-slide.danggeun-event {
             position: relative;
-            min-height: 420px;
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e40af 100%) !important;
+            min-height: 480px;
+            background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 50%, #FFEBE0 100%) !important;
+            border-bottom: 1px solid #E2E8F0;
             overflow: hidden;
             display: flex;
             align-items: center;
         }
-        .hero-slide.s26-event::before {
+        .hero-slide.danggeun-event::before {
             content: '';
             position: absolute;
-            top: -50%; right: -20%;
-            width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%);
+            top: -30%; right: -10%;
+            width: 550px; height: 550px;
+            background: radial-gradient(circle, rgba(255, 111, 15, 0.15) 0%, transparent 70%);
             border-radius: 50%;
-            animation: s26FloatOrb 8s ease-in-out infinite;
+            animation: dgFloatOrb 10s ease-in-out infinite;
         }
-        .hero-slide.s26-event::after {
+        .hero-slide.danggeun-event::after {
             content: '';
             position: absolute;
-            bottom: -30%; left: -10%;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+            bottom: -20%; left: -5%;
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
             border-radius: 50%;
-            animation: s26FloatOrb 6s ease-in-out infinite reverse;
+            animation: dgFloatOrb 8s ease-in-out infinite reverse;
         }
-        @keyframes s26FloatOrb {
-            0%, 100% { transform: translate(0,0) scale(1); }
-            50% { transform: translate(20px,-20px) scale(1.05); }
+        @keyframes dgFloatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(25px, -25px) scale(1.08); }
         }
         /* 파티클 */
-        .s26-particles {
+        .danggeun-particles {
             position: absolute; inset: 0;
             overflow: hidden; pointer-events: none; z-index: 1;
         }
-        .s26-particle {
+        .danggeun-particle {
             position: absolute; width: 3px; height: 3px;
-            background: rgba(255,255,255,0.3);
+            background: rgba(37, 99, 235, 0.15);
             border-radius: 50%;
-            animation: s26ParticleFloat linear infinite;
+            animation: dgParticleFloat linear infinite;
         }
-        @keyframes s26ParticleFloat {
+        @keyframes dgParticleFloat {
             0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
         }
-        /* S26 컨테이너 */
-        .s26-hero-container {
+        /* 컨테이너 */
+        .danggeun-hero-container {
             position: relative; z-index: 5;
             max-width: 1200px; margin: 0 auto;
             padding: 60px 40px;
-            display: grid; grid-template-columns: 1fr 1fr;
+            display: grid; grid-template-columns: 1.1fr 0.9fr;
             align-items: center; gap: 40px; width: 100%;
         }
-        .s26-hero-text { color: white; }
-        .s26-event-badge {
+        .danggeun-hero-text { color: #0F172A; }
+        .danggeun-event-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.15));
-            border: 1px solid rgba(251,191,36,0.4);
-            color: #fbbf24; font-weight: 700; font-size: 0.85rem;
-            padding: 6px 14px; border-radius: 20px; margin-bottom: 18px;
-            animation: s26BadgePulse 2s ease-in-out infinite;
+            background: linear-gradient(135deg, rgba(255, 111, 15, 0.12), rgba(255, 138, 61, 0.08));
+            border: 1px solid rgba(255, 111, 15, 0.35);
+            color: #FF8A3D; font-weight: 700; font-size: 0.85rem;
+            padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
+            animation: dgBadgePulse 2s ease-in-out infinite;
         }
-        @keyframes s26BadgePulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.3); }
-            50% { box-shadow: 0 0 0 8px rgba(251,191,36,0); }
+        @keyframes dgBadgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 111, 15, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 111, 15, 0); }
         }
-        .s26-hero-text h1 {
+        .danggeun-hero-text h1 {
             font-family: 'GmarketSans', 'Pretendard', sans-serif !important;
             font-weight: 700 !important; font-size: 2.8rem !important;
-            line-height: 1.25 !important; margin-bottom: 8px !important;
+            line-height: 1.25 !important; margin-bottom: 12px !important;
             letter-spacing: -1px !important; word-break: keep-all;
-            color: white !important;
+            color: #0F172A !important;
         }
-        .s26-hero-text h1 .s26-amount {
-            color: #fbbf24 !important; -webkit-text-fill-color: #fbbf24;
-            font-size: 3.4rem !important; position: relative;
+        .danggeun-hero-text h1 .highlight-orange {
+            background: linear-gradient(90deg, #FF8A3D, #FFBF00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .s26-hero-text h1 .s26-amount::after {
-            content: ''; position: absolute;
-            bottom: 2px; left: 0; right: 0; height: 6px;
-            background: rgba(251,191,36,0.3); border-radius: 3px;
+        .danggeun-subtitle {
+            font-size: 1.05rem; color: #475569;
+            line-height: 1.7; margin-bottom: 30px; max-width: 500px; font-weight: 400;
         }
-        .s26-subtitle {
-            font-size: 1.05rem; color: rgba(255,255,255,0.7);
-            line-height: 1.7; margin-bottom: 28px; max-width: 440px; font-weight: 400;
-        }
-        /* S26 혜택 카드 */
-        .s26-perks { display: flex; gap: 12px; margin-bottom: 30px; }
-        .s26-perk-card {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            backdrop-filter: blur(10px);
+        /* 혜택 카드 */
+        .danggeun-perks { display: flex; gap: 12px; margin-bottom: 32px; }
+        .danggeun-perk-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 111, 15, 0.15);
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
             border-radius: 12px; padding: 14px 16px; flex: 1;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease; text-align: left;
         }
-        .s26-perk-card:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
-        .s26-perk-icon { font-size: 1.4rem; margin-bottom: 6px; display: block; }
-        .s26-perk-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 2px; }
-        .s26-perk-value { font-weight: 700; font-size: 0.9rem; color: white; }
-        /* S26 CTA */
-        .s26-cta-row { display: flex; gap: 12px; align-items: center; }
-        .s26-btn-primary {
+        .danggeun-perk-card:hover {
+            background: #FFFFFF; transform: translateY(-3px);
+            border-color: rgba(255, 111, 15, 0.35);
+            box-shadow: 0 8px 25px rgba(255, 111, 15, 0.08);
+        }
+        .danggeun-perk-icon { font-size: 1.5rem; margin-bottom: 6px; display: block; }
+        .danggeun-perk-label { font-size: 0.75rem; color: #64748B; margin-bottom: 2px; }
+        .danggeun-perk-value { font-weight: 700; font-size: 0.9rem; color: #0F172A; }
+        /* CTA */
+        .danggeun-cta-row { display: flex; gap: 12px; align-items: center; }
+        .danggeun-btn-primary {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 14px 30px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #FF6F0F, #FF8A3D);
             color: white; font-weight: 700; font-size: 1rem;
             border: none; border-radius: 12px; cursor: pointer;
             transition: all 0.3s ease; text-decoration: none;
-            box-shadow: 0 8px 25px -5px rgba(37,99,235,0.5);
+            box-shadow: 0 8px 25px -5px rgba(255, 111, 15, 0.5);
         }
-        .s26-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 35px -5px rgba(37,99,235,0.6); }
-        .s26-btn-secondary {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 14px 24px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white; font-weight: 600; font-size: 0.95rem;
-            border-radius: 12px; cursor: pointer;
-            transition: all 0.3s ease; text-decoration: none;
+        .danggeun-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px -5px rgba(255, 111, 15, 0.7);
         }
-        .s26-btn-secondary:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
-        .s26-event-period {
+        .danggeun-event-period {
             display: flex; align-items: center; gap: 6px;
-            margin-top: 16px; font-size: 0.8rem; color: rgba(255,255,255,0.45);
+            margin-top: 18px; font-size: 0.8rem; color: #64748B;
         }
-        /* S26 이미지 영역 */
-        .s26-hero-image { position: relative; display: flex; align-items: center; justify-content: center; }
-        .s26-phone-showcase { position: relative; z-index: 2; }
-        .s26-phone-showcase img {
+        /* 이미지 영역 */
+        .danggeun-hero-image { position: relative; display: flex; align-items: center; justify-content: center; }
+        .danggeun-phone-showcase { position: relative; z-index: 2; }
+        .danggeun-phone-showcase img {
             max-height: 380px; width: auto;
-            filter: drop-shadow(0 30px 60px rgba(0,0,0,0.4));
+            filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
             border-radius: 16px;
         }
-        .s26-floating-bonus {
-            position: absolute; top: 10px; right: 20px; z-index: 10;
-            width: 100px; height: 100px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+        .danggeun-floating-bonus {
+            position: absolute; top: 10px; right: 10px; z-index: 10;
+            width: 105px; height: 105px;
+            background: linear-gradient(135deg, #FF6F0F, #E65F00);
             border-radius: 50%; display: flex; flex-direction: column;
             align-items: center; justify-content: center; color: white;
-            box-shadow: 0 8px 30px rgba(245,158,11,0.5);
-            animation: s26BonusBounce 2s ease-in-out infinite;
-            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 30px rgba(255, 111, 15, 0.5);
+            animation: dgBonusBounce 2s ease-in-out infinite;
+            border: 3px solid rgba(255, 255, 255, 0.3);
         }
-        .s26-floating-bonus .s26-bonus-text { font-size: 0.65rem; font-weight: 600; opacity: 0.9; }
-        .s26-floating-bonus .s26-bonus-amount {
+        .danggeun-floating-bonus .danggeun-bonus-text { font-size: 0.65rem; font-weight: 600; opacity: 0.9; letter-spacing: -0.5px; }
+        .danggeun-floating-bonus .danggeun-bonus-amount {
             font-family: 'GmarketSans', sans-serif;
-            font-size: 1.4rem; font-weight: 700; line-height: 1;
+            font-size: 1.45rem; font-weight: 700; line-height: 1; margin: 2px 0;
         }
-        .s26-floating-bonus .s26-bonus-sub { font-size: 0.6rem; font-weight: 600; opacity: 0.85; }
-        @keyframes s26BonusBounce {
+        .danggeun-floating-bonus .danggeun-bonus-sub { font-size: 0.6rem; font-weight: 600; opacity: 0.85; }
+        @keyframes dgBonusBounce {
             0%, 100% { transform: scale(1) rotate(-5deg); }
             50% { transform: scale(1.08) rotate(3deg); }
         }
-        .s26-series-tags {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; z-index: 10;
-        }
-        .s26-series-tag {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white; font-size: 0.75rem; font-weight: 600;
-            padding: 4px 12px; border-radius: 20px;
-            backdrop-filter: blur(8px); white-space: nowrap;
-        }
-        /* S26 반응형 */
+        /* 반응형 */
         @media (max-width: 768px) {
-            .hero-slide.s26-event { min-height: auto !important; }
-            .s26-hero-container {
+            .hero-slide.danggeun-event { min-height: auto !important; padding: 0 !important; }
+            .danggeun-hero-container {
                 grid-template-columns: 1fr !important;
-                padding: 15px 20px !important;
+                padding: 5px 15px !important;
                 gap: 10px !important;
                 display: flex !important; flex-direction: row !important;
                 align-items: center !important; justify-content: space-between !important;
             }
-            .s26-hero-text h1 { font-size: 1.5rem !important; margin-bottom: 0 !important; line-height: 1.35 !important; }
-            .s26-hero-text h1 .s26-amount { font-size: 1.7rem !important; }
-            .s26-subtitle { display: none !important; }
-            .s26-perks { display: none !important; }
-            .s26-cta-row { display: none !important; }
-            .s26-event-period { display: none !important; }
-            .s26-event-badge { font-size: 0.7rem; padding: 3px 8px; margin-bottom: 8px; }
-            .s26-hero-image { width: 130px !important; flex-shrink: 0; }
-            .s26-phone-showcase img { max-height: 120px !important; }
-            .s26-floating-bonus {
-                width: 48px !important; height: 48px !important;
-                top: -5px !important; right: -5px !important;
+            .danggeun-hero-text h1 { font-size: 1.15rem !important; margin-bottom: 0 !important; line-height: 1.35 !important; color: #0F172A !important; word-break: keep-all; }
+            .danggeun-hero-text h1 .highlight-orange { background: none; -webkit-text-fill-color: initial; color: #FF8A3D !important; }
+            .danggeun-subtitle { display: none !important; }
+            .danggeun-perks { display: none !important; }
+            .danggeun-cta-row { display: none !important; }
+            .danggeun-event-period { display: none !important; }
+            .danggeun-event-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 138, 61, 0.05)); border: 1px solid rgba(255, 111, 15, 0.3); color: #FF8A3D; font-weight: 700; font-size: 0.65rem; padding: 2px 7px; border-radius: 12px; margin-bottom: 6px; }
+            .danggeun-hero-image { width: 105px !important; flex-shrink: 0; }
+            .danggeun-phone-showcase img { max-height: 95px !important; }
+            .danggeun-floating-bonus {
+                display: none !important;
             }
-            .s26-floating-bonus .s26-bonus-amount { font-size: 0.75rem !important; }
-            .s26-floating-bonus .s26-bonus-text { display: none; }
-            .s26-floating-bonus .s26-bonus-sub { font-size: 0.5rem !important; }
             .s26-series-tags { display: none !important; }
             .s26-hero-text { flex: 1; }
         }
@@ -482,9 +461,9 @@ wcs_do();
             .fast-search-section .usc-chip { min-width: 0 !important; width: 100% !important; margin-bottom: 0 !important; padding: 8px 4px; flex-direction: column; align-items: center; text-align: center; border-radius: 12px; }
             .chip-icon { margin-right: 0; margin-bottom: 6px; font-size: 1.2rem; }
             .chip-icon img { max-width: 40px !important; max-height: 40px !important; margin-bottom: 2px; }
-            .chip-name { font-size: 0.65rem; margin-bottom: 2px; font-weight: 700; word-break: break-word; line-height: 1.2; letter-spacing: -0.5px; }
-            .chip-price { font-size: 0.75rem; margin-bottom: 2px; font-weight: 800; color: #ef4444; word-break: break-word; line-height: 1.2; letter-spacing: -0.5px; }
-            .chip-tag { font-size: 0.6rem; color: #888; word-break: break-word; line-height: 1.2; letter-spacing: -0.5px; }
+            .fast-search-section .chip-name { font-size: 0.55rem; margin-bottom: 2px; font-weight: 700; word-break: keep-all; line-height: 1.1; letter-spacing: -0.5px; }
+            .fast-search-section .chip-price { font-size: 0.6rem; margin-bottom: 2px; font-weight: 800; color: #ef4444; word-break: keep-all; line-height: 1.1; letter-spacing: -0.5px; }
+            .fast-search-section .chip-tag { font-size: 0.45rem; color: #888; word-break: keep-all; line-height: 1.1; letter-spacing: -0.5px; }
             .usc-quick-title { margin-bottom: 10px; font-size: 0.85rem; }
 
             
@@ -782,73 +761,73 @@ wcs_do();
 
 
 
-            <!-- Slide 1: S26 출시기념 이벤트 -->
-            <div class="hero-slide s26-event">
+            <!-- Slide 1: 당근마켓 광고 유입 특별 이벤트 -->
+            <div class="hero-slide danggeun-event">
                 <!-- 파티클 -->
-                <div class="s26-particles" id="s26-particles"></div>
-
-                <div class="s26-hero-container">
-                    <!-- 왼쪽: 텍스트 -->
-                    <div class="s26-hero-text">
-                        <div class="s26-event-badge">
-                            <i class="ri-gift-2-fill"></i>
-                            S26 시리즈 출시 기념 특별 이벤트
-                        </div>
-
-                        <h1>
-                            기존 폰 보내고<br>
-                            <span class="s26-amount">5만원</span> 추가 증정!
-                        </h1>
-
-                        <p class="s26-subtitle">
-                            갤럭시 S26으로 바꾸셨나요?<br>
-                            기존 폰을 쉐라폰에 판매하시면 매입가에 <strong style="color:#fbbf24;">5만원을 추가</strong>로 더 드립니다.
-                        </p>
-
-                        <!-- 이벤트 혜택 카드 -->
-                        <div class="s26-perks">
-                            <div class="s26-perk-card">
-                                <span class="s26-perk-icon">📱</span>
-                                <div class="s26-perk-label">기종별 추가보너스</div>
-                                <div class="s26-perk-value">기종에 따라 차등 지급</div>
+                <a href="event_danggeun.html" style="text-decoration: none; color: inherit; display: block; width: 100%; position: relative; z-index: 10;">
+                    <div class="danggeun-hero-container">
+                        <!-- 왼쪽: 텍스트 -->
+                        <div class="danggeun-hero-text">
+                            <div class="danggeun-event-badge">
+                                <i class="ri-car-fill"></i>
+                                당근마켓 광고 보고 오신 분들을 위한 특별 혜택
                             </div>
-                            <div class="s26-perk-card">
-                                <span class="s26-perk-icon">📦</span>
-                                <div class="s26-perk-label">수거 방식</div>
-                                <div class="s26-perk-value">무료 택배</div>
+
+                            <h1>
+                                당근 보고 오셨나요?<br>
+                                <span class="highlight-orange">최대 2만원</span> 추가 증정!
+                            </h1>
+
+                            <p class="danggeun-subtitle">
+                                중고폰 판매 신청 시 당근 특별 혜택 자동 적용!<br>
+                                2대 이상 묶어 팔면 추가 2만원 보너스와 매주 5만원 상품권(2명) 당첨의 기회까지!
+                            </p>
+
+                            <!-- 이벤트 혜택 카드 -->
+                            <div class="danggeun-perks">
+                                <div class="danggeun-perk-card">
+                                    <span class="danggeun-perk-icon"><img src="carrot_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="당근"></span>
+                                    <div class="danggeun-perk-label">유입 특별 보너스</div>
+                                    <div class="danggeun-perk-value">최대 +20,000원 추가</div>
+                                </div>
+                                <div class="danggeun-perk-card">
+                                    <span class="danggeun-perk-icon"><img src="phones_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="폰"></span>
+                                    <div class="danggeun-perk-label">2대 이상 묶음 판매</div>
+                                    <div class="danggeun-perk-value">+20,000원 무조건 합산</div>
+                                </div>
+                                <div class="danggeun-perk-card">
+                                    <span class="danggeun-perk-icon"><img src="gift_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="선물"></span>
+                                    <div class="danggeun-perk-label">매주 럭키드로우</div>
+                                    <div class="danggeun-perk-value">신세계 상품권 5만원 (2명)</div>
+                                </div>
+                            </div>
+
+                            <div class="danggeun-cta-row">
+                                <span class="danggeun-btn-primary">
+                                    <i class="ri-gift-2-line"></i>
+                                    나의 추가 혜택 확인하기
+                                </span>
+                            </div>
+
+                            <div class="danggeun-event-period">
+                                <i class="ri-time-line"></i>
+                                이벤트 기간: 2026년 5월 29일 ~ 상시 진행 (매주 럭키드로우 진행)
                             </div>
                         </div>
 
-                        <div class="s26-cta-row">
-                            <a href="quote.html" class="s26-btn-primary">
-                                <i class="ri-smartphone-line"></i>
-                                내 폰 판매하기
-                            </a>
-                        </div>
-
-                        <div class="s26-event-period">
-                            <i class="ri-time-line"></i>
-                            이벤트 기간: 2026.04.28 ~ 2026.05.31
+                        <!-- 오른쪽: 이미지 -->
+                        <div class="danggeun-hero-image">
+                            <div class="danggeun-phone-showcase">
+                                <img src="danggeun_hero.png" alt="Smartphones Showcase" style="max-height:360px; border-radius: 0; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15));">
+                            </div>
+                            <div class="danggeun-floating-bonus">
+                                <span class="danggeun-bonus-text">당근회원</span>
+                                <span class="danggeun-bonus-amount">+2만원</span>
+                                <span class="danggeun-bonus-sub">MAX BONUS</span>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- 오른쪽: 이미지 -->
-                    <div class="s26-hero-image">
-                        <div class="s26-phone-showcase">
-                            <img src="galaxy_s26_v3.png" alt="Galaxy S26 Ultra">
-                        </div>
-                        <div class="s26-floating-bonus">
-                            <span class="s26-bonus-text">추가증정</span>
-                            <span class="s26-bonus-amount">5만원</span>
-                            <span class="s26-bonus-sub">BONUS</span>
-                        </div>
-                        <div class="s26-series-tags">
-                            <span class="s26-series-tag">S26</span>
-                            <span class="s26-series-tag">S26+</span>
-                            <span class="s26-series-tag">S26 Ultra</span>
-                        </div>
-                    </div>
-                </div>
+                </a>
             </div>
 
 
@@ -1281,10 +1260,8 @@ wcs_do();
                 <div class="chip-info">
 
                     <div class="chip-name">아이폰 15 Pro</div>
-
-                    <div class="chip-price" id="pop-price-ip15p">최고 1,100,000원</div>
-
-                    <div class="chip-tag">기본 128GB A급 기준</div>
+                    <div class="chip-price" id="pop-price-ip15p">1,100,000원</div>
+                    <div class="chip-tag">기본용량A급기준</div>
 
                 </div>
 
@@ -1297,10 +1274,8 @@ wcs_do();
                 <div class="chip-info">
 
                     <div class="chip-name">갤럭시 S24 Ultra</div>
-
-                    <div class="chip-price" id="pop-price-s24u">최고 1,150,000원</div>
-
-                    <div class="chip-tag">기본 256GB A급 기준</div>
+                    <div class="chip-price" id="pop-price-s24u">1,150,000원</div>
+                    <div class="chip-tag">기본용량A급기준</div>
 
                 </div>
 
@@ -1313,16 +1288,21 @@ wcs_do();
                 <div class="chip-info">
 
                     <div class="chip-name">갤럭시 Z 플립 5</div>
-
-                    <div class="chip-price" id="pop-price-zf5">최고 550,000원</div>
-
-                    <div class="chip-tag">기본 256GB A급 기준</div>
+                    <div class="chip-price" id="pop-price-zf5">550,000원</div>
+                    <div class="chip-tag">기본용량A급기준</div>
 
                 </div>
 
             </div>
 
         </div>
+
+        <!-- Foreigner 배너 버튼 -->
+        <a href="quote-foreigner.html" class="notranslate" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; padding: 10px 16px; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: white; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.82rem; transition: all 0.2s; box-shadow: 0 3px 8px rgba(37,99,235,0.15);">
+            <span style="font-size: 1rem;">🌍</span>
+            <span>Sell Your Phone — For Foreigners in Korea</span>
+            <span style="font-size: 0.9rem;">→</span>
+        </a>
 
     </section>
 
@@ -1561,7 +1541,7 @@ wcs_do();
 
 
 
-                    style="color: #666; text-decoration: none; font-weight: 500; font-size: 0.95rem;">+ 더보기</a>
+                    style="color: #666; text-decoration: none; font-weight: 500; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;">+ 더보기</a>
 
 
 
@@ -1785,7 +1765,7 @@ wcs_do();
 
 
 
-                        통신판매업 신고번호: 기타 | 개인정보보호책임자: <span id="dyn-ceo-name2">박현용</span>
+                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
 
 
 
@@ -1826,7 +1806,8 @@ wcs_do();
 
 
 
-                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br><br>
+                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
+                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
 
 
 
@@ -1895,7 +1876,7 @@ wcs_do();
 
 
 
-                &copy; <span id="current-year">2024</span> <span class="dyn-company-name">에스알커머스</span>. All rights reserved.
+                &copy; 2026 HooPak all rights reserved
 
 
 
@@ -1998,7 +1979,7 @@ wcs_do();
 
 
 
-    <script type="module" src="script.js?v=1779351162"></script>
+    <script type="module" src="script.js?v=1780109837"></script>
 
 
 
@@ -2288,18 +2269,21 @@ wcs_do();
 
     </script>
 
-    <!-- S26 파티클 생성 스크립트 -->
+    <!-- 당근마켓 파티클 생성 스크립트 -->
     <script>
         (function() {
-            var container = document.getElementById('s26-particles');
+            var container = document.getElementById('danggeun-particles');
             if (container) {
-                for (var i = 0; i < 20; i++) {
+                for (var i = 0; i < 25; i++) {
                     var p = document.createElement('div');
-                    p.className = 's26-particle';
+                    p.className = 'danggeun-particle';
                     p.style.left = Math.random() * 100 + '%';
-                    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+                    p.style.animationDuration = (8 + Math.random() * 12) + 's';
                     p.style.animationDelay = Math.random() * 8 + 's';
-                    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+                    p.style.width = p.style.height = (2.5 + Math.random() * 3.5) + 'px';
+                    if (Math.random() > 0.5) {
+                        p.style.background = 'rgba(255, 111, 15, 0.45)';
+                    }
                     container.appendChild(p);
                 }
             }

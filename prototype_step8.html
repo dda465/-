@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이탈률 개선 - 1안 vs 2안 프로토타입</title>
+    <!-- 카카오 주소 검색 API (무료, API키 불필요) -->
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .nav {
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo { font-weight: 800; font-size: 1.1rem; }
+        .compare-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 15px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 49px;
+            z-index: 99;
+        }
+        .compare-btn {
+            padding: 10px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .compare-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
+        .proto-label {
+            text-align: center; padding: 10px 12px;
+            background: #fef3c7; border: 1px solid #fbbf24;
+            border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+            color: #92400e; margin-bottom: 15px; line-height: 1.4;
+        }
+
+        /* 공통 스타일 */
+        .form-input {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+            transition: all 0.3s; background: white;
+        }
+        .form-input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .form-input[readonly] { background: #f8f9fa; }
+        .form-label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        .req { color: red; }
+        .hidden { display: none !important; }
+
+        .delivery-card {
+            padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;
+            border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer;
+            transition: all 0.2s; background: white;
+        }
+        .delivery-card.active { border-color: #2563eb; background: #eff6ff; }
+        .delivery-card:hover { border-color: #93c5fd; }
+        .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .card-sub { font-size: 0.8rem; color: #64748b; margin-top: 5px; }
+        .free-badge {
+            background: linear-gradient(135deg, #FF4B2B, #FF416C);
+            color: white; font-size: 0.7rem; padding: 2px 7px;
+            border-radius: 10px; font-weight: 800;
+        }
+
+        .btn-primary {
+            width: 100%; padding: 15px; font-size: 1.05rem;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white; border: none; border-radius: 12px;
+            font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.4); }
+
+        /* ===== 1안 전용 스타일 ===== */
+        .slide-panel {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.4s ease, padding 0.4s ease;
+            opacity: 0; background: #f8fafc;
+            border-radius: 12px; border: 1px solid #e2e8f0;
+            margin-top: 15px;
+        }
+        .slide-panel.open {
+            max-height: 1500px; opacity: 1; padding: 20px;
+        }
+        .auth-complete-badge {
+            display: flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 12px 16px; border-radius: 10px;
+            border: 1px solid #86efac; margin-bottom: 15px;
+        }
+        .auth-complete-badge .check {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #22c55e; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+        }
+        .section-divider {
+            display: flex; align-items: center; gap: 10px;
+            margin: 18px 0 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;
+        }
+        .section-divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+
+        /* ===== 2안 전용 스타일 ===== */
+        .guided-field {
+            transition: all 0.4s ease;
+            border-radius: 10px; padding: 12px;
+            margin-bottom: 8px;
+        }
+        .guided-field.highlight {
+            background: #eff6ff; border: 2px solid #2563eb;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+        .guided-field.completed {
+            background: #f0fdf4; border: 2px solid #22c55e;
+        }
+        .guided-field .step-number {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%;
+            font-size: 0.7rem; font-weight: 800; margin-right: 6px;
+            background: #e5e7eb; color: #64748b;
+            transition: all 0.3s;
+        }
+        .guided-field.highlight .step-number { background: #2563eb; color: white; }
+        .guided-field.completed .step-number { background: #22c55e; color: white; }
+        .guided-arrow {
+            text-align: center; font-size: 1.2rem; color: #2563eb;
+            margin: 4px 0; opacity: 0;
+            animation: bounceDown 1s infinite;
+        }
+        .guided-arrow.show { opacity: 1; }
+        @keyframes bounceDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+        .guided-helper {
+            font-size: 0.78rem; color: #2563eb; font-weight: 600;
+            margin-top: 4px; opacity: 0; transition: opacity 0.3s;
+        }
+        .guided-field.highlight .guided-helper { opacity: 1; }
+
+        /* 안심 배지 */
+        .trust-badge {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 8px; padding: 10px 12px;
+            background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0;
+        }
+        .trust-badge span:first-child { font-size: 1rem; }
+        .trust-badge span:last-child { font-size: 0.75rem; color: #15803d; line-height: 1.4; }
+
+        /* 은행 선택 드롭다운 */
+        .bank-select {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+            background: white; transition: all 0.3s; appearance: auto;
+        }
+        .bank-select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .bank-direct-input {
+            margin-top: 8px; display: none;
+        }
+        .bank-direct-input.show { display: block; }
+
+        .explain-box {
+            margin-top: 20px; padding: 14px; border-radius: 8px;
+            font-size: 0.83rem; line-height: 1.6;
+        }
+        .explain-good { background: #f0fdf4; border: 1px dashed #22c55e; color: #166534; }
+    </style>
+
+<!-- NAVER PV SCRIPT -->
+<script type="text/javascript" src="//wcs.naver.net/wcslog.js"> </script> 
+<script type="text/javascript"> 
+if (!wcs_add) var wcs_add={};
+wcs_add["wa"] = "s_bfc3561d569";
+if (!_nasa) var _nasa={};
+if(window.wcs){
+wcs.inflow();
+wcs_do();
+}
+</script>
+
+</head>
+<body>
+
+    <div class="nav">
+        <div class="nav-logo">✨ 쉐라폰 프로토타입</div>
+    </div>
+
+    <div class="compare-toggle">
+        <button class="compare-btn active" onclick="showVer('a')" id="btn-a">1안: 인증 후 바로 펼침</button>
+        <button class="compare-btn" onclick="showVer('b')" id="btn-b">2안: 가이드 스크롤</button>
+    </div>
+
+    <!-- ============================== -->
+    <!--       1안: 인증 후 바로 펼침       -->
+    <!-- ============================== -->
+    <div id="ver-a" class="container">
+        <div class="proto-label">
+            1안: 본인인증 완료 후 <strong>바로 아래에</strong> 배송방법+주소+계좌 펼침<br>
+            <span style="font-size: 0.8rem; font-weight: 400;">(한 페이지에서 모든 걸 끝냄 → 이탈 지점 제거)</span>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb;">
+            <h2 style="font-size: 1.15rem; margin-bottom: 12px;">접수자 정보 입력 <span class="req">*</span></h2>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 18px;">정확한 정산 및 거래 안내를 위해 정보를 입력해주세요.</p>
+
+            <div style="margin-bottom: 12px;">
+                <label class="form-label">이름 <span class="req">*</span></label>
+                <input type="text" class="form-input" placeholder="실명을 입력해주세요">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label class="form-label">휴대폰 번호 <span class="req">*</span></label>
+                <input type="tel" class="form-input" placeholder="예) 01012345678" maxlength="11">
+            </div>
+
+            <div style="background: #F8F9FA; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; cursor: pointer; font-size: 0.9rem;">
+                    <input type="checkbox" checked style="margin-right: 10px; width: 18px; height: 18px;">
+                    <span><a href="#" style="color: #2563EB; text-decoration: underline;">이용약관</a> 및 <a href="#" style="color: #2563EB; text-decoration: underline;">개인정보 처리방침</a> 동의 <span class="req">*</span></span>
+                </label>
+            </div>
+
+            <div id="a-auth-btn-area">
+                <button class="btn-primary" onclick="completeAuth1()">다음 단계로 →</button>
+                <p style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; text-align: center;">배송방법과 계좌 정보를 입력하시면 접수가 완료됩니다</p>
+            </div>
+
+            <div id="a-auth-done" class="hidden">
+                <div class="auth-complete-badge">
+                    <div class="check">✓</div>
+                    <div>
+                        <div style="font-weight: 700; color: #15803d; font-size: 0.9rem;">접수자 확인 완료!</div>
+                        <div style="font-size: 0.78rem; color: #16a34a;">아래에서 배송방법만 선택하면 끝이에요</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 슬라이드 패널 -->
+            <div id="a-delivery-panel" class="slide-panel">
+                <div class="section-divider">📦 배송 방법 선택</div>
+                <div style="display: grid; gap: 10px; margin-bottom: 12px;">
+                    <div class="delivery-card" onclick="this.parentElement.querySelectorAll('.delivery-card').forEach(c=>c.classList.remove('active'));this.classList.add('active');">
+                        <div style="background: #E3F2FD; padding: 8px; border-radius: 50%; font-size: 1.1rem;">🏪</div>
+                        <div>
+                            <div class="card-title" style="font-size: 0.9rem;">택배비 입금받기 <span class="free-badge">택배비 무료 🆓</span></div>
+                            <div class="card-sub" style="font-size: 0.75rem;">편의점/우체국에서 직접 발송</div>
+                        </div>
+                    </div>
+                    <div class="delivery-card active" onclick="this.parentElement.querySelectorAll('.delivery-card').forEach(c=>c.classList.remove('active'));this.classList.add('active');">
+                        <div style="background: #E8F5E9; padding: 8px; border-radius: 50%; font-size: 1.1rem;">📦</div>
+                        <div>
+                            <div class="card-title" style="font-size: 0.9rem;">택배 방문수거 <span class="free-badge">택배비 무료 🆓</span></div>
+                            <div class="card-sub" style="font-size: 0.75rem;">문 앞에 두시면 수거 (검수 당일입금)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label class="form-label" style="font-size: 0.85rem;">희망 수거일자 <span class="req">*</span></label>
+                    <select class="form-input" style="padding: 10px;">
+                        <option>05/23 (금)</option><option>05/24 (토)</option><option>05/26 (월)</option>
+                    </select>
+                </div>
+
+                <div class="section-divider">📍 수거 주소</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" class="form-input" style="width: 35%; padding: 10px;" placeholder="우편번호" readonly id="a-postcode">
+                    <button onclick="openKakaoAddr('a')" style="flex-shrink: 0; background: #2563eb; color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">주소 검색</button>
+                </div>
+                <input type="text" class="form-input" style="padding: 10px; margin-bottom: 8px;" placeholder="주소 검색 버튼을 눌러주세요" readonly id="a-address">
+                <input type="text" class="form-input" style="padding: 10px;" placeholder="상세주소 (동/호수)" id="a-detail">
+
+                <div class="section-divider">💳 계좌 정보</div>
+                <div style="margin-bottom: 4px;">
+                    <label class="form-label" style="font-size: 0.85rem;">은행 선택 <span class="req">*</span></label>
+                    <select class="bank-select" onchange="toggleDirectInput(this, 'a-bank-direct')">
+                        <option value="">-- 은행을 선택해주세요 --</option>
+                        <option value="direct">✏️ 직접입력</option>
+                        <option value="KB국민은행">KB국민은행</option>
+                        <option value="신한은행">신한은행</option>
+                        <option value="하나은행">하나은행</option>
+                        <option value="우리은행">우리은행</option>
+                        <option value="NH농협은행">NH농협은행</option>
+                        <option value="카카오뱅크">카카오뱅크</option>
+                        <option value="토스뱅크">토스뱅크</option>
+                        <option value="케이뱅크">케이뱅크</option>
+                        <option value="IBK기업은행">IBK기업은행</option>
+                        <option value="SC제일은행">SC제일은행</option>
+                        <option value="대구은행">대구은행</option>
+                        <option value="부산은행">부산은행</option>
+                        <option value="경남은행">경남은행</option>
+                        <option value="광주은행">광주은행</option>
+                        <option value="전북은행">전북은행</option>
+                        <option value="제주은행">제주은행</option>
+                        <option value="수협은행">수협은행</option>
+                        <option value="신협">신협</option>
+                        <option value="새마을금고">새마을금고</option>
+                        <option value="우체국">우체국</option>
+                    </select>
+                    <div id="a-bank-direct" class="bank-direct-input">
+                        <input type="text" class="form-input" style="padding: 10px;" placeholder="은행/금융기관명 직접 입력">
+                    </div>
+                </div>
+                <div style="margin-top: 8px;">
+                    <label class="form-label" style="font-size: 0.85rem;">계좌번호 <span class="req">*</span></label>
+                    <input type="text" class="form-input" style="padding: 10px;" placeholder="계좌번호 (- 없이)">
+                </div>
+                <div class="trust-badge">
+                    <span>🔒</span>
+                    <span>계좌 정보는 안전하게 관리되며, 검수 완료 후 <strong>즉시 입금</strong>됩니다.</span>
+                </div>
+
+                <div style="margin-top: 18px;">
+                    <button class="btn-primary" onclick="alert('🎉 접수 완료!\n\n(1안 프로토타입 데모)')">접수 완료하기 ✅</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="explain-box explain-good">
+            <strong>✅ 1안 포인트:</strong><br>
+            • "다음 단계로 →" 누르면 아래에 배송 영역이 <strong>쫙 펼쳐짐</strong><br>
+            • <strong>주소 검색 버튼</strong> → 카카오 우편번호 API 팝업 (실제 동작!)<br>
+            • <strong>은행 드롭다운</strong> → 20개 은행 + 맨 위에 "직접입력" 옵션<br>
+            • 양쪽 배송 모두 <strong>"택배비 무료"</strong> 배지 표시
+        </div>
+    </div>
+
+
+    <!-- ============================== -->
+    <!--       2안: 가이드 스크롤          -->
+    <!-- ============================== -->
+    <div id="ver-b" class="container" style="display: none;">
+        <div class="proto-label">
+            2안: 현행 구조 유지 + <strong>단계별 자동 가이드</strong><br>
+            <span style="font-size: 0.8rem; font-weight: 400;">(배송 선택 → 자동 스크롤 → 주소 하이라이트 → 계좌 하이라이트 → 완료)</span>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 12px; padding: 14px 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; border: 1px solid #bfdbfe;">
+            <div style="background: #2563eb; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">✓</div>
+            <div>
+                <div style="font-weight: 700; color: #1e40af; font-size: 0.95rem;">마지막 단계! 거의 다 왔어요 🎉</div>
+                <div style="font-size: 0.8rem; color: #3b82f6; margin-top: 2px;">아래 <strong>3개 항목</strong>만 입력하면 접수 완료!</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 12px;">
+            <h2 style="font-size: 1.2rem;">배송 전달방법을 선택해주세요</h2>
+            <div style="font-size: 1.15rem; color: #2563eb; font-weight: 800; margin-top: 5px;">예상 매입가: ₩1,363,000 ~ ₩1,787,000</div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="guided-field highlight" id="b-step1">
+            <div style="margin-bottom: 8px;">
+                <span class="step-number">1</span>
+                <span class="form-label" style="display: inline; font-size: 0.85rem;">배송 방법 선택</span>
+            </div>
+            <div class="guided-helper">👇 배송 방법을 선택해주세요</div>
+            <div style="display: grid; gap: 10px; margin-top: 8px;">
+                <div class="delivery-card" onclick="selectB(this)">
+                    <div style="background: #E3F2FD; padding: 8px; border-radius: 50%; font-size: 1.1rem;">🏪</div>
+                    <div>
+                        <div class="card-title" style="font-size: 0.9rem;">택배비 입금받기 <span class="free-badge">택배비 무료 🆓</span></div>
+                        <div class="card-sub" style="font-size: 0.75rem;">편의점/우체국에서 직접 발송</div>
+                    </div>
+                </div>
+                <div class="delivery-card active" onclick="selectB(this)">
+                    <div style="background: #E8F5E9; padding: 8px; border-radius: 50%; font-size: 1.1rem;">📦</div>
+                    <div>
+                        <div class="card-title" style="font-size: 0.9rem;">택배 방문수거 <span class="free-badge">택배비 무료 🆓</span></div>
+                        <div class="card-sub" style="font-size: 0.75rem;">문 앞에 두시면 수거 (검수 당일입금)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guided-arrow" id="b-arrow1">⬇️</div>
+
+        <!-- STEP 2 -->
+        <div class="guided-field" id="b-step2" style="opacity: 0.5;">
+            <div style="margin-bottom: 8px;">
+                <span class="step-number">2</span>
+                <span class="form-label" style="display: inline; font-size: 0.85rem;">수거 주소 <span class="req">*</span></span>
+            </div>
+            <div class="guided-helper">👇 주소 검색 버튼을 눌러주세요</div>
+            <div style="margin-bottom: 6px;">
+                <label class="form-label" style="font-size: 0.82rem;">희망 수거일자</label>
+                <select class="form-input" style="padding: 10px;">
+                    <option>05/23 (금)</option><option>05/24 (토)</option><option>05/26 (월)</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 6px; margin-top: 8px;">
+                <input type="text" class="form-input" style="width: 35%; padding: 10px;" placeholder="우편번호" readonly id="b-postcode">
+                <button onclick="openKakaoAddr('b')" style="flex-shrink: 0; background: #2563eb; color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">주소 검색</button>
+            </div>
+            <input type="text" class="form-input" style="padding: 10px; margin-bottom: 6px;" placeholder="주소 검색 버튼을 눌러주세요" readonly id="b-address">
+            <input type="text" class="form-input" style="padding: 10px;" placeholder="상세주소 (동/호수)" id="b-detail">
+        </div>
+
+        <div class="guided-arrow" id="b-arrow2">⬇️</div>
+
+        <!-- STEP 3 -->
+        <div class="guided-field" id="b-step3" style="opacity: 0.5;">
+            <div style="margin-bottom: 8px;">
+                <span class="step-number">3</span>
+                <span class="form-label" style="display: inline; font-size: 0.85rem;">계좌 정보 <span class="req">*</span></span>
+            </div>
+            <div class="guided-helper">👇 입금 받으실 계좌를 입력해주세요</div>
+            <div style="margin-bottom: 6px;">
+                <label class="form-label" style="font-size: 0.82rem;">은행 선택</label>
+                <select class="bank-select" onchange="toggleDirectInput(this, 'b-bank-direct')">
+                    <option value="">-- 은행을 선택해주세요 --</option>
+                    <option value="direct">✏️ 직접입력</option>
+                    <option value="KB국민은행">KB국민은행</option>
+                    <option value="신한은행">신한은행</option>
+                    <option value="하나은행">하나은행</option>
+                    <option value="우리은행">우리은행</option>
+                    <option value="NH농협은행">NH농협은행</option>
+                    <option value="카카오뱅크">카카오뱅크</option>
+                    <option value="토스뱅크">토스뱅크</option>
+                    <option value="케이뱅크">케이뱅크</option>
+                    <option value="IBK기업은행">IBK기업은행</option>
+                    <option value="SC제일은행">SC제일은행</option>
+                    <option value="대구은행">대구은행</option>
+                    <option value="부산은행">부산은행</option>
+                    <option value="경남은행">경남은행</option>
+                    <option value="광주은행">광주은행</option>
+                    <option value="전북은행">전북은행</option>
+                    <option value="제주은행">제주은행</option>
+                    <option value="수협은행">수협은행</option>
+                    <option value="신협">신협</option>
+                    <option value="새마을금고">새마을금고</option>
+                    <option value="우체국">우체국</option>
+                </select>
+                <div id="b-bank-direct" class="bank-direct-input">
+                    <input type="text" class="form-input" style="padding: 10px;" placeholder="은행/금융기관명 직접 입력">
+                </div>
+            </div>
+            <div style="margin-top: 6px;">
+                <label class="form-label" style="font-size: 0.82rem;">계좌번호</label>
+                <input type="text" class="form-input" style="padding: 10px;" placeholder="계좌번호 (- 없이)" id="b-account">
+            </div>
+            <div class="trust-badge">
+                <span>🔒</span>
+                <span>계좌 정보는 안전하게 관리되며, 검수 완료 후 <strong>즉시 입금</strong>됩니다.</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 18px; margin-bottom: 20px; opacity: 0.5; transition: all 0.4s;" id="b-submit-area">
+            <button class="btn-primary" onclick="alert('🎉 접수 완료!\n\n(2안 프로토타입 데모)')">접수 완료하기 ✅</button>
+        </div>
+
+        <div class="explain-box explain-good">
+            <strong>✅ 2안 포인트:</strong><br>
+            • 배송 방법 카드를 누르면 → <strong>자동 스크롤 + 파란 하이라이트</strong><br>
+            • <strong>주소 검색</strong> → 카카오 API 실제 동작!<br>
+            • <strong>은행 드롭다운</strong> → 20개 은행 + "직접입력"<br>
+            • 양쪽 배송 모두 <strong>"택배비 무료"</strong> 배지 표시
+        </div>
+    </div>
+
+
+    <script>
+        function showVer(v) {
+            document.getElementById('ver-a').style.display = v === 'a' ? 'block' : 'none';
+            document.getElementById('ver-b').style.display = v === 'b' ? 'block' : 'none';
+            document.getElementById('btn-a').classList.toggle('active', v === 'a');
+            document.getElementById('btn-b').classList.toggle('active', v === 'b');
+        }
+
+        // ===== 카카오 주소 검색 (실제 동작!) =====
+        function openKakaoAddr(prefix) {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    document.getElementById(prefix + '-postcode').value = data.zonecode;
+                    document.getElementById(prefix + '-address').value = data.roadAddress || data.jibunAddress;
+                    document.getElementById(prefix + '-detail').focus();
+                    document.getElementById(prefix + '-detail').placeholder = '상세주소를 입력해주세요 (동/호수)';
+
+                    // 2안일 때: Step2 완료 → Step3 활성화
+                    if (prefix === 'b') {
+                        setTimeout(() => {
+                            const s2 = document.getElementById('b-step2');
+                            s2.classList.remove('highlight');
+                            s2.classList.add('completed');
+                            document.getElementById('b-arrow2').classList.add('show');
+                            setTimeout(() => {
+                                const s3 = document.getElementById('b-step3');
+                                s3.style.opacity = '1';
+                                s3.classList.add('highlight');
+                                s3.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 400);
+                        }, 500);
+                    }
+                }
+            }).open();
+        }
+
+        // ===== 은행 직접입력 토글 =====
+        function toggleDirectInput(selectEl, directId) {
+            const directDiv = document.getElementById(directId);
+            if (selectEl.value === 'direct') {
+                directDiv.classList.add('show');
+                directDiv.querySelector('input').focus();
+            } else {
+                directDiv.classList.remove('show');
+            }
+        }
+
+        // ===== 1안: 인증 완료 → 패널 펼치기 =====
+        function completeAuth1() {
+            document.getElementById('a-auth-btn-area').classList.add('hidden');
+            document.getElementById('a-auth-done').classList.remove('hidden');
+            const panel = document.getElementById('a-delivery-panel');
+            panel.classList.add('open');
+            setTimeout(() => {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        // ===== 2안: 배송 선택 → 다음 단계 =====
+        function selectB(el) {
+            el.parentElement.querySelectorAll('.delivery-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            const s1 = document.getElementById('b-step1');
+            s1.classList.remove('highlight');
+            s1.classList.add('completed');
+            document.getElementById('b-arrow1').classList.add('show');
+
+            setTimeout(() => {
+                const s2 = document.getElementById('b-step2');
+                s2.style.opacity = '1';
+                s2.classList.add('highlight');
+                s2.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 400);
+        }
+
+        // 계좌 입력 시 제출 활성화
+        document.getElementById('b-account')?.addEventListener('input', function() {
+            if (this.value.length > 5) {
+                const s3 = document.getElementById('b-step3');
+                s3.classList.remove('highlight');
+                s3.classList.add('completed');
+                const sub = document.getElementById('b-submit-area');
+                sub.style.opacity = '1';
+                sub.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    </script>
+
+</body>
+</html>
