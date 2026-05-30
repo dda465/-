@@ -6705,7 +6705,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const isWeekendOrHoliday = (date) => {
             const day = date.getDay();
-            if (day === 0 || day === 6) return true; // 일요일(0), 토요일(6) 제외
+            if (day === 0) return true; // 일요일(0) 제외 (토요일은 수거 가능하므로 허용)
             const yyyy = date.getFullYear();
             const mm = String(date.getMonth() + 1).padStart(2, '0');
             const dd = String(date.getDate()).padStart(2, '0');
@@ -6715,7 +6715,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const validDates = [];
         let currentDate = new Date();
         
-        // 최소 5일치 날짜를 채움 (토/일/공휴일 및 6/3 제외)
+        // 최소 5일치 날짜를 채움 (일요일/공휴일 및 6/3 제외, 토요일은 수거 가능하므로 포함)
         while (validDates.length < 5) {
             currentDate.setDate(currentDate.getDate() + 1);
             if (!isWeekendOrHoliday(currentDate)) {
