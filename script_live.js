@@ -5189,7 +5189,9 @@ async function initDeepWizard() {
         const btnSubmit = document.getElementById('btn-submit-final');
         const name = document.getElementById('auth-name').value;
         const phone = document.getElementById('auth-phone').value;
-        const address = document.getElementById('customer-address').value;
+        const baseAddress = document.getElementById('customer-address').value;
+        const detailAddress = document.getElementById('step8-customer-address-detail') ? document.getElementById('step8-customer-address-detail').value.trim() : '';
+        const address = detailAddress ? `${baseAddress} ${detailAddress}` : baseAddress;
         const bankName = document.getElementById('customer-bank') ? document.getElementById('customer-bank').value : '';
         const accountNum = document.getElementById('customer-account').value;
         const account = bankName ? `${bankName} ${accountNum}` : accountNum;
