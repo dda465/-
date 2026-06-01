@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>박동후 기획자님 디지털 명함 - 에스알커머스</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Pretendard:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- RemixIcon CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #1E3A8A;
+            --secondary-blue: #2563EB;
+            --accent-green: #10B981;
+            --text-dark: #0F172A;
+            --text-light: #64748B;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --card-width: 480px;
+            --card-height: 270px; /* 16:9 ratio, standard card shape */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-dark);
+            perspective: 1500px; /* For 3D rotation */
+        }
+
+        /* Container for Interactive UI */
+        .wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-navy);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        /* 3D Card Box */
+        .card-container {
+            width: var(--card-width);
+            height: var(--card-height);
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.15);
+            border-radius: 16px;
+        }
+
+        .card-container.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Card Faces */
+        .card-face {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            box-sizing: border-box;
+        }
+
+        /* Front Face (Minimal Brand identity) */
+        .card-front {
+            background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);
+            color: white;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            padding: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .company-name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: 'Outfit', 'Pretendard', sans-serif;
+            text-align: center;
+        }
+
+        .company-sub {
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-top: -8px;
+        }
+
+        /* Back Face (Information details) */
+        .card-back {
+            transform: rotateY(180deg);
+            background: #ffffff;
+            padding: 30px;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Subtle back-decoration */
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 130px;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(30, 58, 138, 0.05) 100%);
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+            z-index: 1;
+        }
+
+        .card-back-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 2;
+        }
+
+        .profile-info h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--primary-navy);
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .profile-info .title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--secondary-blue);
+            background: #EFF6FF;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .back-logo {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #F1F5F9;
+            padding: 4px;
+        }
+
+        .back-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            z-index: 2;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contact-item:hover {
+            color: var(--secondary-blue);
+        }
+
+        .contact-item i {
+            font-size: 1rem;
+            color: var(--secondary-blue);
+            width: 20px;
+            text-align: center;
+        }
+
+        .card-back-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-top: 1px solid #F1F5F9;
+            padding-top: 10px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            z-index: 2;
+        }
+
+        /* Action Buttons */
+        .controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: var(--card-width);
+            z-index: 10;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-flip {
+            background: var(--primary-navy);
+            color: white;
+        }
+
+        .btn-flip:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+        }
+
+        .btn-save {
+            background: white;
+            color: var(--text-dark);
+            border: 1px solid #CBD5E1;
+        }
+
+        .btn-save:hover {
+            background: #F8FAFC;
+            transform: translateY(-2px);
+        }
+
+        .btn-print {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 520px) {
+            :root {
+                --card-width: 90vw;
+                --card-height: calc(90vw * 0.5625);
+            }
+            .profile-info h2 { font-size: 1.15rem; }
+            .profile-info .title { font-size: 0.75rem; padding: 2px 8px; }
+            .contact-item { font-size: 0.72rem; gap: 8px; }
+            .back-logo { width: 36px; height: 36px; }
+            .company-name { font-size: 1.3rem; }
+        }
+
+        /* ==================================================== */
+        /* PRINT STYLESHEET (Ctrl+P로 실제 인쇄 시 규격에 맞게 인쇄) */
+        /* ==================================================== */
+        @media print {
+            body {
+                background: white;
+                min-height: auto;
+                padding: 0;
+                display: block;
+            }
+
+            .wrapper, .header, .controls, .instructions {
+                display: none !important;
+            }
+
+            /* Lay out Front and Back side-by-side on paper */
+            .print-layout {
+                display: flex !important;
+                flex-direction: row;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                margin-top: 50px;
+            }
+
+            .card-container {
+                display: none !important; /* Hide interactive flip card */
+            }
+
+            .print-card {
+                display: flex !important;
+                position: relative !important;
+                width: 90mm !important;
+                height: 50mm !important;
+                border: 1px solid #E2E8F0 !important;
+                border-radius: 6px !important;
+                overflow: hidden !important;
+                box-shadow: none !important;
+                page-break-inside: avoid;
+            }
+
+            .print-card-front {
+                background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-card-back {
+                background: white !important;
+                color: #0F172A !important;
+                border: 1px solid #CBD5E1 !important;
+                padding: 6mm !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+            }
+        }
+
+        .print-layout {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <div class="header">
+            <h1>박동후 기획자님 디지털 명함</h1>
+            <p>화면의 명함을 탭하거나 아래 버튼을 클릭하여 뒷면을 확인하세요.</p>
+        </div>
+
+        <!-- 3D Interactive Card -->
+        <div class="card-container" id="card">
+            <!-- FRONT SIDE -->
+            <div class="card-face card-front">
+                <div class="logo-wrap">
+                    <img src="sr_logo.webp" alt="에스알커머스 로고" class="logo-img">
+                </div>
+                <div class="company-name">에스알커머스</div>
+                <div class="company-sub">SR Commerce</div>
+            </div>
+
+            <!-- BACK SIDE -->
+            <div class="card-face card-back">
+                <div class="card-back-header">
+                    <div class="profile-info">
+                        <h2>박 동 후</h2>
+                        <span class="title">웹개발 및 기획담당</span>
+                    </div>
+                    <div class="back-logo">
+                        <img src="sr_logo.webp" alt="로고">
+                    </div>
+                </div>
+
+                <div class="contact-details">
+                    <a href="tel:01023719277" class="contact-item">
+                        <i class="ri-phone-fill"></i>
+                        <span>010-2371-9277</span>
+                    </a>
+                    <a href="mailto:guffy2321@naver.com" class="contact-item">
+                        <i class="ri-mail-fill"></i>
+                        <span>guffyd321@naver.com</span>
+                    </a>
+                    <div class="contact-item">
+                        <i class="ri-map-pin-fill"></i>
+                        <span>부산광역시 부산진구 동천로 116 한신밴빌딩 1003호</span>
+                    </div>
+                </div>
+
+                <div class="card-back-footer">
+                    <span>에스알커머스</span>
+                    <span style="font-family: 'Outfit'; font-weight: 600;">SR Commerce Co., Ltd.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <i class="ri-information-line"></i>
+            <span>명함을 클릭하면 앞/뒷면이 회전합니다.</span>
+        </div>
+
+        <!-- Interactive Buttons -->
+        <div class="controls">
+            <button class="btn-action btn-flip" onclick="toggleFlip()">
+                <i class="ri-restart-line"></i>
+                명함 뒤집기
+            </button>
+            <button class="btn-action btn-save" onclick="downloadVCard()">
+                <i class="ri-contacts-book-upload-line"></i>
+                연락처 저장 (.vcf)
+            </button>
+            <button class="btn-action btn-print" onclick="window.print()">
+                <i class="ri-printer-line"></i>
+                명함 인쇄
+            </button>
+        </div>
+    </div>
+
+    <!-- Print Layout (Invisible in screen mode, active for printing) -->
+    <div class="print-layout">
+        <!-- Front side for printing -->
+        <div class="print-card print-card-front card-face">
+            <div class="logo-wrap" style="width: 15mm; height: 15mm; animation: none;">
+                <img src="sr_logo.webp" alt="로고" class="logo-img">
+            </div>
+            <div class="company-name" style="font-size: 4.5mm; margin-top: 2mm;">에스알커머스</div>
+            <div class="company-sub" style="font-size: 2.2mm; margin-top: 1mm;">SR Commerce</div>
+        </div>
+
+        <!-- Back side for printing -->
+        <div class="print-card print-card-back card-face" style="display: flex;">
+            <div class="card-back-header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div class="profile-info">
+                    <h2 style="font-size: 4mm; margin: 0; padding: 0;">박 동 후</h2>
+                    <span class="title" style="font-size: 2.2mm; padding: 0.5mm 2mm; margin-top: 1mm;">웹개발 및 기획담당</span>
+                </div>
+                <div class="back-logo" style="width: 8mm; height: 8mm; padding: 0.5mm;">
+                    <img src="sr_logo.webp" alt="로고">
+                </div>
+            </div>
+
+            <div class="contact-details" style="margin-top: 2mm; display: flex; flex-direction: column; gap: 1mm;">
+                <div class="contact-item" style="font-size: 2.2mm;">
+                    <i class="ri-phone-fill" style="font-size: 2.6mm; width: 3mm;"></i>
+                    <span>010-2371-9277</span>
+                </div>
+                <div class="contact-item" style="font-size: 2.2mm;">
+                    <i class="ri-mail-fill" style="font-size: 2.6mm; width: 3mm;"></i>
+                    <span>guffyd321@naver.com</span>
+                </div>
+                <div class="contact-item" style="font-size: 2.2mm;">
+                    <i class="ri-map-pin-fill" style="font-size: 2.6mm; width: 3mm;"></i>
+                    <span>부산광역시 부산진구 동천로 116 한신밴빌딩 1003호</span>
+                </div>
+            </div>
+
+            <div class="card-back-footer" style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 2mm; width: 100%; border-top: 0.2mm solid #E2E8F0; padding-top: 1mm;">
+                <span>에스알커머스</span>
+                <span style="font-family: 'Outfit'; font-weight: 600;">SR Commerce</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('card');
+        
+        // Toggle flip status
+        function toggleFlip() {
+            card.classList.toggle('flipped');
+        }
+
+        // Tap direct on card to flip
+        card.addEventListener('click', toggleFlip);
+
+        // Generate and Download vCard (VCF file)
+        function downloadVCard() {
+            const vcardData = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                'N:박;동후;;;',
+                'FN:박동후',
+                'ORG:에스알커머스',
+                'TITLE:웹개발 및 기획담당',
+                'TEL;TYPE=CELL,VOICE:010-2371-9277',
+                'EMAIL;TYPE=PREF,INTERNET:guffyd321@naver.com',
+                'ADR;TYPE=WORK:;;동천로 116 한신밴빌딩 1003호;부산광역시;부산진구;;대한민국',
+                'REV:' + new Date().toISOString(),
+                'END:VCARD'
+            ].join('\r\n');
+
+            const blob = new Blob([vcardData], { type: 'text/vcard;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (navigator.msSaveBlob) { // IE 10+
+                navigator.msSaveBlob(blob, 'park_donghoo_contact.vcf');
+            } else {
+                link.href = URL.createObjectURL(blob);
+                link.setAttribute('download', 'park_donghoo_contact.vcf');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>
