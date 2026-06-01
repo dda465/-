@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const phoneInput = document.getElementById('auth-phone');
                     
                     if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = false; }
-                    if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
+                    if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = false; }
                     
                     window.isPhoneVerified = true;
 
@@ -2639,7 +2639,7 @@ async function initDeepWizard() {
                     if (viewNonMember) viewNonMember.style.display = 'none';
                     if (viewMember) viewMember.style.display = 'block';
                     if (nameInput) nameInput.readOnly = false;
-                    if (phoneInput) phoneInput.readOnly = true;
+                    if (phoneInput) phoneInput.readOnly = false;
                 } else if (isMember) {
                     if (viewNonMember) viewNonMember.style.display = 'none';
                     if (viewMember) viewMember.style.display = 'block';
@@ -2650,7 +2650,7 @@ async function initDeepWizard() {
                     }
                     if (phoneInput) { 
                         phoneInput.value = memberPhone; 
-                        phoneInput.readOnly = !memberPhone; 
+                        phoneInput.readOnly = false; 
                     }
                     window.isPhoneVerified = true;
                 } else {
@@ -4044,7 +4044,7 @@ async function initDeepWizard() {
                                 const phoneInput = document.getElementById('auth-phone');
                                 
                                 if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = false; }
-                                if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
+                                if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = false; }
                                 
                                 window.isPhoneVerified = true;
 
