@@ -161,7 +161,7 @@ exchange_body = """
             <div class="feature-card">
                 <i class="ri-delete-bin-line"></i>
                 <h3 style="font-size: 1.1rem; margin-bottom: 8px;">데이터 100% 삭제</h3>
-                <p style="font-size: 0.9rem; color: #64748B;">국제 인증 블랑코 솔루션으로 복구 불가능하게 데이터를 파기한 뒤 안전하게 교환해 드립니다.</p>
+                <p style="font-size: 0.9rem; color: #64748B;">데이터 영구 삭제 솔루션으로 복구 불가능하게 데이터를 파기한 뒤 안전하게 교환해 드립니다.</p>
             </div>
             <div class="feature-card">
                 <i class="ri-hand-coin-line"></i>
@@ -240,7 +240,7 @@ exchange_body = """
                     <h4 style="color: #1E3A8A; margin-bottom: 10px; font-size: 1rem;"><i class="ri-information-line"></i> 이용 수수료 및 결제 안내</h4>
                     <p style="font-size: 0.9rem; color: #3B82F6; line-height: 1.5; margin:0;">
                         신청서 접수 후, 영업일 기준 1~2시간 내에 전문 상담원이 해피콜을 드려 상세한 <b>수수료 정책 및 배송 절차(가상계좌 입금 방식 등)</b>를 안내해 드립니다.<br>
-                        * 쉐라폰의 전문 검수 및 블랑코 데이터 삭제 비용이 포함됩니다.
+                        * 쉐라폰의 전문 검수 및 데이터 영구 삭제 비용이 포함됩니다.
                     </p>
                 </div>
 

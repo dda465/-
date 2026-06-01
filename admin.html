@@ -38,7 +38,7 @@
     <title>관리자 페이지 - Sharaphone</title>
 
 
-    <link rel="stylesheet" href="styles.css?v=1780133227108">
+    <link rel="stylesheet" href="styles.css?v=1780278127604">
 
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -801,6 +801,10 @@ wcs_do();
                     <span class="material-symbols-outlined">assignment_return</span>
                     반송 접수 내역
                 </div>
+                <div class="menu-item" onclick="switchTab('monthly-stats')">
+                    <span class="material-symbols-outlined">table_chart</span>
+                    월별통계 분석표
+                </div>
 
                 <div style="margin: 15px 0; border-top: 1px solid #eee;"></div>
                 <div style="font-size: 0.8rem; color: #888; font-weight: bold; margin: 0 0 5px 15px;">운영 관리</div>
@@ -1038,6 +1042,7 @@ wcs_do();
                 <div id="tab-completed" class="view-section" style="display: none;">
                     <h2 class="mb-2">매입 완료 내역 (입금완료 건)</h2>
                     <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">'입금완료' 상태로 변경된 매입 건들만 모아보는 목록입니다.</p>
+                    <div id="completed-filter-container" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;"></div>
                     <div style="overflow-x: auto;">
                         <table class="data-table">
                             <thead>
@@ -1061,6 +1066,7 @@ wcs_do();
                 <div id="tab-canceled" class="view-section" style="display: none;">
                     <h2 class="mb-2">매입 취소 내역 (취소 건)</h2>
                     <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">'취소' 상태로 변경된 매입 건들만 모아보는 목록입니다.</p>
+                    <div id="canceled-filter-container" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;"></div>
                     <div style="overflow-x: auto;">
                         <table class="data-table">
                             <thead>
@@ -1084,6 +1090,7 @@ wcs_do();
                 <div id="tab-returned" class="view-section" style="display: none;">
                     <h2 class="mb-2">반송 접수 내역</h2>
                     <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">'반송접수' 상태로 변경된 매입 건들만 모아보는 목록입니다.</p>
+                    <div id="returned-filter-container" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;"></div>
                     <div style="overflow-x: auto;">
                         <table class="data-table">
                             <thead>
@@ -1098,6 +1105,32 @@ wcs_do();
                                 </tr>
                             </thead>
                             <tbody id="returned-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Monthly Stats Tab -->
+                <div id="tab-monthly-stats" class="view-section" style="display: none;">
+                    <h2 class="mb-2">월별통계 분석표</h2>
+                    <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">월별 매입 신청 접수, 완료, 취소, 반송 및 총계 현황입니다.</p>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>년월 (Month)</th>
+                                    <th>총 접수건수 (Total)</th>
+                                    <th>매입완료 건수 (Completed)</th>
+                                    <th>매입취소 건수 (Cancelled)</th>
+                                    <th>반송접수 건수 (Returned)</th>
+                                    <th>기타/진행중 건수 (In Progress)</th>
+                                    <th>매입완료 총액 (Total Payout)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-stats-table-body">
+                                <tr>
+                                    <td colspan="7" class="text-center">데이터를 불러오는 중입니다...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1890,7 +1923,7 @@ wcs_do();
 
 
 
-    <script type="module" src="admin.js?v=1780205980"></script>
+    <script type="module" src="admin.js?v=1780278127604"></script>
 
 
 

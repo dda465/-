@@ -18,7 +18,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.c
 
 
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWCf4pn7jyNSLzBAgNnDFEilE-1nKx_lIiCr1ausGHp_lkZ5Vkh7S9uruSfatRH0aB/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyJ7SJmjqF0mNABE3TE7Xo-A7EPXgfhHc2mxebVzfSwDGqTJ3dhasTXB7pjNTCOmTr/exec";
 
 
 
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const nameInput = document.getElementById('auth-name');
                     const phoneInput = document.getElementById('auth-phone');
                     
-                    if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = true; }
+                    if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = false; }
                     if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
                     
                     window.isPhoneVerified = true;
@@ -2638,6 +2638,8 @@ async function initDeepWizard() {
                 if (window.isPhoneVerified) {
                     if (viewNonMember) viewNonMember.style.display = 'none';
                     if (viewMember) viewMember.style.display = 'block';
+                    if (nameInput) nameInput.readOnly = false;
+                    if (phoneInput) phoneInput.readOnly = true;
                 } else if (isMember) {
                     if (viewNonMember) viewNonMember.style.display = 'none';
                     if (viewMember) viewMember.style.display = 'block';
@@ -2648,7 +2650,7 @@ async function initDeepWizard() {
                     }
                     if (phoneInput) { 
                         phoneInput.value = memberPhone; 
-                        phoneInput.readOnly = false; 
+                        phoneInput.readOnly = !memberPhone; 
                     }
                     window.isPhoneVerified = true;
                 } else {
@@ -4041,7 +4043,7 @@ async function initDeepWizard() {
                                 const nameInput = document.getElementById('auth-name');
                                 const phoneInput = document.getElementById('auth-phone');
                                 
-                                if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = true; }
+                                if (nameInput) { nameInput.value = result.data.name; nameInput.readOnly = false; }
                                 if (phoneInput) { phoneInput.value = result.data.phone; phoneInput.readOnly = true; }
                                 
                                 window.isPhoneVerified = true;
@@ -4823,10 +4825,48 @@ async function initDeepWizard() {
                             }
                         }
                         
+                        const mapValueToKoLocal = (val) => {
+                            const dict = {
+                                'true': '미개봉', 'false': '개봉', 'yes': '있음/불량', 'no': '없음/정상',
+                                'scratch': '흠집', 'dent': '찍힘', 'break': '파손',
+                                'lcd_broken': '액정파손/LCD불량', 'lcd_backlight': '백라이트 불량',
+                                'burn_in_mild': '미세 잔상', 'burn_in_severe': '심한 잔상',
+                                'camera': '카메라 불량', 'wifi': '와이파이 불량', 'power': '전원 버튼 불량',
+                                'volume': '볼륨 버튼 불량', 'speaker': '스피커 불량', 'mic': '마이크 불량',
+                                'charge': '충전 불량', 'biometrics': '생체인식 불량', 'gps': 'GPS 불량',
+                                'network': '네트워크(유심) 불량', 'account': '계정 잠김(매입불가)'
+                            };
+                            return dict[val] || val;
+                        };
+                        const formatDefectsLocal = (defects) => {
+                            if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
+                            let parts = [];
+                            if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '미개봉' : '개봉'}`);
+                            if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
+                            if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
+                            for (const key in defects) {
+                                if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
+                                if (Array.isArray(defects[key]) && defects[key].length > 0) {
+                                    const mappedValues = defects[key].map(mapValueToKoLocal).join(', ');
+                                    let groupName = key;
+                                    if (key === 'func_defect') groupName = '기능';
+                                    else if (key === 'body_defect' || key === 'body') groupName = '외관';
+                                    parts.push(`${groupName}: ${mappedValues}`);
+                                }
+                            }
+                            return parts.join(', ');
+                        };
+                        
+                        const sheetPayload = {
+                            ...fullData,
+                            id: window.currentQuoteDocId || '',
+                            defects: formatDefectsLocal(fullData.defectsDetails)
+                        };
+
                         fetch(GOOGLE_SCRIPT_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify(fullData)
+                            body: JSON.stringify(sheetPayload)
                         }).catch(e => console.error("Google Sheet Fetch Error:", e));
 
                         // --- 배송 방법 확정 텔레그램 알림 (상세 내용 포함) ---
@@ -5086,7 +5126,7 @@ ${defectInfo}
 
 
 
-            await addDoc(collection(db, "quotes"), payload);
+            const docRef = await addDoc(collection(db, "quotes"), payload);
             window.trackFunnel("quote_complete");
 
             // --- Alimtalk Trigger (방문택배 or 직접발송) ---
@@ -5159,24 +5199,48 @@ ${defectInfo}
                 }
             }
 
+            const mapValueToKoLocal = (val) => {
+                const dict = {
+                    'true': '미개봉', 'false': '개봉', 'yes': '있음/불량', 'no': '없음/정상',
+                    'scratch': '흠집', 'dent': '찍힘', 'break': '파손',
+                    'lcd_broken': '액정파손/LCD불량', 'lcd_backlight': '백라이트 불량',
+                    'burn_in_mild': '미세 잔상', 'burn_in_severe': '심한 잔상',
+                    'camera': '카메라 불량', 'wifi': '와이파이 불량', 'power': '전원 버튼 불량',
+                    'volume': '볼륨 버튼 불량', 'speaker': '스피커 불량', 'mic': '마이크 불량',
+                    'charge': '충전 불량', 'biometrics': '생체인식 불량', 'gps': 'GPS 불량',
+                    'network': '네트워크(유심) 불량', 'account': '계정 잠김(매입불가)'
+                };
+                return dict[val] || val;
+            };
+            const formatDefectsLocal = (defects) => {
+                if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
+                let parts = [];
+                if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '미개봉' : '개봉'}`);
+                if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
+                if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
+                for (const key in defects) {
+                    if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
+                    if (Array.isArray(defects[key]) && defects[key].length > 0) {
+                        const mappedValues = defects[key].map(mapValueToKoLocal).join(', ');
+                        let groupName = key;
+                        if (key === 'func_defect') groupName = '기능';
+                        else if (key === 'body_defect' || key === 'body') groupName = '외관';
+                        parts.push(`${groupName}: ${mappedValues}`);
+                    }
+                }
+                return parts.join(', ');
+            };
 
+            const sheetPayload = {
+                ...payload,
+                id: docRef.id,
+                defects: formatDefectsLocal(payload.defectsDetails)
+            };
 
             fetch(GOOGLE_SCRIPT_URL, {
-
-
-
                 method: 'POST',
-
-
-
                 headers: { 'Content-Type': 'text/plain' },
-
-
-
-                body: JSON.stringify(payload)
-
-
-
+                body: JSON.stringify(sheetPayload)
             }).catch(e => console.log("GAS Error ignored:", e));
 
 

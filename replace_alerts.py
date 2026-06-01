@@ -5,7 +5,7 @@ with open('index.html', 'r', encoding='utf-8') as f:
 
 # Replace the onclick alerts
 html = html.replace(
-    '''onclick="alert('블랑코 솔루션은 국방부/공공기관에서 사용하는 국제 인증 데이터 영구 삭제 시스템입니다.\\n\\n고객님의 스마트폰 수거 즉시 100% 복구 불가능하게 데이터를 파기해 드립니다.')"''',
+    '''onclick="alert('데이터 영구 삭제 시스템은 국방부/공공기관 등에서 신뢰하는 복구 불가능한 영구 삭제 방식입니다.\\n\\n고객님의 스마트폰 수거 즉시 100% 복구 불가능하게 데이터를 파기해 드립니다.')"''',
     '''onclick="showInfoModal('data')"'''
 )
 
@@ -38,7 +38,7 @@ modal_html = """
             icon.style.color = '#22c55e';
             icon.innerHTML = '<i class="ri-shield-check-fill"></i>';
             title.innerHTML = '데이터 100% 파기 보장';
-            content.innerHTML = '<span style="font-weight:700; color:#1e293b;">국제 인증 블랑코(Blancco) 기술 적용</span><br><br>국방부 및 공공기관에서 채택한 최고 수준의 보안 데이터 삭제 시스템으로, 고객님의 기기가 센터에 도착하는 즉시 <strong>100% 복구 불가능하게 영구 파기</strong>하여 개인정보 유출을 원천 차단합니다.';
+            content.innerHTML = '<span style="font-weight:700; color:#1e293b;">데이터 영구 삭제 기술 적용</span><br><br>국방부 및 공공기관에서 채택한 최고 수준의 보안 데이터 삭제 시스템으로, 고객님의 기기가 센터에 도착하는 즉시 <strong>100% 복구 불가능하게 영구 파기</strong>하여 개인정보 유출을 원천 차단합니다.';
         } else if(type === 'process') {
             icon.style.background = '#fff7ed';
             icon.style.color = '#f97316';

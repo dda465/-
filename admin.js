@@ -1,5 +1,5 @@
 import { db, auth } from './firebase-config.js';
-
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyJ7SJmjqF0mNABE3TE7Xo-A7EPXgfhHc2mxebVzfSwDGqTJ3dhasTXB7pjNTCOmTr/exec";
 import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -184,130 +184,63 @@ if (logoutBtn) {
 // 2. Load Quotes
 
 async function loadQuotes() {
-
     try {
-
         const q = query(collection(db, "quotes"), orderBy("timestamp", "desc"));
-
         const querySnapshot = await getDocs(q);
-
-
 
         quotesTableBody.innerHTML = '';
 
-
-
-        const completedTableBody = document.getElementById('completed-table-body');
-        if (completedTableBody) completedTableBody.innerHTML = '';
-        
-        const canceledTableBody = document.getElementById('canceled-table-body');
-        if (canceledTableBody) canceledTableBody.innerHTML = '';
-        
-        const returnedTableBody = document.getElementById('returned-table-body');
-        if (returnedTableBody) returnedTableBody.innerHTML = '';
-
         let pendingCount = 0;
-
         let pendingAmount = 0;
-
         let monthlyCount = 0;
-
         let monthlyAmount = 0;
 
-        const now = new Date();
-
-        const currentMonth = now.getMonth();
-
-        const currentYear = now.getFullYear();
-
-
-
         if (querySnapshot.empty) {
-
             quotesTableBody.innerHTML = '<tr><td colspan="7" class="text-center">접수된 신청이 없습니다.</td></tr>';
+            const completedTableBody = document.getElementById('completed-table-body');
             if (completedTableBody) completedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">매입 완료된 신청이 없습니다.</td></tr>';
+            const canceledTableBody = document.getElementById('canceled-table-body');
             if (canceledTableBody) canceledTableBody.innerHTML = '<tr><td colspan="7" class="text-center">취소된 신청이 없습니다.</td></tr>';
+            const returnedTableBody = document.getElementById('returned-table-body');
             if (returnedTableBody) returnedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">반송 접수된 신청이 없습니다.</td></tr>';
 
             updateStats(0, 0, 0, 0);
-
             return;
-
         }
-
-
 
         const cvsRows = [];
         const courierRows = [];
+        const pendingRows = [];
+
+        const completedItems = [];
+        const canceledItems = [];
+        const returnedItems = [];
 
         querySnapshot.forEach((docSnapshot) => {
-
             const data = docSnapshot.data();
-
             const id = docSnapshot.id;
-
             const status = data.status || '신청접수';
-
-
-
-            // 휴지통 필터링
 
             if (data.isDeleted) return;
 
-
+            const isForeigner = data.isForeigner === true || data.method === 'foreigner' || data.series === 'Foreigner';
+            if (isForeigner) return;
 
             // Stats Calculation
-
-            if (status === '입금대기') {
-
-                pendingCount++;
-
-                pendingAmount += (data.price || 0);
-
-            }
-
             if (status === '입금완료') {
-
-                let dateObj = new Date();
-                if (data.firebaseTimestamp) {
-                    dateObj = new Date(data.firebaseTimestamp.toMillis());
-                } else if (data.timestamp && typeof data.timestamp.toDate === 'function') {
-                    dateObj = data.timestamp.toDate();
-                } else if (typeof data.timestamp === 'string') {
-                    let d = new Date(data.timestamp);
-                    if (!isNaN(d.getTime())) dateObj = d;
-                    else {
-                        const parts = data.timestamp.split('.');
-                        if (parts.length >= 3) {
-                            dateObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-                        }
-                    }
-                }
-
-                if (!isNaN(dateObj.getTime()) && dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear) {
-
-                    monthlyCount++;
-
-                    monthlyAmount += (data.price || 0);
-
-                }
-
+                monthlyCount++;
+                monthlyAmount += (data.price || 0);
+            } else if (status !== '취소' && status !== '반송접수') {
+                pendingCount++;
+                pendingAmount += (data.price || 0);
             }
-
-
 
             const formattedDate = formatDate(data.timestamp);
-
             const formattedPrice = new Intl.NumberFormat('ko-KR').format(data.price || 0);
 
-
-
             // Status Badge Logic
-
             let statusClass = 'status-new';
-
             if (status === '수거중') statusClass = 'status-pickup';
-
             if (status.includes('검수중')) statusClass = 'status-inspection';
             if (status === '입금완료') statusClass = 'status-paid';
             if (status === '입금대기') statusClass = 'status-pickup';
@@ -325,7 +258,7 @@ async function loadQuotes() {
                 deliveryTag = `<br><span style="font-size: 0.75rem; background: #FFF3E0; color: #E65100; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">개인발송</span>${trackingInfo}`;
             } else if (data.deliveryMethod === 'courier') {
                 deliveryTag = `<br><span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">방문수거 (${data.pickupDate || '미정'})</span>`;
-            } else if (data.deliveryMethod === 'pending') {
+            } else if (!data.deliveryMethod || data.deliveryMethod === 'pending') {
                 deliveryTag = `<br>
                 <span style="font-size: 0.75rem; background: #ffe4e6; color: #e11d48; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: bold;">배송방법 미입력 (이탈)</span>
                 <button onclick="sendDropoffAlert('${id}')" style="font-size: 0.75rem; background: #FEE500; color: #391B1B; padding: 2px 8px; border-radius: 4px; margin-top: 4px; margin-left: 5px; border: none; font-weight: bold; cursor: pointer; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">알림톡 보내기</button>`;
@@ -344,11 +277,19 @@ async function loadQuotes() {
             if (status === '신청접수') displayStatus = '매입접수완료';
             if (status === '수거중') displayStatus = '택배발송완료';
 
+            const sourceMap = {
+                'daangn': '<span style="font-size:0.75rem; background:#fff3e0; color:#e65100; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">당근마켓 🥕</span>',
+                'naver': '<span style="font-size:0.75rem; background:#e6f4ea; color:#137333; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">네이버 🟢</span>',
+                'google': '<span style="font-size:0.75rem; background:#e8f0fe; color:#1967d2; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">구글 🔵</span>',
+                'direct': '<span style="font-size:0.75rem; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">직접유입 📱</span>'
+            };
+            const sourceTag = sourceMap[data.trafficSource] || `<span style="font-size:0.75rem; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">${data.trafficSource || '기타/직접'}</span>`;
+
             const trHtml = `
                 <td>${formattedDate}${deliveryTag}</td>
-                <td>${data.customerName}<br><span style="font-size:0.8rem; color:#888;">${data.customerPhone}</span></td>
+                <td>${data.customerName}<br><span style="font-size:0.8rem; color:#888;">${data.customerPhone}</span><br>${sourceTag}</td>
                 <td>${data.brand} ${data.model}</td>
-                <td>${data.condition || '-'}</td>
+                <td>${data.condition || data.grade || '-'}</td>
                 <td>${formatCurrency(data.price)}</td>
                 <td><span class="status-badge ${statusClass}">${displayStatus}</span></td>
                 <td>
@@ -371,73 +312,66 @@ async function loadQuotes() {
 
             const tr = document.createElement('tr');
             tr.innerHTML = trHtml;
-            
+
             if (status === '입금완료') {
-                if (completedTableBody) {
-                    const trCompleted = document.createElement('tr');
-                    trCompleted.innerHTML = trHtml;
-                    completedTableBody.appendChild(trCompleted);
-                }
+                completedItems.push({ id, ...data });
             } else if (status === '취소') {
-                if (canceledTableBody) {
-                    const trCanceled = document.createElement('tr');
-                    trCanceled.innerHTML = trHtml;
-                    canceledTableBody.appendChild(trCanceled);
-                }
+                canceledItems.push({ id, ...data });
             } else if (status === '반송접수') {
-                if (returnedTableBody) {
-                    const trReturned = document.createElement('tr');
-                    trReturned.innerHTML = trHtml;
-                    returnedTableBody.appendChild(trReturned);
-                }
+                returnedItems.push({ id, ...data });
             } else {
                 if (data.deliveryMethod === 'cvs') {
                     cvsRows.push(tr);
-                } else {
+                } else if (data.deliveryMethod === 'courier') {
                     courierRows.push(tr);
+                } else {
+                    pendingRows.push(tr);
                 }
             }
         });
 
         // Append sorted rows
-        cvsRows.forEach(tr => quotesTableBody.appendChild(tr));
-        
-        if (cvsRows.length > 0 && courierRows.length > 0) {
-            const divider = document.createElement('tr');
-            divider.innerHTML = `<td colspan="7" style="background: #f8fafc; text-align: center; font-weight: bold; padding: 15px; color: #475569; border-top: 2px solid #e2e8f0; border-bottom: 2px solid #e2e8f0;">🚚 방문수거 신청 건</td>`;
-            quotesTableBody.appendChild(divider);
+        if (cvsRows.length > 0) {
+            const dividerCvs = document.createElement('tr');
+            dividerCvs.innerHTML = `<td colspan="7" style="background: #FFF3E0; text-align: center; font-weight: bold; padding: 12px; color: #E65100; border-bottom: 2px solid #FFE0B2;">🏪 개인발송 건 (${cvsRows.length}건)</td>`;
+            quotesTableBody.appendChild(dividerCvs);
+            cvsRows.forEach(tr => quotesTableBody.appendChild(tr));
         }
 
-        courierRows.forEach(tr => quotesTableBody.appendChild(tr));
-
-        if (completedTableBody && completedTableBody.children.length === 0) {
-            completedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">매입 완료된 신청이 없습니다.</td></tr>';
-        }
-        
-        if (canceledTableBody && canceledTableBody.children.length === 0) {
-            canceledTableBody.innerHTML = '<tr><td colspan="7" class="text-center">취소된 신청이 없습니다.</td></tr>';
+        if (courierRows.length > 0) {
+            const dividerCourier = document.createElement('tr');
+            dividerCourier.innerHTML = `<td colspan="7" style="background: #E8F5E9; text-align: center; font-weight: bold; padding: 12px; color: #2E7D32; border-bottom: 2px solid #C8E6C9; ${cvsRows.length > 0 ? 'border-top: 2px solid #e2e8f0;' : ''}">🚚 방문수거 신청 건 (${courierRows.length}건)</td>`;
+            quotesTableBody.appendChild(dividerCourier);
+            courierRows.forEach(tr => quotesTableBody.appendChild(tr));
         }
 
-        if (returnedTableBody && returnedTableBody.children.length === 0) {
-            returnedTableBody.innerHTML = '<tr><td colspan="7" class="text-center">반송 접수된 신청이 없습니다.</td></tr>';
+        if (pendingRows.length > 0) {
+            const dividerPending = document.createElement('tr');
+            dividerPending.innerHTML = `<td colspan="7" style="background: #FFEBEE; text-align: center; font-weight: bold; padding: 12px; color: #C62828; border-bottom: 2px solid #FFCDD2; ${(cvsRows.length > 0 || courierRows.length > 0) ? 'border-top: 2px solid #e2e8f0;' : ''}">⚠️ 배송방법 미입력 건 (${pendingRows.length}건)</td>`;
+            quotesTableBody.appendChild(dividerPending);
+            pendingRows.forEach(tr => quotesTableBody.appendChild(tr));
         }
 
+        if (cvsRows.length === 0 && courierRows.length === 0 && pendingRows.length === 0) {
+            quotesTableBody.innerHTML = '<tr><td colspan="7" class="text-center">접수된 신청이 없습니다.</td></tr>';
+        }
 
+        // Save to window globals for client side filtering
+        window.completedQuotesData = completedItems;
+        window.canceledQuotesData = canceledItems;
+        window.returnedQuotesData = returnedItems;
+
+        applyTabFilter('completed', completedItems);
+        applyTabFilter('canceled', canceledItems);
+        applyTabFilter('returned', returnedItems);
 
         // Update Stats UI
-
         updateStats(pendingCount, pendingAmount, monthlyCount, monthlyAmount);
 
-
-
     } catch (e) {
-
         console.error("Error loading quotes:", e);
-
         quotesTableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">데이터 로딩 실패: ${e.message}</td></tr>`;
-
     }
-
 }
 
 
@@ -505,6 +439,7 @@ window.deleteQuote = async (id) => {
             setTimeout(() => toast.remove(), 3000);
             
             loadQuotes();
+            if (typeof loadForeignerQuotes === 'function') loadForeignerQuotes();
             if (typeof loadTrash === 'function') loadTrash();
         } catch (e) {
             console.error("Delete Error:", e);
@@ -809,17 +744,12 @@ window.switchTab = (tabName, event) => {
 
 
     if (tabName === 'prices') loadPrices();
-
     if (tabName === 'quotes') loadQuotes();
-
+    if (tabName === 'foreigner') loadForeignerQuotes();
+    if (tabName === 'monthly-stats') loadMonthlyStats();
     if (tabName === 'users') loadUsers();
-
     if (tabName === 'chat') fetchChatSessions();
-
     if (tabName === 'trash') loadTrash();
-
-    if (tabName === 'analytics') window.loadFunnelData();
-
     if (tabName === 'analytics') window.loadFunnelData();
     if (tabName === 'popup' && typeof window.loadPopupSettings === 'function') window.loadPopupSettings();
     if (tabName === 'settings' && typeof window.loadGeneralSettings === 'function') window.loadGeneralSettings();
@@ -1735,7 +1665,12 @@ window.viewDetail = async (id) => {
 
 
 
-            const methodText = (data.deliveryMethod === 'visit') ? '매장 방문' : (data.deliveryMethod === 'cvs' ? '편의점 택배 (착불)' : '방문 수거 (택배)');
+            let methodText = '방문 수거 (택배)';
+            if (data.deliveryMethod === 'visit') {
+                methodText = '매장 방문';
+            } else if (data.deliveryMethod === 'cvs' || data.method === 'foreigner' || data.deliveryMethod === 'Foreigner Pickup') {
+                methodText = '편의점 택배 (착불)';
+            }
 
             document.getElementById('detail-method').textContent = methodText;
 
@@ -2115,12 +2050,27 @@ window.updateQuoteStatus = async (id, newStatus) => {
             triggerAlimtalk(quoteData, newStatus);
         }
 
+        // 구글 시트 동기화 호출
+        try {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: 'updateStatus',
+                    orderId: id,
+                    status: newStatus
+                })
+            }).catch(e => console.error("GAS status update error:", e));
+        } catch(e) {}
+
         loadQuotes();
-        alert("상태가 변경되었습니다. (알림톡 발송 요청됨)");
+        if (typeof loadForeignerQuotes === 'function') loadForeignerQuotes();
+        alert("상태가 변경되었습니다. (알림톡 발송 및 구글 시트 동기화 요청됨)");
     } catch (e) {
         console.error("Status Update Error:", e);
         alert("상태 변경 실패: " + e.message);
         loadQuotes();
+        if (typeof loadForeignerQuotes === 'function') loadForeignerQuotes();
     }
 };
 
@@ -2769,3 +2719,359 @@ window.saveGeneralSettings = async () => {
         alert("기본 설정을 저장하는 중 오류가 발생했습니다.");
     }
 };
+
+// =========================================================================
+// 3. Monthly Classification, Statistics & Foreigner Application Management
+// =========================================================================
+
+function getQuoteYearMonth(data) {
+    let dateObj = null;
+    if (data.firebaseTimestamp) {
+        dateObj = new Date(data.firebaseTimestamp.toMillis());
+    } else if (data.timestamp) {
+        if (typeof data.timestamp.toDate === 'function') {
+            dateObj = data.timestamp.toDate();
+        } else {
+            let d = new Date(data.timestamp);
+            if (!isNaN(d.getTime())) {
+                dateObj = d;
+            } else {
+                const parts = String(data.timestamp).split('.');
+                if (parts.length >= 3) {
+                    dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                }
+            }
+        }
+    }
+    
+    if (!dateObj || isNaN(dateObj.getTime())) {
+        return null;
+    }
+    
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+}
+
+let currentFilters = {
+    completed: 'all',
+    canceled: 'all',
+    returned: 'all'
+};
+
+function updateMonthlyFilters(type, allData) {
+    const container = document.getElementById(`${type}-filter-container`);
+    if (!container) return;
+    
+    const monthsSet = new Set();
+    allData.forEach(item => {
+        const ym = getQuoteYearMonth(item);
+        if (ym) monthsSet.add(ym);
+    });
+    
+    const sortedMonths = Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
+    container.innerHTML = '';
+    
+    // 1. "전체보기" Button
+    const btnAll = document.createElement('button');
+    btnAll.className = 'action-btn';
+    btnAll.style.cssText = currentFilters[type] === 'all' 
+        ? 'background: #2563EB; color: white; border-color: #2563EB; font-weight: bold; margin-right: 5px;' 
+        : 'background: white; color: #475569; border-color: #cbd5e1; margin-right: 5px;';
+    btnAll.textContent = '전체보기';
+    btnAll.onclick = () => {
+        currentFilters[type] = 'all';
+        applyTabFilter(type, allData);
+    };
+    container.appendChild(btnAll);
+    
+    // 2. Monthly Buttons
+    sortedMonths.forEach(ym => {
+        const [y, m] = ym.split('-');
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.style.cssText = currentFilters[type] === ym 
+            ? 'background: #2563EB; color: white; border-color: #2563EB; font-weight: bold; margin-right: 5px;' 
+            : 'background: white; color: #475569; border-color: #cbd5e1; margin-right: 5px;';
+        btn.textContent = `${parseInt(m)}월 (${allData.filter(item => getQuoteYearMonth(item) === ym).length}건)`;
+        btn.onclick = () => {
+            currentFilters[type] = ym;
+            applyTabFilter(type, allData);
+        };
+        container.appendChild(btn);
+    });
+}
+
+function applyTabFilter(type, allData) {
+    const tableBody = document.getElementById(`${type}-table-body`);
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    updateMonthlyFilters(type, allData);
+    
+    const filterVal = currentFilters[type];
+    const filteredData = filterVal === 'all' 
+        ? allData 
+        : allData.filter(item => getQuoteYearMonth(item) === filterVal);
+        
+    if (filteredData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">해당 월의 내역이 없습니다.</td></tr>`;
+        return;
+    }
+    
+    filteredData.forEach(data => {
+        const id = data.id;
+        const status = data.status || '신청접수';
+        const formattedDate = formatDate(data.timestamp);
+        
+        let statusClass = 'status-new';
+        if (status === '수거중') statusClass = 'status-pickup';
+        if (status.includes('검수중')) statusClass = 'status-inspection';
+        if (status === '입금완료') statusClass = 'status-paid';
+        if (status === '입금대기') statusClass = 'status-pickup';
+        
+        let deliveryTag = '';
+        if (data.deliveryMethod === 'cvs') {
+            let trackingInfo = '';
+            if (data.trackingNumber) {
+                if (data.trackingNumber === '미입력') {
+                    trackingInfo = `<br><span style="font-size: 0.75rem; color: #64748b; font-weight:600; display:block; margin-top:2px;">송장없이 발송완료</span>`;
+                } else {
+                    trackingInfo = `<br><span style="font-size: 0.75rem; color: #1976D2; font-weight:600; display:block; margin-top:2px;">[운송장] ${data.trackingCarrier || ''} ${data.trackingNumber}</span>`;
+                }
+            }
+            deliveryTag = `<br><span style="font-size: 0.75rem; background: #FFF3E0; color: #E65100; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">개인발송</span>${trackingInfo}`;
+        } else if (data.deliveryMethod === 'courier') {
+            deliveryTag = `<br><span style="font-size: 0.75rem; background: #E8F5E9; color: #2E7D32; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;">방문수거 (${data.pickupDate || '미정'})</span>`;
+        } else if (!data.deliveryMethod || data.deliveryMethod === 'pending') {
+            deliveryTag = `<br><span style="font-size: 0.75rem; background: #ffe4e6; color: #e11d48; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; font-weight: bold;">배송방법 미입력 (이탈)</span>`;
+        }
+        
+        let feePaidBtn = '';
+        if (data.deliveryMethod === 'cvs') {
+            if (data.shippingFeePaid) {
+                feePaidBtn = `<br><button class="action-btn" style="background:#E8F5E9; color:#2E7D32; border-color:#81C784; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', false)">배송비 입금됨 ✓</button>`;
+            } else {
+                feePaidBtn = `<br><button class="action-btn" style="background:#FFF; color:#E65100; border-color:#FFB74D; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', true)">배송비 입금확인</button>`;
+            }
+        }
+        
+        let displayStatus = status;
+        if (status === '신청접수') displayStatus = '매입접수완료';
+        if (status === '수거중') displayStatus = '택배발송완료';
+        
+        const sourceMap = {
+            'daangn': '<span style="font-size:0.75rem; background:#fff3e0; color:#e65100; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">당근마켓 🥕</span>',
+            'naver': '<span style="font-size:0.75rem; background:#e6f4ea; color:#137333; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">네이버 🟢</span>',
+            'google': '<span style="font-size:0.75rem; background:#e8f0fe; color:#1967d2; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">구글 🔵</span>',
+            'direct': '<span style="font-size:0.75rem; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">직접유입 📱</span>'
+        };
+        const sourceTag = sourceMap[data.trafficSource] || `<span style="font-size:0.75rem; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-weight:bold; margin-top:3px; display:inline-block;">${data.trafficSource || '기타/직접'}</span>`;
+        
+        const trHtml = `
+            <td>${formattedDate}${deliveryTag}</td>
+            <td>${data.customerName}<br><span style="font-size:0.8rem; color:#888;">${data.customerPhone}</span><br>${sourceTag}</td>
+            <td>${data.brand} ${data.model}</td>
+            <td>${data.condition || data.grade || '-'}</td>
+            <td>${formatCurrency(data.price)}</td>
+            <td><span class="status-badge ${statusClass}">${displayStatus}</span></td>
+            <td>
+                <button class="action-btn" onclick="viewDetail('${id}')">상세보기</button>
+                <button class="action-btn" style="background:#E3F2FD; color:#1976D2; border-color:#90CAF9;" onclick="openInspectionModal('${id}')">검수서 작성</button>
+                <select onchange="updateQuoteStatus('${id}', this.value)" class="action-btn" style="width: auto;">
+                    <option value="" disabled selected>상태변경</option>
+                    <option value="신청접수">매입접수완료</option>
+                    <option value="수거중">택배발송완료</option>
+                    <option value="검수중">검수중</option>
+                    <option value="입금대기" ${status === '입금대기' ? 'selected' : ''}>입금대기</option>
+                    <option value="입금완료" ${status === '입금완료' ? 'selected' : ''}>입금완료</option>
+                    <option value="반송접수" ${status === '반송접수' ? 'selected' : ''}>반송접수</option>
+                    <option value="취소" ${status === '취소' ? 'selected' : ''}>취소</option>
+                </select>
+                <button class="action-btn" style="color:red; margin-left:5px;" onclick="deleteQuote('${id}')">삭제</button>
+                ${feePaidBtn}
+            </td>
+        `;
+        const tr = document.createElement('tr');
+        tr.innerHTML = trHtml;
+        tableBody.appendChild(tr);
+    });
+}
+
+async function loadForeignerQuotes() {
+    const tableBody = document.getElementById('foreigner-table-body');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">로딩 중...</td></tr>';
+    
+    try {
+        const q = query(collection(db, "quotes"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
+        
+        tableBody.innerHTML = '';
+        
+        let pendingCount = 0;
+        let pendingAmount = 0;
+        let completedCount = 0;
+        let completedAmount = 0;
+        
+        querySnapshot.forEach((docSnapshot) => {
+            const data = docSnapshot.data();
+            const id = docSnapshot.id;
+            
+            if (data.isDeleted) return;
+            
+            const isForeigner = data.isForeigner === true || data.method === 'foreigner' || data.series === 'Foreigner';
+            if (!isForeigner) return;
+            
+            const status = data.status || '신청접수';
+            
+            if (status === '입금완료') {
+                completedCount++;
+                completedAmount += (data.price || 0);
+            } else if (status !== '취소' && status !== '반송접수') {
+                pendingCount++;
+                pendingAmount += (data.price || 0);
+            }
+            
+            const formattedDate = formatDate(data.timestamp);
+            
+            let statusClass = 'status-new';
+            if (status === '수거중') statusClass = 'status-pickup';
+            if (status.includes('검수중')) statusClass = 'status-inspection';
+            if (status === '입금완료') statusClass = 'status-paid';
+            if (status === '입금대기') statusClass = 'status-pickup';
+            
+            let displayStatus = status;
+            if (status === '신청접수') displayStatus = '매입접수완료';
+            if (status === '수거중') displayStatus = '택배발송완료';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${data.customerName}<br><span style="font-size:0.8rem; color:#2563eb; font-weight:bold;">${(data.language || 'en').toUpperCase()}</span></td>
+                <td>${data.customerPhone}<br><span style="font-size:0.8rem; color:#888;">${data.contactMethod || ''}</span></td>
+                <td>${data.brand} ${data.model}<br><span style="font-size:0.75rem; color:#666;">${data.storage || ''} / ${data.grade || ''}</span></td>
+                <td>${formatCurrency(data.price)}</td>
+                <td><span class="status-badge ${statusClass}">${displayStatus}</span></td>
+                <td>
+                    <button class="action-btn" onclick="viewDetail('${id}')">상세보기</button>
+                    <select onchange="updateQuoteStatus('${id}', this.value)" class="action-btn" style="width: auto;">
+                        <option value="" disabled selected>상태변경</option>
+                        <option value="신청접수">매입접수완료</option>
+                        <option value="수거중">택배발송완료</option>
+                        <option value="검수중">검수중</option>
+                        <option value="입금대기" ${status === '입금대기' ? 'selected' : ''}>입금대기</option>
+                        <option value="입금완료" ${status === '입금완료' ? 'selected' : ''}>입금완료</option>
+                        <option value="반송접수" ${status === '반송접수' ? 'selected' : ''}>반송접수</option>
+                        <option value="취소" ${status === '취소' ? 'selected' : ''}>취소</option>
+                    </select>
+                    <button class="action-btn" style="color:red; margin-left:5px;" onclick="deleteQuote('${id}')">삭제</button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        if (tableBody.children.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">접수된 외국인 신청이 없습니다.</td></tr>';
+        }
+        
+        const pendingCountEl = document.getElementById('stat-fg-pending-count');
+        const pendingAmountEl = document.getElementById('stat-fg-pending-amount');
+        const monthlyCountEl = document.getElementById('stat-fg-monthly-count');
+        const monthlyAmountEl = document.getElementById('stat-fg-monthly-amount');
+
+        if (pendingCountEl) pendingCountEl.innerText = `${pendingCount}건`;
+        if (pendingAmountEl) pendingAmountEl.innerText = `${new Intl.NumberFormat('ko-KR').format(pendingAmount)}원`;
+        if (monthlyCountEl) monthlyCountEl.innerText = `${completedCount}건`;
+        if (monthlyAmountEl) monthlyAmountEl.innerText = `${new Intl.NumberFormat('ko-KR').format(completedAmount)}원`;
+        
+    } catch (e) {
+        console.error("Error loading foreigner quotes:", e);
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">데이터 로딩 실패: ${e.message}</td></tr>`;
+    }
+}
+
+async function loadMonthlyStats() {
+    const tableBody = document.getElementById('monthly-stats-table-body');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">로딩 중...</td></tr>';
+    
+    try {
+        const q = query(collection(db, "quotes"));
+        const querySnapshot = await getDocs(q);
+        
+        const monthlyMap = {};
+        
+        querySnapshot.forEach((docSnapshot) => {
+            const data = docSnapshot.data();
+            if (data.isDeleted) return;
+            
+            const ym = getQuoteYearMonth(data);
+            if (!ym) return;
+            
+            if (!monthlyMap[ym]) {
+                monthlyMap[ym] = {
+                    total: 0,
+                    completed: 0,
+                    canceled: 0,
+                    returned: 0,
+                    pending: 0,
+                    completedAmount: 0
+                };
+            }
+            
+            monthlyMap[ym].total++;
+            const status = data.status || '신청접수';
+            if (status === '입금완료') {
+                monthlyMap[ym].completed++;
+                monthlyMap[ym].completedAmount += (data.price || 0);
+            } else if (status === '취소') {
+                monthlyMap[ym].canceled++;
+            } else if (status === '반송접수') {
+                monthlyMap[ym].returned++;
+            } else {
+                monthlyMap[ym].pending++;
+            }
+        });
+        
+        tableBody.innerHTML = '';
+        
+        const sortedMonths = Object.keys(monthlyMap).sort((a, b) => b.localeCompare(a));
+        
+        if (sortedMonths.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">통계 데이터가 없습니다.</td></tr>';
+            return;
+        }
+        
+        sortedMonths.forEach(ym => {
+            const stats = monthlyMap[ym];
+            const tr = document.createElement('tr');
+            
+            const [y, m] = ym.split('-');
+            const displayLabel = `${y}년 ${m}월`;
+            
+            tr.innerHTML = `
+                <td style="font-weight: bold;">${displayLabel}</td>
+                <td style="text-align: right; font-weight: bold; color: #1e293b;">${stats.total} 건</td>
+                <td style="text-align: right; color: #2e7d32; font-weight: bold;">${stats.completed} 건</td>
+                <td style="text-align: right; color: #c62828;">${stats.canceled} 건</td>
+                <td style="text-align: right; color: #e65100;">${stats.returned} 건</td>
+                <td style="text-align: right; color: #475569;">${stats.pending} 건</td>
+                <td style="text-align: right; font-weight: bold; color: #0d47a1;">${new Intl.NumberFormat('ko-KR').format(stats.completedAmount)}원</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+    } catch(e) {
+        console.error("Monthly stats calculation error:", e);
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">통계 계산 실패: ${e.message}</td></tr>`;
+    }
+}
+
+// Global Exports
+window.loadForeignerQuotes = loadForeignerQuotes;
+window.loadMonthlyStats = loadMonthlyStats;
+window.applyTabFilter = applyTabFilter;

@@ -18,7 +18,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.c
 
 
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWCf4pn7jyNSLzBAgNnDFEilE-1nKx_lIiCr1ausGHp_lkZ5Vkh7S9uruSfatRH0aB/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyJ7SJmjqF0mNABE3TE7Xo-A7EPXgfhHc2mxebVzfSwDGqTJ3dhasTXB7pjNTCOmTr/exec";
 
 
 
