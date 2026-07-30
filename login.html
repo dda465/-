@@ -8,12 +8,26 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 
 <!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -38,7 +52,7 @@
     <title>로그인 - 쉐라폰</title>
 
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
 
 
     <style>
@@ -600,18 +614,20 @@
     </script>
 
 
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 
 <!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
 
@@ -677,7 +693,7 @@ wcs_do();
 
             <div class="nav-links pc-only">
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
                 <a href="login.html" id="nav-login-link" style="color: #2563EB;">로그인</a>
             </div>
             <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
@@ -749,8 +765,9 @@ wcs_do();
 
 
                 <button type="submit" class="login-btn">이메일로 로그인</button>
-
-
+                <div style="text-align: right; margin-top: 10px;">
+                    <a href="find_account.html" style="font-size: 13px; color: #86868b; text-decoration: none;">아이디 / 비밀번호 찾기</a>
+                </div>
             </form>
 
 
@@ -850,7 +867,7 @@ wcs_do();
 
 
 
-    <script type="module" src="auth.js?v=1780278690883"></script>
+    <script type="module" src="auth.js?v=1784620125"></script>
 
 
 

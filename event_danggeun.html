@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <!-- Danggeun Market Code -->
     <script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
     <script>
@@ -23,11 +33,11 @@
     <title>당근 보고 오신 분들을 위한 특별 혜택 - 쉐라폰</title>
     
     <!-- Google Fonts & Icons -->
-    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <!-- Main Style Sheet Link -->
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
     
     <style>
         @font-face {
@@ -515,7 +525,7 @@
             
             <div class="nav-links pc-only">
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
                 <a href="login.html" id="nav-login-link">로그인</a>
             </div>
             
@@ -548,7 +558,7 @@
         <!-- 참여 방법 강조 안내 -->
         <div style="background-color: #fff3cd; border: 1px solid #ffe69c; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; text-align: center;">
             <p style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #856404; word-break: keep-all;">
-                <i class="ri-error-warning-fill"></i> 필수 참여 방법: 매입 신청 시 마지막 <span style="color: #ef4444; text-decoration: underline;">메모란에 반드시 "당근이벤트 신청"</span>이라고 기재해주세요!
+                <i class="ri-checkbox-circle-fill" style="color:#10b981;"></i> 안내: 당근마켓을 통해 접속하신 고객님들은 <span style="color: #ef4444; text-decoration: underline;">이벤트에 자동 신청</span>됩니다! 편하게 매입 신청해 주세요.
             </p>
         </div>
 
@@ -690,7 +700,7 @@
                 <div class="process-card">
                     <div class="process-step-num">2</div>
                     <h4>내 폰 매입 신청</h4>
-                    <p>매입 신청 시 <strong>마지막 신청 전 메모란에 꼭 "당근이벤트 신청"</strong>이라고 적어주셔야 이벤트 참여가 가능합니다. (배송비 무료)</p>
+                    <p>간편하게 폰 정보를 입력하고 매입을 신청합니다. 당근 유입 시 이벤트에 자동 응모됩니다. (배송비 무료)</p>
                 </div>
                 <div class="process-card">
                     <div class="process-step-num">3</div>
@@ -706,7 +716,7 @@
             <ul class="terms-list">
                 <li>본 이벤트 혜택은 2026년 5월 29일 신청 건부터 기준으로 적용되며, 이전 신청 건에 대해서는 소급 적용되지 않습니다.</li>
                 <li>본 이벤트는 당근마켓 광고 funnel(유입링크)을 통해 들어오신 고객 및 당근마켓 유입 코드를 보유하신 분께 적용됩니다.</li>
-                <li style="color: #ef4444; font-weight: bold;">매입 신청 시 마지막 신청 전 메모란에 반드시 "당근이벤트 신청"이라고 기재해 주셔야만 혜택 적용이 가능합니다.</li>
+                <li style="color: #ef4444; font-weight: bold;">당근마켓을 통해 당사 웹사이트에 접속하여 매입을 신청하신 고객님들은 별도의 메모 작성 없이 이벤트 혜택이 자동 적용됩니다.</li>
                 <li>기본 보너스 및 프리미엄 보너스는 정상 매입 처리 및 최종 정산금액 동의가 완료된 기기에 한하여 지급됩니다.</li>
                 <li>정상 매입 거래가 완료된 기기에 한하여 보너스가 지급되며, 매입 불가(도난, 분실, 계정 잠김, 전원 불가 등) 또는 부품용/폐폰 매입 대상 기기는 본 이벤트 대상에서 제외됩니다.</li>
                 <li>묶음 보너스는 동일 주소, 동일 입금 계좌 및 접수건으로 2대 이상의 스마트폰이 동시 거래 완료된 경우 정산 총액에 2만 원이 1회 일괄 합산 지급됩니다.</li>
@@ -823,6 +833,7 @@
         });
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="module" src="script.js?v=1785403500"></script>
 
 </body>
 </html>

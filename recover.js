@@ -561,7 +561,7 @@ const missingCode = `
                 <p>\${msgDesc}</p>
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0;">
                     <strong>부산시 동천로 116 한신밴빌딩 1003호</strong><br>
-                    <span style="font-size: 0.9rem; color: #666;">Tel: 010-3263-5672</span>
+                    <span style="font-size: 0.9rem; color: #666;">Tel: 010-5173-5382</span>
                 </div>
                 <p style="font-size: 0.9rem; color: #666;">* 마이페이지에서 진행 상황을 확인하실 수 있습니다.</p>
             \`;

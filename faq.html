@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<!-- Danggeun Market Code -->
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script>
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
+</script>
+<!-- End Danggeun Market Code -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18055027970');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자주 묻는 질문(FAQ) - 쉐라폰 중고폰 매입</title>
+    <meta name="description" content="중고폰 판매 전 꼭 알아야 할 질문과 답변. 방문수거·검수·입금·계정 초기화 등 쉐라폰 중고폰 매입 관련 궁금증을 한눈에 확인하세요.">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 반응형 네비 — 기본은 모바일 액션 숨김, 768px 이하에서 전환 (index.html과 동일 규칙) */
+        .mobile-only { display: none !important; }
+        @media (max-width: 768px) {
+            .mobile-only { display: flex !important; }
+            .pc-only { display: none !important; }
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            .lang-select { padding: 3px 12px 3px 4px; font-size: 0.75rem; width: 60px; min-width: 60px; margin-right: 4px !important; background-position: right 3px top 50%; background-size: 6px auto; letter-spacing: -0.5px; }
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            /* styles.css가 모바일에서 .navbar .container를 flex-direction:column으로 세로 정렬시키므로
+               index.html과 동일하게 가로 한 줄로 되돌린다 (이게 없으면 로고·언어·버튼이 줄줄이 쌓임) */
+            .navbar { height: auto; padding: 6px 0; }
+            .navbar .container { flex-direction: row !important; align-items: center !important; gap: 0 !important; padding: 0 6px !important; flex-wrap: nowrap !important; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+        .faq-wrap { max-width: 820px; margin: 110px auto 60px; padding: 0 20px; }
+        .faq-title { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+        .faq-sub { text-align: center; color: #6b7280; font-size: 0.95rem; margin-bottom: 36px; }
+        .faq-cat { display: flex; align-items: center; gap: 9px; font-size: 1.15rem; font-weight: 700; color: #2563EB; margin: 34px 0 14px; padding-left: 10px; border-left: 4px solid #2563EB; }
+        .faq-cat svg { width: 22px; height: 22px; flex: 0 0 auto; }
+        .faq-item { border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 10px; overflow: hidden; background: #fff; }
+        .faq-q { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; cursor: pointer; font-weight: 600; font-size: 0.98rem; color: #1f2937; list-style: none; }
+        .faq-q::-webkit-details-marker { display: none; }
+        .faq-q .ic { flex: 0 0 auto; width: 20px; height: 20px; transition: transform .2s; color: #9ca3af; }
+        details[open] .faq-q .ic { transform: rotate(45deg); }
+        .faq-a { padding: 0 18px 18px; color: #4b5563; font-size: 0.92rem; line-height: 1.7; }
+        .faq-a strong { color: #1f2937; }
+        .faq-cta { margin-top: 40px; text-align: center; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 16px; padding: 28px 20px; }
+        .faq-cta h3 { margin: 0 0 8px; font-size: 1.1rem; }
+        .faq-cta p { margin: 0 0 16px; color: #6b7280; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <a href="index.html" class="logo">
+                <img src="sr_logo.png" alt="SR 로고" class="logo-icon"
+                    style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+                <span class="logo-text-wrapper"
+                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 24px; color: #2563EB; margin-left: 8px;">
+                    쉐라폰
+                </span>
+            </a>
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <div id="google_translate_element" style="display:none;"></div>
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
+
+            <!-- Mobile App Actions -->
+            <div class="mobile-only" style="align-items:center;">
+                <a href="quote.html" style="font-size:0.8rem; font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:3px 8px; border-radius:16px; margin-right:6px; white-space:nowrap; flex-shrink:0; min-width:max-content;">판매하기</a>
+                <a href="login.html" id="mobile-auth-link" style="font-size:0.8rem; font-weight:700; color:#1e293b; border: 1px solid #e2e8f0; padding:3px 8px; border-radius:16px; white-space:nowrap; flex-shrink:0; min-width:max-content;">로그인</a>
+                <button onclick="ChannelIO('show')" style="background:none; border:none; font-size:1.6rem; color:#1e293b; cursor:pointer; padding:0; display:flex; align-items:center; margin-left:6px;">
+                    <i class="ri-customer-service-2-line"></i>
+                </button>
+            </div>
+
+            <!-- Desktop Nav Links -->
+            <div class="nav-links pc-only">
+                <a href="quote.html">내 폰 판매</a>
+                <a href="faq.html">자주 묻는 질문</a>
+                <a href="login.html" id="nav-login-link">로그인</a>
+            </div>
+            <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
+        </div>
+    </nav>
+
+    <div class="faq-wrap">
+        <h1 class="faq-title">자주 묻는 질문</h1>
+        <p class="faq-sub">중고폰 판매 전 궁금하신 점을 확인해 보세요. 더 궁금한 점은 우측 하단 채널톡으로 24시간 문의 가능합니다.</p>
+
+        <!-- 이용 방법 -->
+        <div class="faq-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="10" y1="18" x2="14" y2="18"/></svg>이용 방법</div>
+
+        <details class="faq-item">
+            <summary class="faq-q">쉐라폰은 어떻게 이용하나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a"><strong>1단계 시세 조회</strong> — 홈페이지에서 판매할 기종을 클릭 3번으로 검색해 최고 예상매입가를 즉시 확인합니다. <strong>2단계 신청</strong> — 방문수거 또는 직접발송을 선택해 접수합니다. <strong>3단계 검수 후 당일 송금</strong> — 기기가 검수센터에 입고되면 알림톡으로 안내드리고, 전문 엔지니어가 개인정보 초기화 후 검수하여 최종매입가를 안내합니다. 매입가에 동의하시면 당일 계좌로 입금해 드립니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">검수센터에 직접 방문할 수 있나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">죄송하지만 검수센터는 고객 응대 인력·시설이 갖춰져 있지 않고, 보안 및 내부 규정상 외부인 출입이 제한되어 <strong>방문 접수가 불가</strong>합니다. 온라인 접수 후 기기를 보내주시면 안전하게 처리해 드립니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">오늘 영업하나요? 운영시간이 어떻게 되나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">검수센터는 <strong>평일 09:00~18:00</strong> 운영됩니다. 카카오톡 채널 및 채널톡 고객지원은 <strong>24시간</strong> 운영되나, 영업시간 외에는 답변이 지연될 수 있습니다. 공휴일·센터 사정에 따라 운영시간은 변동될 수 있습니다.</div>
+        </details>
+
+        <!-- 배송·수거 -->
+        <div class="faq-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h13v11H1z"/><path d="M14 8h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>배송 · 수거</div>
+
+        <details class="faq-item">
+            <summary class="faq-q">방문수거와 직접발송, 뭐가 다른가요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a"><strong>방문수거</strong>는 신청 시 선택한 날짜에 택배 기사님이 집으로 방문해 수거하며, 별도 배송비 부담이 없습니다. <strong>직접발송</strong>은 편의점 택배·우체국 등으로 직접 보내는 방식이며, <strong>배송비 3,000원을 선지원</strong>해 드립니다. 편하신 방법을 선택하시면 됩니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">당일 접수해서 바로 보낼 수 있나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">당일 예약·접수는 택배사 방문수거 서비스가 불가합니다. <strong>당일 접수 후 바로 발송을 원하시면 직접발송</strong>으로 접수해 주세요.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">방문수거는 신청한 날짜에 정확히 오나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">신청하신 희망일에 맞춰 배차되지만, <strong>택배사 물량이 많을 경우 방문수거 일자보다 최대 3일까지 수거가 늦어질 수 있습니다.</strong> 신청은 그대로 유지되니 안심하고 기다려 주세요. 집하가 완료되면 운송장번호를 알림톡으로 안내해 드립니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">방문수거일을 변경할 수 있나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">채널톡으로 성함·연락처를 남겨주시면 관리자 확인 후 변경 가능 여부를 안내해 드립니다. 다만 <strong>당일·익일 픽업의 경우 일정 변경이 어려울 수 있습니다.</strong></div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">여러 대를 한 박스에 같이 보내도 되나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">네. 여러 신청 건을 방문수거하실 때는 <strong>함께 합포장</strong>하여 보내주시면 됩니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">포장은 어떻게 해야 하나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">기기를 <strong>에어캡(뽁뽁이) 등으로 완충 포장</strong>하고 크기에 맞는 튼튼한 박스를 사용해 주세요. 비닐 봉투나 쇼핑백 포장은 파손 위험이 커 수거가 거절될 수 있습니다. <strong>포장 부실로 인한 배송 중 파손은 보상이 어렵습니다.</strong> 발송 전 <a href="delivery-guide-self.html" style="color:#2563EB;">택배발송 유의사항</a>을 꼭 확인해 주세요.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">도서·산간 지역도 수거·반송이 되나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">네, 가능합니다. 다만 매입가에 동의하지 않아 반송하실 경우, <strong>제주 및 도서·산간 지역은 반송 배송비가 10,000원~20,000원까지 부과될 수 있습니다.</strong></div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">택배 기사님과 연락이 안 되면 어떻게 되나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">방문수거 신청 후 사전 연락 없이 당일 부재, 연락 두절, 기기 미배출 등으로 택배사의 헛걸음이 발생하면 이용약관 제4조 5항에 따라 <strong>왕복 택배비 상당의 위약금(5,000원)이 청구</strong>될 수 있습니다. 방문 예정일에는 문 앞에 기기를 두시거나 연락 가능한 상태를 유지해 주세요.</div>
+        </details>
+
+        <!-- 검수·등급·가격 -->
+        <div class="faq-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg>검수 · 등급 · 가격</div>
+
+        <details class="faq-item">
+            <summary class="faq-q">기기가 도착했는지, 검수는 언제 하는지 어떻게 아나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">기기가 검수센터에 입고되면 <strong>알림톡으로 안내</strong>드립니다. 검수 진행 여부도 알림톡으로 안내되니 걱정하지 않으셔도 됩니다. 당일 입고 물량이 많을 경우 검수가 다소 지연될 수 있으나, 순차적으로 담당 엔지니어가 검수 후 최종매입가를 안내드립니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">예상 견적과 실제 매입가가 다른가요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">예상 견적은 참고용이며, <strong>실제 매입가는 기기 수령 후 전문 검수를 거쳐 확정</strong>됩니다. 특히 '사진 간편 접수'처럼 상세 상태 입력 없이 접수하신 경우 제시 금액은 예상가에 불과합니다. 또한 중고 시세는 변동성이 커, 최종 매입가는 검수 결과를 안내하는 시점의 기준으로 산정됩니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">고장나거나 파손된 기기도 매입하나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">네, <strong>파손·고장난 기기도 전원이 들어오면 매입 가능</strong>합니다. 다만 심각한 파손이나 전원이 켜지지 않는 기기, 구형 모델의 경우 홈페이지의 D등급 예상매입가보다 큰 폭으로 차감된 최종매입가로 매입될 수 있습니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">박스나 충전기가 없어도 팔 수 있나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">네, <strong>본체만 보내주셔도 매입가에 영향이 없습니다.</strong> 다만 함께 동봉된 박스·충전기·케이스·필름 등 구성품은 검수센터 도착 시 폐기되어, 매입 취소·반송 시에도 본체 외 구성품은 반환되지 않습니다. 필요한 물품은 발송 전 반드시 제거해 주세요.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">미개봉 새 제품인데 개봉해서 검수하나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">네. 미개봉(밀봉·씰 부착) 제품도 기기의 외관 및 정상 작동 여부를 확인하기 위해 <strong>포장 및 밀봉을 개봉하여 검수를 진행</strong>합니다. 반송이 결정되더라도 개봉된 상태로 반송되며, 밀봉 훼손으로 인한 가치 하락은 보상되지 않는 점 양해 부탁드립니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">아이디가 기억이 안 나 결과 확인서를 못 찾겠어요.<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">로그아웃 후 로그인 화면에서 <strong>[비회원 신청 내역 조회]</strong>를 통해 예약하신 성함과 연락처를 입력하시면 검수 결과 및 전자매매계약서를 확인하실 수 있습니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">최종 매입가가 마음에 들지 않으면요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">검수 완료 후 상세 검수내역이 담긴 검수서와 전자매매계약서를 보내드립니다. 금액에 동의하지 않으시면 <strong>매입을 거부하고 기기를 반송</strong>받으실 수 있습니다. 채널톡으로 예약자 성함·연락처를 남겨주시면 반송접수를 도와드립니다. 단, 단순 변심에 의한 반송 시 반송 배송비는 고객님께 청구될 수 있습니다.</div>
+        </details>
+
+        <!-- 입금·계좌·본인인증 -->
+        <div class="faq-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/></svg>입금 · 계좌 · 본인인증</div>
+
+        <details class="faq-item">
+            <summary class="faq-q">입금은 언제 되나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">검수 완료 후 최종매입가를 안내드리며, 고객님이 <strong>전자매매계약서에 동의하신 시점</strong>을 기준으로 입금됩니다. <strong>평일 영업시간(09:00~18:00) 내 동의 시 2시간 이내, 영업시간 외 및 주말·공휴일 동의 시 6시간 이내</strong> 입금해 드립니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">전자매매계약서를 받고 아무 응답을 안 하면요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">전자매매계약서를 보내드린 후 <strong>반송·매입거부 의사표시 없이 영업일 기준 7일이 지나면, 계약 내용에 동의하신 것으로 간주</strong>합니다. 이 경우 안내해 주신 계좌로 매입 대금을 입금한 뒤 매입 절차가 완료됩니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">가족 명의 계좌로 입금받을 수 있나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">매입 대금은 원칙적으로 <strong>본인 인증을 완료한 회원 명의의 계좌로만 입금</strong>됩니다. 부득이하게 타인(가족 등) 명의 계좌로 받아야 하는 경우, 가족관계증명서·통장 사본 등 증빙서류 제출 후 확인을 거쳐야 합니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">신청을 수정하거나 취소하고 싶어요.<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">기기 발송 전이라면 채널톡으로 <strong>예약자 성함·연락처·요청 내용(신청 수정 또는 취소)</strong>을 남겨주시면 관리자 확인 후 처리해 드립니다. 단, <strong>방문수거일 이후 취소</strong>의 경우 신청 시 동의하신 이용약관 제4조 5항에 따라 위약금이 발생할 수 있습니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">미성년자도 판매할 수 있나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">만 19세 미만 미성년자는 관련 법령에 따라 거래가 제한되거나 법정대리인의 동의가 필요할 수 있습니다. 만 14세 미만 아동의 거래는 원칙적으로 제한됩니다.</div>
+        </details>
+
+        <!-- 개인정보·초기화 -->
+        <div class="faq-cat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>개인정보 · 초기화</div>
+
+        <details class="faq-item">
+            <summary class="faq-q">보내기 전에 초기화를 꼭 해야 하나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">개인정보 보호를 위해 발송 전 <strong>기기 전체 초기화 및 계정 로그아웃(iCloud·삼성/구글 계정)</strong>을 해주시길 권장합니다. 초기화를 못 하셨더라도, 검수센터 도착 후 전문 솔루션으로 데이터를 안전하게 삭제해 드리니 안심하셔도 됩니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">화면이 깨져서 초기화를 할 수 없어요.<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">터치·화면 불량으로 직접 초기화가 어려운 경우, 아래 정보를 <strong>메모로 남겨 기기와 함께 포장</strong>해 주시면 검수센터에서 초기화를 도와드립니다.<br>• <strong>아이폰:</strong> Apple 계정 아이디/비밀번호 및 기기 잠금비밀번호<br>• <strong>갤럭시:</strong> 기기 잠금비밀번호 혹은 패턴</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">내 데이터는 안전하게 삭제되나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">네. 매입 확정 시 국제 데이터 삭제 보안 인증 기관 <strong>ADISA 인증 솔루션(m360soft)</strong>을 사용해 기기 내 모든 데이터를 복구 불가능한 상태로 100% 영구 삭제합니다. 만일을 대비해 발송 전 직접 초기화하시는 것을 권장합니다.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary class="faq-q">유심(USIM)이나 SD카드는 어떻게 하나요?<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
+            <div class="faq-a">유심과 SD카드는 <strong>발송 전 반드시 제거</strong>해 주세요. 본체 외 부속품은 검수센터 도착 시 폐기되어 돌려받을 수 없습니다.</div>
+        </details>
+
+        <div class="faq-cta">
+            <h3>이 외에 궁금한 점이 있으신가요?</h3>
+            <p>찾으시는 답변이 없거나 더 자세한 상담이 필요하시면 고객센터로 문의해 주세요. 연중무휴 24시간 상담 가능합니다.</p>
+            <button type="button" class="btn btn-primary" onclick="if(window.ChannelIO){ChannelIO('show')}else{location.href='https://jz5zd.channel.io'}" style="cursor:pointer;">💬 고객센터 문의하기</button>
+        </div>
+    </div>
+
+    <!-- FAQ 구조화 데이터 (검색엔진 FAQ 리치 결과용) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type":"Question","name":"중고폰 기기는 어떻게 보내나요?","acceptedAnswer":{"@type":"Answer","text":"방문수거(택배 기사가 집으로 방문)와 개인발송(편의점·우체국 직접 발송) 두 가지가 있으며, 방문수거는 별도 배송비 부담이 없습니다."}},
+        {"@type":"Question","name":"방문수거는 신청한 날짜에 오나요?","acceptedAnswer":{"@type":"Answer","text":"희망일에 맞춰 배차되지만 택배사 물량이 많을 경우 최대 3일까지 지연될 수 있으며, 신청은 그대로 유지됩니다. 집하 완료 시 운송장번호를 알림톡으로 안내합니다."}},
+        {"@type":"Question","name":"예상 견적과 실제 매입가가 다른가요?","acceptedAnswer":{"@type":"Answer","text":"예상 견적은 참고용이며 실제 매입가는 기기 수령 후 전문 검수를 거쳐 확정됩니다. 시세 변동에 따라 검수 결과 안내 시점 기준으로 산정됩니다."}},
+        {"@type":"Question","name":"박스나 충전기가 없어도 판매할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"본체만 있어도 판매 가능합니다. 다만 동봉된 구성품은 검수 과정에서 폐기되며 반송 시에도 본체 외 구성품은 반환되지 않습니다."}},
+        {"@type":"Question","name":"입금은 언제 되나요?","acceptedAnswer":{"@type":"Answer","text":"검수 완료 후 매입가에 동의하시면 안내된 계좌로 신속하게 입금되며, 진행이 빠를 경우 당일 입금도 가능합니다."}},
+        {"@type":"Question","name":"보내기 전에 초기화를 꼭 해야 하나요?","acceptedAnswer":{"@type":"Answer","text":"발송 전 데이터 백업 후 공장 초기화 및 계정 로그아웃(iCloud·삼성/구글 계정)을 완료해야 합니다. 계정 잠금이 해제되지 않으면 착불 반송될 수 있습니다."}},
+        {"@type":"Question","name":"내 데이터는 안전하게 삭제되나요?","acceptedAnswer":{"@type":"Answer","text":"매입 확정 시 ADISA 인증 데이터 삭제 솔루션(m360soft)으로 복구 불가능하게 완전 삭제합니다."}}
+      ]
+    }
+    </script>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col" style="flex: 2;">
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">
+                        <strong>쇼핑몰 기본정보</strong><br>
+                        상호명: 에스알커머스 | 대표자명: 박현용<br>
+                        사업장 주소: 부산시 동천로 116 한신밴빌딩 1003호<br>
+                        사업자 등록번호: 331-77-00487
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>고객센터 정보</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                        상담/주문 이메일: guffyd321@naver.com<br>
+                        대표 연락처: 070-8680-9275<br><br>
+                        <strong>CS운영시간</strong><br>
+                        연중무휴 24시간 채널톡으로 상담가능
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>About</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        <a href="terms.html" style="color: inherit; text-decoration: none;">이용약관</a> |
+                        <a href="privacy.html" style="color: inherit; text-decoration: none;">개인정보처리방침</a> |
+                        <a href="delivery-guide.html" style="color: inherit; text-decoration: none;">택배발송 유의사항</a> |
+                        <a href="faq.html" style="color: inherit; text-decoration: none; font-weight: bold;">자주 묻는 질문</a>
+                    </p>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2026 HooPak all rights reserved
+            </div>
+        </div>
+    </footer>
+
+    <!-- 로그인 상태 반영·언어 선택 등 공통 로직 -->
+    <script type="module" src="script.js?v=1785403500"></script>
+
+    <!-- Channel Plugin Scripts -->
+    <script>
+        (function () {
+            var w = window;
+            if (w.ChannelIO) { return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.'); }
+            var ch = function () { ch.c(arguments); };
+            ch.q = []; ch.c = function (args) { ch.q.push(args); };
+            w.ChannelIO = ch;
+            function l() {
+                if (w.ChannelIOInitialized) { return; }
+                w.ChannelIOInitialized = true;
+                var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true;
+                s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js'; s.charset = 'UTF-8';
+                var x = document.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x);
+            }
+            if (document.readyState === 'complete') { l(); }
+            else if (window.attachEvent) { window.attachEvent('onload', l); }
+            else { window.addEventListener('DOMContentLoaded', l, false); window.addEventListener('load', l, false); }
+        })();
+        ChannelIO('boot', { "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e" });
+    </script>
+
+<!-- NAVER PV SCRIPT -->
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){ wcs.inflow(); wcs_do(); }
+});
+</script>
+</body>
+</html>

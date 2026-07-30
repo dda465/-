@@ -1,4 +1,4 @@
-import { db, auth, storage } from './firebase-config.js';
+import { db, auth, getStorageLazy } from './firebase-config.js';
 
 
 
@@ -18,7 +18,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.c
 
 
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyJ7SJmjqF0mNABE3TE7Xo-A7EPXgfhHc2mxebVzfSwDGqTJ3dhasTXB7pjNTCOmTr/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkewwgQ-m_3OQVph5Laex78UEgJV1klI1MaluW5ugsIeZy-bfXdi0JpZMnpER1CxGR/exec";
 
 
 
@@ -271,15 +271,20 @@ function injectFloatingWidgets() {
     const urlParams = new URLSearchParams(window.location.search);
     const utmSource = (urlParams.get('utm_source') || '').toLowerCase();
     const referrer = (document.referrer || '').toLowerCase();
+    const ua = (navigator.userAgent || '').toLowerCase();
 
     let source = 'direct';
 
-    if (utmSource.includes('naver') || referrer.includes('naver.com')) {
+    if (utmSource.includes('naver') || referrer.includes('naver.com') || ua.includes('naver')) {
         source = 'naver';
-    } else if (utmSource.includes('daangn') || utmSource.includes('karrot') || referrer.includes('daangn.com') || referrer.includes('karrotmarket')) {
+    } else if (utmSource.includes('daangn') || utmSource.includes('karrot') || referrer.includes('daangn.com') || referrer.includes('karrotmarket') || ua.includes('daangn') || ua.includes('karrot')) {
         source = 'daangn';
     } else if (utmSource.includes('google') || referrer.includes('google.com')) {
         source = 'google';
+    } else if (utmSource.includes('instagram') || utmSource.includes('reels') || referrer.includes('instagram.com') || ua.includes('instagram')) {
+        source = 'instagram';
+    } else if (utmSource.includes('tiktok') || referrer.includes('tiktok.com') || ua.includes('tiktok')) {
+        source = 'tiktok';
     }
 
     sessionStorage.setItem('traffic_source', source);
@@ -494,6 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             const navLinksContainer = document.querySelector('.nav-links');
+            if (!navLinksContainer) return;
 
 
 
@@ -2520,11 +2526,12 @@ async function initDeepWizard() {
     const loadingOverlay = document.getElementById('wizard-loading');
 
     // Restore pending quote after login (skip if Naver callback is processing)
-    const pendingQuoteStr = sessionStorage.getItem('pendingQuote');
+    const pendingQuoteStr = sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote');
     if (pendingQuoteStr && !window.location.hash.includes('access_token')) {
         try {
             currentQuote = JSON.parse(pendingQuoteStr);
             sessionStorage.removeItem('pendingQuote');
+            localStorage.removeItem('pendingQuote');
             // Slight delay to ensure auth state and DOM are ready before navigating
             setTimeout(() => {
                 goToStep('auth');
@@ -3859,6 +3866,9 @@ async function initDeepWizard() {
 
         const savePendingQuote = () => {
             sessionStorage.setItem('pendingQuote', JSON.stringify(currentQuote));
+            localStorage.setItem('pendingQuote', JSON.stringify(currentQuote));
+            sessionStorage.setItem('pendingQuotePage', window.location.pathname);
+            localStorage.setItem('pendingQuotePage', window.location.pathname);
         };
 
         if (btnAuthLogin) {
@@ -4876,7 +4886,7 @@ async function initDeepWizard() {
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0; font-size: 0.95rem; line-height: 1.6;">
                     받는 이: <strong>쉐라폰</strong><br>
                     주소: <strong>부산시 부산진구 동천로 116 한신밴빌딩 1003호</strong><br>
-                    연락처: <span style="color: #666;">010-3263-5672</span>
+                    연락처: <span style="color: #666;">010-5173-5382</span>
                 </div>
 
 
@@ -4930,6 +4940,16 @@ async function initDeepWizard() {
 
 
             goToStep(8); // Success Step
+
+            // Sign out of the anonymous Firebase Auth session to restore clean state for returning social users/guests
+            if (auth.currentUser && auth.currentUser.isAnonymous) {
+                try {
+                    const { signOut } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    await signOut(auth);
+                } catch (err) {
+                    console.error("Sign out anonymous user error", err);
+                }
+            }
 
 
 
@@ -6527,7 +6547,8 @@ async function submitReview() {
 
 
 
-                const storageRef = ref(storage, `reviews/${Date.now()}_${file.name}`);
+                const storageInstance = await getStorageLazy();
+                const storageRef = ref(storageInstance, `reviews/${Date.now()}_${file.name}`);
 
 
 

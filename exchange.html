@@ -11,12 +11,26 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 
 <!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -53,7 +67,7 @@
     <meta name="naver-site-verification" content="88cd5e4f7d21bc69a519a61b2d5c440af0f6b836" />
     <link rel="canonical" href="https://sharaphone.com">
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <!-- OpenGraph SEO Tags -->
@@ -165,7 +179,7 @@
         }
     </style>
 
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 
     <!-- Danggeun Ad Funnel Event Hero Banner Styles -->
     <style>
@@ -348,15 +362,17 @@
 
 
 <!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
     <style>
@@ -709,8 +725,7 @@ wcs_do();
                     <i class="ri-customer-service-2-line"></i>
 
                 </button>
-
-            </div>
+                    </div>
 
 
 
@@ -719,23 +734,20 @@ wcs_do();
             <div class="nav-links pc-only">
 
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
 
                 <a href="login.html" id="nav-login-link">로그인</a>
-
-            </div>
+                    </div>
 
             <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
-
-        </div>
+                    </div>
 
     </nav>
 
     <div class="mobile-ticker mobile-only">
 
         <span><i class="ri-shield-check-fill" style="color:#4ade80;"></i> 개인정보 데이터 100% 영구 삭제 보장센터 &nbsp;|&nbsp; <i class="ri-flashlight-fill" style="color:#fbbf24;"></i> 검수 완료 직후 당일 송금 원칙 &nbsp;|&nbsp; <i class="ri-smartphone-line" style="color:#60a5fa;"></i> 클릭 3번으로 시세 확인 끝</span>
-
-    </div>
+                    </div>
 
 
 
@@ -897,14 +909,8 @@ wcs_do();
 
 
                                     style="background: #fff; color: #3b82f6;">리뷰 보러가기</a>
-
-
-
-                            </div>
-
-
-
-                        </div>
+                    </div>
+                    </div>
 
 
 
@@ -917,30 +923,11 @@ wcs_do();
 
 
                                 style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));">
-
-
-
-                        </div>
-
-
-
                     </div>
-
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-
-
-
-
-        </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1232,8 +1219,7 @@ wcs_do();
             <h2>오늘의 정확한 매입 시세 확인</h2>
 
             <p>기종을 검색하거나 아래 인기 기종을 클릭해 최고가를 바로 확인하세요.</p>
-
-        </div>
+                    </div>
 
         
 
@@ -1244,8 +1230,7 @@ wcs_do();
             <input type="text" id="fast-search-input" placeholder="기종명 입력 (예: 아이폰15, 갤럭시S24)" onkeypress="if(event.key === 'Enter') document.getElementById('fast-search-btn').click();">
 
             <button id="fast-search-btn" class="usc-button" onclick="const q = document.getElementById('fast-search-input').value; if(q) location.href='quote.html?search=' + encodeURIComponent(q); else location.href='quote.html';">시세 조회</button>
-
-        </div>
+                    </div>
 
 
 
@@ -1261,11 +1246,9 @@ wcs_do();
 
                     <div class="chip-name">아이폰 15 Pro</div>
                     <div class="chip-price" id="pop-price-ip15p">1,100,000원</div>
-                    <div class="chip-tag">기본용량A급기준</div>
-
-                </div>
-
-            </div>
+                    <div class="chip-tag">기본용량 최상급기준</div>
+                    </div>
+                    </div>
 
             <div class="usc-chip" onclick="location.href='quote.html?model=s24ultra'">
 
@@ -1275,11 +1258,9 @@ wcs_do();
 
                     <div class="chip-name">갤럭시 S24 Ultra</div>
                     <div class="chip-price" id="pop-price-s24u">1,150,000원</div>
-                    <div class="chip-tag">기본용량A급기준</div>
-
-                </div>
-
-            </div>
+                    <div class="chip-tag">기본용량 최상급기준</div>
+                    </div>
+                    </div>
 
             <div class="usc-chip" onclick="location.href='quote.html?model=zflip5'">
 
@@ -1289,13 +1270,10 @@ wcs_do();
 
                     <div class="chip-name">갤럭시 Z 플립 5</div>
                     <div class="chip-price" id="pop-price-zf5">550,000원</div>
-                    <div class="chip-tag">기본용량A급기준</div>
-
-                </div>
-
-            </div>
-
-        </div>
+                    <div class="chip-tag">기본용량 최상급기준</div>
+                    </div>
+                    </div>
+                    </div>
 
         <!-- Foreigner 배너 버튼 -->
         <a href="quote-foreigner.html" class="notranslate" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; padding: 10px 16px; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: white; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.82rem; transition: all 0.2s; box-shadow: 0 3px 8px rgba(37,99,235,0.15);">
@@ -1328,8 +1306,7 @@ wcs_do();
                 <div class="app-grid-icon" style="background:#f1f5f9; color:#2563eb; font-size: 36px;"><i class="ri-file-list-3-fill"></i></div>
                 <div class="app-grid-label">단가보기</div>
             </a>
-
-        </div>
+                    </div>
 
     </section>
 
@@ -1358,15 +1335,9 @@ wcs_do();
 
 
                 <h3 style="margin: 0 0 5px 0; color: #4CAF50;">100% 데이터 영구 삭제 보장</h3>
-
-
-
-                <p style="margin: 0; color: #ccc;">개인정보 유출 걱정 없이 데이터를 복구 불가능하게 영구 삭제해드립니다.<br>
-                    안심하고 판매하세요.</p>
-
-
-
-            </div>
+                <p style="margin: 0; color: #ccc; line-height: 1.6;">개인정보 유출 걱정 없이 데이터를 복구 불가능하게 영구 삭제해드립니다.<br>
+                    국제 데이터 삭제 보안 인증 기관 ADISA의 프로덕트 어슈어런스(Product Assurance) m360soft를 사용해 기기 개인정보초기화 및 진단을 시행합니다.</p>
+                    </div>
 
 
 
@@ -1379,14 +1350,8 @@ wcs_do();
 
 
                     안전하게 팔기</a>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1439,10 +1404,7 @@ wcs_do();
 
 
                     <p>몇 번의 클릭으로 현재 가장 정확한<br>내 폰의 매입가를 확인하세요.</p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1459,10 +1421,7 @@ wcs_do();
 
 
                     <p>원하는 곳에서 무료 방문 수거 또는<br>편리한 택배 착불 발송을 선택하세요.</p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1479,18 +1438,9 @@ wcs_do();
 
 
                     <p>저희 직원이 꼼꼼히 검수한 뒤<br>지체 없이 당일 송금을 원칙으로 합니다.</p>
-
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1527,10 +1477,7 @@ wcs_do();
 
 
                     <h2 class="section-title" style="margin-bottom: 5px; text-align: left;">판매하기 실거래 리뷰 💬</h2>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1539,10 +1486,7 @@ wcs_do();
 
 
                     style="color: #666; text-decoration: none; font-weight: 500; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;">+ 더보기</a>
-
-
-
-            </div>
+                    </div>
 
 
 
@@ -1563,14 +1507,8 @@ wcs_do();
 
 
                 <div class="text-center" style="grid-column: 1/-1; padding: 40px; color: #888;">후기를 불러오는 중입니다...</div>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1619,18 +1557,9 @@ wcs_do();
 
 
                     <span>Loading...</span>
-
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1679,14 +1608,8 @@ wcs_do();
 
 
                     <span>Loading...</span>
-
-
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -1699,14 +1622,8 @@ wcs_do();
 
 
                 <a href="quote.html" class="btn btn-secondary">내 모델 시세 찾기</a>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1758,15 +1675,8 @@ wcs_do();
 
 
 
-                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-
-
-
-                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-
-
-
-                    </div>
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
                     <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
                         <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
                             <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
@@ -1779,11 +1689,14 @@ wcs_do();
                         <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                             <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
                         </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1804,7 +1717,7 @@ wcs_do();
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 
@@ -1826,10 +1739,7 @@ wcs_do();
                             네이버 스마트플레이스
                         </a>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1858,14 +1768,8 @@ wcs_do();
 
 
                     </p>
-
-
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -1874,14 +1778,8 @@ wcs_do();
 
 
                 &copy; 2026 HooPak all rights reserved
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1920,9 +1818,9 @@ wcs_do();
             <span>이용후기</span>
         </a>
 
-        <a href="javascript:void(0)" class="nav-item" aria-label="고객센터" onclick="ChannelIO('show')">
-            <i class="ri-customer-service-2-line"></i>
-            <span>고객센터</span>
+        <a href="faq.html" class="nav-item" aria-label="자주 묻는 질문">
+            <i class="ri-question-line"></i>
+            <span>자주 묻는 질문</span>
         </a>
     </div>
 
@@ -1976,7 +1874,7 @@ wcs_do();
 
 
 
-    <script type="module" src="script.js?v=1780278690883"></script>
+    <script type="module" src="script.js?v=1785403500"></script>
 
 
 
@@ -2167,8 +2065,7 @@ wcs_do();
         <div id="info-modal-content" style="font-size:0.95rem; color:#475569; line-height:1.6; word-break:keep-all; margin-bottom:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:16px; width:100%; box-sizing:border-box;"></div>
 
         <button onclick="closeInfoModal()" style="width:100%; background:#2563EB; color:white; border:none; padding:16px; border-radius:16px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:background 0.2s;">확인완료</button>
-
-    </div>
+                    </div>
 
 
 
@@ -2210,7 +2107,7 @@ wcs_do();
 
             title.innerHTML = '쉽고 빠른 총알 3단계';
 
-            content.innerHTML = '<ul style="padding-left:20px; margin:0; line-height:1.8;"><li><strong>1. 3초 견적</strong>: 내 폰 시세 3초 만에 조회</li><li><strong>2. 1분 접수</strong>: 원클릭 무료 택배/방문 수거 예약</li><li><strong>3. 당일 입금</strong>: 폰 도착 30분 내 검수 완료 및 즉시 현금 송금!</li></ul>';
+            content.innerHTML = '<ul style="padding-left:20px; margin:0; line-height:1.8;"><li><strong>1. 3초 견적</strong>: 내 폰 시세 3초 만에 조회</li><li><strong>2. 1분 접수</strong>: 원클릭 무료 택배/방문 수거 예약</li><li><strong>3. 당일 입금</strong>: 검수 완료 후 지체 없이 현금 송금!</li></ul>';
 
         }
 
@@ -2719,15 +2616,8 @@ wcs_do();
 
 
 
-                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-
-
-
-                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-
-
-
-                    </div>
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
                     <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
                         <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
                             <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
@@ -2740,11 +2630,14 @@ wcs_do();
                         <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                             <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
                         </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -2765,7 +2658,7 @@ wcs_do();
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 
@@ -2787,10 +2680,7 @@ wcs_do();
                             네이버 스마트플레이스
                         </a>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -2819,14 +2709,8 @@ wcs_do();
 
 
                     </p>
-
-
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -2835,14 +2719,8 @@ wcs_do();
 
 
                 &copy; 2026 HooPak all rights reserved
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -2881,9 +2759,9 @@ wcs_do();
             <span>이용후기</span>
         </a>
 
-        <a href="javascript:void(0)" class="nav-item" aria-label="고객센터" onclick="ChannelIO('show')">
-            <i class="ri-customer-service-2-line"></i>
-            <span>고객센터</span>
+        <a href="faq.html" class="nav-item" aria-label="자주 묻는 질문">
+            <i class="ri-question-line"></i>
+            <span>자주 묻는 질문</span>
         </a>
     </div>
 
@@ -2937,7 +2815,7 @@ wcs_do();
 
 
 
-    <script type="module" src="script.js?v=1780278690883"></script>
+    <script type="module" src="script.js?v=1785403500"></script>
 
 
 
@@ -3128,8 +3006,7 @@ wcs_do();
         <div id="info-modal-content" style="font-size:0.95rem; color:#475569; line-height:1.6; word-break:keep-all; margin-bottom:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:16px; width:100%; box-sizing:border-box;"></div>
 
         <button onclick="closeInfoModal()" style="width:100%; background:#2563EB; color:white; border:none; padding:16px; border-radius:16px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:background 0.2s;">확인완료</button>
-
-    </div>
+                    </div>
 
 
 
@@ -3171,7 +3048,7 @@ wcs_do();
 
             title.innerHTML = '쉽고 빠른 총알 3단계';
 
-            content.innerHTML = '<ul style="padding-left:20px; margin:0; line-height:1.8;"><li><strong>1. 3초 견적</strong>: 내 폰 시세 3초 만에 조회</li><li><strong>2. 1분 접수</strong>: 원클릭 무료 택배/방문 수거 예약</li><li><strong>3. 당일 입금</strong>: 폰 도착 30분 내 검수 완료 및 즉시 현금 송금!</li></ul>';
+            content.innerHTML = '<ul style="padding-left:20px; margin:0; line-height:1.8;"><li><strong>1. 3초 견적</strong>: 내 폰 시세 3초 만에 조회</li><li><strong>2. 1분 접수</strong>: 원클릭 무료 택배/방문 수거 예약</li><li><strong>3. 당일 입금</strong>: 검수 완료 후 지체 없이 현금 송금!</li></ul>';
 
         }
 

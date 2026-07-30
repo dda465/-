@@ -1,4 +1,4 @@
-import { db, auth, storage } from './firebase-config.js';
+import { db, auth, getStorageLazy } from './firebase-config.js';
 
 
 
@@ -18,7 +18,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.c
 
 
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyJ7SJmjqF0mNABE3TE7Xo-A7EPXgfhHc2mxebVzfSwDGqTJ3dhasTXB7pjNTCOmTr/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkewwgQ-m_3OQVph5Laex78UEgJV1klI1MaluW5ugsIeZy-bfXdi0JpZMnpER1CxGR/exec";
 
 
 
@@ -320,6 +320,10 @@ function injectFloatingWidgets() {
         source = 'daangn';
     } else if (utmSource.includes('google') || referrer.includes('google.com')) {
         source = 'google';
+    } else if (utmSource.includes('instagram') || utmSource.includes('reels') || referrer.includes('instagram.com') || ua.includes('instagram')) {
+        source = 'instagram';
+    } else if (utmSource.includes('tiktok') || referrer.includes('tiktok.com') || ua.includes('tiktok')) {
+        source = 'tiktok';
     }
 
     sessionStorage.setItem('traffic_source', source);
@@ -2336,36 +2340,32 @@ async function initPriceList() {
 
 
 
-        // Deduplicate and calculate average
+        // Deduplicate and calculate S grade
         const modelMap = {};
         filtered.forEach(p => {
             if (!modelMap[p.model]) {
                 modelMap[p.model] = {
                     ...p,
-                    allPrices: []
+                    maxS: 0
                 };
             }
-            // Collect all valid prices for this model across all duplicated docs
+            // Collect S grade price for this model
             const prices = p.prices || {};
             const priceS = prices.s || p.basePrice || 0;
-            const priceA = prices.a || 0;
-            const priceB = prices.b || 0;
-            const priceC = prices.c || prices.d || 0;
             
-            [priceS, priceA, priceB, priceC].forEach(v => {
-                if (v > 0) modelMap[p.model].allPrices.push(v);
-            });
+            if (priceS > modelMap[p.model].maxS) {
+                modelMap[p.model].maxS = priceS;
+            }
         });
 
         const uniqueModels = Object.values(modelMap);
 
         uniqueModels.forEach(p => {
-            const sum = p.allPrices.reduce((a, b) => a + b, 0);
-            const avg = p.allPrices.length > 0 ? Math.floor(sum / p.allPrices.length / 1000) * 1000 : 0;
+            const displayPrice = p.maxS;
             
             let priceText = '-';
-            if (avg > 0) {
-                priceText = `${avg.toLocaleString()}원`;
+            if (displayPrice > 0) {
+                priceText = `${displayPrice.toLocaleString()}원`;
             }
 
             const tr = document.createElement('tr');
@@ -4385,12 +4385,6 @@ async function initDeepWizard() {
                                     });
                                 }
                             }
-
-                            fetch(GOOGLE_SCRIPT_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'text/plain' },
-                                body: JSON.stringify(fullData)
-                            }).catch(e => console.error("Google Sheet Fetch Error:", e));
                         }
                     } catch(e) {
                         console.error("Google Sheet Integration Error:", e);
@@ -4476,7 +4470,7 @@ async function initDeepWizard() {
 
                     const instr = document.getElementById('success-instruction');
                     if (deliveryMethod === 'cvs') {
-                        instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-3263-5672</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
+                        instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-5173-5382</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                     } else {
                         instr.innerHTML = `<p><strong>📦 택배 방문수거 접수 완료</strong></p><p>선택하신 수거일자(${pickupDate})에 맞춰 박스를 포장해 문 앞에 두시면, 택배 기사님이 안전하게 수거해 갈 예정입니다.</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                     }
@@ -4551,9 +4545,15 @@ async function initDeepWizard() {
                     alert("방문날짜를 선택해주세요.");
                     return;
                 }
-                if (needsAddress && !address) {
-                    alert("수거를 위해 주소를 입력해주세요.");
-                    return;
+                if (needsAddress) {
+                    if (!baseAddress) {
+                        alert("주소 검색 버튼을 눌러 기본 주소를 입력해주세요.");
+                        return;
+                    }
+                    if (!detailAddress) {
+                        alert("상세 주소를 입력해주세요.");
+                        return;
+                    }
                 }
 
                 if (!account) {
@@ -5038,15 +5038,26 @@ async function initDeepWizard() {
                     alert("방문날짜를 선택해주세요.");
                     return;
                 }
-                if (needsAddress && !address) {
-                if (errorMsg) {
-                    errorMsg.innerText = "상세 주소가 입력되지 않았습니다.";
-                    errorMsg.style.display = 'block';
-                } else {
-                    alert("수거를 위해 주소를 입력해주세요.");
+                if (needsAddress) {
+                    if (!baseAddress) {
+                        if (errorMsg) {
+                            errorMsg.innerText = "주소 검색 버튼을 눌러 기본 주소를 입력해주세요.";
+                            errorMsg.style.display = 'block';
+                        } else {
+                            alert("주소 검색 버튼을 눌러 기본 주소를 입력해주세요.");
+                        }
+                        return;
+                    }
+                    if (!detailAddress) {
+                        if (errorMsg) {
+                            errorMsg.innerText = "상세 주소를 입력해주세요.";
+                            errorMsg.style.display = 'block';
+                        } else {
+                            alert("상세 주소를 입력해주세요.");
+                        }
+                        return;
+                    }
                 }
-                return;
-            }
             if (!accountNum) {
                 if (errorMsg) {
                     errorMsg.innerText = "계좌 정보(은행명 및 계좌번호)가 입력되지 않았습니다.";
@@ -5105,13 +5116,7 @@ async function initDeepWizard() {
                                 });
                             }
                         }
-                        
-                        fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify(fullData)
-                        }).catch(e => console.error("Google Sheet Fetch Error:", e));
-                    }
+                        }
                 } catch(e) {
                     console.error("Google Sheet Integration Error:", e);
                 }
@@ -5166,7 +5171,7 @@ async function initDeepWizard() {
                 
                 const instr = document.getElementById('success-instruction');
                 if (deliveryMethod === 'cvs') {
-                    instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-3263-5672</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
+                    instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-5173-5382</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                 } else {
                     instr.innerHTML = `<p><strong>📦 택배 방문수거 접수 완료</strong></p><p>선택하신 수거일자(${pickupDate})에 맞춰 박스를 포장해 문 앞에 두시면, 택배 기사님이 안전하게 수거해 갈 예정입니다.</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                 }
@@ -5222,9 +5227,15 @@ async function initDeepWizard() {
                     alert("방문날짜를 선택해주세요.");
                     return;
                 }
-                if (needsAddress && !address) {
-            alert("수거를 위해 주소를 입력해주세요.");
-            return;
+                if (needsAddress) {
+            if (!baseAddress) {
+                alert("주소 검색 버튼을 눌러 기본 주소를 입력해주세요.");
+                return;
+            }
+            if (!detailAddress) {
+                alert("상세 주소를 입력해주세요.");
+                return;
+            }
         }
 
         if (!account) {
@@ -5372,23 +5383,7 @@ async function initDeepWizard() {
 
 
 
-            fetch(GOOGLE_SCRIPT_URL, {
-
-
-
-                method: 'POST',
-
-
-
-                headers: { 'Content-Type': 'text/plain' },
-
-
-
-                body: JSON.stringify(payload)
-
-
-
-            }).catch(e => console.log("GAS Error ignored:", e));
+            // 백엔드 트리거에서 자동으로 구글 시트로 동기화됨
 
 
 
@@ -5518,7 +5513,7 @@ async function initDeepWizard() {
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0; font-size: 0.95rem; line-height: 1.6;">
                     받는 이: <strong>쉐라폰</strong><br>
                     주소: <strong>부산시 부산진구 동천로 116 한신밴빌딩 1003호</strong><br>
-                    연락처: <span style="color: #666;">010-3263-5672</span>
+                    연락처: <span style="color: #666;">010-5173-5382</span>
                 </div>
 
 
@@ -5647,19 +5642,7 @@ let allReviewsData = [];
 
 
 
-// Call initReviews if on reviews page
 
-
-
-if (document.getElementById('reviews-list')) {
-
-
-
-    initReviews();
-
-
-
-}
 
 
 
@@ -6778,10 +6761,10 @@ function renderPagination() {
 
 
 
-    let startPage = Math.max(1, currentReviewPage - 1);
-    let endPage = Math.min(totalPages, startPage + 2);
-    if (endPage - startPage < 2 && startPage > 1) {
-        startPage = Math.max(1, endPage - 2);
+    let startPage = Math.max(1, currentReviewPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+    if (endPage - startPage < 4 && startPage > 1) {
+        startPage = Math.max(1, endPage - 4);
     }
 
     for (let i = startPage; i <= endPage; i++) {
@@ -7101,7 +7084,8 @@ async function submitReview() {
 
 
 
-                const storageRef = ref(storage, `reviews/${Date.now()}_${file.name}`);
+                const storageInstance = await getStorageLazy();
+                const storageRef = ref(storageInstance, `reviews/${Date.now()}_${file.name}`);
 
 
 

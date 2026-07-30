@@ -1,0 +1,10 @@
+[CONSOLE] log: Traffic source initialized: direct
+[CONSOLE] log: initLandingPage
+[CONSOLE] log: Navbar: No user detected
+[CONSOLE] log: loadHomepageDynamicPrices: Prices updated from Firestore
+[DOM EVAL]: {
+  "zeroBubbleExists": true,
+  "fongabiGridExists": true,
+  "tickerExists": false,
+  "tickerVisible": false
+}

@@ -11,12 +11,27 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-<!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
+<!-- Danggeun Market Code (deferred to not block render) -->
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -45,7 +60,27 @@
 
 
 
-    <meta name="description" content="최고가 중고폰 매입 서비스 쉐라폰. 아이폰, 갤럭시 등 내 폰 시세 조회하고 3분 만에 판매 신청하세요. 투명한 검수와 즉시 입금을 보장합니다.">
+    <meta name="description" content="최고가 중고폰 매입 서비스 쉐라폰. 아이폰, 갤럭시 등 내 폰 시세와 매입가를 조회하고 3분 만에 판매 신청하세요. 수수료·검수 과정까지 투명하게 안내하고 즉시 입금을 보장합니다.">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "쉐라폰",
+          "alternateName": "SHERAPHONE",
+          "url": "https://sharaphone.com/",
+          "logo": "https://sharaphone.com/logo_header.png",
+          "description": "중고폰 매입 서비스 쉐라폰. 아이폰, 갤럭시 등 중고폰 시세·매입가 조회 및 판매, 투명한 검수와 즉시 입금."
+        },
+        {
+          "@type": "WebSite",
+          "name": "쉐라폰",
+          "url": "https://sharaphone.com/"
+        }
+      ]
+    }
+    </script>
 
 
 
@@ -53,8 +88,9 @@
     <meta name="naver-site-verification" content="88cd5e4f7d21bc69a519a61b2d5c440af0f6b836" />
     <link rel="canonical" href="https://sharaphone.com">
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"></noscript>
 
     <!-- OpenGraph SEO Tags -->
     <meta property="og:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
@@ -128,6 +164,7 @@
 
         /* Apply Gmarket Sans to key promotional titles */
         .hero-text-area h1,
+        .hero-text-area h2,
         .usc-header h2,
         .section-title,
         .stat-value,
@@ -137,7 +174,7 @@
         }
 
         /* Tweak for h1 specifically in the slider */
-        .hero-text-area h1 {
+        .hero-text-area h1, .hero-text-area h2 {
             font-weight: 700 !important;
         }
     </style>
@@ -165,7 +202,7 @@
         }
     </style>
 
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 
     <!-- Danggeun Ad Funnel Event Hero Banner Styles -->
     <style>
@@ -347,16 +384,18 @@
     </style>
 
 
-<!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<!-- NAVER PV SCRIPT (async to not block render) -->
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
     <style>
@@ -376,35 +415,389 @@ wcs_do();
 
     <style>
 
-        /* Shared App Styles */
-
+        /* ================================================================= */
+        /* Shared & Desktop Base Styles                                      */
+        /* ================================================================= */
         .mobile-only { display: none !important; }
-
         .pc-only { display: inline-flex; }
+        .mobile-bottom-nav { display: none; }
 
         .app-grid-section { max-width: 1200px; margin: 0 auto 40px; padding: 0 40px; position: relative; z-index: 20; }
 
-        .app-grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* Fongabi UI Card & Category Styles (Desktop - Smartphone Only)    */
+        .fongabi-card {
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 25px 30px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.02);
+            border: 1px solid #E2E8F0;
+            margin-bottom: 16px;
+        }
+        .fongabi-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .fongabi-card-title {
+            font-family: 'GmarketSans', var(--font-main);
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: -0.5px;
+        }
+        .fongabi-badge-blue {
+            background: #EFF6FF;
+            color: #2563EB;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+        .fongabi-grid-container.smartphone-only {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 12px !important;
+            overflow: visible !important;
+            padding-bottom: 0 !important;
+        }
+        .fongabi-grid-item-large {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 18px;
+            padding: 16px 10px;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .fongabi-grid-item-large:active {
+            transform: scale(0.95);
+        }
+        .fongabi-grid-item-large:hover {
+            border-color: #CBD5E1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            transform: translateY(-2px);
+        }
+        .fongabi-grid-icon-large {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+        .fongabi-grid-label-large {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+        .fongabi-grid-subtext {
+            font-size: 0.68rem;
+            font-weight: 500;
+            color: #64748B;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+        }
+        
+        /* Pastel Colors */
+        .apple-bg { background: #F1F5F9; color: #0F172A; }
+        .samsung-bg { background: #EFF6FF; color: #2563EB; }
+        .price-bg { background: #FDF4FF; color: #C026D3; }
 
-        .app-grid-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: all 0.2s; padding: 15px; border-radius: 12px; text-decoration: none !important; }
+        /* Zero Bubble Section Styles (Desktop & Main)                      */
+        .zero-bubble-section {
+            padding: 70px 0;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+            border-top: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .zb-header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+        .zb-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563EB;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .zb-header h2 {
+            font-family: 'GmarketSans', var(--font-main);
+            font-size: 2.3rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .zb-header p {
+            font-size: 1.1rem;
+            color: #64748B;
+            font-weight: 500;
+        }
 
-        .app-grid-item:hover { background: #f8fafc; transform: translateY(-5px); }
+        /* 2대 핵심 강점 카드 (Desktop) */
+        .zb-strengths {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .zb-strength-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+            position: relative;
+            text-align: left;
+        }
+        .s-badge {
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563EB;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .zb-strength-card h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+        .zb-strength-card p {
+            font-size: 0.9rem;
+            color: #475569;
+            line-height: 1.6;
+            margin: 0;
+        }
 
-        .app-grid-icon { width: 80px; height: 80px; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 12px; background: #eff6ff; color: #2563eb; transition: transform 0.2s; }
-
-        .app-grid-item:hover .app-grid-icon { transform: scale(1.05); }
-
-        .app-grid-icon.samsung { background: #f0f9ff; color: #0284c7; }
-
-        .app-grid-icon.apple { background: #f8fafc; color: #0f172a; }
-
-        .app-grid-icon.tablet { background: #fdf4ff; color: #c026d3; }
-
-        .app-grid-icon.watch { background: #f0fdf4; color: #059669; }
-
-        .app-grid-label { font-weight: 700; font-size: 1.15rem; color: #334155; }
-
-        .mobile-bottom-nav { display: none; }
+        .zb-compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .zb-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 24px;
+            padding: 35px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+        .zb-card-good {
+            border: 2px solid #2563EB;
+            box-shadow: 0 10px 30px rgba(37,99,235,0.06);
+        }
+        .zb-card-badge {
+            position: absolute;
+            top: -14px;
+            right: 30px;
+            background: #2563EB;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+        .zb-card-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.bad { background: #94A3B8; }
+        .status-dot.good { background: #2563EB; }
+        
+        .zb-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #F8FAFC;
+            padding: 20px 15px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+        .zb-flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+        .zb-flow-step .step-num {
+            width: 24px;
+            height: 24px;
+            background: #E2E8F0;
+            color: #64748B;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        .zb-flow-step.highlight .step-num {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563EB;
+        }
+        .zb-flow-step.main-brand {
+            background: white;
+            border: 1.5px solid #2563EB;
+            padding: 8px 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(37,99,235,0.08);
+            transform: scale(1.05);
+        }
+        .zb-flow-step .step-txt {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #334155;
+            line-height: 1.3;
+        }
+        .zb-flow-step .step-txt small {
+            font-size: 0.7rem;
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .flow-arrow-right {
+            font-size: 1.1rem;
+            color: #94A3B8;
+        }
+        .flow-arrow-right.good {
+            color: #2563EB;
+            font-weight: bold;
+        }
+        .flow-arrow-down {
+            display: none;
+        }
+        
+        .zb-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-radius: 12px;
+        }
+        .zb-result.bad {
+            background: #F1F5F9;
+            border: 1px dashed #CBD5E1;
+        }
+        .zb-result.good {
+            background: rgba(37, 99, 235, 0.05);
+            border: 1.5px solid rgba(37, 99, 235, 0.2);
+        }
+        .zb-result .result-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        .zb-result.good .result-label {
+            color: #1E3A8A;
+        }
+        .zb-result .result-price {
+            font-family: 'GmarketSans', var(--font-main);
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+        .zb-result.bad .result-price {
+            color: #64748B;
+        }
+        .zb-result.good .result-price {
+            color: #2563EB;
+        }
+        
+        .zb-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }
+        .zb-bullets li {
+            font-size: 0.88rem;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .zb-bullets li i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* 3대 보장 칩 */
+        .zb-guarantees {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .zb-guarantee-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+        }
+        .g-icon-wrap {
+            width: 44px;
+            height: 44px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563EB;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .g-info h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 4px;
+        }
+        .g-info p {
+            font-size: 0.8rem;
+            color: #64748B;
+            margin: 0;
+            line-height: 1.4;
+        }
 
 
 
@@ -440,42 +833,125 @@ wcs_do();
 
             .fast-search-section { order: 5; margin: 0 15px 5px !important; padding: 12px 15px !important; width: auto !important; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border-radius: 16px; }
 
-            .fast-search-section .usc-header { display: none !important; }
+            /* 모바일에서도 제목을 보여준다(예전엔 숨겨서 검색창만 덩그러니 떠 있었다) */
+            .fast-search-section .usc-header { display: block !important; text-align: left; margin-bottom: 13px; }
+            .fast-search-section .usc-header h2 { font-size: 1.12rem; margin: 0 0 3px; line-height: 1.4; }
+            .fast-search-section .usc-header p { font-size: 0.78rem; color: #64748b; margin: 0; }
 
             
 
-            .fast-search-section .usc-search-bar { padding: 0; margin-bottom: 12px; }
+            /* 검색바 — 입력창과 버튼을 한 줄로.
+               예전엔 세로로 쌓여서 큰 파란 버튼이 화면을 크게 차지했다. */
+            .fast-search-section .usc-search-bar {
+                padding: 5px 5px 5px 13px !important; margin-bottom: 4px !important;
+                display: flex !important; flex-direction: row !important; align-items: center; gap: 8px;
+                background: #fff !important; border: 1.5px solid #2563EB !important; border-radius: 14px !important;
+                box-shadow: 0 4px 14px rgba(37,99,235,0.09) !important;
+            }
+            .fast-search-section .usc-search-bar i { display: inline-block !important; color: #2563EB; font-size: 1.05rem; }
+            .fast-search-section .usc-search-bar input {
+                flex: 1 1 auto; width: auto !important; min-width: 0;
+                padding: 9px 0 !important; font-size: 0.93rem; text-align: left !important;
+                background: transparent !important; border: none !important;
+                margin-bottom: 0 !important; border-radius: 0 !important;
+            }
+            .fast-search-section .usc-search-bar:focus-within input { outline: none !important; }
+            .fast-search-section .usc-button {
+                height: auto !important; width: auto !important; flex: 0 0 auto;
+                padding: 10px 15px !important; font-size: 0.85rem; border-radius: 10px !important; white-space: nowrap;
+            }
 
-            .fast-search-section .usc-search-bar input { padding: 12px 15px; font-size: 0.95rem; background: white; border: 1px solid #e2e8f0; margin-bottom: 8px; border-radius: 12px; }
-
-            .fast-search-section .usc-button { height: 44px; font-size: 1rem; border-radius: 12px; }
-
-            
-
-            /* Smaller chips for swipe -> now 3 col grid to fit screen */
-
-            .fast-search-section .usc-chips { display: grid !important; grid-template-columns: repeat(3, 1fr); padding-bottom: 5px; gap: 6px; overflow-x: hidden; }
-
+            /* 인기 기종 — 3열 격자에 밀어넣으니 글자가 0.55rem까지 작아졌다.
+               가로 스크롤로 바꿔 카드를 키운다. 기종을 더 넣어도 레이아웃이 안 깨진다. */
+            .fast-search-section .usc-chips {
+                display: flex !important; grid-template-columns: none !important;
+                gap: 9px; overflow-x: auto; padding: 2px 15px 6px;
+                margin: 0 -15px; scroll-snap-type: x proximity;
+                -webkit-overflow-scrolling: touch;
+            }
             .fast-search-section .usc-chips::-webkit-scrollbar { display: none; }
 
-            .fast-search-section .usc-chip { min-width: 0 !important; width: 100% !important; margin-bottom: 0 !important; padding: 8px 4px; flex-direction: column; align-items: center; text-align: center; border-radius: 12px; }
-            .chip-icon { margin-right: 0; margin-bottom: 6px; font-size: 1.2rem; }
-            .chip-icon img { max-width: 40px !important; max-height: 40px !important; margin-bottom: 2px; }
-            .fast-search-section .chip-name { font-size: 0.55rem; margin-bottom: 2px; font-weight: 700; word-break: keep-all; line-height: 1.1; letter-spacing: -0.5px; }
-            .fast-search-section .chip-price { font-size: 0.6rem; margin-bottom: 2px; font-weight: 800; color: #ef4444; word-break: keep-all; line-height: 1.1; letter-spacing: -0.5px; }
-            .fast-search-section .chip-tag { font-size: 0.45rem; color: #888; word-break: keep-all; line-height: 1.1; letter-spacing: -0.5px; }
-            .usc-quick-title { margin-bottom: 10px; font-size: 0.85rem; }
+            /* 카드 3개가 화면 폭에 딱 맞게. 고정 116px이면 마지막 카드가 화면 끝에서
+               몇 px 잘려 '벗어난' 느낌이 난다. 기종이 4개 이상일 때만 자연스럽게 스크롤된다. */
+            .fast-search-section .usc-chip {
+                flex: 0 0 calc((100% - 18px) / 3) !important;
+                min-width: 96px !important; width: auto !important;
+                margin-bottom: 0 !important; padding: 11px 10px 12px;
+                flex-direction: column; align-items: stretch; text-align: left;
+                border-radius: 14px; scroll-snap-align: start;
+            }
+            .chip-icon {
+                margin-right: 0; margin-bottom: 9px; font-size: 1.2rem;
+                height: 52px; display: flex; align-items: center; justify-content: center;
+                background: #f6f9fd; border-radius: 10px;
+            }
+            .chip-icon img { max-width: 42px !important; max-height: 42px !important; margin-bottom: 0; }
+            .fast-search-section .chip-name { font-size: 0.73rem; margin-bottom: 0; font-weight: 700; word-break: keep-all; line-height: 1.3; min-height: 29px; letter-spacing: -0.3px; }
+            .fast-search-section .chip-price { font-size: 0.88rem; margin: 5px 0 0; font-weight: 800; color: #1E3A8A; word-break: keep-all; line-height: 1.2; letter-spacing: -0.3px; }
+            .fast-search-section .chip-tag { font-size: 0.6rem; color: #a3aebd; word-break: keep-all; line-height: 1.3; margin-top: 1px; letter-spacing: -0.3px; }
+            .usc-quick-title { margin-bottom: 9px; font-size: 0.83rem; font-weight: 800; }
 
             
 
             /* Compressed Grid */
 
-            .app-grid-section { order: 4; padding: 0 15px; margin: 0 0 5px; }
+            .app-grid-section { order: 4; margin: 0 15px 5px !important; padding: 0 !important; width: auto !important; }
             .app-grid-container { padding: 8px 15px; grid-template-columns: repeat(3, 1fr); gap: 6px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
             .app-grid-item { padding: 2px; }
             .app-grid-icon { width: 38px; height: 38px; font-size: 1.2rem; margin-bottom: 4px; border-radius: 12px; }
 
             .app-grid-label { font-size: 0.75rem; font-weight: 600; letter-spacing: -0.5px; white-space: nowrap; }
+
+            /* Fongabi Card Mobile Optimization */
+            .fongabi-card {
+                padding: 16px 16px !important;
+                border-radius: 20px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+            }
+            .fongabi-card-header {
+                margin-bottom: 12px !important;
+                gap: 8px !important;
+            }
+            .fongabi-card-title {
+                font-size: 1.12rem !important;
+            }
+            .fongabi-badge-blue {
+                font-size: 0.68rem !important;
+                padding: 2px 7px !important;
+            }
+            .fongabi-grid-container.smartphone-only {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+            }
+            .fongabi-grid-item-large {
+                padding: 14px 4px !important;
+                border-radius: 14px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+            }
+            .fongabi-grid-icon-large {
+                width: 42px !important;
+                height: 42px !important;
+                border-radius: 12px !important;
+                font-size: 1.25rem !important;
+                margin-bottom: 8px !important;
+            }
+            .fongabi-grid-label-large {
+                font-size: 0.78rem !important;
+                font-weight: 800 !important;
+            }
+            .fongabi-grid-subtext {
+                font-size: 0.60rem !important;
+                letter-spacing: -0.5px !important;
+                word-break: keep-all !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+            }
 
             
 
@@ -485,23 +961,25 @@ wcs_do();
 
             .hero-slide { min-height: 110px !important; border-radius: 16px !important; align-items: center; justify-content: center; display: flex; }
 
-            .hero-container { padding: 15px 20px !important; position: relative; width: 100%; height: 100%; display: flex; align-items: center;}
+            .hero-container { padding: 20px 15px !important; position: relative; width: 100%; height: 100%; display: flex; align-items: center;}
 
             .hero-content-wrapper { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; text-align: left !important; width: 100%; gap: 10px !important; margin: 0 !important; }
 
             .hero-text-area { padding-right: 0; position: relative; z-index: 2; margin: 0 !important; flex: 1; }
 
-            .hero-text-area h1 { font-size: 1.5rem !important; margin-bottom: 0 !important; letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3; margin-top: 0 !important;}
+            .hero-text-area h1, .hero-text-area h2 { font-size: 1.15rem !important; margin-bottom: 0 !important; letter-spacing: -0.5px; word-break: keep-all; line-height: 1.35 !important; margin-top: 0 !important;}
 
-            .hero-badge { display: inline-block !important; font-size: 0.85rem !important; padding: 4px 10px !important; margin-bottom: 10px !important; border-radius: 6px !important;}
+            .hero-badge { display: inline-flex !important; align-items: center; gap: 4px; font-size: 0.65rem !important; padding: 2px 7px !important; margin-bottom: 6px !important; border-radius: 12px !important;}
 
             .hero-subtitle { display: none !important; }
 
+            .samsung-event-period { display: none !important; }
+
             .cta-group { display: none !important; }
 
-            .hero-image-area { position: relative !important; width: 130px; flex-shrink: 0; text-align: right; z-index: 1; margin: 0 !important; right: auto !important; bottom: auto !important; }
+            .hero-image-area { position: relative !important; width: 105px; flex-shrink: 0; text-align: right; z-index: 1; margin: 0 !important; right: auto !important; bottom: auto !important; }
 
-            .hero-image-area img { max-height: 120px !important; max-width: 100% !important; opacity: 1 !important; position: static !important; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); display: inline-block !important; }
+            .hero-image-area img { max-height: 95px !important; max-width: 100% !important; opacity: 1 !important; position: static !important; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); display: inline-block !important; }
 
             .slider-controls { right: 10px !important; justify-content: flex-start !important; left: auto !important; bottom: 5px !important; padding: 2px 8px !important; background: rgba(0,0,0,0.4) !important; z-index: 10 !important; border-radius: 10px !important;}
 
@@ -645,7 +1123,167 @@ wcs_do();
                 100% { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4), 0 0 0 0 rgba(37, 99, 235, 0); }
             }
 
+        }
 
+        /* Zero Bubble Section overrides for mobile & tablet */
+        @media (max-width: 992px) {
+            .zero-bubble-section {
+                order: 7;
+                padding: 35px 15px !important;
+                background: #f8fafc !important;
+                border-top: none;
+                border-bottom: none;
+                margin-bottom: 25px;
+            }
+            .zero-bubble-section .container {
+                padding: 0;
+            }
+            .zb-strengths {
+                display: none !important;
+            }
+            .zb-guarantees {
+                display: none !important;
+            }
+            .zb-bullets {
+                margin: 0 0 15px 0 !important;
+                gap: 8px !important;
+            }
+            .zb-bullets li {
+                font-size: 0.8rem !important;
+            }
+            .zb-header {
+                margin-bottom: 25px;
+            }
+            .zb-badge {
+                padding: 4px 12px;
+                font-size: 0.75rem;
+                margin-bottom: 8px;
+            }
+            .zb-header h2 {
+                font-size: 1.45rem !important;
+                margin-bottom: 8px !important;
+                line-height: 1.3 !important;
+            }
+            .zb-header p {
+                font-size: 0.85rem;
+                color: #64748B;
+            }
+            .zb-compare-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+                margin-bottom: 30px;
+            }
+            .zb-card {
+                padding: 24px 20px;
+                border-radius: 20px;
+            }
+            .zb-card-title {
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+            }
+            
+            /* Responsive timeline layout for mobile */
+            .zb-flow {
+                flex-direction: column !important;
+                gap: 12px !important;
+                align-items: center;
+                justify-content: center;
+                padding: 20px 15px;
+                border-radius: 16px;
+                margin-bottom: 20px;
+            }
+            .zb-flow-step {
+                flex: none;
+                width: 100%;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 12px;
+                text-align: left !important;
+            }
+            .zb-flow-step .step-num {
+                margin-bottom: 0 !important;
+                flex-shrink: 0;
+            }
+            .zb-flow-step .step-txt {
+                font-size: 0.85rem !important;
+                text-align: left !important;
+            }
+            .zb-flow-step.main-brand {
+                padding: 10px 14px;
+                border-radius: 12px;
+                transform: none !important;
+                width: 100%;
+                box-sizing: border-box;
+                display: flex !important;
+            }
+            .flow-arrow-right {
+                display: none !important;
+            }
+            .flow-arrow-down {
+                display: block !important;
+                font-size: 1.2rem;
+                color: #94A3B8;
+                margin: 2px 0;
+            }
+            .flow-arrow-down.good {
+                color: #2563EB;
+            }
+            
+            .zb-result {
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+            .zb-result .result-label {
+                font-size: 0.85rem;
+            }
+            .zb-result .result-price {
+                font-size: 1.05rem;
+            }
+            .zb-guarantees {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 15px;
+                padding: 0 10px;
+            }
+            .zb-guarantee-card {
+                padding: 14px 18px;
+                border-radius: 16px;
+                border: 1px solid #E2E8F0;
+                background: #FFFFFF;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            }
+            .g-icon-wrap {
+                width: 40px;
+                height: 40px;
+                font-size: 1.3rem;
+                border-radius: 12px;
+            }
+            .g-info h4 {
+                font-size: 0.9rem;
+            }
+            .g-info p {
+                font-size: 0.75rem;
+            }
+
+            /* 2대 핵심 강점 카드 (Mobile) */
+            .zb-strengths {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+                margin-bottom: 30px;
+            }
+            .zb-strength-card {
+                padding: 20px;
+                border-radius: 16px;
+            }
+            .zb-strength-card h3 {
+                font-size: 1.05rem;
+                margin-bottom: 8px;
+            }
+            .zb-strength-card p {
+                font-size: 0.8rem;
+                line-height: 1.5;
+            }
 
         }
 
@@ -709,8 +1347,7 @@ wcs_do();
                     <i class="ri-customer-service-2-line"></i>
 
                 </button>
-
-            </div>
+                    </div>
 
 
 
@@ -719,23 +1356,17 @@ wcs_do();
             <div class="nav-links pc-only">
 
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
 
                 <a href="login.html" id="nav-login-link">로그인</a>
-
-            </div>
+                    </div>
 
             <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
-
-        </div>
+                    </div>
 
     </nav>
 
-    <div class="mobile-ticker mobile-only">
 
-        <span><i class="ri-shield-check-fill" style="color:#4ade80;"></i> 개인정보 데이터 100% 영구 삭제 보장센터 &nbsp;|&nbsp; <i class="ri-flashlight-fill" style="color:#fbbf24;"></i> 검수 완료 직후 당일 송금 원칙 &nbsp;|&nbsp; <i class="ri-smartphone-line" style="color:#60a5fa;"></i> 클릭 3번으로 시세 확인 끝</span>
-
-    </div>
 
 
 
@@ -761,7 +1392,7 @@ wcs_do();
 
 
 
-            <!-- Slide 1: 당근마켓 광고 유입 특별 이벤트 -->
+            <!-- Slide 3(당근): 맨 앞으로 이동 -->
             <div class="hero-slide danggeun-event">
                 <!-- 파티클 -->
                 <a href="event_danggeun.html" style="text-decoration: none; color: inherit; display: block; width: 100%; position: relative; z-index: 10;">
@@ -786,17 +1417,17 @@ wcs_do();
                             <!-- 이벤트 혜택 카드 -->
                             <div class="danggeun-perks">
                                 <div class="danggeun-perk-card">
-                                    <span class="danggeun-perk-icon"><img src="carrot_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="당근"></span>
+                                    <span class="danggeun-perk-icon"><img src="carrot_3d.webp" loading="lazy" style="width:36px; height:36px; object-fit:contain;" alt="당근"></span>
                                     <div class="danggeun-perk-label">유입 특별 보너스</div>
                                     <div class="danggeun-perk-value">최대 +20,000원 추가</div>
                                 </div>
                                 <div class="danggeun-perk-card">
-                                    <span class="danggeun-perk-icon"><img src="phones_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="폰"></span>
+                                    <span class="danggeun-perk-icon"><img src="phones_3d.webp" loading="lazy" style="width:36px; height:36px; object-fit:contain;" alt="폰"></span>
                                     <div class="danggeun-perk-label">2대 이상 묶음 판매</div>
                                     <div class="danggeun-perk-value">+20,000원 무조건 합산</div>
                                 </div>
                                 <div class="danggeun-perk-card">
-                                    <span class="danggeun-perk-icon"><img src="gift_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="선물"></span>
+                                    <span class="danggeun-perk-icon"><img src="gift_3d.webp" loading="lazy" style="width:36px; height:36px; object-fit:contain;" alt="선물"></span>
                                     <div class="danggeun-perk-label">매주 럭키드로우</div>
                                     <div class="danggeun-perk-value">신세계 상품권 5만원 (2명)</div>
                                 </div>
@@ -818,7 +1449,7 @@ wcs_do();
                         <!-- 오른쪽: 이미지 -->
                         <div class="danggeun-hero-image">
                             <div class="danggeun-phone-showcase">
-                                <img src="danggeun_hero.png" alt="Smartphones Showcase" style="max-height:360px; border-radius: 0; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15));">
+                                <img src="danggeun_hero.webp" alt="Smartphones Showcase" style="max-height:360px; border-radius: 0; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15));">
                             </div>
                             <div class="danggeun-floating-bonus">
                                 <span class="danggeun-bonus-text">당근회원</span>
@@ -830,117 +1461,102 @@ wcs_do();
                 </a>
             </div>
 
-
-
-
-
-
-
-            <!-- Slide 2: Quick Process -->
-
-
-
-            <div class="hero-slide" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);">
-
-
-
-                <div class="container hero-container" style="padding: 60px 20px;">
-
-
-
-                    <div class="hero-content-wrapper">
-
-
-
-                        <div class="hero-text-area">
-
-
-
-                            <span class="hero-badge"
-
-
-
-                                style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 700;">100% 당첨 리뷰
-
-
-
-                                이벤트</span>
-
-
-
-                            <h1
-
-
-
-                                style="color: #fff; font-size: 3.2rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">
-
-
-
-                                거래 후 리뷰 쓰면<br>스타벅스 커피 증정!</h1>
-
-
-
-                            <p class="hero-subtitle" style="color: rgba(255,255,255,0.9);">쉐라폰 이용 후기를 남겨주시면<br>아메리카노
-
-
-
-                                기프티콘을 드립니다.</p>
-
-
-
-                            <div class="cta-group" style="display: flex; gap: 15px; margin-top: 30px;">
-
-
-
-                                <a href="reviews.html" class="btn btn-primary btn-lg"
-
-
-
-                                    style="background: #fff; color: #3b82f6;">리뷰 보러가기</a>
-
-
-
+            <!-- Slide 1: 7월 첫 거래 웰컴 보너스 -->
+            <div class="hero-slide" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);">
+                <a href="event_welcome.html" style="text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; position: relative; z-index: 10;">
+                    <div class="container hero-container" style="padding: 20px 15px !important; position: relative; width: 100%; height: 100%; display: flex; align-items: center;">
+                        <div class="hero-content-wrapper">
+                            <div class="hero-text-area">
+                                <span class="hero-badge" style="background: rgba(5,150,105,0.1); border: 1px solid rgba(5,150,105,0.2); color: #059669; font-weight: 700; border-radius: 20px; padding: 6px 16px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="ri-gift-2-fill"></i> 7월 한정 첫 거래 웰컴 이벤트
+                                </span>
+                                <h2 style="color: #0F172A; font-size: 3rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">
+                                    처음이시죠?<br>
+                                    최대 <span style="color:#059669;">10,000원</span> 드려요!
+                                </h2>
+                                <p class="hero-subtitle" style="color: #475569; line-height: 1.6; margin-bottom: 20px;">
+                                    쉐라폰 첫 거래 고객님께<br>
+                                    기종에 따라 최대 10,000원 웰컴 보너스 지급!
+                                </p>
+                                <div style="font-size: 0.72rem; color: #64748B; display: flex; align-items: center; gap: 4px; white-space: nowrap; letter-spacing: -0.3px;">
+                                    <i class="ri-calendar-event-line"></i> 이벤트 기간: 2026.07.01 ~ 07.31
+                                </div>
+                                <div class="cta-group" style="display: flex; gap: 15px; margin-top: 30px;">
+                                    <span class="btn btn-primary btn-lg" style="background: #059669; border: none; color: #fff; font-weight: 800;">웰컴 보너스 받기</span>
+                                </div>
                             </div>
-
-
-
+                            <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
+                                <img src="welcome_banner.webp" alt="웰컴 보너스" style="max-width: 90%; max-height: 350px; display: inline-block; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1)); animation: floatHero 6s ease-in-out infinite; border-radius: 16px;">
+                            </div>
                         </div>
-
-
-
-                        <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
-
-
-
-                            <img src="real_starbucks_promo.webp" alt="커피 증정 리뷰 이벤트"
-
-
-
-                                style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));">
-
-
-
-                        </div>
-
-
-
                     </div>
+                </a>
+            </div>
 
+            <!-- Slide 2: 아이폰 전 기종 특별 매입 이벤트 -->
+            <div class="hero-slide" style="background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 50%, #e8ecf1 100%);">
+                <a href="event_iphone.html" style="text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; position: relative; z-index: 10;">
+                    <div class="container hero-container" style="padding: 20px 15px !important; position: relative; width: 100%; height: 100%; display: flex; align-items: center;">
+                        <div class="hero-content-wrapper">
+                            <div class="hero-text-area">
+                                <span class="hero-badge" style="background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); color: #1d1d1f; font-weight: 700; border-radius: 20px; padding: 6px 16px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="ri-apple-fill"></i> 아이폰 전 기종 특별 매입 이벤트
+                                </span>
+                                <h2 style="color: #1d1d1f; font-size: 3rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">
+                                    아이폰 팔면<br>
+                                    기종 번호만큼 <span style="color:#2563EB;">보너스!</span>
+                                </h2>
+                                <p class="hero-subtitle" style="color: #6e6e73; line-height: 1.6; margin-bottom: 20px;">
+                                    아이폰 15 → +15,000원 | 아이폰 16 → +16,000원<br>
+                                    아이폰 17 → +17,000원! 기종 번호가 곧 보너스!
+                                </p>
+                                <div class="cta-group" style="display: flex; gap: 15px; margin-top: 30px;">
+                                    <span class="btn btn-primary btn-lg" style="background: #1d1d1f; border: none; color: #fff; font-weight: 800;">내 아이폰 보너스 확인</span>
+                                </div>
+                            </div>
+                            <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
+                                <img src="iphone_hero_banner.webp" alt="아이폰" style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.2)); animation: floatHero 6s ease-in-out infinite;">
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
 
-
-                </div>
-
-
-
+            <!-- Slide 4: 리뷰 작성 보너스 (상시) -->
+            <div class="hero-slide" style="background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #6366F1 100%);">
+                <style>@keyframes floatHero { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }</style>
+                <a href="event_review.html" style="text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; position: relative; z-index: 10;">
+                    <div class="container hero-container" style="padding: 20px 15px !important; position: relative; width: 100%; height: 100%; display: flex; align-items: center;">
+                        <div class="hero-content-wrapper">
+                            <div class="hero-text-area">
+                                <span class="hero-badge" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #FDE68A; font-weight: 700; border-radius: 20px; padding: 6px 16px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="ri-star-fill"></i> 상시 리뷰 보너스 이벤트
+                                </span>
+                                <h2 style="color: #fff; font-size: 3rem; font-weight: 800; line-height: 1.3; margin-bottom: 20px;">
+                                    후기 하나에<br>
+                                    <span style="color:#FDE68A;">5,000원!</span>
+                                </h2>
+                                <p class="hero-subtitle" style="color: rgba(255,255,255,0.85); line-height: 1.6; margin-bottom: 20px;">
+                                    거래 완료 후 이용후기를 남겨주시면<br>
+                                    5,000원을 추가로 지급해 드립니다.
+                                </p>
+                                <div style="font-size: 0.72rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                    <i class="ri-time-line"></i> 상시 진행
+                                </div>
+                                <div class="cta-group" style="display: flex; gap: 15px; margin-top: 30px;">
+                                    <span class="btn btn-primary btn-lg" style="background: #FDE68A; border: none; color: #1e293b; font-weight: 800;">리뷰 보너스 받기</span>
+                                </div>
+                            </div>
+                            <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
+                                <img src="review_bonus_banner.png" alt="리뷰 보너스" style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); animation: floatHero 6s ease-in-out infinite; border-radius: 16px;">
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
 
-
-
-
-
-
-        </div>
+                    </div>
 
 
 
@@ -952,6 +1568,8 @@ wcs_do();
         <div id="slider-dots" style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 8px;">
             <span class="slider-dot active" data-index="0"></span>
             <span class="slider-dot" data-index="1"></span>
+            <span class="slider-dot" data-index="2"></span>
+            <span class="slider-dot" data-index="3"></span>
         </div>
 
         <!-- Prev/Next Controls (PC Only) -->
@@ -1191,6 +1809,64 @@ wcs_do();
 
         .chip-tag { font-size: 0.8rem; color: #94a3b8; background: transparent; padding: 0; font-weight: 500;}
 
+        /* ── 직매입 구조 설명 아코디언 ──
+           항상 펼쳐져 화면을 크게 차지했던 섹션을 기본 접힘으로 바꿨다.
+           details 요소를 쓰므로 자바스크립트가 필요 없다. */
+        .zb-acc { border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; overflow: hidden; }
+        .zb-sum {
+            list-style: none; cursor: pointer; padding: 18px 20px;
+            display: grid; grid-template-columns: 1fr auto; align-items: center;
+            gap: 4px 14px; position: relative;
+        }
+        .zb-sum::-webkit-details-marker { display: none; }
+        .zb-sum-badge {
+            grid-column: 1; font-size: 0.7rem; font-weight: 800; color: #1d4ed8;
+            background: #eef4ff; padding: 4px 10px; border-radius: 9px; justify-self: start;
+        }
+        .zb-sum-title { grid-column: 1; font-size: 1.12rem; font-weight: 800; color: #0f172a; line-height: 1.4; }
+        .zb-sum-desc { grid-column: 1; font-size: 0.83rem; color: #64748b; }
+        .zb-sum-arrow {
+            grid-column: 2; grid-row: 1 / span 3; width: 30px; height: 30px; border-radius: 50%;
+            background: #f1f5f9; position: relative; transition: transform .25s, background .2s;
+        }
+        .zb-sum-arrow::after {
+            content: ''; position: absolute; left: 50%; top: 47%;
+            width: 8px; height: 8px; border-right: 2px solid #475569; border-bottom: 2px solid #475569;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+        .zb-acc[open] .zb-sum-arrow { transform: rotate(180deg); background: #eef4ff; }
+        .zb-sum:hover .zb-sum-arrow { background: #e6ecf4; }
+        .zb-acc-body { padding: 4px 20px 22px; border-top: 1px solid #f1f5f9; }
+        .zero-bubble-section .container { padding-left: 15px; padding-right: 15px; }
+
+        @media (max-width: 768px) {
+            /* 후기(order 7) 아래, 푸터(order 10) 위로 내린다.
+               order를 지정하지 않으면 기본값 0이라 네비게이션보다도 위로 올라간다. */
+            .zero-bubble-section { order: 8; padding: 0 !important; margin: 0 15px 20px; }
+            .foreigner-cta { order: 9; margin: 0 15px 18px !important; padding: 0 !important; width: auto !important; }
+            .zero-bubble-section .container { padding: 0; }
+            .zb-sum { padding: 15px 16px; gap: 3px 12px; }
+            .zb-sum-title { font-size: 1rem; }
+            .zb-sum-desc { font-size: 0.76rem; }
+            .zb-sum-badge { font-size: 0.65rem; }
+            .zb-acc-body { padding: 4px 16px 18px; }
+        }
+
+        /* ── 실거래 후기 섹션 헤더 ──
+           예전엔 제목만 크고(1.35rem 이상) '+ 더보기'가 제목 아래 오른쪽에 떠 있어
+           어디에 걸린 링크인지 애매했다. 제목 옆으로 붙이고 설명을 한 줄 넣는다. */
+        .rv-head { margin-bottom: 22px; }
+        .rv-title { font-size: 1.35rem !important; }
+        .rv-more { color: #2563EB; text-decoration: none; font-weight: 700; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
+        .rv-sub { font-size: 0.88rem; color: #64748b; margin: 6px 0 0; }
+
+        @media(max-width: 768px) {
+            .rv-head { margin-bottom: 15px; }
+            .rv-title { font-size: 1.14rem !important; }
+            .rv-sub { font-size: 0.78rem; margin-top: 4px; }
+            .rv-more { font-size: 0.75rem; }
+        }
+
 
 
         @media(max-width: 768px) {
@@ -1229,11 +1905,10 @@ wcs_do();
 
         <div class="usc-header">
 
-            <h2>오늘의 정확한 매입 시세 확인</h2>
+            <h2>내 폰, 지금 얼마일까요?</h2>
 
-            <p>기종을 검색하거나 아래 인기 기종을 클릭해 최고가를 바로 확인하세요.</p>
-
-        </div>
+            <p>기종만 알려주시면 3초 안에 시세를 알려드립니다.</p>
+                    </div>
 
         
 
@@ -1241,11 +1916,10 @@ wcs_do();
 
             <i class="ri-search-line"></i>
 
-            <input type="text" id="fast-search-input" placeholder="기종명 입력 (예: 아이폰15, 갤럭시S24)" onkeypress="if(event.key === 'Enter') document.getElementById('fast-search-btn').click();">
+            <input type="text" id="fast-search-input" placeholder="예) 아이폰 15, 갤럭시 S24" onkeypress="if(event.key === 'Enter') document.getElementById('fast-search-btn').click();">
 
             <button id="fast-search-btn" class="usc-button" onclick="const q = document.getElementById('fast-search-input').value; if(q) location.href='quote.html?search=' + encodeURIComponent(q); else location.href='quote.html';">시세 조회</button>
-
-        </div>
+                    </div>
 
 
 
@@ -1255,54 +1929,43 @@ wcs_do();
 
             <div class="usc-chip" onclick="location.href='quote.html?model=iphone15pro'">
 
-                <div class="chip-icon"><img src="assets/series/apple/아이폰15.png" alt="아이폰 15 Pro" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
+                <div class="chip-icon"><img src="assets/series/apple/아이폰15.webp" loading="lazy" alt="아이폰 15 Pro" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
 
                 <div class="chip-info">
 
                     <div class="chip-name">아이폰 15 Pro</div>
                     <div class="chip-price" id="pop-price-ip15p">1,100,000원</div>
-                    <div class="chip-tag">기본용량A급기준</div>
-
-                </div>
-
-            </div>
+                    <div class="chip-tag">기본용량 최상급기준</div>
+                    </div>
+                    </div>
 
             <div class="usc-chip" onclick="location.href='quote.html?model=s24ultra'">
 
-                <div class="chip-icon"><img src="assets/series/samsung/s시리즈.png" alt="갤럭시 S24 Ultra" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
+                <div class="chip-icon"><img src="assets/series/samsung/s시리즈.webp" loading="lazy" alt="갤럭시 S24 Ultra" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
 
                 <div class="chip-info">
 
                     <div class="chip-name">갤럭시 S24 Ultra</div>
                     <div class="chip-price" id="pop-price-s24u">1,150,000원</div>
-                    <div class="chip-tag">기본용량A급기준</div>
-
-                </div>
-
-            </div>
+                    <div class="chip-tag">기본용량 최상급기준</div>
+                    </div>
+                    </div>
 
             <div class="usc-chip" onclick="location.href='quote.html?model=zflip5'">
 
-                <div class="chip-icon"><img src="assets/series/samsung/플립 시리즈.png" alt="갤럭시 Z 플립 5" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
+                <div class="chip-icon"><img src="assets/series/samsung/플립 시리즈.webp" loading="lazy" alt="갤럭시 Z 플립 5" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
 
                 <div class="chip-info">
 
                     <div class="chip-name">갤럭시 Z 플립 5</div>
                     <div class="chip-price" id="pop-price-zf5">550,000원</div>
-                    <div class="chip-tag">기본용량A급기준</div>
+                    <div class="chip-tag">기본용량 최상급기준</div>
+                    </div>
+                    </div>
+                    </div>
 
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Foreigner 배너 버튼 -->
-        <a href="quote-foreigner.html" class="notranslate" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; padding: 10px 16px; background: linear-gradient(135deg, #1e3a5f, #2563eb); color: white; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.82rem; transition: all 0.2s; box-shadow: 0 3px 8px rgba(37,99,235,0.15);">
-            <span style="font-size: 1rem;">🌍</span>
-            <span>Sell Your Phone — For Foreigners in Korea</span>
-            <span style="font-size: 0.9rem;">→</span>
-        </a>
+        <!-- Foreigner 배너는 페이지 하단(푸터 위)으로 이동했습니다.
+             시세조회 흐름을 끊지 않기 위한 조치이며, 상단 언어 선택기로도 진입할 수 있습니다. -->
 
     </section>
 
@@ -1310,27 +1973,178 @@ wcs_do();
 
     <!-- App-Like Quick Menu Grid -->
 
+    <!-- App-Like Quick Menu Grid (Fongabi-style Smartphone Category Card) -->
     <section class="app-grid-section">
-
-        <div class="app-grid-container">
-
-            <a href="quote.html?brand=apple" class="app-grid-item">
-                <div class="app-grid-icon apple"><img src="apple.svg" style="width: 40px;"></div>
-                <div class="app-grid-label">아이폰 팔기</div>
-            </a>
-
-            <a href="quote.html?brand=samsung" class="app-grid-item">
-                <div class="app-grid-icon samsung"><img src="samsung.svg" style="width: 50px;"></div>
-                <div class="app-grid-label">갤럭시 팔기</div>
-            </a>
-
-            <a href="price-list.html" class="app-grid-item">
-                <div class="app-grid-icon" style="background:#f1f5f9; color:#2563eb; font-size: 36px;"><i class="ri-file-list-3-fill"></i></div>
-                <div class="app-grid-label">단가보기</div>
-            </a>
-
+        <div class="fongabi-card">
+            <div class="fongabi-card-header">
+                <span class="fongabi-card-title">내 중고폰 판매하기</span>
+                <span class="fongabi-badge-blue">수수료 0원 직매입</span>
+            </div>
+            <div class="fongabi-grid-container smartphone-only">
+                <a href="quote.html?brand=apple" class="fongabi-grid-item-large apple-card">
+                    <div class="fongabi-grid-icon-large apple-bg">
+                        <img src="apple.svg" alt="Apple" style="width: 20px; height: 20px; filter: brightness(0.2);">
+                    </div>
+                    <span class="fongabi-grid-label-large">아이폰 팔기</span>
+                    <span class="fongabi-grid-subtext">애플 전 기종 최고가</span>
+                </a>
+                <a href="quote.html?brand=samsung" class="fongabi-grid-item-large samsung-card">
+                    <div class="fongabi-grid-icon-large samsung-bg">
+                        <img src="samsung.svg" alt="Samsung" style="width: 28px; height: 28px;">
+                    </div>
+                    <span class="fongabi-grid-label-large">갤럭시 팔기</span>
+                    <span class="fongabi-grid-subtext">삼성 최신 모델 전문</span>
+                </a>
+                <a href="price-list.html" class="fongabi-grid-item-large price-card">
+                    <div class="fongabi-grid-icon-large price-bg">
+                        <i class="ri-file-list-3-line"></i>
+                    </div>
+                    <span class="fongabi-grid-label-large">시세표 보기</span>
+                    <span class="fongabi-grid-subtext">실시간 매입 단가표</span>
+                </a>
+            </div>
         </div>
+    </section>
 
+    <!-- Recent Reviews (Added dynamically) -->
+    <section class="recent-reviews" style="background: #fbfbfd; padding: 60px 0;">
+        <div class="container">
+            <div class="rv-head">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                    <h2 class="section-title rv-title" style="margin-bottom: 0; text-align: left;">실거래 후기</h2>
+                    <a href="reviews.html" class="rv-more">전체보기 ›</a>
+                </div>
+                <p class="rv-sub">매입이 완료된 고객이 직접 남긴 후기입니다.</p>
+            </div>
+
+            <div class="review-grid" id="homepage-recent-reviews"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <!-- JavaScript will populate this -->
+                <div class="text-center" style="grid-column: 1/-1; padding: 40px; color: #888;">후기를 불러오는 중입니다...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 유통단계 거품 제로 · 직매입 구조 설명 섹션 (모바일에서는 후기 아래로, 기본 접힘) -->
+    <section class="zero-bubble-section">
+        <div class="container">
+          <!-- 아코디언 — 기본 접힘. 눌렀을 때만 펼쳐진다.
+               예전엔 이 섹션이 항상 펼쳐진 상태로 화면을 크게 차지했다. -->
+          <details class="zb-acc" id="zb-acc">
+            <summary class="zb-sum">
+                <span class="zb-sum-badge">쉐라폰 직매입 구조 💎</span>
+                <span class="zb-sum-title">왜 쉐라폰이 더 높게 드릴 수 있을까요?</span>
+                <span class="zb-sum-desc">중간 마진 없이 돌려드리는 구조를 확인해 보세요</span>
+                <span class="zb-sum-arrow" aria-hidden="true"></span>
+            </summary>
+            <div class="zb-acc-body">
+
+            <!-- 2대 핵심 강점 카드 -->
+            <div class="zb-strengths">
+                <div class="zb-strength-card">
+                    <span class="s-badge">강점 01</span>
+                    <h3>중간 유통 마진이 없습니다.</h3>
+                    <p>대리점과 도매상을 거치는 복잡한 중간 유통 단계를 전부 제거했습니다. <strong>마진 거품이 없는 직매입 구조</strong>로 높은 매입가를 고스란히 돌려드립니다.</p>
+                </div>
+                <div class="zb-strength-card">
+                    <span class="s-badge">강점 02</span>
+                    <h3>재판매, 렌탈 없이 중고폰 매입만 진행합니다.</h3>
+                    <p>재판매 매장 운영비나 렌탈 구독 서비스 등의 <strong>불필요한 고정 지출을 전부 없앴습니다</strong>. 매입에만 전념하여 절감한 비용을 매입가에 반영해드립니다.</p>
+                </div>
+            </div>
+            
+            <div class="zb-compare-grid">
+                <!-- 기존 유통망 카드 -->
+                <div class="zb-card zb-card-bad">
+                    <div class="zb-card-title">
+                        <span class="status-dot bad"></span>
+                        일반 중고폰 매입 (3단계 거품)
+                    </div>
+                    <div class="zb-flow">
+                        <div class="zb-flow-step">
+                            <span class="step-num">1</span>
+                            <span class="step-txt">고객</span>
+                        </div>
+                        <i class="ri-arrow-right-line flow-arrow-right"></i>
+                        <i class="ri-arrow-down-line flow-arrow-down" style="display:none;"></i>
+                        <div class="zb-flow-step">
+                            <span class="step-num">2</span>
+                            <span class="step-txt">수거처 및 대리점<br><small>(수수료 차감)</small></span>
+                        </div>
+                        <i class="ri-arrow-right-line flow-arrow-right"></i>
+                        <i class="ri-arrow-down-line flow-arrow-down" style="display:none;"></i>
+                        <div class="zb-flow-step">
+                            <span class="step-num">3</span>
+                            <span class="step-txt">중간 유통업체<br><small>(마진 차감)</small></span>
+                        </div>
+                    </div>
+                    <ul class="zb-bullets">
+                        <li><i class="ri-close-circle-fill" style="color: #94A3B8;"></i> 대리점/도매상 유통 마진 발생</li>
+                        <li><i class="ri-close-circle-fill" style="color: #94A3B8;"></i> 불필요한 매장 운영 및 고정비 반영</li>
+                    </ul>
+                    <div class="zb-result bad">
+                        <span class="result-label">고객이 받는 최종 매입가</span>
+                        <span class="result-price">단가 하락 📉</span>
+                    </div>
+                </div>
+
+                <!-- 쉐라폰 다이렉트 카드 -->
+                <div class="zb-card zb-card-good">
+                    <div class="zb-card-badge">추천</div>
+                    <div class="zb-card-title">
+                        <span class="status-dot good"></span>
+                        쉐라폰 다이렉트 매입 (수수료 0원)
+                    </div>
+                    <div class="zb-flow">
+                        <div class="zb-flow-step highlight">
+                            <span class="step-num">1</span>
+                            <span class="step-txt">고객</span>
+                        </div>
+                        <i class="ri-arrow-right-line flow-arrow-right good"></i>
+                        <i class="ri-arrow-down-line flow-arrow-down good" style="display:none;"></i>
+                        <div class="zb-flow-step main-brand">
+                            <span class="step-icon" style="display:flex; align-items:center; justify-content:center; margin-bottom:4px;"><img src="sr_logo.webp" alt="SR" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"></span>
+                            <span class="step-txt">쉐라폰 직매입<br><small>(수수료 0원)</small></span>
+                        </div>
+                    </div>
+                    <ul class="zb-bullets">
+                        <li><i class="ri-checkbox-circle-fill" style="color: #2563EB;"></i> 중간 유통 단계 없는 다이렉트 거래</li>
+                        <li><i class="ri-checkbox-circle-fill" style="color: #2563EB;"></i> 매입 전념을 통한 불필요한 지출 제로</li>
+                    </ul>
+                    <div class="zb-result good">
+                        <span class="result-label">쉐라폰 약속 최종 매입가</span>
+                        <span class="result-price">수수료 0원 직매입가 📈</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 신뢰 보장 3가지 배지 -->
+            <div class="zb-guarantees">
+                <div class="zb-guarantee-card">
+                    <div class="g-icon-wrap"><i class="ri-shield-user-fill"></i></div>
+                    <div class="g-info">
+                        <h4>개인정보 100% 영구삭제</h4>
+                        <p>전문 파쇄 솔루션으로 안전 복구 불가능</p>
+                    </div>
+                </div>
+                <div class="zb-guarantee-card">
+                    <div class="g-icon-wrap"><i class="ri-refund-2-fill"></i></div>
+                    <div class="g-info">
+                        <h4>불만족 시 반송 보장</h4>
+                        <p>매입 강요 없이 언제든 반송해 드립니다</p>
+                    </div>
+                </div>
+                <div class="zb-guarantee-card">
+                    <div class="g-icon-wrap"><i class="ri-money-dollar-circle-fill"></i></div>
+                    <div class="g-info">
+                        <h4>검수 후 당일 입금</h4>
+                        <p>지체 없는 가장 빠른 송금을 약속합니다</p>
+                    </div>
+                </div>
+            </div>
+            </div><!-- /.zb-acc-body -->
+          </details>
+        </div>
     </section>
 
     <!-- Data Deletion Guarantee Banner -->
@@ -1358,15 +2172,9 @@ wcs_do();
 
 
                 <h3 style="margin: 0 0 5px 0; color: #4CAF50;">100% 데이터 영구 삭제 보장</h3>
-
-
-
-                <p style="margin: 0; color: #ccc;">개인정보 유출 걱정 없이 데이터를 복구 불가능하게 영구 삭제해드립니다.<br>
-                    안심하고 판매하세요.</p>
-
-
-
-            </div>
+                <p style="margin: 0; color: #ccc; line-height: 1.6;">개인정보 유출 걱정 없이 데이터를 복구 불가능하게 영구 삭제해드립니다.<br>
+                    국제 데이터 삭제 보안 인증 기관 ADISA의 프로덕트 어슈어런스(Product Assurance) m360soft를 사용해 기기 개인정보초기화 및 진단을 시행합니다.</p>
+                    </div>
 
 
 
@@ -1379,14 +2187,8 @@ wcs_do();
 
 
                     안전하게 팔기</a>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1439,10 +2241,7 @@ wcs_do();
 
 
                     <p>몇 번의 클릭으로 현재 가장 정확한<br>내 폰의 매입가를 확인하세요.</p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1459,10 +2258,7 @@ wcs_do();
 
 
                     <p>원하는 곳에서 무료 방문 수거 또는<br>편리한 택배 착불 발송을 선택하세요.</p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1479,18 +2275,9 @@ wcs_do();
 
 
                     <p>저희 직원이 꼼꼼히 검수한 뒤<br>지체 없이 당일 송금을 원칙으로 합니다.</p>
-
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1505,76 +2292,6 @@ wcs_do();
     
 
 
-    <!-- Recent Reviews (Added dynamically) -->
-    
-
-
-
-    <section class="recent-reviews" style="background: #fbfbfd; padding: 60px 0;">
-
-
-
-        <div class="container">
-
-
-
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
-
-
-
-                <div>
-
-
-
-                    <h2 class="section-title" style="margin-bottom: 5px; text-align: left;">판매하기 실거래 리뷰 💬</h2>
-
-
-
-                </div>
-
-
-
-                <a href="reviews.html"
-
-
-
-                    style="color: #666; text-decoration: none; font-weight: 500; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;">+ 더보기</a>
-
-
-
-            </div>
-
-
-
-
-
-
-
-            <div class="review-grid" id="homepage-recent-reviews"
-
-
-
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-
-
-
-                <!-- JavaScript will populate this -->
-
-
-
-                <div class="text-center" style="grid-column: 1/-1; padding: 40px; color: #888;">후기를 불러오는 중입니다...</div>
-
-
-
-            </div>
-
-
-
-        </div>
-
-
-
-    </section>
 
 
 
@@ -1619,18 +2336,9 @@ wcs_do();
 
 
                     <span>Loading...</span>
-
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1642,75 +2350,6 @@ wcs_do();
 
 
 
-    <!-- Live Prices -->
-
-
-
-    <section class="live-prices">
-
-
-
-        <div class="container">
-
-
-
-            <h2 class="section-title text-center">실시간 매입 시세</h2>
-
-
-
-            <p class="section-subtitle text-center">지금 가장 인기 있는 모델들의 매입가입니다.</p>
-
-
-
-
-
-
-
-            <div class="price-grid live-prices-list">
-
-
-
-                <!-- Javascript will populate this -->
-
-
-
-                <div class="price-card">
-
-
-
-                    <span>Loading...</span>
-
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-
-
-
-
-            <div class="text-center" style="margin-top: 40px;">
-
-
-
-                <a href="quote.html" class="btn btn-secondary">내 모델 시세 찾기</a>
-
-
-
-            </div>
-
-
-
-        </div>
-
-
-
-    </section>
 
 
 
@@ -1721,6 +2360,16 @@ wcs_do();
     <!-- Footer -->
 
 
+
+    <!-- Foreigner 배너 — 시세조회 블록에서 여기로 내렸습니다.
+         ⚠ order를 반드시 지정해야 한다. 미지정(기본 0)이면 모바일에서 네비게이션보다 위로 올라간다. -->
+    <div class="container foreigner-cta" style="margin-bottom: 22px;">
+        <a href="quote-foreigner.html" class="notranslate" style="display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: #f4f8ff; border: 1px solid #dbe7fb; color: #1e3a8a; border-radius: 13px; text-decoration: none; font-weight: 700; font-size: 0.82rem; line-height: 1.4;">
+            <span style="font-size: 1.05rem;">🌍</span>
+            <span style="flex: 1;">Sell Your Phone<br>For Foreigners in Korea</span>
+            <span style="color: #93b4e8;">›</span>
+        </a>
+    </div>
 
     <footer>
 
@@ -1758,32 +2407,9 @@ wcs_do();
 
 
 
-                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-
-
-
-                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-
-
-
-                    </div>
-                    <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
-                        <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
-                            <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
-                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
-                                고객님의 안전거래를 위해 현금 결제 시 저희 쇼핑몰이 가입한<br>
-                                <strong>KG이니시스의 에스크로(구매안전) 서비스</strong>를 이용하실 수 있습니다.<br>
-                                <span style="color: #6b7280; text-decoration: underline;">[서비스 가입사실 확인하기]</span>
-                            </div>
-                        </div>
-                        <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
-                            <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
                         </div>
                     </div>
-
-
-
-                </div>
 
 
 
@@ -1804,7 +2430,7 @@ wcs_do();
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 
@@ -1816,7 +2442,7 @@ wcs_do();
                     </p>
 
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                        <a href="http://pf.kakao.com/_TEvMK" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #FEE500; color: #000000; font-weight: 700; font-size: 0.95rem; padding: 12px 20px; border-radius: 12px; text-decoration: none; width: fit-content; box-shadow: 0 4px 12px rgba(254,229,0,0.3);">
+                        <a href="https://pf.kakao.com/_TEvMK" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #FEE500; color: #000000; font-weight: 700; font-size: 0.95rem; padding: 12px 20px; border-radius: 12px; text-decoration: none; width: fit-content; box-shadow: 0 4px 12px rgba(254,229,0,0.3);">
                             <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M12 3C5.9 3 1 6.9 1 11.8c0 3.2 2.1 6 5.3 7.6-.2.8-.8 2.8-.9 3.2 0 0-.1.2.1.2.2 0 2.6-1.7 3.6-2.4 1 .1 1.9.2 2.9.2 6.1 0 11-3.9 11-8.8S18.1 3 12 3z" /></svg>
                             쉐라폰 카카오채널 소식
                         </a>
@@ -1826,10 +2452,7 @@ wcs_do();
                             네이버 스마트플레이스
                         </a>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1858,30 +2481,39 @@ wcs_do();
 
 
                     </p>
+                    </div>
+                    </div>
 
 
 
+            <!-- 인증·보증 마크 — 원래는 사업자정보 열 안에 섞여 있어 크기와 형태가 제각각이었다.
+                 전체 폭 한 줄로 빼고 카드 규격을 통일한다. -->
+            <div class="footer-certs">
+                <!-- 에스크로와 결제시스템 유효성은 같은 KG이니시스 확인 팝업이라 하나로 합쳤다 -->
+                <div class="fcert" role="button" tabindex="0"
+                    onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','width=565,height=683,scrollbars=no,resizable=no');">
+                    <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" alt="KG이니시스 에스크로 가입사실 확인">
+                    <div class="fcert-tx">
+                        <b>KG이니시스 에스크로 (구매안전)</b>
+                        현금 결제 시 안전거래 서비스를 이용하실 수 있습니다
+                        <span class="fcert-link">가입사실 확인 ›</span>
+                    </div>
                 </div>
 
-
-
+                <div class="fcert">
+                    <img src="m360_logo.png" alt="m360soft">
+                    <div class="fcert-tx">
+                        <b>ADISA 인증 데이터 삭제</b>
+                        국제 인증 기관 ADISA Certification Limited의 m360soft로
+                        기기 개인정보 초기화 및 진단을 시행합니다
+                    </div>
+                </div>
             </div>
-
-
 
             <div class="copyright">
-
-
-
                 &copy; 2026 HooPak all rights reserved
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1920,9 +2552,9 @@ wcs_do();
             <span>이용후기</span>
         </a>
 
-        <a href="javascript:void(0)" class="nav-item" aria-label="고객센터" onclick="ChannelIO('show')">
-            <i class="ri-customer-service-2-line"></i>
-            <span>고객센터</span>
+        <a href="faq.html" class="nav-item" aria-label="자주 묻는 질문">
+            <i class="ri-question-line"></i>
+            <span>자주 묻는 질문</span>
         </a>
     </div>
 
@@ -1934,18 +2566,43 @@ wcs_do();
 
     <!-- Global Notice Popup -->
     <div id="global-popup-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; opacity:0; transition: opacity 0.4s;"></div>
-    <div id="global-popup" style="display:none; position:fixed; left:50%; top:50%; transform:translate(-50%, -45%); width:90%; max-width:450px; background:white; border-radius:24px; z-index:10001; box-shadow:0 25px 50px rgba(0,0,0,0.25); opacity:0; transition: all 0.4s; flex-direction:column; overflow:hidden;">
-        <div style="padding:40px 30px 30px 30px;">
-            <div style="font-size:2.5rem; text-align:center; margin-bottom:15px; text-shadow:0 10px 20px rgba(255,183,77,0.3);">📢</div>
-            <h3 id="global-popup-title" style="font-size:1.5rem; color:#1e293b; font-weight:800; margin-bottom:20px; text-align:center; letter-spacing:-0.5px; word-break:keep-all;"></h3>
-            <div id="global-popup-content" style="font-size:1.05rem; color:#475569; line-height:1.7; word-break:keep-all; text-align:center; margin-bottom:0;"></div>
+    <div id="global-popup" style="display:none; position:fixed; left:50%; top:50%; transform:translate(-50%, -45%); width:90%; max-width:420px; background:white; border-radius:22px; z-index:10001; box-shadow:0 25px 50px rgba(0,0,0,0.22); opacity:0; transition: all 0.4s; flex-direction:column; overflow:hidden;">
+        <div style="background:#1d4ed8; padding:24px 28px 22px 28px; text-align:center;">
+            <div style="width:50px; height:50px; margin:0 auto 10px; border-radius:15px; background:rgba(255,255,255,0.16); display:flex; align-items:center; justify-content:center;">
+                <i class="ri-notification-3-fill" style="font-size:25px; color:#ffffff;"></i>
+            </div>
+            <div style="font-size:0.82rem; color:#bfdbfe; font-weight:600; letter-spacing:0.3px;">쉐라폰 공지</div>
+
+            <!-- 남은 시간 타이머: 관리자에서 종료일시 + 타이머 표시를 켠 경우에만 노출 (한국시간 기준) -->
+            <div id="global-popup-countdown" style="display:none; gap:6px; justify-content:center; margin-top:16px;">
+                <div style="background:rgba(0,0,0,0.28); border-radius:9px; padding:8px 0; width:60px;">
+                    <div id="gp-cd-d" style="font-size:1.35rem; font-weight:800; color:#ffffff; line-height:1.1; font-variant-numeric:tabular-nums;">0</div>
+                    <div style="font-size:0.68rem; color:rgba(255,255,255,0.72); margin-top:2px;">일</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.28); border-radius:9px; padding:8px 0; width:60px;">
+                    <div id="gp-cd-h" style="font-size:1.35rem; font-weight:800; color:#ffffff; line-height:1.1; font-variant-numeric:tabular-nums;">00</div>
+                    <div style="font-size:0.68rem; color:rgba(255,255,255,0.72); margin-top:2px;">시간</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.28); border-radius:9px; padding:8px 0; width:60px;">
+                    <div id="gp-cd-m" style="font-size:1.35rem; font-weight:800; color:#ffffff; line-height:1.1; font-variant-numeric:tabular-nums;">00</div>
+                    <div style="font-size:0.68rem; color:rgba(255,255,255,0.72); margin-top:2px;">분</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.28); border-radius:9px; padding:8px 0; width:60px;">
+                    <div id="gp-cd-s" style="font-size:1.35rem; font-weight:800; color:#bfdbfe; line-height:1.1; font-variant-numeric:tabular-nums;">00</div>
+                    <div style="font-size:0.68rem; color:rgba(255,255,255,0.72); margin-top:2px;">초</div>
+                </div>
+            </div>
         </div>
-        <div id="global-popup-btn-container" style="display:none; justify-content:center; padding:0 30px 30px 30px;">
-            <button id="global-popup-link-btn" style="width:100%; background:linear-gradient(135deg, #3b82f6, #2563eb); color:white; border:none; padding:16px; border-radius:16px; font-size:1.1rem; font-weight:700; cursor:pointer; box-shadow:0 10px 20px rgba(37,99,235,0.3); transition: transform 0.2s;"></button>
+        <div style="padding:26px 30px 22px 30px; text-align:center;">
+            <h3 id="global-popup-title" style="font-size:1.35rem; color:#0f172a; font-weight:800; margin:0 0 12px; text-align:center; letter-spacing:-0.4px; word-break:keep-all;"></h3>
+            <div id="global-popup-content" style="font-size:1rem; color:#475569; line-height:1.7; word-break:keep-all; text-align:center; margin-bottom:0;"></div>
         </div>
-        <div style="display:flex; border-top:1px solid #f1f5f9; background:#f8fafc;">
-            <button id="global-popup-close-btn" style="flex:1; background:transparent; color:#64748b; border:none; padding:18px; font-size:1rem; font-weight:500; cursor:pointer; border-right:1px solid #f1f5f9;">오늘 하루 보지 않기</button>
-            <button onclick="closeGlobalPopup()" style="flex:1; background:transparent; color:#0f172a; border:none; padding:18px; font-size:1rem; font-weight:700; cursor:pointer;">닫기</button>
+        <div id="global-popup-btn-container" style="display:none; justify-content:center; padding:0 30px 22px 30px;">
+            <button id="global-popup-link-btn" style="width:100%; background:#2563eb; color:white; border:none; padding:15px; border-radius:14px; font-size:1.05rem; font-weight:700; cursor:pointer; box-shadow:0 8px 18px rgba(37,99,235,0.28); transition: transform 0.2s;"></button>
+        </div>
+        <div style="display:flex; border-top:1px solid #f1f5f9; background:#fafbfc;">
+            <button id="global-popup-close-btn" style="flex:1; background:transparent; color:#94a3b8; border:none; padding:16px; font-size:0.92rem; font-weight:500; cursor:pointer; border-right:1px solid #f1f5f9;">오늘 하루 보지 않기</button>
+            <button onclick="closeGlobalPopup()" style="flex:1; background:transparent; color:#334155; border:none; padding:16px; font-size:0.92rem; font-weight:700; cursor:pointer;">닫기</button>
         </div>
     </div>
     
@@ -1967,6 +2624,16 @@ wcs_do();
     document.getElementById('global-popup-close-btn').addEventListener('click', function() {
         closeGlobalPopup(true);
     });
+    // SEO: 3rd-party(네이버 로그인·구글 번역 등)가 주입하는 alt 없는/빈 alt 이미지에 대체텍스트 보강
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            document.querySelectorAll('img:not([alt]), img[alt=""]').forEach(function(img) {
+                var src = img.getAttribute('src') || '';
+                if (/translate/i.test(src)) img.setAttribute('alt', '언어 번역');
+                else img.setAttribute('alt', '쉐라폰 중고폰 매입');
+            });
+        }, 1800);
+    });
     </script>
 
     <!-- Naver SDK for Login Callback -->
@@ -1976,7 +2643,7 @@ wcs_do();
 
 
 
-    <script type="module" src="script.js?v=1780278690883"></script>
+    <script type="module" src="script.js?v=1785403500"></script>
 
 
 
@@ -2167,8 +2834,7 @@ wcs_do();
         <div id="info-modal-content" style="font-size:0.95rem; color:#475569; line-height:1.6; word-break:keep-all; margin-bottom:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:16px; width:100%; box-sizing:border-box;"></div>
 
         <button onclick="closeInfoModal()" style="width:100%; background:#2563EB; color:white; border:none; padding:16px; border-radius:16px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:background 0.2s;">확인완료</button>
-
-    </div>
+                    </div>
 
 
 

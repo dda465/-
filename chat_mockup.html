@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>당근마켓 채팅 캡처용</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+        }
+        .chat-container {
+            width: 375px;
+            height: 600px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .chat-header {
+            height: 60px;
+            border-bottom: 1px solid #ebebeb;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 17px;
+            font-weight: bold;
+            color: #212124;
+        }
+        .chat-header span {
+            margin-left: 10px;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background-color: #ffffff;
+        }
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+        .message-row.other {
+            justify-content: flex-start;
+        }
+        .message-row.me {
+            justify-content: flex-end;
+        }
+        .bubble {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        .message-row.other .bubble {
+            background-color: #f2f3f6;
+            color: #212124;
+            border-top-left-radius: 4px;
+        }
+        .message-row.me .bubble {
+            background-color: #ff7e36;
+            color: #ffffff;
+            border-top-right-radius: 4px;
+        }
+        .time {
+            font-size: 11px;
+            color: #888888;
+            margin: 0 6px;
+            align-self: flex-end;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <!-- 헤더 영역 -->
+        <div class="chat-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="#212124" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>네고충(매너온도 20.5도)</span>
+        </div>
+
+        <!-- 채팅 내역 영역 -->
+        <div class="chat-body">
+            
+            <!-- 상대방 1 -->
+            <div class="message-row other">
+                <div class="bubble">안녕하세요! 올리신 아이폰 14 프로 30만원에 쿨거래 가능할까요? 제가 학생이라서요 ㅠㅠ</div>
+                <div class="time">오전 10:14</div>
+            </div>
+
+            <!-- 나 1 -->
+            <div class="message-row me">
+                <div class="time">오전 10:16</div>
+                <div class="bubble">아... 50만원에 올렸는데요 😅</div>
+            </div>
+
+            <!-- 상대방 2 -->
+            <div class="message-row other">
+                <div class="bubble">제가 지금 바로 계좌이체 해드릴게요! 직거래로 제가 그쪽으로 갈테니까 차비 빼서 25만원 어떠세요?!</div>
+                <div class="time">오전 10:17</div>
+            </div>
+
+            <!-- 나 2 -->
+            <div class="message-row me">
+                <div class="time">오전 10:19</div>
+                <div class="bubble">죄송합니다 안팔게요.</div>
+            </div>
+
+            <!-- 상대방 3 -->
+            <div class="message-row other">
+                <div class="bubble">아 장사 그렇게 하는거 아닙니다 ㅡㅡ 너무하시네요</div>
+                <div class="time">오전 10:20</div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

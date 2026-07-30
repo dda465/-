@@ -1,4 +1,4 @@
-﻿import { db, auth, storage } from './firebase-config.js';
+import { db, auth, storage } from './firebase-config.js';
 
 import { collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc, updateDoc, getDoc, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -2570,7 +2570,7 @@ async function initDeepWizard() {
                     <p>${msgDesc}</p>
                     <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0;">
                         <strong>遺?곌킅??떆 遺?곗쭊援??꾪룷??686-1 ?붾툝猷? 719???먮씪??/strong><br>
-                        <span style="font-size: 0.9rem; color: #666;">Tel: 010-3263-5672</span>
+                        <span style="font-size: 0.9rem; color: #666;">Tel: 010-5173-5382</span>
                     </div>
                     <p style="font-size: 0.9rem; color: #666;">* 留덉씠?섏씠吏?먯꽌 吏꾪뻾 ?곹솴???뺤씤?섏떎 ???덉뒿?덈떎.</p>
                 `;
@@ -3194,7 +3194,7 @@ window.addEventListener('click', function(e) {
                 <p>${msgDesc}</p>
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0;">
                     <strong>遺?곌킅??떆 遺?곗쭊援??꾪룷??686-1 ?붾툝猷? 719???먮씪??/strong><br>
-                    <span style="font-size: 0.9rem; color: #666;">Tel: 010-3263-5672</span>
+                    <span style="font-size: 0.9rem; color: #666;">Tel: 010-5173-5382</span>
                 </div>
                 <p style="font-size: 0.9rem; color: #666;">* 留덉씠?섏씠吏?먯꽌 吏꾪뻾 ?곹솴???뺤씤?섏떎 ???덉뒿?덈떎.</p>
             `;

@@ -11,12 +11,26 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 
 <!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -53,7 +67,7 @@
     <meta name="naver-site-verification" content="88cd5e4f7d21bc69a519a61b2d5c440af0f6b836" />
     <link rel="canonical" href="https://sharaphone.com">
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <!-- OpenGraph SEO Tags -->
@@ -165,7 +179,7 @@
         }
     </style>
 
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 
     <!-- S26 Event Hero Banner Styles -->
     <style>
@@ -369,15 +383,17 @@
 
 
 <!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
 </head>
@@ -673,7 +689,547 @@ wcs_do();
 
     </style>
 
+    <!-- Accordion Price List CSS -->
+    <style>
+        /* ── Accordion Variables ── */
+        :root {
+            --pl-primary: #2563eb;
+            --pl-primary-hover: #1d4ed8;
+            --pl-primary-light: #dbeafe;
+            --pl-primary-lighter: #eff6ff;
+            --pl-price-color: #3b82f6;
+            --pl-apple-bg: #f1f5f9;
+            --pl-apple-text: #334155;
+            --pl-samsung-bg: #dbeafe;
+            --pl-samsung-text: #1e40af;
+            --pl-shadow-md: 0 4px 12px rgba(0,0,0,.08);
+            --pl-radius: 12px;
+            --pl-radius-lg: 16px;
+            --pl-transition: .25s cubic-bezier(.4,0,.2,1);
+        }
 
+        /* ── Page Hero Banner ── */
+        .price-hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+            padding: 48px 20px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .price-hero::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,.06);
+            border-radius: 50%;
+        }
+        .price-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: -40px;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,.04);
+            border-radius: 50%;
+        }
+        .price-hero h2 {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .price-hero .subtitle {
+            color: rgba(255,255,255,.8);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+        .price-hero .subtitle .note {
+            display: block;
+            margin-top: 4px;
+            color: rgba(255,255,255,.6);
+            font-size: 13px;
+        }
+
+        /* ── Controls Section ── */
+        .pl-controls {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px 20px 0;
+        }
+        .pl-search-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .pl-search-wrap i.search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 20px;
+            pointer-events: none;
+            transition: var(--pl-transition);
+        }
+        .pl-search-input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--pl-radius);
+            font-size: 15px;
+            font-family: inherit;
+            color: #1e293b;
+            background: #fff;
+            outline: none;
+            transition: var(--pl-transition);
+        }
+        .pl-search-input::placeholder { color: #94a3b8; }
+        .pl-search-input:focus {
+            border-color: var(--pl-primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+        }
+        .pl-search-input:focus ~ i.search-icon { color: var(--pl-primary); }
+
+        /* ── Brand Tabs ── */
+        .pl-brand-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 0;
+        }
+        .pl-brand-tab {
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+            transition: var(--pl-transition);
+            white-space: nowrap;
+            user-select: none;
+            font-family: inherit;
+        }
+        .pl-brand-tab:hover {
+            border-color: var(--pl-primary);
+            color: var(--pl-primary);
+        }
+        .pl-brand-tab.active {
+            background: var(--pl-primary);
+            border-color: var(--pl-primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(37,99,235,.3);
+        }
+
+        /* ── Sticky Index Bar ── */
+        .pl-index-bar-wrapper {
+            position: sticky;
+            top: 61px;
+            z-index: 50;
+            background: rgba(248,250,252,.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e2e8f0;
+            transition: box-shadow var(--pl-transition);
+        }
+        .pl-index-bar-wrapper.scrolled {
+            box-shadow: 0 2px 12px rgba(0,0,0,.06);
+        }
+        .pl-index-bar {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .pl-index-bar::-webkit-scrollbar { display: none; }
+        .pl-index-pill {
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
+            color: #475569;
+            transition: var(--pl-transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+            user-select: none;
+            font-family: inherit;
+        }
+        .pl-index-pill:hover {
+            border-color: var(--pl-primary);
+            color: var(--pl-primary);
+            background: var(--pl-primary-lighter);
+        }
+        .pl-index-pill.active {
+            background: var(--pl-primary);
+            border-color: var(--pl-primary);
+            color: #fff;
+        }
+        .pl-index-pill.apple-pill.active {
+            background: var(--pl-apple-text);
+            border-color: var(--pl-apple-text);
+        }
+        .pl-index-pill.samsung-pill.active {
+            background: var(--pl-samsung-text);
+            border-color: var(--pl-samsung-text);
+        }
+
+        /* ── Accordion ── */
+        .pl-accordion-group {
+            margin-bottom: 12px;
+            animation: plFadeInUp .4s ease both;
+        }
+        .pl-accordion-group:nth-child(2) { animation-delay: .05s; }
+        .pl-accordion-group:nth-child(3) { animation-delay: .1s; }
+        .pl-accordion-group:nth-child(4) { animation-delay: .15s; }
+        .pl-accordion-group:nth-child(5) { animation-delay: .2s; }
+        .pl-accordion-group:nth-child(6) { animation-delay: .25s; }
+        .pl-accordion-group:nth-child(7) { animation-delay: .3s; }
+
+        @keyframes plFadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pl-accordion-item {
+            background: #fff;
+            border-radius: var(--pl-radius-lg);
+            border: 1.5px solid #e2e8f0;
+            overflow: hidden;
+            transition: border-color var(--pl-transition), box-shadow var(--pl-transition);
+        }
+        .pl-accordion-item:hover {
+            border-color: #cbd5e1;
+        }
+        .pl-accordion-item.open {
+            border-color: var(--pl-primary);
+            box-shadow: 0 4px 20px rgba(37,99,235,.1);
+        }
+        .pl-accordion-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background var(--pl-transition);
+        }
+        .pl-accordion-header:hover { background: #f8fafc; }
+        .pl-accordion-item.open .pl-accordion-header { background: transparent; }
+
+        .pl-brand-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .pl-brand-badge.apple {
+            background: var(--pl-apple-bg);
+            color: var(--pl-apple-text);
+        }
+        .pl-brand-badge.samsung {
+            background: var(--pl-samsung-bg);
+            color: var(--pl-samsung-text);
+        }
+
+        .pl-series-name {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            flex: 1;
+            min-width: 0;
+        }
+        .pl-max-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--pl-price-color);
+            white-space: nowrap;
+            margin-right: 4px;
+        }
+        .pl-chevron {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform .35s cubic-bezier(.4,0,.2,1), background var(--pl-transition);
+            color: #64748b;
+            font-size: 18px;
+        }
+        .pl-accordion-item.open .pl-chevron {
+            transform: rotate(180deg);
+            background: var(--pl-primary-light);
+            color: var(--pl-primary);
+        }
+
+        /* ── Accordion Body ── */
+        .pl-accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .45s cubic-bezier(.4,0,.2,1);
+        }
+        .pl-accordion-body-inner {
+            padding: 0 20px 20px;
+        }
+
+        /* ── Price Table (Desktop) ── */
+        .pl-price-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .pl-price-table thead th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-bottom: 1.5px solid #e2e8f0;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+        .pl-price-table thead th:first-child { border-radius: 8px 0 0 0; }
+        .pl-price-table thead th:last-child { border-radius: 0 8px 0 0; text-align: center; }
+        .pl-price-table thead th:not(:first-child):not(:last-child) { text-align: right; }
+
+        .pl-price-table tbody tr {
+            transition: background var(--pl-transition);
+        }
+        .pl-price-table tbody tr:hover {
+            background: var(--pl-primary-lighter);
+        }
+        .pl-price-table tbody td {
+            padding: 14px 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .pl-price-table tbody tr:last-child td { border-bottom: none; }
+        .pl-price-table tbody td:first-child {
+            font-weight: 600;
+            color: #1e293b;
+            max-width: 240px;
+        }
+        .pl-price-table tbody td:not(:first-child):not(:last-child) {
+            text-align: right;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+        .pl-price-table tbody td:last-child { text-align: center; }
+
+        .pl-price-s { color: var(--pl-price-color); font-weight: 700 !important; }
+        .pl-price-a { color: #059669; }
+        .pl-price-b { color: #475569; }
+        .pl-price-c { color: #94a3b8; }
+
+        .pl-popular-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .pl-sell-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 14px;
+            background: var(--pl-primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--pl-transition);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .pl-sell-btn:hover {
+            background: var(--pl-primary-hover);
+            box-shadow: 0 2px 8px rgba(37,99,235,.3);
+            transform: translateY(-1px);
+        }
+
+        /* ── Mobile Cards (replaces table on mobile) ── */
+        .pl-mobile-cards { display: none; }
+        .pl-mobile-card {
+            background: #f8fafc;
+            border-radius: var(--pl-radius);
+            padding: 16px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+            transition: var(--pl-transition);
+        }
+        .pl-mobile-card:last-child { margin-bottom: 0; }
+        .pl-mobile-card:hover { border-color: #cbd5e1; }
+        .pl-mobile-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .pl-mobile-card-model {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pl-mobile-grades {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .pl-mobile-grade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+        .pl-mobile-grade-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .pl-mobile-grade-price {
+            font-size: 14px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .pl-mobile-card-footer { text-align: right; }
+        .pl-mobile-sell-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 20px;
+            background: var(--pl-primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--pl-transition);
+            text-decoration: none;
+            width: 100%;
+            justify-content: center;
+        }
+        .pl-mobile-sell-btn:hover { background: var(--pl-primary-hover); }
+
+        /* ── Empty State ── */
+        .pl-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+        }
+        .pl-empty-state.show { display: block; }
+        .pl-empty-state i {
+            font-size: 56px;
+            color: #cbd5e1;
+            margin-bottom: 16px;
+        }
+        .pl-empty-state h3 {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 18px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .pl-empty-state p {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* ── Update Badge ── */
+        .pl-update-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 100px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        .pl-update-badge i { color: var(--pl-primary); font-size: 16px; }
+        .pl-update-badge strong { color: #1e293b; font-weight: 600; }
+
+        /* ── Result Count ── */
+        .pl-result-count {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+            padding-left: 2px;
+        }
+        .pl-result-count strong { color: var(--pl-primary); font-weight: 700; }
+
+        /* ── Scroll Highlight ── */
+        .pl-accordion-item.highlight {
+            animation: plHighlightPulse .6s ease;
+        }
+        @keyframes plHighlightPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+            50% { box-shadow: 0 0 0 4px rgba(37,99,235,.15); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .price-hero { padding: 36px 20px 32px; }
+            .price-hero h2 { font-size: 26px; }
+            .price-hero .subtitle { font-size: 13px; }
+            .pl-series-name { font-size: 14px; }
+            .pl-max-price { font-size: 13px; }
+            .pl-accordion-header { padding: 14px 16px; gap: 10px; }
+            .pl-accordion-body-inner { padding: 0 16px 16px; }
+            .pl-price-table { display: none; }
+            .pl-mobile-cards { display: block; }
+            .pl-brand-tabs { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+            .pl-brand-tabs::-webkit-scrollbar { display: none; }
+        }
+        @media (max-width: 480px) {
+            .price-hero h2 { font-size: 22px; }
+            .pl-mobile-grades { grid-template-columns: 1fr; }
+            .pl-brand-tab { padding: 7px 14px; font-size: 13px; }
+        }
+    </style>
 
 <body>
 
@@ -718,8 +1274,7 @@ wcs_do();
                     <i class="ri-customer-service-2-line"></i>
 
                 </button>
-
-            </div>
+                    </div>
 
 
 
@@ -740,45 +1295,55 @@ wcs_do();
             <div class="nav-links pc-only">
 
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
 
                 <a href="login.html" id="nav-login-link">로그인</a>
-
-            </div>
+                    </div>
 
             <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
-
-        </div>
+                    </div>
 
     </nav>
 
-<main class="container" style="max-width: 800px; margin: 40px auto; min-height: 50vh; padding: 0 20px;">
-  <h2 style="text-align:center; margin-bottom:10px; font-family: 'GmarketSans', sans-serif;">매입 단가표</h2>
-  <p style="text-align:center; color:#ef4444; font-size:0.9rem; font-weight:600; margin-bottom:5px;">※ 실제 매입가는 기기의 상태와 용량에 따라 달라질 수 있습니다.</p>
-  <p style="text-align:center; color:#64748b; font-size:0.85rem; margin-bottom:30px;">단가표의 기준은 기본용량 A등급에 해당하는 단가입니다.</p>
-  
-  <div class="search-bar" style="display:flex; justify-content:center; margin-bottom:20px;">
-    <input type="text" id="model-search" placeholder="모델명 검색" style="padding:12px; width:100%; max-width:400px; border:1px solid #ccc; border-radius:12px; font-size: 1rem;">
+<!-- Price List Hero -->
+<section class="price-hero">
+  <h2>매입 단가표</h2>
+  <p class="subtitle">
+    ※ 실제 매입가는 기기의 상태와 용량에 따라 달라질 수 있습니다.
+    <span class="note">단가표의 기준은 기본용량 S등급에 해당하는 단가입니다.</span>
+  </p>
+</section>
+
+<!-- Controls -->
+<section class="pl-controls">
+  <div class="pl-search-wrap">
+    <input type="text" class="pl-search-input" id="model-search" placeholder="모델명 검색 (예: 아이폰 16, 갤럭시 S26)">
+    <i class="ri-search-line search-icon"></i>
   </div>
-  
-  <div class="filter-tabs" style="display:flex; gap:10px; justify-content:center; margin-bottom:30px;">
-    <button class="filter-btn active btn btn-primary" onclick="filterModels('all')" onclick="filterModels('all')" data-brand="all" style="padding:10px 20px; border-radius: 20px;">전체</button>
-    <button class="filter-btn btn btn-outline" onclick="filterModels('apple')" onclick="filterModels('apple')" data-brand="apple" style="padding:10px 20px; border-radius: 20px;">애플</button>
-    <button class="filter-btn btn btn-outline" onclick="filterModels('samsung')" onclick="filterModels('samsung')" data-brand="samsung" style="padding:10px 20px; border-radius: 20px;">삼성</button>
+  <div class="pl-brand-tabs" id="brandTabs">
+    <button class="pl-brand-tab active" data-brand="all">전체</button>
+    <button class="pl-brand-tab" data-brand="apple"><i class="ri-apple-fill" style="margin-right:4px"></i>애플</button>
+    <button class="pl-brand-tab" data-brand="samsung"><i class="ri-device-line" style="margin-right:4px"></i>삼성</button>
   </div>
-  
-  <div class="table-responsive" style="overflow-x:auto; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;">
-    <table style="width:100%; border-collapse:collapse; text-align:center;">
-      <thead>
-        <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0;">
-            <th style="padding:16px; width: 40%;">기종</th>
-            <th style="padding:16px; width: 60%;">평균 매입가</th>
-        </tr>
-      </thead>
-      <tbody id="price-table-body">
-        <tr><td colspan="2" style="padding: 30px;">데이터를 불러오는 중입니다...</td></tr>
-      </tbody>
-    </table>
+</section>
+
+<!-- Sticky Index Bar -->
+<div class="pl-index-bar-wrapper" id="indexBarWrapper">
+  <div class="pl-index-bar" id="price-index-nav"></div>
+</div>
+
+<!-- Main Content -->
+<main class="container" style="max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; min-height: 50vh;">
+  <div class="pl-update-badge">
+    <i class="ri-time-line"></i>
+    <span>최종 업데이트: <strong id="pl-update-date">-</strong></span>
+  </div>
+  <div class="pl-result-count" id="pl-result-count"></div>
+  <div id="price-table-body"></div>
+  <div class="pl-empty-state" id="pl-empty-state">
+    <i class="ri-search-eye-line"></i>
+    <h3>검색 결과가 없습니다</h3>
+    <p>다른 키워드로 검색하거나 필터를 변경해 보세요.</p>
   </div>
 </main>
     <footer>
@@ -817,15 +1382,8 @@ wcs_do();
 
 
 
-                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-
-
-
-                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-
-
-
-                    </div>
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
                     <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
                         <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
                             <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
@@ -838,11 +1396,14 @@ wcs_do();
                         <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                             <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
                         </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -863,7 +1424,7 @@ wcs_do();
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 
@@ -876,10 +1437,7 @@ wcs_do();
 
 
                     </p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -908,14 +1466,8 @@ wcs_do();
 
 
                     </p>
-
-
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -924,14 +1476,8 @@ wcs_do();
 
 
                 &copy; 2026 HooPak all rights reserved
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -942,7 +1488,7 @@ wcs_do();
 
 </footer>
 
-<script type="module" src="script.js?v=-6168578163426892003"></script>
+<script type="module" src="script.js?v=1785403500-6168578163426892003"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Expose initPriceList and call it

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-18055027970');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 작성 보너스 - 후기 하나에 5,000원! | 쉐라폰</title>
+    <meta name="description" content="쉐라폰 거래 후 이용후기를 작성하면 5,000원을 추가로 드립니다. 상시 진행 이벤트!">
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Main Style Sheet Link -->
+    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link rel="stylesheet" href="event-shared.css?v=1783305600">
+    
+    <style>
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 500;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+        }
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 700;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+        }
+
+        :root {
+            --primary-blue: #2563EB;
+            --review-purple: #7C3AED;
+            --review-violet: #4F46E5;
+            --review-light: #EDE9FE;
+            --apple-black: #1d1d1f;
+            --apple-gray: #f5f5f7;
+            --dark-navy: #0F172A;
+            --border-color: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            color: #1e293b;
+            max-width: 1400px;
+            margin: 0 auto;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+
+        /* =============== HERO BANNER =============== */
+        .review-hero-banner {
+            background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #6366F1 100%);
+            padding: 80px 40px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .review-hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .review-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+        .review-hero-title {
+            font-family: 'GmarketSans', 'Pretendard', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+        .review-hero-title .highlight {
+            color: #FDE68A;
+            position: relative;
+        }
+        .review-hero-sub {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .review-hero-period {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 30px;
+        }
+        .review-hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: var(--review-purple);
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .review-hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        /* =============== FLOATING STARS =============== */
+        .floating-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .floating-stars .star {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.2;
+            animation: floatStar 8s ease-in-out infinite;
+        }
+        .floating-stars .star:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+        .floating-stars .star:nth-child(2) { top: 25%; right: 15%; animation-delay: 2s; font-size: 1.2rem; }
+        .floating-stars .star:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 4s; font-size: 2rem; }
+        .floating-stars .star:nth-child(4) { top: 40%; right: 8%; animation-delay: 1s; }
+        .floating-stars .star:nth-child(5) { bottom: 30%; right: 25%; animation-delay: 3s; font-size: 1rem; }
+        @keyframes floatStar {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
+            50% { transform: translateY(-20px) rotate(15deg); opacity: 0.4; }
+        }
+
+        /* =============== BONUS HIGHLIGHT =============== */
+        .bonus-highlight-section {
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #F5F3FF 0%, #fff 100%);
+        }
+        .bonus-amount-card {
+            max-width: 500px;
+            margin: 0 auto 40px;
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 30px rgba(124,58,237,0.1);
+            border: 1px solid #EDE9FE;
+        }
+        .bonus-amount-label {
+            font-size: 0.9rem;
+            color: #7C3AED;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .bonus-amount-value {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+        .bonus-amount-value .won {
+            font-size: 2rem;
+            color: #7C3AED;
+        }
+        .bonus-amount-desc {
+            font-size: 0.95rem;
+            color: #64748B;
+            line-height: 1.5;
+        }
+
+        /* =============== HOW TO =============== */
+        .how-to-section {
+            padding: 60px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            text-align: center;
+            font-size: 1rem;
+            color: #64748B;
+            margin-bottom: 48px;
+        }
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .step-card {
+            background: #fff;
+            border: 1px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .step-card:hover {
+            border-color: #7C3AED;
+            box-shadow: 0 8px 25px rgba(124,58,237,0.1);
+            transform: translateY(-4px);
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7C3AED, #4F46E5);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+        .step-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        .step-icon.icon-phone { background: linear-gradient(135deg, #3B82F6, #2563EB); }
+        .step-icon.icon-check { background: linear-gradient(135deg, #10B981, #059669); }
+        .step-icon.icon-star  { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .step-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .step-desc {
+            font-size: 0.9rem;
+            color: #64748B;
+            line-height: 1.5;
+        }
+
+        /* =============== NOTICE =============== */
+        .notice-section {
+            padding: 40px 20px 60px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .notice-card {
+            background: #F8FAFC;
+            border-radius: 16px;
+            padding: 28px 24px;
+            border: 1px solid #E2E8F0;
+        }
+        .notice-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #475569;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .notice-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .notice-list li {
+            font-size: 0.85rem;
+            color: #64748B;
+            line-height: 1.6;
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+        .notice-list li::before {
+            content: '·';
+            position: absolute;
+            left: 4px;
+            color: #94A3B8;
+            font-weight: 800;
+        }
+
+        /* =============== CTA BOTTOM =============== */
+        .cta-bottom-section {
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+        }
+        .cta-bottom-title {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .cta-bottom-sub {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+        }
+        .cta-bottom-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #FDE68A;
+            color: #1e293b;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .cta-bottom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        /* =============== MOBILE RESPONSIVE =============== */
+        @media (max-width: 768px) {
+            .review-hero-banner {
+                padding: 50px 20px 40px;
+            }
+            .review-hero-title {
+                font-size: 2rem;
+            }
+            .review-hero-sub {
+                font-size: 0.95rem;
+            }
+            .bonus-amount-value {
+                font-size: 3rem;
+            }
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .step-card {
+                display: flex;
+                align-items: center;
+                text-align: left;
+                gap: 16px;
+                padding: 20px;
+            }
+            .step-card .step-icon {
+                font-size: 2rem;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            .step-card .step-number {
+                display: none;
+            }
+            .step-card .step-text {
+                flex: 1;
+            }
+            .section-title {
+                font-size: 1.4rem;
+            }
+            .cta-bottom-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Google Translate Overrides */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        html, body { top: 0px !important; position: static !important; }
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
+        .lang-select:hover { border-color: #2563EB; }
+        @media (max-width: 768px) {
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            .lang-select { padding: 3px 12px 3px 4px; font-size: 0.75rem; width: 60px; min-width: 60px; margin-right: 4px !important; background-position: right 3px top 50%; background-size: 6px auto; letter-spacing: -0.5px; }
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <div class="container" style="display:flex; align-items:center; justify-content:space-between; padding: 12px 20px;">
+            <a href="index.html" class="logo" style="display:flex; align-items:center; text-decoration:none;">
+                <img src="sr_logo.webp" alt="쉐라폰" class="logo-icon" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                <span class="logo-text-wrapper" style="font-family: 'Pretendard', sans-serif; font-weight: 800; font-size: 24px; color: #1E3A8A; margin-left: 8px; letter-spacing: -1px;">쉐라폰</span>
+            </a>
+            
+            <div id="google_translate_element" style="display:none;"></div>
+            
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
+
+            <div class="mobile-only" style="align-items:center;">
+                <a href="quote.html" style="font-size:0.8rem; font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:3px 8px; border-radius:16px; margin-right:6px; white-space:nowrap; flex-shrink:0; min-width:max-content;">판매하기</a>
+                <a href="login.html" id="mobile-auth-link" style="font-size:0.8rem; font-weight:700; color:#1e293b; border: 1px solid #e2e8f0; padding:3px 8px; border-radius:16px; white-space:nowrap; flex-shrink:0; min-width:max-content;">로그인</a>
+                <a href="admin.html" id="mobile-admin-btn" style="font-size:1.4rem; color:#e11d48; display:none; margin-left:6px;"><i class="ri-dashboard-2-line"></i></a>
+                <button onclick="ChannelIO('show')" style="background:none; border:none; font-size:1.6rem; color:#1e293b; cursor:pointer; padding:0; display:flex; align-items:center; margin-left:6px;">
+                    <i class="ri-customer-service-2-line"></i>
+                </button>
+            </div>
+
+            <div class="nav-links pc-only">
+                <a href="quote.html">내 폰 판매</a>
+                <a href="faq.html">자주 묻는 질문</a>
+                <a href="login.html" id="nav-login-link">로그인</a>
+            </div>
+            
+            <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
+        </div>
+    </nav>
+
+    <div class="mobile-ticker mobile-only">
+        <span><i class="ri-shield-check-fill" style="color:#4ade80;"></i> 개인정보 데이터 100% 영구 삭제 보장센터 &nbsp;|&nbsp; <i class="ri-flashlight-fill" style="color:#fbbf24;"></i> 검수 완료 직후 당일 송금 원칙 &nbsp;|&nbsp; <i class="ri-smartphone-line" style="color:#60a5fa;"></i> 클릭 3번으로 시세 확인 끝</span>
+    </div>
+
+    <!-- ===== HERO BANNER ===== -->
+    <div class="review-hero-banner">
+        <div class="floating-stars">
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+            <span class="star">⭐</span>
+        </div>
+        <div style="position: relative; z-index: 1;">
+            <div class="review-hero-badge">
+                <i class="ri-star-fill"></i>
+                상시 진행 리뷰 보너스 이벤트
+            </div>
+            <div class="review-hero-title">
+                후기 하나에<br>
+                <span class="highlight">5,000원!</span>
+            </div>
+            <div class="review-hero-sub">
+                쉐라폰 거래 완료 후 이용후기를 남겨주시면<br>
+                5,000원을 추가로 지급해 드립니다.
+            </div>
+            <div class="review-hero-period">
+                <i class="ri-time-line"></i>
+                상시 진행 (종료 시 사전 공지)
+            </div>
+            <br>
+            <a href="quote.html" class="review-hero-cta">
+                <i class="ri-smartphone-line"></i>
+                지금 판매하기
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== BONUS HIGHLIGHT ===== -->
+    <div class="bonus-highlight-section">
+        <div class="bonus-amount-card">
+            <div class="bonus-amount-label">
+                <i class="ri-star-fill"></i>
+                리뷰 작성 보너스
+            </div>
+            <div class="bonus-amount-value">
+                5,000<span class="won">원</span>
+            </div>
+            <div class="bonus-amount-desc">
+                거래 완료 후 카카오채널로 리뷰 이벤트 참여 신청 및<br>
+                작성하신 후기를 보내주셔야 추가 지급됩니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HOW TO ===== -->
+    <div class="how-to-section">
+        <div class="section-title">참여 방법</div>
+        <div class="section-subtitle">3단계로 간단하게 리뷰 보너스를 받으세요</div>
+        
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <span class="step-icon icon-phone"><i class="ri-smartphone-line"></i></span>
+                <div class="step-text">
+                    <div class="step-title">중고폰 판매 접수</div>
+                    <div class="step-desc">쉐라폰에서 간편하게<br>매입 신청을 해주세요</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <span class="step-icon icon-check"><i class="ri-checkbox-circle-line"></i></span>
+                <div class="step-text">
+                    <div class="step-title">거래 완료</div>
+                    <div class="step-desc">기기 검수 후<br>매입 대금이 입금됩니다</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <span class="step-icon icon-star"><i class="ri-star-smile-line"></i></span>
+                <div class="step-text">
+                    <div class="step-title">후기 작성 및 문의</div>
+                    <div class="step-desc">솔직한 후기를 작성해주신 뒤<br>카카오채널로 문의해 주세요<br><strong style="color:#7C3AED;">5,000원 추가 지급!</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NOTICE ===== -->
+    <div class="notice-section">
+        <div class="notice-card">
+            <div class="notice-title">
+                <i class="ri-information-line"></i>
+                유의사항
+            </div>
+            <ul class="notice-list">
+                <li>거래 완료 후 이용후기를 작성하시고 <strong>카카오채널로 이벤트 참여 신청 및 작성하신 후기를 보내주셔야</strong> 5,000원이 지급됩니다.</li>
+                <li>리뷰 보너스는 거래 1건당 1회만 적용됩니다.</li>
+                <li>다른 이벤트 혜택과 중복 적용 가능합니다.</li>
+                <li>허위 또는 부적절한 내용의 후기는 보너스 지급 대상에서 제외될 수 있습니다.</li>
+                <li>이벤트 참여 신청 및 후기 전송 확인 후 영업일 기준 1~2일 이내 송금됩니다.</li>
+                <li>본 이벤트는 사전 고지 없이 변경 또는 종료될 수 있습니다.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ===== CTA BOTTOM ===== -->
+    <div class="cta-bottom-section">
+        <div class="cta-bottom-title">
+            솔직한 후기가<br>보너스가 됩니다 ⭐
+        </div>
+        <div class="cta-bottom-sub">
+            지금 바로 중고폰을 판매하고, 후기 작성으로 5,000원을 추가로 받으세요!
+        </div>
+        <a href="quote.html" class="cta-bottom-btn">
+            <i class="ri-arrow-right-line"></i>
+            판매 신청하러 가기
+        </a>
+    </div>
+
+    <!-- ===== BOTTOM NAV (MOBILE) ===== -->
+    <div class="bottom-nav mobile-only" aria-label="하단 메뉴">
+        <a href="index.html" class="nav-item">
+            <i class="ri-home-5-line"></i>
+            <span>홈</span>
+        </a>
+        <a href="mypage.html" class="nav-item">
+            <i class="ri-user-3-line"></i>
+            <span>마이페이지</span>
+        </a>
+        <a href="quote.html" class="nav-item sell-cta">
+            <div class="sell-icon-wrap">
+                <i class="ri-smartphone-line"></i>
+            </div>
+            <span>판매하기</span>
+        </a>
+        <a href="reviews.html" class="nav-item">
+            <i class="ri-chat-quote-line"></i>
+            <span>이용후기</span>
+        </a>
+        <a href="#" class="nav-item" onclick="ChannelIO('show'); return false;">
+            <i class="ri-headphone-line"></i>
+            <span>고객센터</span>
+        </a>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer style="background: #1e293b; color: rgba(255,255,255,0.6); padding: 40px 20px; text-align: center; font-size: 0.8rem; line-height: 1.6;">
+        <div style="margin-bottom: 12px;">
+            <strong style="color: #fff;">쉐라폰</strong> | 대표: 안재현
+        </div>
+        <div>
+            사업자등록번호: 529-22-02538 | 통신판매업: 제2025-인천미추홀-0522호<br>
+            주소: 인천광역시 미추홀구 경인로 229, 8층 802호<br>
+            이메일: cs@sharaphone.com | 고객센터: 070-8098-0684
+        </div>
+        <div style="margin-top: 16px; color: rgba(255,255,255,0.3);">
+            © 2026 쉐라폰. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Google Translate -->
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru',
+                layout: google.translate.TranslateElement.InlineLayout.NONE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var langSelect = document.getElementById('custom_lang_select');
+            var savedLang = (document.cookie.match(/googtrans=\/ko\/(\w[\w-]*)/)||[])[1];
+            if (savedLang && langSelect) langSelect.value = savedLang;
+            
+            langSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                if (targetLang === 'ko') {
+                    document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+                    document.cookie = 'googtrans=; domain=' + window.location.hostname + '; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="module" src="script.js?v=1785403500"></script>
+
+</body>
+</html>

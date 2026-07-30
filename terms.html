@@ -11,12 +11,26 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 
 <!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -45,7 +59,7 @@
 
 
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
 
 
 
@@ -120,23 +134,17 @@
                 <a href="quote.html">내 폰 판매</a>
 
 
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
 
 
 
                 <a href="login.html" id="nav-login-link">로그인</a>
-
-
-
-            </div>
+                    </div>
 
 
 
             <a href="quote.html" class="btn btn-primary">판매하기</a>
-
-
-
-        </div>
+                    </div>
 
 
 
@@ -173,7 +181,11 @@
                 1. 회원은 회사가 정한 양식에 따라 내 폰 판매 신청을 함으로써 서비스 이용을 신청합니다.<br>
                 2. 매매계약은 회사가 회원의 기기를 수령하고 최종 매입가를 안내한 후, 회원이 이에 동의(수락)함으로써 최종 성립됩니다.<br>
                 3. 회사가 검수 후 안내한 최종 매입가에 회원이 동의하여 회원의 계좌로 매입 대금이 입금 완료된 시점부터는 매매계약이 최종적으로 확정된 것으로 봅니다. <strong>이후에는 어떠한 사유로도 단순 변심에 의한 거래 취소 및 기기 반환 요구를 할 수 없습니다.</strong><br>
-                4. 회원이 안내된 매입가에 동의하지 않을 경우, 회사는 기기를 회원에게 반송하며 이 때 발생하는 반송 비용은 원칙적으로 회원이 부담합니다 (단, 프로모션 등 예외 적용 가능).<br>
+                4. 회원이 안내된 매입가에 동의하지 않을 경우, 회사는 기기를 회원에게 반송하며 이 때 발생하는 반송 비용은 원칙적으로 회원이 부담합니다. 구체적으로, 기기 검수 결과 기능 결함 또는 하자가 확인되어 매입가가 조정된 상태에서 회원이 전자매매계약서상 최종 견적 금액에 동의하지 않아 반송을 요청하는 경우, <strong>회사가 부담한 왕복 택배비 실비 9,000원(수거 4,500원 + 반송 4,500원)</strong>이 청구됩니다. <strong>제주 및 도서·산간 지역의 경우 반송 배송비가 10,000원~20,000원까지 부과될 수 있습니다.</strong><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;다만 다음 각 호의 어느 하나에 해당하는 경우에는 반송 비용을 청구하지 않습니다.<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;① 회사의 검수 오류로 최종 매입가가 잘못 산정된 경우<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;② 회원이 접수 시 입력한 기기 상태와 검수 결과가 일치함에도 매입가가 변경된 경우<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;③ 회사가 프로모션 등을 통해 반송비 면제를 별도로 안내한 경우<br>
                 5. 매입 거부, 검수 불가 등으로 기기 반송이 결정되었으나, 회원이 반송 비용 결제를 거부하거나 <strong>회사의 반송 통보일로부터 14일 이내에 연락이 닿지 않는 경우, 회원은 해당 기기에 대한 소유권을 포기한 것으로 간주</strong>합니다. 이 경우 회사는 기기를 임의로 폐기 또는 재활용 처리할 수 있으며, 회원은 어떠한 민/형사상 이의도 제기할 수 없습니다.
             </p>
 
@@ -183,17 +195,20 @@
                 2. 분실, 도난, 연체, 임대폰, 타인 명의 도용 등 비정상적인 기기는 거래가 불가합니다. 만약 매입 대금 지급 이후라도 해당 기기가 위와 같은 불법 기기로 밝혀질 경우, 회사는 즉시 수사기관에 고발할 수 있습니다. <strong>이 경우 회원은 수령한 매입 대금을 전액 반환해야 하며, 회사가 입은 모든 법적, 물질적, 영업적 손해를 배상할 전적인 책임이 있습니다.</strong><br>
                 3. 미성년자(만 19세 미만)의 경우, 관련 법령에 따라 거래가 일부 제한되거나 법정대리인의 동의가 필요할 수 있습니다. 쉐라폰은 원칙적으로 만 14세 미만 아동의 거래를 제한합니다.<br>
                 4. 회사는 관련 소유권 확인을 위해 신분증 사본 등 추가 정보를 요구할 수 있습니다.<br>
-                5. 회원이 '방문 수거(택배 기사 방문)'를 신청한 후, 사전 연락 없이 당일 부재, 연락 두절, 미배출 등으로 인해 택배사의 헛걸음(공차) 비용이 발생하는 경우, <strong>회사는 회원에게 왕복 택배비 상당의 위약금(5,000원~10,000원)을 청구하거나 향후 쉐라폰 서비스 이용을 영구적으로 제한</strong>할 수 있습니다.
+                5. 회원이 '방문 수거(택배 기사 방문)'를 신청한 후, 사전 연락 없이 당일 부재, 연락 두절, 미배출 등으로 인해 택배사의 헛걸음(공차) 비용이 발생하는 경우, <strong>회사는 회원에게 왕복 택배비 상당의 위약금(5,000원~10,000원)을 청구하거나 향후 쉐라폰 서비스 이용을 영구적으로 제한</strong>할 수 있습니다.<br>
+                6. 매입 대금은 <strong>본인 확인(본인인증)을 완료한 회원 명의의 계좌로만 입금</strong>됩니다. 회원명과 예금주명이 일치하지 않는 경우 입금이 제한될 수 있으며, 부득이하게 타인(가족 등) 명의 계좌로 입금이 필요한 경우 회사가 요구하는 증빙서류(가족관계증명서, 통장 사본 등) 제출 후 회사의 승인을 거쳐야 합니다.
             </p>
 
             <h2>제5조 (기기의 검수 및 단가 산정)</h2>
             <p>
                 1. 회사는 회원이 택배로 발송한 기기를 수령한 후, 당사의 전문 검수 기준에 따라 외관, 기능, 배터리 상태 등을 종합적으로 평가합니다.<br>
-                2. 예상 견적은 단순 참고용이며, <strong>실제 매입가는 검수 결과에 따라 예상 견적과 차이가 발생할 수 있습니다.</strong><br>
-                3. 기기와 함께 동봉된 박스, 충전기, 케이스, 필름 등 <strong>일체의 구성품 및 부속품은 검수 과정에서 임의 폐기됩니다. 따라서 매입 취소 및 반송이 결정되더라도 본체(기기) 외의 폐기된 구성품은 절대 반환되거나 보상되지 않음을 원칙</strong>으로 합니다.<br>
-                4. 정상적인 검수가 불가능한 기기(완전 파손 등)의 경우, 별도의 검수비가 청구되거나 착불로 반송될 수 있습니다.<br>
-                5. <strong>최종 매입가 안내 후 7일 이상 연락이 두절되거나 의사표시가 없는 경우</strong>, 검수팀이 측정한 최종 견적에 따라 고객님의 계좌로 입금 처리되며 이로써 매입이 완료된 것으로 간주합니다.<br>
-                6. 회원은 검수 결과 및 최종 매입가에 이의가 있는 경우, <strong>결과 안내일로부터 3일(영업일 기준) 이내에 회사에 서면(이메일, 채널톡 등)으로 이의를 제기</strong>해야 합니다. 이 기간 내 이의 제기가 없는 경우 검수 결과에 동의한 것으로 간주합니다.
+                2. 예상 견적은 단순 참고용이며, <strong>실제 매입가는 검수 결과에 따라 예상 견적과 차이가 발생할 수 있습니다.</strong> 특히 <strong>'사진 간편 접수' 등 상세 상태 입력 없이 접수한 경우, 제시된 금액은 예상가에 불과하며 최종 단가는 기기 수령 후 실물 검수를 거쳐 확정</strong>됩니다.<br>
+                3. 중고 기기의 시세는 변동성이 큰 특성이 있어, <strong>판매 신청 시점의 예상 시세와 실제 검수·매입 확정 시점의 시세가 다를 수 있으며, 최종 매입가는 검수 결과를 회원에게 안내하는 시점의 기준으로 산정</strong>됩니다.<br>
+                4. 기기와 함께 동봉된 박스, 충전기, 케이스, 필름 등 <strong>일체의 구성품 및 부속품은 검수 과정에서 임의 폐기됩니다. 따라서 매입 취소 및 반송이 결정되더라도 본체(기기) 외의 폐기된 구성품은 절대 반환되거나 보상되지 않음을 원칙</strong>으로 합니다.<br>
+                5. 정상적인 검수가 불가능한 기기(완전 파손 등)의 경우, 별도의 검수비가 청구되거나 착불로 반송될 수 있습니다.<br>
+                6. 회원은 검수 결과 및 최종 매입가에 이의가 있는 경우, <strong>전자매매계약서 송부일로부터 3일(영업일 기준) 이내에 회사에 서면(이메일, 채널톡 등)으로 이의를 제기</strong>해야 합니다. 이 기간 내 이의 제기가 없는 경우 검수 결과에 동의한 것으로 간주합니다.<br>
+                7. <strong>회사가 전자매매계약서(최종 견적서)를 송부한 후, 회원의 반송 또는 매입 거부 의사표시 없이 영업일 기준 7일이 경과한 경우, 회원이 전자매매계약서의 내용에 동의한 것으로 간주</strong>합니다. 이 경우 회사는 회원이 안내한 계좌로 매입 대금을 입금한 후 매입 절차를 완료하며, 이후에는 거래 취소 및 기기 반환을 요구할 수 없습니다.<br>
+                8. <strong>미개봉 상품(밀봉 패키지 및 씰 기부착 제품)</strong>의 경우, 회사는 기기의 외관 상태 및 정상 작동(내부 기능 등) 여부를 검수하기 위해 <strong>해당 제품의 포장 및 밀봉(씰)을 해제(개봉)하여 검수를 진행</strong>합니다. 이에 따라 매입 취소 및 반송이 결정되더라도 기기는 개봉된 상태로 반송되며, <strong>회사는 포장 및 밀봉(씰) 훼손으로 인한 상품 가치 하락이나 원상 복구에 대해 일체의 배상 또는 보상 책임을 지지 않습니다.</strong>
             </p>
 
             <h2>제6조 (개인정보 보호 및 데이터 삭제)</h2>
@@ -229,7 +244,7 @@
                 2. 회사가 사업을 종료하고자 하는 경우, 종료일 30일 전까지 웹사이트에 이를 공지하고 진행 중인 거래를 모두 정산 완료합니다.
             </p>
 
-            <p style="margin-top: 40px; text-align: center; color: #888;">공고일자: 2026년 3월 31일<br>시행일자: 2026년 3월 31일</p>
+            <p style="margin-top: 40px; text-align: center; color: #888;">공고일자: 2026년 7월 24일<br>시행일자: 2026년 8월 1일</p>
 
 
 
@@ -285,15 +300,8 @@
 
 
 
-                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-
-
-
-                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-
-
-
-                    </div>
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
                     <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
                         <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
                             <img src="sr_logo.png" alt="KG이니시스 에스크로" style="height: 38px;">
@@ -306,11 +314,14 @@
                         <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                             <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
                         </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -331,7 +342,7 @@
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 
@@ -344,10 +355,7 @@
 
 
                     </p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -376,14 +384,8 @@
 
 
                     </p>
-
-
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -392,14 +394,8 @@
 
 
                 &copy; 2026 HooPak all rights reserved
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -581,15 +577,17 @@
 
             
 <!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
 

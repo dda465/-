@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -21,7 +35,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>택배 발송 유의사항 - 쉐라폰</title>
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -50,7 +64,7 @@
             </div>
             <div class="nav-links">
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
                 <a href="login.html" id="nav-login-link">로그인</a>
             </div>
             <a href="quote.html" class="btn btn-primary">판매하기</a>
@@ -73,7 +87,7 @@
             <p>박스 내부의 빈 공간은 에어캡(뾱뾱이)이나 신문지를 충분히 채워 기기가 흔들리지 않도록 안전하게 포장해 주세요.</p>
 
             <h2>4. 박스 표기 사항</h2>
-            <p>박스 겉면에 크게 <strong>"쉐라폰 회수건"</strong> 또는 <strong>"CJ대한통운 반품"</strong>이라고 적어주시면 더 신속한 처리가 가능합니다.</p>
+            <p>박스 겉면에 크게 <strong>"쉐라폰 회수건"</strong>이라고 적어주시면 더 신속한 처리가 가능합니다.</p>
 
             <h2>5. 기사님 방문 및 수거</h2>
             <p>픽업 당일, 담당 택배 기사님이 사전에 연락을 드린 후 방문하여 수거를 진행합니다.</p>
@@ -88,9 +102,18 @@
                     <li><strong>구성품 폐기 안내:</strong> 기기 본체 외의 케이스, 기존 박스, 유심(SIM) 카드, 보호 필름 등은 검수 과정에서 모두 폐기됩니다. 필요한 물품은 발송 전 반드시 제거해 주세요.</li>
                     <li><strong>안전한 전달:</strong> 가급적 택배 기사님께 직접 전달해 주시길 권장합니다. 직접 전달이 어려울 경우 무인택배함이나 경비실 등 분실 위험이 없는 곳에 맡기신 후 기사님께 꼭 위치를 알려주세요.</li>
                     <li><strong>문 앞 보관 시:</strong> 문 앞에 놓아두셨다가 발생하는 수거 전 분실 사고에 대해서는 보상이 불가합니다.</li>
-                    <li>기사님이 방문 후, <strong>연락두절로 인한 미집하 및 취소건은 택배비 4,300원이 청구</strong>될 수 있습니다.</li>
+                    <li>기사님이 방문 후, <strong>연락두절로 인한 미집하 및 취소건은 택배비 4,500원이 청구</strong>될 수 있습니다.</li>
                     <li style="color: #c62828; font-weight: bold;">매입 신청 후 7일 이내 미발송 시 해당 신청건은 자동으로 예약이 취소됩니다.</li>
                 </ul>
+
+                <div style="margin-top: 16px; background: #fff; border: 2px solid #c62828; border-radius: 10px; padding: 14px 16px;">
+                    <p style="margin: 0; color: #c62828; font-weight: bold; font-size: 1.02rem; line-height: 1.6;">
+                        📦 택배사의 물량이 많을 경우, 방문수거 일자보다 <span style="text-decoration: underline;">최대 3일까지 수거가 늦어질 수 있습니다.</span>
+                    </p>
+                    <p style="margin: 6px 0 0; color: #666; font-size: 0.9rem; line-height: 1.6;">
+                        수거가 지연되더라도 신청은 그대로 유지되니 안심하고 기다려 주세요.
+                    </p>
+                </div>
             </div>
             
             <br><br><br>
@@ -104,9 +127,8 @@
                                 <strong>쇼핑몰 기본정보</strong><br>
                                 상호명: <span id="dyn-company-name">에스알커머스</span> | 대표자명: <span id="dyn-ceo-name">박현용</span><br>
                                 사업장 주소: <span id="dyn-address">부산시 동천로 116 한신밴빌딩 1003호</span><br>
-                                사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-                                개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-                            </div>
+                                사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
                             <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
                                 <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
                                     <img src="sr_logo.png" alt="KG이니시스 에스크로" style="height: 38px;">
@@ -119,13 +141,19 @@
                                 <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                                     <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
                                 </div>
+                                <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                                    <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                                    <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                        쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="footer-col">
                             <h4>고객센터 정보</h4>
                             <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
                                 상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
                                 <strong>CS운영시간</strong><br>
                                 연중무휴 24시간 채널톡으로 상담가능
                             </p>
@@ -189,15 +217,17 @@
             </script>
             
 <!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
     <!-- Google Translate Script & Styling -->

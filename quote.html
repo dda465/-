@@ -5,12 +5,27 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-<!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
+<!-- Danggeun Market Code (deferred to not block render) -->
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -33,7 +48,7 @@
 
     <meta name="description" content="3분이면 끝! 내 폰의 정확한 판매 금액을 확인하고 바로 판매 신청하세요.">
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -262,18 +277,20 @@
 
 
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 
-<!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<!-- NAVER PV SCRIPT (async to not block render) -->
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
 
@@ -338,7 +355,7 @@ wcs_do();
 
             <div class="nav-links pc-only">
                 <a href="quote.html">내 폰 판매</a>
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
                 <a href="login.html" id="nav-login-link">로그인</a>
             </div>
         </div>
@@ -600,10 +617,8 @@ wcs_do();
                 <div class="showcase-image-container" id="sc-art-container" style="display: none;">
 
                     <div id="sc-icon"></div>
-
-                </div>
-
-            </div>
+                    </div>
+                    </div>
 
             
 
@@ -618,12 +633,9 @@ wcs_do();
                     <div class="summary-model" id="summary-model">갤럭시 S24 울트라</div>
 
                     <div class="summary-storage" id="summary-storage">512 GB</div>
-
-                </div>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -684,6 +696,10 @@ wcs_do();
             </div>
         </div>
 
+        <!-- 선택 내역 띠 — 고른 항목이 쌓여서 따라온다. 항목을 누르면 그 단계로 돌아간다.
+             내용은 script.js 의 renderQuoteTrail() 이 채운다. -->
+        <div id="quote-trail" class="qtrail" style="display:none;"></div>
+
         <!-- Loading Overlay for Data Fetching -->
 
         <div id="wizard-loading" class="loading-overlay" style="display: none;">
@@ -693,10 +709,8 @@ wcs_do();
                 <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
 
                 <p>데이터를 불러오는 중입니다...</p>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -709,8 +723,7 @@ wcs_do();
                 <h2>어떤 브랜드의 폰인가요?</h2>
 
                 <p>판매하실 제품의 제조사를 선택해주세요.</p>
-
-            </div>
+                    </div>
 
             <div class="selection-grid">
 
@@ -719,20 +732,35 @@ wcs_do();
                     <img src="apple.svg" class="card-icon-img" alt="Apple">
 
                     <div class="card-title">Apple</div>
-
-                </div>
+                    </div>
 
                 <div class="selection-card brand-btn" data-brand="samsung">
 
                     <img src="samsung.svg" class="card-icon-img" alt="Samsung">
 
                     <div class="card-title">삼성</div>
+                    </div>
+                    </div>
 
+            <!-- 카드가 2개뿐이라 아래가 크게 비던 자리 — 홈과 같은 신뢰 요소로 채운다 -->
+            <div class="quote-trust">
+                <div class="quote-trust-row">
+                    <div class="qt-ic">₩</div>
+                    <div><div class="qt-t">수수료 0원 직매입</div>
+                        <div class="qt-d">중간 유통 없이 쉐라폰이 직접 매입합니다</div></div>
                 </div>
-
+                <div class="quote-trust-row">
+                    <div class="qt-ic"><i class="ri-truck-line"></i></div>
+                    <div><div class="qt-t">무료 방문수거</div>
+                        <div class="qt-d">원하시는 날짜에 택배기사가 찾아갑니다</div></div>
+                </div>
+                <div class="quote-trust-row">
+                    <div class="qt-ic">✓</div>
+                    <div><div class="qt-t">불만족 시 반송 보장</div>
+                        <div class="qt-d">매입 강요 없이 언제든 반송해 드립니다</div></div>
+                </div>
             </div>
-
-        </div>
+                    </div>
 
 
 
@@ -745,22 +773,18 @@ wcs_do();
                 <h2>카테고리를 선택해주세요</h2>
 
                 <p>찾으시는 모델의 대표 시리즈군을 선택해주세요.</p>
-
-            </div>
+                    </div>
 
             <div id="series-list" class="selection-grid">
 
                 <!-- JS Populated -->
-
-            </div>
+                    </div>
 
             <div class="text-center" style="margin-top:30px;">
 
                 <button onclick="goToStep(1)" class="back-btn">이전 단계로</button>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -773,22 +797,18 @@ wcs_do();
                 <h2>세부 시리즈를 선택해주세요</h2>
 
                 <p>원하시는 상세 시리즈(연도/라인업)를 선택해주세요.</p>
-
-            </div>
+                    </div>
 
             <div id="sub-series-list" class="selection-grid">
 
                 <!-- JS Populated -->
-
-            </div>
+                    </div>
 
             <div class="text-center" style="margin-top:30px;">
 
                 <button onclick="goToStep(2)" class="back-btn">이전 단계로</button>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -801,22 +821,18 @@ wcs_do();
                 <h2>상세 모델을 선택해주세요</h2>
 
                 <p>사용하시는 휴대폰의 정확한 모델명입니다.</p>
-
-            </div>
+                    </div>
 
             <div id="model-list" class="selection-grid">
 
                 <!-- JS Populated -->
-
-            </div>
+                    </div>
 
             <div class="text-center" style="margin-top:30px;">
 
                 <button onclick="goToStep(2)" class="back-btn">이전 단계로</button>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -829,22 +845,18 @@ wcs_do();
                 <h2>저장공간 용량을 선택해주세요</h2>
 
                 <p>설정 > 일반 > 정보에서 확인 가능합니다.</p>
-
-            </div>
+                    </div>
 
             <div id="storage-list" class="selection-grid">
 
                 <!-- JS Populated -->
-
-            </div>
+                    </div>
 
             <div class="text-center" style="margin-top:30px;">
 
                 <button onclick="goToStep(3)" class="back-btn">이전 단계로</button>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -857,8 +869,7 @@ wcs_do();
                 <h2>판매 방법을 선택해 주세요</h2>
 
                 <p>원하시는 접수 방식을 선택해주세요.</p>
-
-            </div>
+                    </div>
 
 
 
@@ -875,10 +886,8 @@ wcs_do();
                         제품 상태 <strong>체크 없이</strong> 바로 배송<br>
 
                         <span style="font-size: 0.8rem; color: #888;">(도착 후 검수를 통해 최종 금액 안내)</span>
-
                     </div>
-
-                </div>
+                    </div>
 
                 <div class="selection-card method-select-btn" data-method="self" onclick="selectMethod('self')">
 
@@ -891,22 +900,17 @@ wcs_do();
                         직접 제품 상태 <strong>체크 후</strong> 배송<br>
 
                         <span style="font-size: 0.8rem; color: #888;">(예상 견적을 미리 확인 가능)</span>
-
                     </div>
-
-                </div>
-
-            </div>
+                    </div>
+                    </div>
 
 
 
             <div class="text-center" style="margin-top: 40px;">
 
                 <button onclick="goToStep(4)" class="back-btn">이전 단계로</button>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -929,10 +933,8 @@ wcs_do();
                 <div id="grade-price-list-target">
 
                     <!-- Populated by JS -->
-
-                </div>
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -945,14 +947,12 @@ wcs_do();
                 <button onclick="calculateAndShowResult(true); goToStep('auth');" class="btn btn-primary"
 
                     style="flex: 1; max-width: 200px;">예약하기</button>
-
-            </div>
+                    </div>
 
             <div class="text-center" style="margin-top: 20px;">
 
                 <button onclick="goToStep('method')" class="back-btn">이전 단계로</button>
-
-            </div>
+                    </div>
 
 
 
@@ -963,10 +963,8 @@ wcs_do();
                 <p><strong>📱 [내 기기로 등록]</strong>: 등록 후 변경되는 시세를 편하게 확인하세요.</p>
 
                 <p style="margin-top:5px;"><strong>👉 [예약하기]</strong>: 정확한 가격은 상품 도착 후 빠르게 검수하고 알려 드릴게요.</p>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1057,8 +1055,7 @@ wcs_do();
                         <button class="btn-check-opt" data-group="lcd_damage" data-value="heavy"
                             onclick="toggleRadioSafe(this)">⚠️ 액정불량(완전안보임)</button>
                     </div>
-                    
-                </div>
+                    </div>
             </div>
 
             <!-- Sub-step 5: 번인 -->
@@ -1100,7 +1097,7 @@ wcs_do();
                         <button class="btn-check-opt" data-group="func_defect" data-value="compass"
                             onclick="toggleMulti(this, 'compass')">나침반/GPS</button>
                         <button class="btn-check-opt" data-group="func_defect" data-value="unknown_part"
-                            onclick="toggleMulti(this, \'unknown_part\')">알수없는부품오류</button>
+                            onclick="toggleMulti(this, 'unknown_part')">알수없는부품오류</button>
                         <button class="btn-check-opt" data-group="func_defect" data-value="sound"
                             onclick="toggleMulti(this, 'sound')">스피커/마이크</button>
 
@@ -1143,8 +1140,7 @@ wcs_do();
                     .defect-sub-step .btn-check-opt[style*="grid-column: span 3"] { grid-column: span 2 !important; }
                 }
             </style>
-
-        </div>
+                    </div>
 
 
 
@@ -1159,8 +1155,7 @@ wcs_do();
                 <p><span id="result-model-name" style="font-weight:bold; color:var(--primary-dark);">아이폰 15</span> 견적
 
                     결과입니다.</p>
-
-            </div>
+                    </div>
 
 
 
@@ -1170,15 +1165,16 @@ wcs_do();
 
                 <div id="final-price-display" class="estimated-price">0원</div>
 
+                <!-- 추가 혜택 배지 (연휴/당근/아이폰) — script.js의 renderBonusBadges가 채움 -->
+                <div id="quote-bonus-badges" style="max-width: 360px; margin: 0 auto; padding: 0 12px; box-sizing: border-box;"></div>
+
                 <div id="price-breakdown"
 
                     style="text-align: left; background: white; padding: 20px; border-radius: 12px; margin-top: 20px; font-size: 0.9rem; color: #555;">
 
                     <!-- Breakdown populated by JS -->
-
-                </div>
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -1189,10 +1185,8 @@ wcs_do();
                 <br><br>
 
                 <button onclick="location.reload()" class="back-btn">다시 조회하기</button>
-
-            </div>
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1202,11 +1196,10 @@ wcs_do();
 
             <div class="step-header">
 
-                <h2>접수자 정보 입력 <span style="color:red">*</span></h2>
+                <h2>거의 다 됐어요</h2>
 
-                <p>정확한 정산 및 거래 안내를 위해 정보를 입력해주세요.</p>
-
-            </div>
+                <p>정확한 정산 및 거래 안내를 위해 접수자 정보를 확인합니다.</p>
+                    </div>
 
 
 
@@ -1227,26 +1220,28 @@ wcs_do();
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 3c-5.52 0-10 3.5-10 7.82 0 2.81 1.8 5.28 4.54 6.64l-1.16 4.26c-.1.38.29.68.61.5l3.86-2.58c.68.16 1.41.24 2.15.24 5.52 0 10-3.5 10-7.82S17.52 3 12 3z"/>
                         </svg>
-                        카카오로 3초만에 로그인하고 진행하기
+                        카카오로 시작하기
                     </button>
 
                     <button type="button" id="btn-auth-naver" class="btn btn-naver" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; background: #03C75A; color: #FFFFFF; border: none; font-weight: 600; padding: 14px 20px; border-radius: 10px; margin-top: 10px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M16.273 12.845 7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z"/>
                         </svg>
-                        네이버로 3초만에 로그인하고 진행하기
+                        네이버로 시작하기
                     </button>
 
-                    <button type="button" id="btn-auth-login" class="btn btn-outline" style="width: 100%; border: 1px solid #2563EB; color: #2563EB; background: white; padding: 14px 20px; border-radius: 10px; font-weight: 600; margin-top: 10px;">일반 계정으로 로그인 후 진행하기</button>
-                    
-                    <div class="divider">또는</div>
-                    
-                    <!-- Option 2: 비회원 본인인증 -->
-                    <div style="background: #f1f5f9; padding: 25px 20px; border-radius: 10px; text-align: center;">
-                        <p style="margin-top: 0; color: #475569; font-size: 0.95rem; margin-bottom: 15px; font-weight: 600;">비회원으로 계속 진행하시겠습니까?</p>
-                        <p style="margin-top: 0; color: #64748b; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">매입 내역 안내 알림톡 수신을 위해<br>1회 본인인증이 필요합니다.</p>
-                        <button type="button" id="btn-auth-nonmember" class="btn" style="background: #334155; color: white; width: 100%; padding: 14px 20px; border-radius: 10px; font-weight: 600; border: none;">비회원으로 휴대폰 본인인증하기</button>
-                    </div>
+                    <p class="auth-hint">가입 절차 없이 바로 진행됩니다.<br>매입 내역은 알림톡으로 안내드립니다.</p>
+
+                    <!-- 나머지 방법은 접어둔다. 선택지가 4개면 오히려 멈칫하게 되고,
+                         '휴대폰 본인인증'이 먼저 보이면 부담을 준다. 버튼 id는 그대로 유지. -->
+                    <details class="auth-more">
+                        <summary>다른 방법으로 진행하기 <span class="am-arrow" aria-hidden="true"></span></summary>
+                        <div class="am-inner">
+                            <button type="button" id="btn-auth-login" class="btn btn-outline" style="width: 100%; border: 1px solid #2563EB; color: #2563EB; background: white; padding: 13px 20px; border-radius: 10px; font-weight: 600; margin-top: 12px;">일반 계정으로 로그인</button>
+                            <button type="button" id="btn-auth-nonmember" class="btn" style="width: 100%; background: white; color: #475569; border: 1px solid #cbd5e1; padding: 13px 20px; border-radius: 10px; font-weight: 600; margin-top: 9px;">비회원으로 휴대폰 본인인증</button>
+                            <p class="auth-hint" style="margin-top: 8px;">비회원은 알림톡 수신을 위해 1회 본인인증이 필요합니다.</p>
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -1322,7 +1317,7 @@ wcs_do();
                     <!-- CVS 보내실 곳 -->
                     <div id="auth-method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
                         <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
-                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-3263-5672</p>
+                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-5173-5382</p>
                         <p style="font-size: 0.8rem; color: #2563eb; margin-top: 8px; font-weight: 600;">💡 보내실 곳 정보는 마이페이지에서도 확인하실 수 있습니다.</p>
                     </div>
 
@@ -1398,8 +1393,7 @@ wcs_do();
                         <button id="btn-auth-delivery-submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;">접수 완료하기 ✅</button>
                     </div>
                 </div>
-
-        </div> <!-- Close wizard-step-auth div -->
+                    </div> <!-- Close wizard-step-auth div -->
 
 
 
@@ -1421,7 +1415,6 @@ wcs_do();
 
                 <div class="step-header" style="margin-bottom: 10px; padding-bottom: 0;">
                     <h2 style="font-size: 1.25rem; color: #1e293b; margin-bottom: 0;">배송 전달방법을 선택해주세요</h2>
-                    <div id="step8-expected-price" style="font-size: 1.2rem; color: #2563eb; font-weight: 800; margin-top: 5px; text-align: center;"></div>
                 </div>
                 
                 <div class="form-container" style="max-width: 500px; margin: 0 auto; margin-top: 5px;">
@@ -1449,7 +1442,7 @@ wcs_do();
                     <!-- CVS 보내실 곳 -->
                     <div id="method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
                         <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
-                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-3263-5672</p>
+                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-5173-5382</p>
                         <p style="font-size: 0.8rem; color: #2563eb; margin-top: 8px; font-weight: 600;">💡 보내실 곳 정보는 마이페이지에서도 확인하실 수 있습니다.</p>
                     </div>
 
@@ -1460,7 +1453,8 @@ wcs_do();
                     </div>
 
                     <!-- 주소 (카카오 API) -->
-                    <div id="step8-address-label" style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📍 수거 주소<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
+                    <div id="step8-address-label" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📍 수거 주소<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
+                    <p style="margin: 0 0 12px; font-size: 0.78rem; color: #94a3b8; line-height: 1.5;">택배 기사님이 방문할 주소이며, 검수 후 반송이 필요한 경우에도 사용됩니다.</p>
                     <div id="step8-address-section" style="margin-bottom: 10px; text-align: left;">
                         <button type="button" onclick="openStep8KakaoAddress()" class="btn" style="width: 100%; background: #2563eb; color: white; border: none; padding: 14px 16px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px; box-sizing: border-box;">📍 주소 검색하기</button>
                         <input type="hidden" id="step8-customer-postcode">
@@ -1543,17 +1537,9 @@ wcs_do();
                 </div>
             </div>
         </div>
-
-
-
-
-        </div>
-
-
-
-        </div>
-
-    </div> <!-- End of premium-quote-layout -->
+                    </div>
+                    </div>
+                    </div> <!-- End of premium-quote-layout -->
 
 
 
@@ -1591,15 +1577,8 @@ wcs_do();
 
 
 
-                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
-
-
-
-                        개인정보보호책임자: 박현용 | 대표 연락처: 010-2774-2610
-
-
-
-                    </div>
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
                     <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
                         <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
                             <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
@@ -1612,11 +1591,14 @@ wcs_do();
                         <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                             <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
                         </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
                     </div>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1637,7 +1619,7 @@ wcs_do();
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 
@@ -1650,10 +1632,7 @@ wcs_do();
 
 
                     </p>
-
-
-
-                </div>
+                    </div>
 
 
 
@@ -1682,14 +1661,8 @@ wcs_do();
 
 
                     </p>
-
-
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -1698,14 +1671,8 @@ wcs_do();
 
 
                 &copy; 2026 HooPak all rights reserved
-
-
-
-            </div>
-
-
-
-        </div>
+                    </div>
+                    </div>
 
 
 
@@ -1776,8 +1743,7 @@ wcs_do();
                 <h3 style="margin: 0; font-size: 1.2rem; color: #0f172a; font-weight:bold;">판매 사전 동의</h3>
 
                 <button onclick="closePresaleModal()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
-
-            </div>
+                    </div>
 
 
 
@@ -1788,8 +1754,7 @@ wcs_do();
                 <div style="height: 2px; width: 60px; background: #e2e8f0;"></div>
 
                 <div class="presale-step-dot" id="p-dot-2">2</div>
-
-            </div>
+                    </div>
 
 
 
@@ -1810,7 +1775,6 @@ wcs_do();
                         계정 암호를 입력해 <strong>'나의 iPhone 찾기'를 끄고</strong> 로그아웃합니다.<br>
 
                         <span style="color: #2563EB; font-weight: bold;">설정 ➜ Apple 계정(사용자 이름) ➜ 로그아웃</span> 순서로 진행해주세요. <br>(휴대폰의 잠금이 해제되어야합니다)
-
                     </div>
                     <p style="font-size: 0.8rem; color: red; margin-bottom: 20px; text-align: center; word-break: keep-all;">※ 화면 및 터치 불량으로 초기화가 되지 않은경우 개인정보초기화를 고객님의 잠금 비밀번호, 애플ID 및 비밀번호를 필요로 할 수 있습니다.</p>
 
@@ -1833,12 +1797,10 @@ wcs_do();
                                 <!-- Pointer at 'Apple 계정' -->
 
                                 <div class="finger-pointer" style="top: 25%; left: 45%;"></div>
-
-                            </div>
+                    </div>
 
                             <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[Apple 계정, iCloud+ 등] 터치</div>
-
-                        </div>
+                    </div>
 
                     
 
@@ -1853,12 +1815,10 @@ wcs_do();
                                 <!-- Pointer at '로그아웃' -->
 
                                 <div class="finger-pointer" style="top: 85%; left: 45%;"></div>
-
-                            </div>
+                    </div>
 
                             <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">화면 맨 아래 [로그아웃] 터치</div>
-
-                        </div>
+                    </div>
 
                     
 
@@ -1873,16 +1833,12 @@ wcs_do();
                                 <!-- Pointer at '끄기' -->
 
                                 <div class="finger-pointer" style="top: 10%; left: 80%;"></div>
-
-                            </div>
-
-                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">암호 입력 후 우측 상단 [끄기] 터치</div>
-
-                        </div>
-
                     </div>
 
-                </div>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">암호 입력 후 우측 상단 [끄기] 터치</div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1897,7 +1853,6 @@ wcs_do();
                         초기화 시 <strong>잠금을 포함한 모든 설정</strong>을 초기화하여야 하며 구글, 삼성 등 <strong>계정 데이터도 모두 삭제</strong>됩니다.<br>
 
                         <span style="color: #2563EB; font-weight: bold;">기기설정 ➜ 일반 ➜ 초기화 ➜ 기기전체초기화</span> 순서로 진행해주세요.
-
                     </div>
                     <p style="font-size: 0.8rem; color: red; margin-bottom: 20px; text-align: center; word-break: keep-all;">※ 화면 및 터치 불량으로 초기화가 되지 않은경우 개인정보초기화를 고객님의 잠금 비밀번호, 구글/삼성 계정 및 비밀번호를 필요로 할 수 있습니다.</p>
 
@@ -1920,12 +1875,10 @@ wcs_do();
                                 <!-- Pointer at 'General' -->
 
                                 <div class="finger-pointer" style="top: 52%; left: 45%;"></div>
-
-                            </div>
+                    </div>
 
                             <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[일반] 터치</div>
-
-                        </div>
+                    </div>
 
                         
 
@@ -1940,12 +1893,10 @@ wcs_do();
                                 <!-- Pointer at 'Reset' -->
 
                                 <div class="finger-pointer" style="top: 52%; left: 45%;"></div>
-
-                            </div>
+                    </div>
 
                             <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[초기화] 터치</div>
-
-                        </div>
+                    </div>
 
                         
 
@@ -1960,16 +1911,12 @@ wcs_do();
                                 <!-- Pointer at 'Factory data reset' -->
 
                                 <div class="finger-pointer" style="top: 85%; left: 45%;"></div>
-
-                            </div>
-
-                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[기기 전체 초기화] 터치</div>
-
-                        </div>
-
                     </div>
 
-                </div>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 5px;">[기기 전체 초기화] 터치</div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -1982,7 +1929,6 @@ wcs_do();
                     <div style="background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #475569; margin-bottom: 24px; line-height: 1.5;">
 
                         중요한 정보는 백업해 주시고, <strong>단말기 발송 전 데이터 삭제를 권장합니다.</strong> 단말기 검수 시 개인정보 보호를 위해 담당자가 데이터를 삭제 처리하며 복구가 불가능합니다.
-
                     </div>
 
                     
@@ -1994,17 +1940,14 @@ wcs_do();
                             <div style="background: #eff6ff; color: #2563EB; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">✂️</div>
 
                             <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">유심 폐기</div>
-
-                        </div>
+                    </div>
 
                         <div class="presale-action-card">
 
                             <div style="background: #eff6ff; color: #2563EB; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">🗑️</div>
 
                             <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">데이터 삭제</div>
-
-                        </div>
-
+                    </div>
                     </div>
 
 
@@ -2014,14 +1957,9 @@ wcs_do();
                         <div style="font-size: 1.2rem; flex-shrink: 0;">⚠️</div>
 
                         <div>전원불량, 심각한 액정손상 등으로 화면 식별 또는 검수가 불가한 기기는 데이터 삭제가 불가하며, 이로 인한 개인정보 유출 피해에 대해서는 당사가 책임을 지지 않습니다.</div>
-
                     </div>
-
-                </div>
-
-
-
-            </div>
+                    </div>
+                    </div>
 
 
 
@@ -2030,12 +1968,9 @@ wcs_do();
                 <button id="p-btn-prev" class="presale-btn-nav" style="display: none; border: 1px solid #cbd5e1; background: white; color: #475569;" onclick="presaleGoPrev()">이전</button>
 
                 <button id="p-btn-next" class="presale-btn-nav" style="flex: 1; background: #2563EB; color: white; border: none;" onclick="presaleGoNext()">동의 후 다음</button>
-
-            </div>
-
-        </div>
-
-    </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -2071,8 +2006,7 @@ wcs_do();
                     <li>반송 통보 후 14일 내 미응답 시 기기 소유권이 포기된 것으로 간주됩니다.</li>
 
                 </ul>
-
-            </div>
+                    </div>
 
             <div style="text-align: center; margin-top: 20px;">
 
@@ -2083,14 +2017,10 @@ wcs_do();
                     <a href="terms.html" target="_blank" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">이용약관 전문 보기</a>
 
                     <a href="privacy.html" target="_blank" target="_blank" style="display: inline-block; padding: 8px 15px; font-size: 0.85rem; color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; font-weight: 500;">개인정보 처리방침 전문 보기</a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
 
 
 
@@ -2124,7 +2054,7 @@ wcs_do();
         }
     </script>
 
-    <script type="module" src="script.js?v=1780278690883"></script>
+    <script type="module" src="script.js?v=1785403500"></script>
 
 
 
@@ -2684,5 +2614,28 @@ wcs_do();
             observer.observe(document.body, { attributes: true });
         });
     </script>
+    <!-- Email Login Modal -->
+    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease;">
+        <div class="modal-container" style="background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); transform: translateY(-20px); transition: transform 0.3s ease; position: relative;">
+            <button type="button" id="btn-close-login-modal" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; line-height: 1;">&times;</button>
+            <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.3rem; font-weight: 700; color: #1e293b; text-align: center;">일반 계정 로그인</h3>
+            <form id="modal-login-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="modal-login-email" style="font-size: 0.85rem; font-weight: 600; color: #475569; text-align: left;">이메일 주소</label>
+                    <input type="email" id="modal-login-email" placeholder="example@email.com" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="modal-login-password" style="font-size: 0.85rem; font-weight: 600; color: #475569; text-align: left;">비밀번호</label>
+                    <input type="password" id="modal-login-password" placeholder="비밀번호를 입력하세요" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div id="modal-login-error" style="color: #ef4444; font-size: 0.85rem; display: none; text-align: left;"></div>
+                <button type="submit" id="btn-modal-login-submit" class="btn btn-primary" style="width: 100%; padding: 14px; margin-top: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">로그인</button>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-top: 5px;">
+                    <a href="signup.html" target="_blank" style="color: #2563eb; text-decoration: underline;">회원가입</a>
+                    <a href="find_account.html" target="_blank" style="color: #64748b; text-decoration: none;">비밀번호 찾기</a>
+                </div>
+            </form>
+        </div>
+    </div>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>

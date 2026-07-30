@@ -9,8 +9,7 @@ for filename in glob.glob('*.html'):
         with open(filename, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # Match script.js?v=... or script_from_web.js?v=...
-        new_content = re.sub(r'(script.*\.m?js)\?v=[a-zA-Z0-9_]+', rf'\1?v={new_ver}', content)
+        new_content = re.sub(r'(\b[a-zA-Z0-9_-]+\.m?js)\?v=[0-9]+', rf'\1?v={new_ver}', content)
         
         # Also handle cases where there's no ?v=
         # Wait, if I do this, it might be safer to just do the first regex

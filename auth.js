@@ -3,16 +3,13 @@ import { auth } from './firebase-config.js';
 import {
 
     signInWithEmailAndPassword,
-
     createUserWithEmailAndPassword,
-
     onAuthStateChanged,
-
-    signOut
-
+    signOut,
+    sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { doc, setDoc, query, where, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { db } from './firebase-config.js';
 
@@ -25,6 +22,14 @@ console.log("Auth.js: Loaded");
 document.addEventListener('DOMContentLoaded', () => {
 
     console.log("Auth.js: DOM Ready");
+
+    // Show loading indicator during auth callbacks to prevent user frustration
+    const isAuthCallback = window.location.hash.includes('access_token') || window.location.search.includes('code=');
+    let globalLoader = document.getElementById('wizard-loading');
+    if (isAuthCallback && globalLoader) {
+        globalLoader.style.display = 'flex';
+        globalLoader.style.zIndex = '99999';
+    }
 
 
 
@@ -55,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
-                    window.location.replace('quote.html');
+                    const pendingPage = sessionStorage.getItem('pendingQuotePage') || localStorage.getItem('pendingQuotePage') || 'quote.html';
+                    window.location.replace(pendingPage);
                 } else {
                     window.location.replace('index.html');
                 }
@@ -159,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
-                    window.location.replace('quote.html');
+                    const pendingPage = sessionStorage.getItem('pendingQuotePage') || localStorage.getItem('pendingQuotePage') || 'quote.html';
+                    window.location.replace(pendingPage);
                 } else {
                     window.location.replace('index.html');
                 }
@@ -246,12 +253,41 @@ document.addEventListener('DOMContentLoaded', () => {
                             // --- SAVE POTENTIAL MEMBER LEAD ---
                             try {
                                 const guestUid = 'lead_' + result.data.phone;
+
+                                let birthday = result.data.birthday || null;
+                                let gender = result.data.gender || null;
+                                let age = null;
+                                let ageGroup = '알수없음';
+                                if (birthday) {
+                                    const birthYear = parseInt(birthday.split('-')[0]);
+                                    if (!isNaN(birthYear)) {
+                                        age = 2026 - birthYear;
+                                        if (age < 20) ageGroup = '10대 이하';
+                                        else if (age < 30) ageGroup = '20대';
+                                        else if (age < 40) ageGroup = '30대';
+                                        else if (age < 50) ageGroup = '40대';
+                                        else if (age < 60) ageGroup = '50대';
+                                        else ageGroup = '60대 이상';
+                                    }
+                                }
+                                let genderKor = '알수없음';
+                                if (gender === 'male') genderKor = '남성';
+                                else if (gender === 'female') genderKor = '여성';
+                                else if (gender) genderKor = gender;
+
+                                if (birthday) sessionStorage.setItem('verified_birthday', birthday);
+                                if (gender) sessionStorage.setItem('verified_gender', gender);
+
                                 await setDoc(doc(db, "users", guestUid), {
                                     email: '회원가입 중단',
                                     nickname: result.data.name,
                                     phone: result.data.phone,
                                     provider: 'lead',
                                     role: 'guest',
+                                    birthday: birthday,
+                                    gender: genderKor,
+                                    age: age,
+                                    ageGroup: ageGroup,
                                     createdAt: new Date()
                                 }, { merge: true });
                             } catch (e) {
@@ -320,6 +356,32 @@ document.addEventListener('DOMContentLoaded', () => {
                             basic: address,
                             detail: detailAddress
                         },
+                        birthday: sessionStorage.getItem('verified_birthday') || null,
+                        gender: (() => {
+                            const g = sessionStorage.getItem('verified_gender');
+                            if (g === 'male') return '남성';
+                            if (g === 'female') return '여성';
+                            return g || null;
+                        })(),
+                        age: (() => {
+                            const b = sessionStorage.getItem('verified_birthday');
+                            if (!b) return null;
+                            const y = parseInt(b.split('-')[0]);
+                            return isNaN(y) ? null : (2026 - y);
+                        })(),
+                        ageGroup: (() => {
+                            const b = sessionStorage.getItem('verified_birthday');
+                            if (!b) return null;
+                            const y = parseInt(b.split('-')[0]);
+                            if (isNaN(y)) return null;
+                            const age = 2026 - y;
+                            if (age < 20) return '10대 이하';
+                            if (age < 30) return '20대';
+                            if (age < 40) return '30대';
+                            if (age < 50) return '40대';
+                            if (age < 60) return '50대';
+                            return '60대 이상';
+                        })(),
                         createdAt: new Date(),
                         role: 'user'
                     });
@@ -364,7 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
-                    window.location.replace('quote.html');
+                    const pendingPage = sessionStorage.getItem('pendingQuotePage') || localStorage.getItem('pendingQuotePage') || 'quote.html';
+                    window.location.replace(pendingPage);
                 } else {
                     window.location.replace('index.html');
                 }
@@ -479,7 +542,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                             if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
-                                window.location.replace('quote.html');
+                                const pendingPage = sessionStorage.getItem('pendingQuotePage') || localStorage.getItem('pendingQuotePage') || 'quote.html';
+                                window.location.replace(pendingPage);
                             } else {
                                 window.location.replace('index.html');
                             }
@@ -487,11 +551,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         },
 
                         fail: function (error) {
-
                             console.error('카카오 사용자 정보 요청 실패:', error);
-
-                            alert('카카오 사용자 정보를 가져오는데 실패했습니다.');
-
+                            if (globalLoader) globalLoader.style.display = 'none';
+                            alert('카카오 사용자 정보를 가져오는데 실패했습니다. 다시 시도해주세요.');
+                            window.history.replaceState(null, null, window.location.pathname);
                         }
 
                     });
@@ -499,11 +562,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
 
                 fail: function (err) {
-
                     console.error('카카오 로그인 실패:', err);
-
-                    alert("카카오 로그인에 실패했습니다.");
-
+                    if (globalLoader) globalLoader.style.display = 'none';
+                    alert("카카오 로그인에 실패했습니다. 다시 시도해주세요.");
+                    window.history.replaceState(null, null, window.location.pathname);
                 }
 
             });
@@ -518,10 +580,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.naver && window.naver.LoginWithNaverId) {
         try {
+            // --- Set state token BEFORE Naver SDK init to prevent state verification race conditions ---
+            if (window.location.hash.includes('access_token')) {
+                const urlStateMatch = window.location.hash.match(/state=([^&]+)/);
+                if (urlStateMatch) {
+                    localStorage.setItem('com.naver.nid.oauth.state_token', urlStateMatch[1]);
+                    document.cookie = "com.naver.nid.oauth.state_token=" + urlStateMatch[1] + "; path=/; max-age=600";
+                }
+            }
+
             const naverLogin = new naver.LoginWithNaverId({
                 clientId: "2DbzH9zYF4ObguujOS0U",
                 callbackUrl: window.location.origin + "/login.html",
-                isPopup: false,
+                isPopup: true,
                 loginButton: { color: "green", type: 1, height: 40 },
                 callbackHandle: true
             });
@@ -529,69 +600,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // --- Handle Naver Callback (when redirected back with access_token) ---
             if (window.location.hash.includes('access_token')) {
-                const urlStateMatch = window.location.hash.match(/state=([^&]+)/);
-                if (urlStateMatch) {
-                    localStorage.setItem('com.naver.nid.oauth.state_token', urlStateMatch[1]);
-                    document.cookie = "com.naver.nid.oauth.state_token=" + urlStateMatch[1] + "; path=/; max-age=600";
-                }
-
                 naverLogin.getLoginStatus(async function (status) {
-                    if (status) {
-                        const email = naverLogin.user.getEmail() || "";
-                        const nickname = naverLogin.user.getNickName() || naverLogin.user.getName() || `naveruser${naverLogin.user.getId()}`;
-                        const uid = `naver_${naverLogin.user.getId()}`;
-
-                        try {
-                            const docRef = doc(db, "users", uid);
-                            const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-                            const docSnap = await getDoc(docRef);
-                            const isNewUser = !docSnap.exists();
-
+                    try {
+                        if (status) {
+                            const email = naverLogin.user.getEmail() || "";
+                            const nickname = naverLogin.user.getNickName() || naverLogin.user.getName() || `naveruser${naverLogin.user.getId()}`;
+                            const uid = `naver_${naverLogin.user.getId()}`;
                             let phone = '';
-                            if (naverLogin.user.getMobile && naverLogin.user.getMobile()) {
-                                let phoneRaw = naverLogin.user.getMobile();
-                                if (phoneRaw.startsWith('+82 ')) phone = '0' + phoneRaw.substring(4).replace(/-/g, '');
-                                else if (phoneRaw.startsWith('+82')) phone = '0' + phoneRaw.substring(3).replace(/-/g, '');
-                                else phone = phoneRaw.replace(/-/g, '');
+
+                            try {
+                                const docRef = doc(db, "users", uid);
+                                const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                                const docSnap = await getDoc(docRef);
+                                const isNewUser = !docSnap.exists();
+
+                                if (naverLogin.user.getMobile && naverLogin.user.getMobile()) {
+                                    let phoneRaw = naverLogin.user.getMobile();
+                                    if (phoneRaw.startsWith('+82 ')) phone = '0' + phoneRaw.substring(4).replace(/-/g, '');
+                                    else if (phoneRaw.startsWith('+82')) phone = '0' + phoneRaw.substring(3).replace(/-/g, '');
+                                    else phone = phoneRaw.replace(/-/g, '');
+                                }
+
+                                await setDoc(docRef, {
+                                    email: email,
+                                    nickname: nickname,
+                                    uid: uid,
+                                    provider: 'naver',
+                                    phone: phone,
+                                    createdAt: new Date(),
+                                    role: 'user'
+                                }, { merge: true });
+
+                                // 알림톡 발송 (신규 가입 + 연락처 제공 동의 시)
+                                if (isNewUser && naverLogin.user.getMobile && naverLogin.user.getMobile() && window.triggerFrontendAlimtalk) {
+                                    let phoneRaw = naverLogin.user.getMobile();
+                                    if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
+                                    window.triggerFrontendAlimtalk("signup", phoneRaw, {
+                                        name: nickname,
+                                        provider: 'naver'
+                                    });
+                                }
+                            } catch (e) {
+                                console.error('Firestore save naver user error:', e);
                             }
 
-                            await setDoc(docRef, {
-                                email: email,
-                                nickname: nickname,
-                                uid: uid,
-                                provider: 'naver',
-                                phone: phone,
-                                createdAt: new Date(),
-                                role: 'user'
-                            }, { merge: true });
+                            const userInfo = { email, nickname, provider: 'naver', uid, phone };
+                            localStorage.setItem('user_info', JSON.stringify(userInfo));
 
-                            // 알림톡 발송 (신규 가입 + 연락처 제공 동의 시)
-                            if (isNewUser && naverLogin.user.getMobile && naverLogin.user.getMobile() && window.triggerFrontendAlimtalk) {
-                                let phoneRaw = naverLogin.user.getMobile();
-                                if (phoneRaw.startsWith('+82 ')) phoneRaw = '0' + phoneRaw.substring(4);
-                                window.triggerFrontendAlimtalk("signup", phoneRaw, {
-                                    name: nickname,
-                                    provider: 'naver'
-                                });
+                            // Clean hash
+                            window.history.replaceState(null, null, window.location.pathname + window.location.search);
+
+                            // If opened in a popup (or has naverLoginPopup name), notify parent and close popup
+                            if (window.opener || window.name === 'naverLoginPopup') {
+                                if (window.opener) {
+                                    try {
+                                        window.opener.postMessage({
+                                            type: 'naver-login-success',
+                                            userInfo: userInfo
+                                        }, window.location.origin);
+                                    } catch (e) {
+                                        console.error("Error sending postMessage to parent:", e);
+                                    }
+                                }
+                                window.close();
+                                return;
                             }
-                        } catch (e) {
-                            console.error('Firestore save naver user error:', e);
-                        }
 
-                        const userInfo = { email, nickname, provider: 'naver', uid };
-                        localStorage.setItem('user_info', JSON.stringify(userInfo));
-
-                        // Clean hash
-                        window.history.replaceState(null, null, window.location.pathname + window.location.search);
-
-                        // Redirect
-                        if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
-                            window.location.replace('quote.html');
+                            // Redirect (fallback for normal redirect flow)
+                            if (sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote')) {
+                                const pendingPage = sessionStorage.getItem('pendingQuotePage') || localStorage.getItem('pendingQuotePage') || 'quote.html';
+                                window.location.replace(pendingPage);
+                            } else {
+                                window.location.replace('index.html');
+                            }
                         } else {
-                            window.location.replace('index.html');
+                            console.error("Naver login callback status false");
+                            if (globalLoader) globalLoader.style.display = 'none';
+                            alert("네이버 로그인 인증에 실패했습니다. 다시 시도해주세요.");
+                            window.history.replaceState(null, null, window.location.pathname);
+                            window.location.replace('login.html');
                         }
-                    } else {
-                        console.error("Naver login callback status false");
+                    } catch (callbackErr) {
+                        console.error("Naver login callback internal crash:", callbackErr);
+                        alert("네이버 로그인 처리 중 오류가 발생했습니다: " + callbackErr.message);
+                        if (globalLoader) globalLoader.style.display = 'none';
+                        window.history.replaceState(null, null, window.location.pathname);
+                        window.location.replace('login.html');
                     }
                 });
             }
@@ -627,6 +721,136 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         }
+    }
+
+    // --- Account Recovery (Find ID / PW) ---
+    const findIdForm = document.getElementById('find-id-form');
+    if (findIdForm) {
+        findIdForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('find-id-name').value.trim();
+            const phone = document.getElementById('find-id-phone').value.trim().replace(/[^0-9]/g, '');
+            
+            if (!name || !phone) {
+                alert("이름과 전화번호를 모두 입력해주세요.");
+                return;
+            }
+            
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("nickname", "==", name), where("phone", "==", phone));
+                const querySnapshot = await getDocs(q);
+                
+                const resultBox = document.getElementById('find-id-result');
+                const emailDisplay = document.getElementById('found-email');
+                
+                if (!querySnapshot.empty) {
+                    let foundEmail = querySnapshot.docs[0].data().email;
+                    if (foundEmail) {
+                        const [idPart, domain] = foundEmail.split('@');
+                        if (idPart.length > 3) {
+                            foundEmail = idPart.substring(0, 3) + '*'.repeat(idPart.length - 3) + '@' + domain;
+                        } else {
+                            foundEmail = idPart.substring(0, 1) + '*'.repeat(idPart.length - 1) + '@' + domain;
+                        }
+                    } else {
+                        foundEmail = "소셜 계정(카카오/네이버)으로 가입된 정보입니다.";
+                    }
+                    emailDisplay.textContent = foundEmail;
+                    resultBox.style.display = 'block';
+                } else {
+                    emailDisplay.textContent = "일치하는 회원 정보가 없습니다.";
+                    resultBox.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Find ID Error:", error);
+                alert("조회 중 오류가 발생했습니다.");
+            }
+        });
+    }
+
+    const verifyPwBtn = document.getElementById('verify-pw-btn');
+    if (verifyPwBtn) {
+        verifyPwBtn.addEventListener('click', () => {
+            if (!window.IMP) {
+                alert("인증 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+                return;
+            }
+            const IMP = window.IMP;
+            IMP.init("imp25541365"); // PortOne Store ID
+
+            IMP.certification({
+                merchant_uid: "cert_pw_" + new Date().getTime()
+            }, async function (rsp) {
+                if (rsp.success) {
+                    verifyPwBtn.textContent = "인증 확인 중...";
+                    verifyPwBtn.disabled = true;
+
+                    try {
+                        const res = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/portoneApi/verify", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ imp_uid: rsp.imp_uid })
+                        });
+                        const result = await res.json();
+                        
+                        if (result.success && result.data) {
+                            const phone = result.data.phone.replace(/[^0-9]/g, '');
+                            const name = result.data.name;
+
+                            // Find User by Phone and Name
+                            const usersRef = collection(db, "users");
+                            const q = query(usersRef, where("nickname", "==", name), where("phone", "==", phone));
+                            const querySnapshot = await getDocs(q);
+                            
+                            if (!querySnapshot.empty) {
+                                const foundEmail = querySnapshot.docs[0].data().email;
+                                if (!foundEmail || !foundEmail.includes('@')) {
+                                    alert("이메일로 가입된 계정이 아닙니다. (카카오/네이버 가입 등)");
+                                    verifyPwBtn.textContent = "휴대폰 본인인증하기";
+                                    verifyPwBtn.disabled = false;
+                                    return;
+                                }
+
+                                // Send Password Reset Email
+                                await sendPasswordResetEmail(auth, foundEmail);
+                                
+                                const resultBox = document.getElementById('find-pw-result');
+                                const emailDisplay = document.getElementById('reset-sent-email');
+                                
+                                const [idPart, domain] = foundEmail.split('@');
+                                let masked = foundEmail;
+                                if (idPart.length > 3) {
+                                    masked = idPart.substring(0, 3) + '*'.repeat(idPart.length - 3) + '@' + domain;
+                                } else {
+                                    masked = idPart.substring(0, 1) + '*'.repeat(idPart.length - 1) + '@' + domain;
+                                }
+                                
+                                emailDisplay.textContent = masked + " (으)로 메일이 발송되었습니다.";
+                                resultBox.style.display = 'block';
+                                verifyPwBtn.style.display = 'none';
+
+                            } else {
+                                alert("일치하는 회원 정보가 없습니다.");
+                                verifyPwBtn.textContent = "휴대폰 본인인증하기";
+                                verifyPwBtn.disabled = false;
+                            }
+                        } else {
+                            alert("인증 정보 조회 실패");
+                            verifyPwBtn.textContent = "휴대폰 본인인증하기";
+                            verifyPwBtn.disabled = false;
+                        }
+                    } catch (error) {
+                        console.error("PW Reset Auth Error:", error);
+                        alert("서버 연결 중 오류가 발생했습니다.");
+                        verifyPwBtn.textContent = "휴대폰 본인인증하기";
+                        verifyPwBtn.disabled = false;
+                    }
+                } else {
+                    alert("인증에 실패하였습니다. 에러 내용: " + rsp.error_msg);
+                }
+            });
+        });
     }
 
 });

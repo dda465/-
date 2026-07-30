@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+
+
+<html lang="ko">
+
+
+
+
+
+
+
+<head>
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
+<!-- Danggeun Market Code -->
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script>
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
+</script>
+<!-- End Danggeun Market Code -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-18055027970');
+</script>
+
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>이용약관 - 쉐라폰</title>
+
+
+
+    <link rel="stylesheet" href="styles.css?v=1782455814">
+
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
+
+
+
+    <!-- ... -->
+
+
+
+    <!-- Navbar -->
+
+
+
+    <nav class="navbar">
+
+
+
+        <div class="container">
+
+
+
+            <a href="index.html" class="logo">
+
+
+
+                <img src="sr_logo.png" alt="SR 로고" class="logo-icon"
+
+
+
+                    style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+
+
+
+                <span class="logo-text-wrapper"
+
+
+
+                    style="font-family: 'Pretendard', sans-serif; font-weight: 700; font-size: 24px; color: #2563EB; margin-left: 8px;">
+
+
+
+                    쉐라폰
+
+
+
+                </span>
+
+
+
+            </a>
+
+
+
+                        <!-- Custom Language Selector -->
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <div id="google_translate_element" style="display:none;"></div>
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
+            <div class="nav-links">
+
+
+
+                <a href="quote.html">내 폰 판매</a>
+
+
+                <a href="reviews.html">이용 후기</a>
+
+
+
+                <a href="login.html" id="nav-login-link">로그인</a>
+                    </div>
+
+
+
+            <a href="quote.html" class="btn btn-primary">판매하기</a>
+                    </div>
+
+
+
+    </nav>
+
+
+
+
+
+
+
+    <div class="container">
+
+
+
+        <div class="legal-container legal-content">
+
+
+
+                                    <h1>이용약관</h1>
+
+            <h2>제1조 (목적)</h2>
+            <p>본 약관은 쉐라폰(이하 "회사")이 운영하는 중고폰 매입 서비스(이하 "서비스")를 이용함에 있어 회사와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+
+            <h2>제2조 (용어의 정의)</h2>
+            <p>
+                1. "서비스"란 회사가 운영하는 웹사이트를 통해 회원의 중고 스마트폰, 패드, 워치 등 스마트기기를 회사가 매입하는 일련의 과정을 의미합니다.<br>
+                2. "회원"이란 본 약관에 동의하고 서비스를 이용하는 고객을 말합니다.<br>
+                3. "매입가"란 회사가 기기의 상태를 검수한 후 회원에게 최종적으로 지급하기로 결정한 금액을 의미합니다.
+            </p>
+
+            <h2>제3조 (서비스 이용 및 계약의 성립)</h2>
+            <p>
+                1. 회원은 회사가 정한 양식에 따라 내 폰 판매 신청을 함으로써 서비스 이용을 신청합니다.<br>
+                2. 매매계약은 회사가 회원의 기기를 수령하고 최종 매입가를 안내한 후, 회원이 이에 동의(수락)함으로써 최종 성립됩니다.<br>
+                3. 회사가 검수 후 안내한 최종 매입가에 회원이 동의하여 회원의 계좌로 매입 대금이 입금 완료된 시점부터는 매매계약이 최종적으로 확정된 것으로 봅니다. <strong>이후에는 어떠한 사유로도 단순 변심에 의한 거래 취소 및 기기 반환 요구를 할 수 없습니다.</strong><br>
+                4. 회원이 안내된 매입가에 동의하지 않을 경우, 회사는 기기를 회원에게 반송하며 이 때 발생하는 반송 비용은 원칙적으로 회원이 부담합니다 (단, 프로모션 등 예외 적용 가능).<br>
+                5. 매입 거부, 검수 불가 등으로 기기 반송이 결정되었으나, 회원이 반송 비용 결제를 거부하거나 <strong>회사의 반송 통보일로부터 14일 이내에 연락이 닿지 않는 경우, 회원은 해당 기기에 대한 소유권을 포기한 것으로 간주</strong>합니다. 이 경우 회사는 기기를 임의로 폐기 또는 재활용 처리할 수 있으며, 회원은 어떠한 민/형사상 이의도 제기할 수 없습니다.
+            </p>
+
+            <h2>제4조 (회원의 의무 및 본인 확인)</h2>
+            <p>
+                1. 회원은 본인 명의로 된, 정상적으로 해지되었거나 소유권이 본인에게 있는 기기만 판매할 수 있습니다.<br>
+                2. 분실, 도난, 연체, 임대폰, 타인 명의 도용 등 비정상적인 기기는 거래가 불가합니다. 만약 매입 대금 지급 이후라도 해당 기기가 위와 같은 불법 기기로 밝혀질 경우, 회사는 즉시 수사기관에 고발할 수 있습니다. <strong>이 경우 회원은 수령한 매입 대금을 전액 반환해야 하며, 회사가 입은 모든 법적, 물질적, 영업적 손해를 배상할 전적인 책임이 있습니다.</strong><br>
+                3. 미성년자(만 19세 미만)의 경우, 관련 법령에 따라 거래가 일부 제한되거나 법정대리인의 동의가 필요할 수 있습니다. 쉐라폰은 원칙적으로 만 14세 미만 아동의 거래를 제한합니다.<br>
+                4. 회사는 관련 소유권 확인을 위해 신분증 사본 등 추가 정보를 요구할 수 있습니다.<br>
+                5. 회원이 '방문 수거(택배 기사 방문)'를 신청한 후, 사전 연락 없이 당일 부재, 연락 두절, 미배출 등으로 인해 택배사의 헛걸음(공차) 비용이 발생하는 경우, <strong>회사는 회원에게 왕복 택배비 상당의 위약금(5,000원~10,000원)을 청구하거나 향후 쉐라폰 서비스 이용을 영구적으로 제한</strong>할 수 있습니다.
+            </p>
+
+            <h2>제5조 (기기의 검수 및 단가 산정)</h2>
+            <p>
+                1. 회사는 회원이 택배로 발송한 기기를 수령한 후, 당사의 전문 검수 기준에 따라 외관, 기능, 배터리 상태 등을 종합적으로 평가합니다.<br>
+                2. 예상 견적은 단순 참고용이며, <strong>실제 매입가는 검수 결과에 따라 예상 견적과 차이가 발생할 수 있습니다.</strong><br>
+                3. 기기와 함께 동봉된 박스, 충전기, 케이스, 필름 등 <strong>일체의 구성품 및 부속품은 검수 과정에서 임의 폐기됩니다. 따라서 매입 취소 및 반송이 결정되더라도 본체(기기) 외의 폐기된 구성품은 절대 반환되거나 보상되지 않음을 원칙</strong>으로 합니다.<br>
+                4. 정상적인 검수가 불가능한 기기(완전 파손 등)의 경우, 별도의 검수비가 청구되거나 착불로 반송될 수 있습니다.<br>
+                5. <strong>최종 매입가 안내 후 7일 이상 연락이 두절되거나 의사표시가 없는 경우</strong>, 검수팀이 측정한 최종 견적에 따라 고객님의 계좌로 입금 처리되며 이로써 매입이 완료된 것으로 간주합니다.<br>
+                6. 회원은 검수 결과 및 최종 매입가에 이의가 있는 경우, <strong>결과 안내일로부터 3일(영업일 기준) 이내에 회사에 서면(이메일, 채널톡 등)으로 이의를 제기</strong>해야 합니다. 이 기간 내 이의 제기가 없는 경우 검수 결과에 동의한 것으로 간주합니다.<br>
+                7. <strong>미개봉 상품(밀봉 패키지 및 씰 기부착 제품)</strong>의 경우, 회사는 기기의 외관 상태 및 정상 작동(내부 기능 등) 여부를 검수하기 위해 <strong>해당 제품의 포장 및 밀봉(씰)을 해제(개봉)하여 검수를 진행</strong>합니다. 이에 따라 매입 취소 및 반송이 결정되더라도 기기는 개봉된 상태로 반송되며, <strong>회사는 포장 및 밀봉(씰) 훼손으로 인한 상품 가치 하락이나 원상 복구에 대해 일체의 배상 또는 보상 책임을 지지 않습니다.</strong>
+            </p>
+
+            <h2>제6조 (개인정보 보호 및 데이터 삭제)</h2>
+            <p>
+                1. 회원은 기기를 발송하기 전 반드시 모든 개인정보와 데이터를 백업하고, 공장 초기화 및 활성화 잠금(예: iCloud, 삼성 계정 등)을 해제해야 합니다.<br>
+                2. 회사는 검수 완료 및 매입 확정 시, 국제 인증 솔루션을 활용하여 기기 내 잔여 데이터를 복구 불가능한 상태로 영구히 삭제합니다.<br>
+                3. 초기화 또는 로그아웃이 되지 않아 발생하는 개인정보 유출에 대해 회사는 책임지지 않으며, <strong>계정 잠김(Lock)이 해제되지 않아 매입 및 검수가 불가능한 경우 기기는 착불로 반송 처리</strong>됩니다.
+            </p>
+
+            <h2>제7조 (면책 조항)</h2>
+            <p>
+                1. 회사는 천재지변, 택배사의 파업 및 운송 중 발생한 사고 등 불가항력적 사유로 인한 서비스 지연 또는 기기 파손/분실에 대해 책임지지 않습니다.<br>
+                2. <strong>완충재 미사용 등 회원의 포장 부주의로 인해 배송 중 발생한 파손에 대해서는 회사가 책임지지 않습니다.</strong><br>
+                3. 방문 수거 서비스를 통해 기기를 발송하는 과정에서 택배사의 과실로 인한 분실 또는 파손이 발생한 경우, 회사는 택배사에 손해배상을 청구하는 데 적극 협조하되, 회사가 직접적으로 택배사 과실에 대한 배상 책임을 지지는 않습니다.<br>
+                4. 편의점 택배 등 회원이 직접 발송한 경우의 운송 중 분실/파손에 대해서는 전적으로 회원과 해당 택배사 간의 문제이며, 회사는 이에 대해 책임지지 않습니다.
+            </p>
+
+            <h2>제8조 (관할 법원 및 준거법)</h2>
+            <p>
+                본 약관 및 서비스 이용과 관련하여 회사와 회원 간에 발생하는 모든 법적 분쟁의 제1심 관할법원은 <strong>'회사의 본점 소재지를 관할하는 법원'</strong>으로 합니다.
+            </p>
+
+            <h2>제9조 (약관의 변경)</h2>
+            <p>
+                1. 회사는 관련 법률을 위반하지 않는 범위 내에서 본 약관을 변경할 수 있습니다.<br>
+                2. 약관이 변경되는 경우 회사는 변경 내용을 시행일 7일 전부터 웹사이트 공지사항에 게시합니다. 단, 회원에게 불리한 변경의 경우 30일 전 게시합니다.<br>
+                3. 변경된 약관 시행일 이후에도 서비스를 계속 이용하는 경우, 변경된 약관에 동의한 것으로 간주합니다.
+            </p>
+
+            <h2>제10조 (서비스의 중단 및 종료)</h2>
+            <p>
+                1. 회사는 시스템 점검, 통신 장비 교체 등 부득이한 사유가 있는 경우 서비스 제공을 일시 중단할 수 있으며, 사전에 공지합니다.<br>
+                2. 회사가 사업을 종료하고자 하는 경우, 종료일 30일 전까지 웹사이트에 이를 공지하고 진행 중인 거래를 모두 정산 완료합니다.
+            </p>
+
+            <p style="margin-top: 40px; text-align: center; color: #888;">공고일자: 2026년 3월 31일<br>시행일자: 2026년 3월 31일</p>
+
+
+
+
+
+
+
+            <br><br><br>
+
+
+
+            <!-- ... -->
+
+
+
+            <!-- Footer -->
+
+
+
+            <footer>
+
+
+
+                <div class="container">
+
+
+
+                    <div class="footer-content">
+
+
+
+                <div class="footer-col" style="flex: 2;">
+
+
+
+
+
+
+
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">
+
+
+
+                        <strong>쇼핑몰 기본정보</strong><br>
+
+
+
+                        상호명: <span id="dyn-company-name">에스알커머스</span> | 대표자명: <span id="dyn-ceo-name">박현용</span><br>
+
+
+
+                        사업장 주소: <span id="dyn-address">부산시 동천로 116 한신밴빌딩 1003호</span><br>
+
+
+
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
+                    <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
+                            <img src="sr_logo.png" alt="KG이니시스 에스크로" style="height: 38px;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                고객님의 안전거래를 위해 현금 결제 시 저희 쇼핑몰이 가입한<br>
+                                <strong>KG이니시스의 에스크로(구매안전) 서비스</strong>를 이용하실 수 있습니다.<br>
+                                <span style="color: #6b7280; text-decoration: underline;">[서비스 가입사실 확인하기]</span>
+                            </div>
+                        </div>
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
+                            <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>고객센터 정보</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+
+
+
+                        
+
+
+
+                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
+
+
+
+                        <strong>CS운영시간</strong><br>
+
+
+
+                        연중무휴 24시간 채널톡으로 상담가능
+
+
+
+                    </p>
+                    </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>About</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+
+
+
+                        <a href="terms.html" style="color: inherit; text-decoration: none;">이용약관</a> |
+
+
+
+                        <a href="privacy.html"
+
+
+
+                            style="color: inherit; text-decoration: none; font-weight: bold;">개인정보처리방침</a>
+
+
+
+                    </p>
+                    </div>
+                    </div>
+
+
+
+            <div class="copyright">
+
+
+
+                &copy; 2026 HooPak all rights reserved
+                    </div>
+                    </div>
+
+
+
+    </footer>
+
+
+
+            <script type="module" src="script.js"></script>
+
+
+
+
+
+
+
+            <!-- Channel Plugin Scripts -->
+
+
+
+            <script>
+
+
+
+                (function () {
+
+
+
+                    var w = window;
+
+
+
+                    if (w.ChannelIO) {
+
+
+
+                        return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.');
+
+
+
+                    }
+
+
+
+                    var ch = function () {
+
+
+
+                        ch.c(arguments);
+
+
+
+                    };
+
+
+
+                    ch.q = [];
+
+
+
+                    ch.c = function (args) {
+
+
+
+                        ch.q.push(args);
+
+
+
+                    };
+
+
+
+                    w.ChannelIO = ch;
+
+
+
+                    function l() {
+
+
+
+                        if (w.ChannelIOInitialized) {
+
+
+
+                            return;
+
+
+
+                        }
+
+
+
+                        w.ChannelIOInitialized = true;
+
+
+
+                        var s = document.createElement('script');
+
+
+
+                        s.type = 'text/javascript';
+
+
+
+                        s.async = true;
+
+
+
+                        s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
+
+
+                        s.charset = 'UTF-8';
+
+
+
+                        var x = document.getElementsByTagName('script')[0];
+
+
+
+                        x.parentNode.insertBefore(s, x);
+
+
+
+                    }
+
+
+
+                    if (document.readyState === 'complete') {
+
+
+
+                        l();
+
+
+
+                    } else if (window.attachEvent) {
+
+
+
+                        window.attachEvent('onload', l);
+
+
+
+                    } else {
+
+
+
+                        window.addEventListener('DOMContentLoaded', l, false);
+
+
+
+                        window.addEventListener('load', l, false);
+
+
+
+                    }
+
+
+
+                })();
+
+
+
+                ChannelIO('boot', {
+
+
+
+                    "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
+
+
+
+                });
+
+
+
+            </script>
+
+
+
+            
+<!-- NAVER PV SCRIPT -->
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
+</script>
+
+
+    <!-- Google Translate Script & Styling -->
+    <style>
+        /* Force Hide Google Translate Top Banner & Tooltips */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        
+        /* Prevent layout shift caused by Google Translate */
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        
+        /* Hide Default Widget Elements */
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        
+        /* Custom Select Styling */
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .lang-select:hover {
+            border-color: #2563EB;
+        }
+        
+        @media (max-width: 768px) {
+            /* Protect the Logo and show text comfortably */
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            
+            /* Comfortable Language Selector */
+            .lang-select { 
+                padding: 3px 12px 3px 4px; 
+                font-size: 0.75rem; 
+                width: 60px; 
+                min-width: 60px;
+                margin-right: 4px !important;
+                background-position: right 3px top 50%;
+                background-size: 6px auto;
+                letter-spacing: -0.5px;
+            }
+            
+            /* Comfortable Action Buttons & Icons in Navbar */
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            
+            /* Navbar Container Tweaks */
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru'
+            }, 'google_translate_element');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var customSelect = document.getElementById('custom_lang_select');
+            if (!customSelect) return;
+            
+            // Initial load cookie check
+            var match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+            if (match) {
+                var lang = match[1].split('/').pop();
+                if (lang && lang !== 'ko') {
+                    customSelect.value = lang;
+                }
+            } else {
+                customSelect.value = 'ko';
+            }
+
+            customSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                
+                if (targetLang === 'ko') {
+                    // Force cookie clear and reload to perfectly restore original Korean DOM
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                // Small delay to allow the Google Translate script to catch the change, else reload
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            // Mutation observer to force remove body top styling injected dynamically by google translate
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>

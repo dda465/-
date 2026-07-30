@@ -101,6 +101,7 @@ function renderResults(quotes) {
         // Handle both English (old) and Korean (new) statuses
         if (currentStatus === 'receipt' || currentStatus === '신청접수') { statusBadgeClass = 'receipt'; statusText = '접수 완료'; }
         else if (currentStatus === 'pickup' || currentStatus === '수거중') { statusBadgeClass = 'pickup'; statusText = '기기 수거중'; }
+        else if (currentStatus === '택배도착') { statusBadgeClass = 'arrived'; statusText = '기기 도착 완료'; }
         else if (currentStatus === 'assessing' || currentStatus === '검수중' || currentStatus === '검수완료') { statusBadgeClass = 'assessing'; statusText = '검수 진행중'; }
         else if (currentStatus === 'complete' || currentStatus === '입금완료') { statusBadgeClass = 'complete'; statusText = '입금 완료'; }
         else if (currentStatus === '입금대기') { statusBadgeClass = 'complete'; statusText = '입금 대기 (송금예정)'; }
@@ -109,16 +110,18 @@ function renderResults(quotes) {
         
         // Setup stepper
         const steps = [
-            { id: 'receipt', label: '매입접수완료', idx: 1 },
-            { id: 'pickup', label: '택배발송완료', idx: 2 },
-            { id: 'assessing', label: '검수중', idx: 3 },
-            { id: 'complete', label: '입금완료', idx: 4 }
+            { id: 'receipt', label: '접수', idx: 1 },
+            { id: 'pickup', label: '발송', idx: 2 },
+            { id: 'arrived', label: '도착', idx: 3 },
+            { id: 'assessing', label: '검수', idx: 4 },
+            { id: 'complete', label: '입금', idx: 5 }
         ];
 
         let currentIdx = 1;
         if (statusBadgeClass === 'pickup') currentIdx = 2;
-        if (statusBadgeClass === 'assessing') currentIdx = 3;
-        if (statusBadgeClass === 'complete') currentIdx = 4;
+        if (statusBadgeClass === 'arrived') currentIdx = 3;
+        if (statusBadgeClass === 'assessing') currentIdx = 4;
+        if (statusBadgeClass === 'complete') currentIdx = 5;
         
         let stepperHtml = '';
         if (statusBadgeClass !== 'cancel') {
@@ -151,7 +154,10 @@ function renderResults(quotes) {
         let dateStr = '알 수 없음';
         if (data.firebaseTimestamp) {
             try {
-                dateStr = new Date(data.firebaseTimestamp.toMillis()).toLocaleString('ko-KR');
+                // 모바일 한 줄에 들어가도록 압축: 2026-07-20 16:58 (초 제외)
+                const _d = new Date(data.firebaseTimestamp.toMillis());
+                const _p2 = (n) => String(n).padStart(2, '0');
+                dateStr = `${_d.getFullYear()}-${_p2(_d.getMonth() + 1)}-${_p2(_d.getDate())} ${_p2(_d.getHours())}:${_p2(_d.getMinutes())}`;
             } catch(e) {}
         } else if (data.timestamp) {
             dateStr = data.timestamp;
@@ -205,7 +211,7 @@ function renderResults(quotes) {
         // Contract Button
         let contractBtnHtml = '';
         if (data.inspectionData) {
-            const encData = encodeURIComponent(JSON.stringify({...data.inspectionData, brand: data.brand, model: data.model, name: data.customerName, phone: data.customerPhone, expected: price, docId: data.id, status: data.status}));
+            const encData = encodeURIComponent(JSON.stringify({...data.inspectionData, brand: data.brand, model: data.model, name: data.customerName, phone: data.customerPhone, expected: price, docId: data.id, status: data.status})).replace(/'/g, "%27");
             contractBtnHtml = `
                 <div style="margin-top: 15px; text-align: center;">
                     <button onclick="openContractViewer('${encData}')" style="width: 100%; padding: 12px; background: #1d1d1f; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -270,7 +276,32 @@ window.openContractViewer = function(encData) {
                            </div>
                        </div>
                       
-                      <!-- Summary Box -->
+                      <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                          검수 차감 내역
+                      </h4>
+                      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 24px;">
+                          <div id="cv-faults" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+                          <div id="cv-details" style="font-size: 0.9rem; color: #555; white-space: pre-wrap; line-height: 1.5; padding-top: 12px; border-top: 1px dashed #ddd;"></div>
+                      </div>
+
+                      <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                          검수자 종합 소견
+                      </h4>
+                      <div id="cv-comment" style="font-size: 0.95rem; color: #333; background: #E3F2FD; padding: 15px; border-radius: 8px; line-height: 1.6; margin-bottom: 24px;"></div>
+
+                      <!-- Attachment Section -->
+                      <div id="cv-attachment-container" style="display: none; background: #F0FDF4; border: 1px solid #BBF7D0; padding: 15px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                          <span class="material-symbols-outlined" style="color: #16A34A;">description</span>
+                          <div style="flex: 1;">
+                              <div style="font-size: 0.85rem; color: #166534; font-weight: 600;">M360 검수완료서 / 첨부파일</div>
+                              <div style="font-size: 0.75rem; color: #166534; opacity: 0.9;">개인정보 삭제처리결과 및 상세 진단 보고서</div>
+                          </div>
+                          <a id="cv-attachment-link" href="#" target="_blank" style="padding: 6px 12px; background: #16A34A; color: white; text-decoration: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(22,163,74,0.2);">
+                              <span class="material-symbols-outlined" style="font-size: 1rem;">download</span> 보기
+                          </a>
+                      </div>
+
+                      <!-- 차감 사유와 소견을 먼저 읽은 뒤 금액을 보도록 배치 (금액부터 보면 방어적으로 읽게 됨) -->
                       <div style="background: linear-gradient(135deg, #1d1d1f, #434345); padding: 20px; border-radius: 12px; color: white; text-align: center; margin-bottom: 24px;">
                           <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">최종 매입 결정 금액</div>
                           <div style="font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;" id="cv-final-price">0원</div>
@@ -301,19 +332,6 @@ window.openContractViewer = function(encData) {
                               <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">쉐라폰</td>
                           </tr>
                       </table>
-
-                      <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                          검수 차감 내역
-                      </h4>
-                      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 24px;">
-                          <div id="cv-faults" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
-                          <div id="cv-details" style="font-size: 0.9rem; color: #555; white-space: pre-wrap; line-height: 1.5; padding-top: 12px; border-top: 1px dashed #ddd;"></div>
-                      </div>
-
-                      <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                          검수자 종합 소견
-                      </h4>
-                      <div id="cv-comment" style="font-size: 0.95rem; color: #333; background: #E3F2FD; padding: 15px; border-radius: 8px; line-height: 1.6; margin-bottom: 24px;"></div>
 
                       <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px; font-size: 0.8rem; color: #666; line-height: 1.6; margin-bottom: 10px; background: #fafafa;">
                           <strong style="color: #333; display: block; margin-bottom: 8px; font-size: 0.85rem;">전자매매계약 약관 동의</strong>
@@ -383,6 +401,15 @@ window.openContractViewer = function(encData) {
             commentDiv.style.display = 'block';
         } else {
             commentDiv.style.display = 'none';
+        }
+        
+        const attachmentContainer = document.getElementById('cv-attachment-container');
+        const attachmentLink = document.getElementById('cv-attachment-link');
+        if (data.attachmentUrl) {
+            attachmentLink.href = data.attachmentUrl;
+            attachmentContainer.style.setProperty('display', 'flex', 'important');
+        } else {
+            attachmentContainer.style.setProperty('display', 'none', 'important');
         }
         
         const actionContainer = document.getElementById('cv-action-container');

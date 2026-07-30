@@ -22,6 +22,14 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://sharaphone.com/faq.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://sharaphone.com/delivery-guide.html</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://sharaphone.com/terms.html</loc>
     <priority>0.3</priority>
   </url>

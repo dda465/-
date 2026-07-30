@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+
+
+
+<html lang="ko">
+
+
+
+
+
+
+
+<head>
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
+<!-- Danggeun Market Code -->
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script>
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
+</script>
+<!-- End Danggeun Market Code -->
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-18055027970');
+</script>
+
+
+
+
+    <meta charset="UTF-8">
+
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>마이페이지 - 쉐라폰</title>
+
+
+
+    <link rel="stylesheet" href="styles.css?v=1782455814">
+
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+
+
+    <style>
+
+
+
+        .page-header {
+
+
+
+            background-color: var(--secondary-color);
+
+
+
+            padding: 60px 0;
+
+
+
+            text-align: center;
+
+
+
+        }
+
+
+
+
+
+
+
+        .page-header h1 {
+
+
+
+            font-size: 2rem;
+
+
+
+            margin-bottom: 10px;
+
+
+
+            color: var(--text-primary);
+
+
+
+        }
+
+
+
+
+
+
+
+        .dashboard-container {
+
+
+
+            background: white;
+
+
+
+            border-radius: 16px;
+
+
+
+            box-shadow: var(--shadow-md);
+
+
+
+            padding: 30px;
+
+
+
+            margin-top: -30px;
+
+
+
+            position: relative;
+
+
+
+            z-index: 10;
+
+
+
+            border: 1px solid var(--border-color);
+
+
+
+            min-height: 400px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .quote-card {
+
+
+
+            border: 1px solid #eee;
+
+
+
+            border-radius: 12px;
+
+
+
+            padding: 20px;
+
+
+
+            margin-bottom: 15px;
+
+
+
+            transition: all 0.2s;
+
+
+
+            display: flex;
+
+
+
+            justify-content: space-between;
+
+
+
+            align-items: center;
+
+
+
+        }
+
+
+
+
+
+
+
+        .quote-card:hover {
+
+
+
+            box-shadow: var(--shadow-sm);
+
+
+
+            transform: translateY(-2px);
+
+
+
+        }
+
+
+
+
+
+
+
+        /* flex 자식은 min-width:auto 기본값 때문에 옆에 여백이 있어도 글자가 잘림 → 0으로 풀어줌 */
+        .qc-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .qc-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+            word-break: keep-all;
+            line-height: 1.35;
+        }
+        /* 좁은 화면에서 기종명·신청일이 두 줄로 넘치지 않도록 축소 */
+        @media (max-width: 420px) {
+            .qc-info h3 { font-size: 0.95rem; letter-spacing: -0.4px; }
+            .qc-info p { font-size: 0.82rem; letter-spacing: -0.3px; }
+        }
+
+
+
+
+
+
+
+        .qc-info p {
+
+
+
+            color: var(--text-secondary);
+
+
+
+            font-size: 0.9rem;
+
+
+
+            margin-bottom: 2px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+
+
+
+
+
+
+        .status-badge.receipt {
+
+
+
+            background: #E3F2FD;
+
+
+
+            color: #1976D2;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 접수 */
+
+
+
+        .status-badge.pickup {
+
+
+
+            background: #FFF3E0;
+
+
+
+            color: #F57C00;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 수거중 */
+
+        /* 기기 도착 완료 (사무실 입고, 검수 전) */
+        .status-badge.arrived {
+            background: #E0F2F1;
+            color: #00695C;
+        }
+
+
+
+        .status-badge.assessing {
+
+
+
+            background: #E8F5E9;
+
+
+
+            color: #388E3C;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 검수중 */
+
+
+
+        .status-badge.complete {
+
+
+
+            background: #2196F3;
+
+
+
+            color: white;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 입금완료 */
+
+
+
+        .status-badge.cancel {
+
+
+
+            background: #FFEBEE;
+
+
+
+            color: #C62828;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 취소 */
+
+
+
+
+
+
+
+        .logout-btn {
+
+
+
+            background: none;
+
+
+
+            border: 1px solid #ddd;
+
+
+
+            padding: 8px 16px;
+
+
+
+            border-radius: 20px;
+
+
+
+            cursor: pointer;
+
+
+
+            font-size: 0.9rem;
+
+
+
+            color: #666;
+
+
+
+        }
+
+
+
+
+
+
+
+        .logout-btn:hover {
+
+
+
+            background: #f5f5f5;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Progress Stepper */
+
+
+
+        .stepper-container {
+
+
+
+            margin-top: 15px;
+
+
+
+            padding-top: 15px;
+
+
+
+            border-top: 1px solid #f0f0f0;
+
+
+
+        }
+
+
+
+
+
+
+
+        .stepper {
+
+
+
+            display: flex;
+
+
+
+            justify-content: space-between;
+
+
+
+            position: relative;
+
+
+
+        }
+
+
+
+
+
+
+
+        .stepper::before {
+
+
+
+            content: '';
+
+
+
+            position: absolute;
+
+
+
+            top: 15px;
+
+
+
+            left: 0;
+
+
+
+            width: 100%;
+
+
+
+            height: 2px;
+
+
+
+            background: #eee;
+
+
+
+            z-index: 1;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step {
+
+
+
+            position: relative;
+
+
+
+            z-index: 2;
+
+
+
+            text-align: center;
+
+
+
+            flex: 1;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step-icon {
+
+
+
+            width: 32px;
+
+
+
+            height: 32px;
+
+
+
+            background: white;
+
+
+
+            border: 2px solid #ddd;
+
+
+
+            border-radius: 50%;
+
+
+
+            margin: 0 auto 8px;
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            font-size: 0.8rem;
+
+
+
+            color: #ccc;
+
+
+
+            font-weight: bold;
+
+
+
+            transition: all 0.3s;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step-text {
+            font-size: 0.72rem;
+            color: #999;
+            font-weight: 500;
+            word-break: keep-all;
+            line-height: 1.3;
+            display: block;
+            padding: 0 2px;
+            letter-spacing: -0.3px;
+        }
+        @media (max-width: 420px) {
+            .step-text { font-size: 0.65rem; letter-spacing: -0.5px; }
+        }
+
+
+
+
+
+
+
+        /* Active & Completed States */
+
+
+
+        .step.active .step-icon {
+
+
+
+            border-color: var(--primary-color);
+
+
+
+            background: var(--primary-color);
+
+
+
+            color: white;
+
+
+
+            box-shadow: 0 0 0 3px rgba(255, 158, 170, 0.2);
+
+
+
+        }
+
+
+
+
+
+
+
+        .step.active .step-text {
+
+
+
+            color: var(--primary-dark);
+
+
+
+            font-weight: 700;
+
+
+
+        }
+
+
+
+
+
+
+
+        .step.completed .step-icon {
+
+
+
+            border-color: var(--primary-color);
+
+
+
+            background: white;
+
+
+
+            color: var(--primary-color);
+
+
+
+        }
+
+
+
+
+
+
+
+        .step.completed .step-text {
+
+
+
+            color: var(--primary-dark);
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Connecting Lines Color Logic would require complex CSS or JS dynamic width. 
+
+
+
+           For simplicity, we just color the icons/text. */
+
+
+
+    </style>
+
+
+
+
+
+
+
+    <!-- Google tag (gtag.js) -->
+
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JWS15NH588"></script>
+
+
+
+    <script>
+
+
+
+        window.dataLayer = window.dataLayer || [];
+
+
+
+        function gtag() { dataLayer.push(arguments); }
+
+
+
+        gtag('js', new Date());
+
+
+
+
+
+
+
+        gtag('config', 'G-JWS15NH588');
+
+
+
+    </script>
+
+
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
+
+<!-- NAVER PV SCRIPT -->
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
+</script>
+
+
+    <!-- OpenGraph SEO Tags -->
+    <meta property="og:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
+    <meta property="og:description" content="사용하시던 중고폰, 집에서 편하게 최고가로 판매하세요. 1분만에 예상 매입가를 확인하고 당일 입금 받으세요!">
+    <meta property="og:image" content="https://rejeuphone.web.app/sr_logo.png">
+    <meta property="og:url" content="https://rejeuphone.web.app">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="쉐라폰">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
+    <meta name="twitter:description" content="사용하시던 중고폰, 집에서 편하게 최고가로 판매하세요. 1분만에 예상 매입가를 확인하고 당일 입금 받으세요!">
+    <meta name="twitter:image" content="https://rejeuphone.web.app/sr_logo.png">
+
+</head>
+
+
+
+
+
+
+
+<body>
+
+
+
+
+
+
+
+    <style>
+        .mobile-only { display: none !important; }
+        .pc-only { display: inline-flex; }
+        @media (max-width: 768px) {
+            .mobile-only { display: flex !important; }
+            .pc-only { display: none !important; }
+            
+            .navbar { order: 1; position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: none; box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
+            .navbar .container { padding: 8px 15px; display: flex; flex-direction: row !important; justify-content: space-between; align-items: center; width: 100%;}
+        }
+    </style>
+    <nav class="navbar">
+        <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <a href="index.html" class="logo">
+                <img src="sr_logo.webp" alt="SR 로고" class="logo-icon" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
+                <span class="logo-text-wrapper" style="font-family: 'Pretendard', sans-serif; font-weight: 800; font-size: 24px; color: #1E3A8A; margin-left: 8px; letter-spacing: -1px;">쉐라폰</span>
+            </a>
+
+            <!-- Custom Language Selector -->
+            <div style="margin-right: 10px; display: flex; align-items: center; position: relative;">
+                <div id="google_translate_element" style="display:none;"></div>
+                <select id="custom_lang_select" class="lang-select notranslate">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="ru">Русский</option>
+                </select>
+            </div>
+
+            <!-- Mobile App Actions -->
+            <div class="mobile-only" style="align-items:center;">
+                <a href="quote.html" style="font-size:0.8rem; font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:3px 8px; border-radius:16px; margin-right:6px; white-space:nowrap; flex-shrink:0; min-width:max-content;">판매하기</a>
+                <a href="login.html" id="mobile-auth-link" style="font-size:0.8rem; font-weight:700; color:#1e293b; border: 1px solid #e2e8f0; padding:3px 8px; border-radius:16px; white-space:nowrap; flex-shrink:0; min-width:max-content;">로그인</a>
+                <a href="admin.html" id="mobile-admin-btn" style="font-size:1.4rem; color:#e11d48; display:none; margin-left:6px;"><i class="ri-dashboard-2-line"></i></a>
+            </div>
+
+            <div class="nav-links pc-only">
+                <a href="quote.html">내 폰 판매</a>
+                <a href="reviews.html">이용 후기</a>
+                <a href="login.html" id="nav-login-link">로그인</a>
+            </div>
+            <a href="quote.html" class="btn btn-primary pc-only">판매하기</a>
+        </div>
+    </nav>
+
+
+
+    </nav>
+
+
+
+
+
+
+
+    <div class="page-header">
+
+
+
+        <div class="container">
+
+
+
+            <h1>마이페이지</h1>
+
+
+
+            <p id="welcome-msg">나의 견적 신청 내역을 확인하세요</p>
+                    </div>
+                    </div>
+
+
+
+
+
+
+
+    <div class="container mb-3">
+
+        <div class="dashboard-container">
+
+            <h2 style="margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+
+                📋 신청 내역
+
+            </h2>
+
+            <div id="my-quotes-list">
+
+                <div style="text-align: center; padding: 40px; color: #999;">
+
+                    불러오는 중...
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+    <!-- 회원정보 관리 영역 -->
+    <div class="container mb-3">
+        <div class="dashboard-container" style="margin-top: 10px; min-height: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; cursor: pointer;" onclick="document.getElementById('profile-edit-form').style.display = document.getElementById('profile-edit-form').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('profile-edit-form').style.display === 'none' ? '▼' : '▲';">
+                <h2 style="font-size: 1.3rem; margin: 0;">
+                    👤 회원정보 관리
+                </h2>
+                <span class="toggle-icon" style="color: #888; font-size: 1.2rem;">▼</span>
+            </div>
+            
+            <form id="profile-edit-form" style="max-width: 500px; margin: 0 auto; display: none;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">이메일</label>
+                    <input type="text" id="profile-email" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f3f4f6; color: #666;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">이름 <span style="font-size:0.8rem; color:#888; font-weight:normal;">(수정 불가)</span></label>
+                    <input type="text" id="profile-name" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f3f4f6; color: #666;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">전화번호 <span style="font-size:0.8rem; color:#888; font-weight:normal;">(수정 불가)</span></label>
+                    <input type="text" id="profile-phone" disabled style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f3f4f6; color: #666;">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">주소 수정</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="profile-zipcode" placeholder="우편번호" readonly style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb;">
+                        <button type="button" onclick="execDaumPostcodeProfile()" style="padding: 0 15px; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #475569; white-space: nowrap;">우편번호 찾기</button>
+                    </div>
+                    <input type="text" id="profile-address" placeholder="기본주소" readonly style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f9fafb; margin-bottom: 10px;">
+                    <input type="text" id="profile-detailAddress" placeholder="상세주소 입력" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+                
+                <button type="submit" id="btn-save-profile" style="width: 100%; padding: 14px; background: #2563EB; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 30px;">
+                    회원정보 저장
+                </button>
+                
+                <div style="text-align: right; border-top: 1px solid #eee; padding-top: 15px;">
+                    <button type="button" id="btn-delete-account" style="background: none; border: none; color: #ef4444; text-decoration: underline; cursor: pointer; font-size: 0.9rem;">
+                        회원 탈퇴하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <footer>
+
+
+
+        <div class="container">
+
+
+
+            <div class="footer-content">
+
+
+
+                <div class="footer-col" style="flex: 2;">
+
+
+
+
+
+
+
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6;">
+
+
+
+                        <strong>쇼핑몰 기본정보</strong><br>
+
+
+
+                        상호명: <span id="dyn-company-name">에스알커머스</span> | 대표자명: <span id="dyn-ceo-name">박현용</span><br>
+
+
+
+                        사업장 주소: <span id="dyn-address">부산시 동천로 116 한신밴빌딩 1003호</span><br>
+
+
+
+                        사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span>
+                        </div>
+                    <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: flex-start; gap: 15px; flex-wrap: wrap;">
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white;" onclick="window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph', 'mark', 'width=565,height=683,scrollbars=no,resizable=no');">
+                            <img src="sr_logo.webp" alt="KG이니시스 에스크로" style="height: 38px;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                고객님의 안전거래를 위해 현금 결제 시 저희 쇼핑몰이 가입한<br>
+                                <strong>KG이니시스의 에스크로(구매안전) 서비스</strong>를 이용하실 수 있습니다.<br>
+                                <span style="color: #6b7280; text-decoration: underline;">[서비스 가입사실 확인하기]</span>
+                            </div>
+                        </div>
+                        <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
+                            <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>고객센터 정보</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+
+
+
+                        
+
+
+
+                        상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
+
+
+
+                        <strong>CS운영시간</strong><br>
+
+
+
+                        연중무휴 24시간 채널톡으로 상담가능
+
+
+
+                    </p>
+                    </div>
+
+
+
+                <div class="footer-col">
+
+
+
+                    <h4>About</h4>
+
+
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+
+
+
+                        <a href="terms.html" target="_blank" style="color: inherit; text-decoration: none;">이용약관</a> |
+
+
+
+                        <a href="privacy.html" target="_blank"
+
+
+
+                            style="color: inherit; text-decoration: none; font-weight: bold;">개인정보처리방침</a>
+
+
+
+                    </p>
+                    </div>
+                    </div>
+
+
+
+            <div class="copyright">
+
+
+
+                &copy; 2026 HooPak all rights reserved
+                    </div>
+                    </div>
+
+
+
+    </footer>
+
+
+
+
+
+
+
+    <script type="module">
+
+
+
+        import { auth, db } from './firebase-config.js';
+
+
+
+        import { onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, orderBy, getDocs, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+
+
+
+
+
+        const myQuotesList = document.getElementById('my-quotes-list');
+        const welcomeMsg = document.getElementById('welcome-msg');
+
+
+
+
+
+
+
+        function formatName(name) {
+
+
+
+            if (!name) return '고객';
+
+
+
+            if (name.startsWith('naveryuser')) return '네이버유저';
+
+
+
+            if (name.length > 8) return name.substring(0, 8) + '...';
+
+
+
+            return name;
+
+
+
+        }
+
+
+
+
+
+
+
+        // Auth Check
+
+
+
+        onAuthStateChanged(auth, async (user) => {
+
+
+
+            if (user && !user.isAnonymous) {
+
+
+
+                const dName = formatName(user.displayName || (user.email ? user.email.split('@')[0] : '사용자'));
+
+
+
+
+
+                welcomeMsg.textContent = `${dName}님의 신청 내역입니다.`;
+
+
+
+                const loginLink = document.getElementById('nav-login-link');
+
+
+
+                if (loginLink) loginLink.style.display = 'none';
+                // 모바일 상단 링크도 함께 전환 — 이 처리가 빠져 로그인 상태에서도 '로그인'이 보였음
+                const mAuth = document.getElementById('mobile-auth-link');
+                if (mAuth) {
+                    mAuth.textContent = '로그아웃';
+                    mAuth.href = '#';
+                    mAuth.onclick = async (ev) => {
+                        ev.preventDefault();
+                        try { await signOut(auth); } catch (e) { console.error('로그아웃 실패:', e); }
+                        location.href = 'index.html';
+                    };
+                }
+
+
+
+
+
+
+
+                await loadMyQuotes(user.uid);
+                await loadUserProfile(user.uid, user.email);
+                return; // Stop here, Firebase auth is verified
+
+
+
+            } else {
+
+
+
+                const localUserStr = localStorage.getItem('user_info');
+
+
+
+                if (localUserStr) {
+
+
+
+                    try {
+
+
+
+                        const localUser = JSON.parse(localUserStr);
+
+
+
+                        if (localUser && localUser.provider) {
+
+
+
+                            const dName = formatName(localUser.nickname || localUser.email?.split('@')[0] || 'SNS유저');
+
+
+
+
+
+                            welcomeMsg.textContent = `${dName}님의 신청 내역입니다.`;
+
+
+
+                            const loginLink = document.getElementById('nav-login-link');
+
+
+
+                            if (loginLink) loginLink.style.display = 'none';
+                // 모바일 상단 링크도 함께 전환 — 이 처리가 빠져 로그인 상태에서도 '로그인'이 보였음
+                const mAuth = document.getElementById('mobile-auth-link');
+                if (mAuth) {
+                    mAuth.textContent = '로그아웃';
+                    mAuth.href = '#';
+                    mAuth.onclick = async (ev) => {
+                        ev.preventDefault();
+                        try { await signOut(auth); } catch (e) { console.error('로그아웃 실패:', e); }
+                        location.href = 'index.html';
+                    };
+                }
+
+
+
+
+
+
+
+                            await loadMyQuotes(localUser.uid);
+                            await loadUserProfile(localUser.uid, localUser.email);
+                            return; // Stop here, social login is verified
+
+
+
+                        }
+
+
+
+                    } catch (e) { }
+
+
+
+                }
+
+
+
+
+
+
+
+                alert("로그인이 필요한 페이지입니다.");
+
+
+
+                window.location.href = 'login.html';
+
+
+
+            }
+
+
+
+        });
+
+        // Load User Profile Data
+        async function loadUserProfile(uid, email) {
+            try {
+                // For Kakao users, docId in auth.js is 'kakao_'+localUser.kakao_uid
+                // but localUser.uid is already 'kakao_...' if they logged in via Kakao
+                // Wait, auth.js does: setDoc(doc(db, "users", 'kakao_'+id)) and localStorage saves uid: 'kakao_'+id
+                let docId = uid;
+                
+                const userDocRef = doc(db, 'users', docId);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('profile-email').value = data.email || email || '';
+                    document.getElementById('profile-name').value = data.nickname || '';
+                    document.getElementById('profile-phone').value = data.phone || '';
+                    
+                    const realName = data.nickname || data.name || email?.split('@')[0] || '고객';
+                    document.getElementById('welcome-msg').textContent = `${realName}님의 신청 내역입니다.`;
+                    const navWelcomeText = document.getElementById('nav-welcome-text');
+                    if (navWelcomeText) navWelcomeText.textContent = `${realName}님 환영합니다`;
+                    if (data.address) {
+                        document.getElementById('profile-zipcode').value = data.address.zipcode || '';
+                        document.getElementById('profile-address').value = data.address.basic || '';
+                        document.getElementById('profile-detailAddress').value = data.address.detail || '';
+                    }
+                    
+                    // Attach save logic
+                    const profileForm = document.getElementById('profile-edit-form');
+                    profileForm.onsubmit = async (e) => {
+                        e.preventDefault();
+                        const btn = document.getElementById('btn-save-profile');
+                        btn.textContent = '저장 중...';
+                        btn.disabled = true;
+                        
+                        try {
+                            await updateDoc(userDocRef, {
+                                address: {
+                                    zipcode: document.getElementById('profile-zipcode').value,
+                                    basic: document.getElementById('profile-address').value,
+                                    detail: document.getElementById('profile-detailAddress').value
+                                }
+                            });
+                            alert('회원정보가 성공적으로 저장되었습니다.');
+                        } catch (err) {
+                            console.error('Update profile error:', err);
+                            alert('회원정보 저장 중 오류가 발생했습니다.');
+                        } finally {
+                            btn.textContent = '회원정보 저장';
+                            btn.disabled = false;
+                        }
+                    };
+                    
+                    // Attach delete logic
+                    const deleteBtn = document.getElementById('btn-delete-account');
+                    deleteBtn.onclick = async () => {
+                        if (!confirm('정말 쉐라폰을 탈퇴하시겠습니까?\n\n탈퇴 시 계정 정보가 모두 삭제됩니다.\n(단, 이미 신청된 매입 견적 데이터는 정산 확인을 위해 유지됩니다)')) return;
+                        if (!confirm('탈퇴를 진행하면 되돌릴 수 없습니다. 계속하시겠습니까?')) return;
+                        
+                        try {
+                            // 1. Delete Firestore user document
+                            await deleteDoc(userDocRef);
+                            
+                            // 2. Clear Local Storage
+                            localStorage.removeItem('user_info');
+                            
+                            // 3. Delete Firebase Auth User (if logged in via Firebase Auth)
+                            if (auth.currentUser) {
+                                await deleteUser(auth.currentUser);
+                            } else {
+                                // For Kakao only login, they don't have auth.currentUser usually, but their session is in localStorage
+                                if (window.Kakao && Kakao.Auth && Kakao.Auth.getAccessToken()) {
+                                    Kakao.API.request({
+                                        url: '/v1/user/unlink',
+                                        success: function(response) {
+                                            console.log('Kakao Unlinked', response);
+                                        },
+                                        fail: function(error) {
+                                            console.log('Kakao Unlink Error', error);
+                                        },
+                                    });
+                                }
+                            }
+                            
+                            alert('회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.');
+                            window.location.href = 'index.html';
+                            
+                        } catch (error) {
+                            console.error('Delete account error:', error);
+                            if (error.code === 'auth/requires-recent-login') {
+                                alert('보안을 위해 다시 로그인한 후 탈퇴를 진행해 주세요.');
+                                await signOut(auth);
+                                window.location.href = 'login.html';
+                            } else {
+                                alert('회원 탈퇴 중 오류가 발생했습니다: ' + error.message);
+                            }
+                        }
+                    };
+                    
+                } else {
+                    document.getElementById('profile-email').value = email || '';
+                }
+            } catch (e) {
+                console.error("Error loading user profile:", e);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        async function loadMyQuotes(uid) {
+
+
+
+            try {
+
+
+
+                // Query quotes where userId == uid
+
+
+
+                const q = query(
+
+                    collection(db, "quotes"),
+
+                    where("userId", "==", uid)
+
+                );
+
+
+
+
+
+
+
+                const querySnapshot = await getDocs(q);
+
+
+
+
+
+
+
+                if (querySnapshot.empty) {
+
+
+
+                    myQuotesList.innerHTML = `
+
+
+
+                        <div style="text-align: center; padding: 50px;">
+
+
+
+                            <p style="color: #666; margin-bottom: 20px;">아직 신청한 내역이 없습니다.</p>
+
+
+
+                            <a href="quote.html" class="btn btn-primary">내 폰 견적 보러가기</a>
+                    </div>
+
+
+
+                    `;
+
+
+
+                    return;
+
+
+
+                }
+
+
+
+
+
+
+
+                myQuotesList.innerHTML = '';
+
+                const docs = [];
+                querySnapshot.forEach(doc => docs.push(doc));
+                docs.sort((a, b) => {
+                    const dataA = a.data();
+                    const dataB = b.data();
+                    const getMs = (data) => {
+                        if (data.firebaseTimestamp && typeof data.firebaseTimestamp.toMillis === 'function') {
+                            return data.firebaseTimestamp.toMillis();
+                        }
+                        if (data.timestamp) {
+                            const parsed = new Date(data.timestamp).getTime();
+                            if (!isNaN(parsed)) return parsed;
+                        }
+                        return 0;
+                    };
+                    return getMs(dataB) - getMs(dataA);
+                });
+
+                docs.forEach((doc) => {
+
+
+
+                    const data = doc.data();
+
+
+
+                    const currentStatus = data.status || 'receipt';
+                    
+                    let statusBadgeClass = '';
+                    let statusText = '';
+                    
+                    if (currentStatus === 'receipt' || currentStatus === '신청접수') { statusBadgeClass = 'receipt'; statusText = '접수 완료'; }
+                    else if (currentStatus === 'pickup' || currentStatus === '수거중') { statusBadgeClass = 'pickup'; statusText = '기기 수거중'; }
+                    else if (currentStatus === '택배도착') { statusBadgeClass = 'arrived'; statusText = '기기 도착 완료'; }
+                    else if (currentStatus === 'assessing' || currentStatus === '검수중' || currentStatus === '검수완료') { statusBadgeClass = 'assessing'; statusText = '검수 진행중'; }
+                    else if (currentStatus === 'complete' || currentStatus === '입금완료') { statusBadgeClass = 'complete'; statusText = '입금 완료'; }
+                    else if (currentStatus === '입금대기') { statusBadgeClass = 'complete'; statusText = '입금 대기 (송금예정)'; }
+                    else if (currentStatus === 'cancel' || currentStatus === '취소') { statusBadgeClass = 'cancel'; statusText = '취소됨'; }
+                    else { statusBadgeClass = 'receipt'; statusText = '접수 완료'; }
+                    
+                    const steps = [
+                        { id: 'receipt', label: '접수', idx: 1 },
+                        { id: 'pickup', label: '발송', idx: 2 },
+                        { id: 'arrived', label: '도착', idx: 3 },
+                        { id: 'assessing', label: '검수', idx: 4 },
+                        { id: 'complete', label: '입금', idx: 5 }
+                    ];
+
+                    let currentIdx = 1;
+                    if (statusBadgeClass === 'pickup') currentIdx = 2;
+                    if (statusBadgeClass === 'arrived') currentIdx = 3;
+                    if (statusBadgeClass === 'assessing') currentIdx = 4;
+                    if (statusBadgeClass === 'complete') currentIdx = 5;
+                    
+                    let stepperHtml = '';
+                    if (statusBadgeClass !== 'cancel') {
+                        stepperHtml = '<div class="stepper-container"><div class="stepper">';
+                        steps.forEach(step => {
+                            let stepClass = 'step';
+                            let iconContent = step.idx;
+                            
+                            if (step.idx < currentIdx) {
+                                stepClass += ' completed';
+                                iconContent = '✓';
+                            } else if (step.idx === currentIdx) {
+                                stepClass += ' active';
+                                iconContent = '✓';
+                            }
+                            
+                            stepperHtml += `
+                                <div class="${stepClass}">
+                                    <div class="step-icon">${iconContent}</div>
+                                    <div class="step-text">${step.label}</div>
+                                </div>
+                            `;
+                        });
+                        stepperHtml += '</div></div>';
+                    } else {
+                        stepperHtml = '<div class="stepper-container" style="text-align:center; color:#C62828; font-weight:bold; padding:10px;">🚫 취소된 신청입니다.</div>';
+                    }
+                    
+                    let dateStr = '알 수 없음';
+                    if (data.firebaseTimestamp) {
+                        try {
+                            const d = new Date(data.firebaseTimestamp.toMillis());
+                            // 모바일 한 줄에 들어가도록 압축: 2026-07-20 16:58 (연도 포함, 초 제외)
+                            const p2 = (n) => String(n).padStart(2, '0');
+                            dateStr = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+                        } catch(e){}
+                    } else if (data.timestamp) {
+                        dateStr = data.timestamp;
+                    }
+
+                    const price = data.expectedPrice || data.price || 0;
+                    const priceStr = new Intl.NumberFormat('ko-KR').format(price) + '원';
+                    
+                    let deliveryInfo = '';
+                    if (data.deliveryMethod === 'cvs') {
+                        deliveryInfo = '<br><span style="font-size: 0.8rem; color: #ff9800; margin-top: 4px; display: inline-block;">[직접발송]</span>';
+                        if (data.shippingFeePaid) {
+                            deliveryInfo += `<br><span style="font-size: 0.8rem; color: #2E7D32; font-weight: 600; margin-top: 4px; display: inline-block;">✅ 배송비 입금 완료</span>`;
+                        }
+                        
+                        // Add return address box for direct delivery users
+                        deliveryInfo += `
+                            <div style="margin-top: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #475569; text-align: left;">
+                                <strong style="color: #1e293b; display: block; margin-bottom: 5px;">[보내실 곳]</strong>
+                                받는 이: 쉐라폰<br>
+                                연락처: 010-5173-5382<br>
+                                주소: 부산시 부산진구 동천로 116 한신밴빌딩 1003호
+                            </div>
+                        `;
+                    } else if (data.deliveryMethod === 'courier') {
+                        deliveryInfo = `<br><span style="font-size: 0.8rem; color: #4CAF50; margin-top: 4px; display: inline-block;">[방문수거] (희망일: ${data.pickupDate || '미정'})</span>`;
+                    } else if (data.deliveryMethod === 'pending') {
+                        deliveryInfo = `<br><span style="font-size: 0.85rem; color: #e11d48; font-weight: 700; margin-top: 4px; display: inline-block;">[배송 방법 미입력]</span>`;
+                    }
+                    if (data.trackingNumber) {
+                        if (data.trackingNumber === '미입력') {
+                            deliveryInfo += ` <span style="font-size: 0.8rem; color: #64748b; display: inline-block;">(송장없이 발송완료)</span>`;
+                        } else {
+                            deliveryInfo += ` <span style="font-size: 0.8rem; color: #2196F3; display: inline-block;">(운송장: ${data.trackingCarrier || ''} ${data.trackingNumber})</span>`;
+                        }
+                    }
+
+                    let dispatchBtnHtml = '';
+                    // 취소된 건에는 발송방법 확정 버튼을 띄우지 않는다 (취소 안내와 모순되어 혼란을 줌)
+                    const isCanceledQuote = (data.status === '취소' || data.status === 'cancel');
+                    if (data.deliveryMethod === 'pending' && !isCanceledQuote) {
+                        dispatchBtnHtml = `
+                            <div style="margin-top: 15px; text-align: center;">
+                                <a href="quote.html?resume_doc_id=${doc.id}" style="width: 100%; padding: 12px; background: #e11d48; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 6px rgba(225, 29, 72, 0.2);">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">local_shipping</span>
+                                    기기 발송 방법 확정하기
+                                </a>
+                            </div>
+                        `;
+                    } else if (data.deliveryMethod === 'cvs' && currentStatus === 'receipt') {
+                        dispatchBtnHtml = `
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="window.notifyDispatch('${doc.id}')" style="width: 100%; padding: 12px; background: #fff; color: #2563EB; border: 1px solid #2563EB; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">local_shipping</span>
+                                    택배 보냈어요!
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    let contractBtnHtml = '';
+                    if (data.inspectionData) {
+                        const encData = encodeURIComponent(JSON.stringify({...data.inspectionData, brand: data.brand, model: data.model, name: data.customerName, phone: data.customerPhone, expected: price, docId: doc.id, status: data.status})).replace(/'/g, "%27");
+                        contractBtnHtml = `
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="openContractViewer('${encData}')" style="width: 100%; padding: 12px; background: #1d1d1f; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">receipt_long</span>
+                                    전자매매계약서(견적서) 확인
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    const el = document.createElement('div');
+                    el.className = 'quote-card';
+                    el.style.display = 'block';
+                    el.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+                            <div class="qc-info">
+                                <h3>${data.brand || ''} ${data.model || ''} <span style="font-size:0.8rem; color:#888;">${data.storage || ''}</span></h3>
+                                <p>예상 매입가: <strong style="color: #2563EB;">${priceStr}</strong></p>
+                                <p style="font-size: 0.8rem; margin-top: 4px; color: #666;">신청일: ${dateStr}</p>
+                                ${deliveryInfo}
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                 <span class="status-badge ${statusBadgeClass}" style="white-space: nowrap;">${statusText}</span>
+                            </div>
+                        </div>
+                        ${stepperHtml}
+                        ${dispatchBtnHtml}
+                        ${contractBtnHtml}
+                    `;
+
+
+
+                    myQuotesList.appendChild(el);
+
+
+
+                });
+
+
+
+
+
+
+
+            } catch (error) {
+
+
+
+                console.error("Error loading my quotes:", error);
+
+
+
+
+
+
+
+                // Fallback for index requirement error
+
+
+
+                if (error.code === 'failed-precondition' || error.message.includes("requires an index")) {
+
+
+
+                    const indexUrl = error.message.match(/https:\/\/console\.firebase\.google\.com[^\s]*/);
+
+
+
+                    myQuotesList.innerHTML = `
+
+
+
+                        <div style="text-align:center; padding: 20px; color: #d9534f; background: #f9f2f4; border: 1px solid #ebccd1; border-radius: 8px;">
+
+
+
+                            <p><strong>시스템 초기화 필요</strong></p>
+
+
+
+                            <p>관리자에게 문의해주세요 (Index 설정 필요).</p>
+
+
+
+                            ${indexUrl ? `<p><a href="${indexUrl}" target="_blank" style="color: #d9534f; text-decoration: underline;">관리자: 여기를 클릭하여 인덱스 생성</a></p>` : ''}
+                    </div>`;
+
+
+
+                    console.error("Firestore Index Required. Create it here:", indexUrl ? indexUrl[0] : "Check console for link");
+
+
+
+                } else {
+
+
+
+                    myQuotesList.innerHTML = '<p style="text-align:center;">내역을 불러오는 중 오류가 발생했습니다.<br>' + error.message + '</p>';
+
+
+
+                }
+
+
+
+            }
+
+
+
+        }
+
+
+
+    </script>
+
+
+
+
+
+
+
+    <!-- Channel Plugin Scripts -->
+
+
+
+    <script>
+
+
+
+        (function() {
+
+
+
+            var w = window;
+
+
+
+            if (w.ChannelIO) {
+
+
+
+            return (window.console.error || window.console.log || function(){})('ChannelIO script included twice.');
+
+
+
+            }
+
+
+
+            var ch = function() {
+
+
+
+            ch.c(arguments);
+
+
+
+            };
+
+
+
+            ch.q = [];
+
+
+
+            ch.c = function(args) {
+
+
+
+            ch.q.push(args);
+
+
+
+            };
+
+
+
+            w.ChannelIO = ch;
+
+
+
+            function l() {
+
+
+
+            if (w.ChannelIOInitialized) {
+
+
+
+                return;
+
+
+
+            }
+
+
+
+            w.ChannelIOInitialized = true;
+
+
+
+            var s = document.createElement('script');
+
+
+
+            s.type = 'text/javascript';
+
+
+
+            s.async = true;
+
+
+
+            s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
+
+
+
+            s.charset = 'UTF-8';
+
+
+
+            var x = document.getElementsByTagName('script')[0];
+
+
+
+            x.parentNode.insertBefore(s, x);
+
+
+
+            }
+
+
+
+            if (document.readyState === 'complete') {
+
+
+
+            l();
+
+
+
+            } else if (window.attachEvent) {
+
+
+
+            window.attachEvent('onload', l);
+
+
+
+            } else {
+
+
+
+            window.addEventListener('DOMContentLoaded', l, false);
+
+
+
+            window.addEventListener('load', l, false);
+
+
+
+            }
+
+
+
+        })();
+
+
+
+        ChannelIO('boot', {
+
+
+
+            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
+
+
+
+        });
+
+
+
+    </script>
+
+
+
+
+    <!-- Policy Modal Script -->
+    <script>
+    window.openPolicyModal = function(url, title) {
+        event.preventDefault();
+        let modal = document.getElementById('policy-modal');
+        if (!modal) {
+            document.body.insertAdjacentHTML('beforeend', `
+            <div id="policy-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
+               <div style="background:white; width:100%; max-width:800px; height:85vh; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                  <div style="padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;">
+                      <h3 id="policy-modal-title" style="margin: 0; font-size: 1.1rem; color: #333; font-weight: bold;">약관</h3>
+                      <button onclick="document.getElementById('policy-modal').style.display='none'" style="background:none; border:none; font-size: 28px; line-height:1; cursor:pointer; color: #666;">&times;</button>
+                  </div>
+                  <iframe id="policy-iframe" src="" style="flex:1; width:100%; border:none; background:white;"></iframe>
+               </div>
+            </div>
+            `);
+            modal = document.getElementById('policy-modal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+        document.getElementById('policy-modal-title').innerText = title;
+        document.getElementById('policy-iframe').src = url;
+        modal.style.display = 'flex';
+    };
+    </script>
+
+    <!-- Contract Modal Script -->
+    <script>
+    window.openContractViewer = function(encData) {
+        try {
+            const data = JSON.parse(decodeURIComponent(encData));
+            
+            let modal = document.getElementById('contract-modal');
+            if (!modal) {
+                const modalHtml = `
+                <div id="contract-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
+                   <div style="background:white; width:100%; max-width:500px; max-height:90vh; border-radius:16px; overflow-y:auto; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                      
+                      <div style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; position: sticky; top: 0; z-index: 10;">
+                          <h3 style="margin: 0; font-size: 1.2rem; color: #1d1d1f; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                              <span class="material-symbols-outlined" style="color: #2563EB;">verified_user</span> 전자매매계약서
+                          </h3>
+                          <button onclick="document.getElementById('contract-modal').style.display='none'" style="background:none; border:none; font-size: 24px; line-height:1; cursor:pointer; color: #666;">&times;</button>
+                      </div>
+                      
+                      <div style="padding: 24px;">
+                          
+                          <!-- Greeting Box -->
+                          <div style="background: #F8FAFC; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #E2E8F0;">
+                              <div style="width: 40px; height: 40px; border-radius: 50%; background: #DBEAFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                  <span class="material-symbols-outlined" style="color: #2563EB; font-size: 1.5rem;">support_agent</span>
+                              </div>
+                              <div>
+                                  <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; color: #1E293B;">안녕하세요, 쉐라폰 검수센터입니다.</h4>
+                                  <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">고객님께서 보내주신 소중한 기기의 검수가 완료되었습니다. 아래 검수 결과와 매매계약서를 확인하신 후 서명(동의)해 주시면 신속하게 입금을 진행해 드리겠습니다.</p>
+                              </div>
+                          </div>
+                          
+                          <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                              검수 차감 내역
+                          </h4>
+                          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 24px;">
+                              <div id="cv-faults" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+                              <div id="cv-details" style="font-size: 0.9rem; color: #555; white-space: pre-wrap; line-height: 1.5; padding-top: 12px; border-top: 1px dashed #ddd;"></div>
+                          </div>
+
+                          <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                              검수자 종합 소견
+                          </h4>
+                          <div id="cv-comment" style="font-size: 0.95rem; color: #333; background: #E3F2FD; padding: 15px; border-radius: 8px; line-height: 1.6; margin-bottom: 24px;"></div>
+
+                          <!-- Attachment Section -->
+                          <div id="cv-attachment-container" style="display: none; background: #F0FDF4; border: 1px solid #BBF7D0; padding: 15px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                              <span class="material-symbols-outlined" style="color: #16A34A;">description</span>
+                              <div style="flex: 1;">
+                                  <div style="font-size: 0.85rem; color: #166534; font-weight: 600;">M360 검수완료서 / 첨부파일</div>
+                                  <div style="font-size: 0.75rem; color: #166534; opacity: 0.9;">개인정보 삭제처리결과 및 상세 진단 보고서</div>
+                              </div>
+                              <a id="cv-attachment-link" href="#" target="_blank" style="padding: 6px 12px; background: #16A34A; color: white; text-decoration: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(22,163,74,0.2);">
+                                  <span class="material-symbols-outlined" style="font-size: 1rem;">download</span> 보기
+                              </a>
+                          </div>
+
+                          <!-- 차감 사유와 소견을 먼저 읽은 뒤 금액을 보도록 배치 (금액부터 보면 방어적으로 읽게 됨) -->
+                          <div style="background: linear-gradient(135deg, #1d1d1f, #434345); padding: 20px; border-radius: 12px; color: white; text-align: center; margin-bottom: 24px;">
+                              <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">최종 매입 결정 금액</div>
+                              <div style="font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;" id="cv-final-price">0원</div>
+                          </div>
+
+                          <h4 style="font-size: 1.05rem; margin: 0 0 10px 0; border-bottom: 2px solid #1d1d1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                              거래 정보
+                          </h4>
+                          <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.95rem;">
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666; width: 35%;">계약 번호</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-family: monospace; color: #888;" id="cv-contract-no"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">매도인 (고객명)</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;" id="cv-name"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">연락처</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right;" id="cv-phone"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">매매 대상 기기</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;" id="cv-model"></td>
+                              </tr>
+                              <tr>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">매수 업체</td>
+                                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; text-align: right; font-weight: 600;">쉐라폰</td>
+                              </tr>
+                          </table>
+
+                          <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px; font-size: 0.8rem; color: #666; line-height: 1.6; margin-bottom: 10px; background: #fafafa;">
+                              <strong style="color: #333; display: block; margin-bottom: 8px; font-size: 0.85rem;">전자매매계약 약관 동의</strong>
+                              <div style="margin-bottom: 6px;"><strong>제 1조 (목적)</strong> 본 계약서는 쉐라폰과 고객 간의 중고 기기 매매에 대한 최종 합의서입니다.</div>
+                              <div style="margin-bottom: 6px;"><strong>제 2조 (소유권 이전)</strong> 명시된 최종 금액이 고객이 지정한 계좌로 입금된 시점에 단말기의 소유권은 쉐라폰으로 완전 이전됩니다.</div>
+                              <div style="margin-bottom: 6px;"><strong>제 3조 (기기 상태 보증)</strong> 매도인은 본 기기가 도난, 분실, 임대 등 불법적인 기기가 아님을 보증하며, 추후 문제 발생 시 모든 민/형사상 책임을 집니다.</div>
+                              <div><strong>제 4조 (반환 불가)</strong> 대금 송금이 완료된 이후에는 단순 변심으로 인한 거래 취소 및 기기 반환이 절대 불가함을 확인합니다.</div>
+                              
+                              <div style="text-align: center; margin-top: 24px; font-weight: 600; color: #333;">
+                                  위와 같이 확인하고 전자매매계약에 동의함<br>
+                                  <span style="font-size: 0.85rem; color: #888; margin-top: 5px; display: inline-block;" id="cv-date"></span>
+                              </div>
+                              
+                              <div style="display: flex; justify-content: space-around; margin-top: 20px; font-weight: 600; color: #444; border-top: 1px dashed #ddd; padding-top: 15px;">
+                                  <span>판매자 : <span id="cv-sign-name" style="color: #2563EB;"></span></span>
+                                  <span>구매자 : 쉐라폰</span>
+                              </div>
+                          </div>
+                          
+                          <div id="cv-action-container" style="margin-top: 24px; text-align: center;">
+                              <!-- Action button injected here -->
+                          </div>
+                          
+                          <div style="text-align: right; margin-top: 20px;">
+                              <img src="sr_logo.webp" style="height: 24px; opacity: 0.5;" alt="쉐라폰">
+                          </div>
+                    </div>
+                   </div>
+                </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                modal = document.getElementById('contract-modal');
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+                
+                // Need material icons if not present
+                if (!document.querySelector('link[href*="Material+Symbols+Outlined"]')) {
+                    document.head.insertAdjacentHTML('beforeend', '<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />');
+                }
+            }
+            
+            document.getElementById('cv-final-price').innerText = new Intl.NumberFormat('ko-KR').format(data.finalPrice) + "원";
+            document.getElementById('cv-contract-no').innerText = data.docId ? data.docId.substring(0,8).toUpperCase() : '-';
+            document.getElementById('cv-phone').innerText = data.phone || '-';
+            document.getElementById('cv-name').innerText = data.name;
+            document.getElementById('cv-sign-name').innerText = data.name;
+            document.getElementById('cv-date').innerText = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('cv-model').innerText = `${data.brand} ${data.model}`;
+            
+            const faultsDiv = document.getElementById('cv-faults');
+            faultsDiv.innerHTML = '';
+            if (data.faults && data.faults.length > 0) {
+                data.faults.forEach(f => {
+                    faultsDiv.innerHTML += `<span style="background: #FFEbee; color: #c62828; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">${f}</span>`;
+                });
+            } else {
+                faultsDiv.innerHTML = '<span style="color: #666; font-size: 0.9rem;">해당사항 없음 (정상 기기)</span>';
+            }
+            
+            document.getElementById('cv-details').innerText = data.details || "세부 차감 내역 없음";
+            
+            const commentDiv = document.getElementById('cv-comment');
+            if (data.comment) {
+                commentDiv.innerText = data.comment;
+                commentDiv.style.display = 'block';
+            } else {
+                commentDiv.style.display = 'none';
+            }
+            
+            const attachmentContainer = document.getElementById('cv-attachment-container');
+            const attachmentLink = document.getElementById('cv-attachment-link');
+            if (data.attachmentUrl) {
+                attachmentLink.href = data.attachmentUrl;
+                attachmentContainer.style.setProperty('display', 'flex', 'important');
+            } else {
+                attachmentContainer.style.setProperty('display', 'none', 'important');
+            }
+            
+            const actionContainer = document.getElementById('cv-action-container');
+            if (actionContainer) {
+                if (data.status === '검수완료') {
+                    actionContainer.innerHTML = `
+                        <button onclick="agreeToContract('${data.docId}')" style="width: 100%; padding: 16px; background: #2563EB; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); transition: transform 0.2s;">
+                            <span class="material-symbols-outlined">task_alt</span>
+                            최종 매입에 동의합니다 (입금 요청)
+                        </button>
+                    `;
+                } else if (data.status === '입금대기' || data.status === '입금완료' || data.status === 'complete') {
+                    actionContainer.innerHTML = `
+                        <div style="width: 100%; padding: 16px; background: #e2e8f0; color: #475569; border-radius: 12px; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            매입 동의 완료 (${data.status === '입금대기' ? '입금 대기 중' : '입금 완료'})
+                        </div>
+                    `;
+                } else {
+                    actionContainer.innerHTML = '';
+                }
+            }
+            
+            modal.style.display = 'flex';
+            
+        } catch(e) {
+            console.error(e);
+            alert("계약서를 불러오는 중 오류가 발생했습니다.");
+        }
+    };
+    </script>
+
+    <!-- Tracking Modal -->
+    <div id="tracking-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; padding: 20px; box-sizing: border-box;">
+        <div style="background: #fff; width: 100%; max-width: 400px; border-radius: 16px; padding: 30px; position: relative;">
+            <button onclick="document.getElementById('tracking-modal').style.display='none'" style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            <h3 style="margin-top:0; font-size: 1.2rem; font-weight: 700; color: #333;">📦 택배 송장번호 입력</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">보내신 택배사와 운송장 번호를 입력해주세요.</p>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">택배사 선택 <span style="color:red">*</span></label>
+                <select id="tracking-courier" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.95rem;">
+                    <option value="" disabled selected>택배사를 선택해주세요</option>
+                    <option value="CJ대한통운">CJ대한통운</option>
+                    <option value="우체국택배">우체국택배</option>
+                    <option value="로젠택배">로젠택배</option>
+                    <option value="한진택배">한진택배</option>
+                    <option value="롯데택배">롯데택배</option>
+                    <option value="편의점택배">편의점택배 (GS25, CU 등)</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">운송장 번호 <span style="color:red">*</span></label>
+                <input type="text" id="tracking-number" placeholder="- 없이 숫자만 입력" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.95rem;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="window.submitTracking(false)" style="width: 100%; padding: 14px; background: #2563EB; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">송장번호 입력 완료</button>
+                <button onclick="window.submitTracking(true)" style="width: 100%; padding: 12px; background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;">송장 입력은 귀찮아요 (택배는 보냄)</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase-config.js';
+        import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        window.agreeToContract = async function(docId) {
+            if (!docId) return;
+            
+            if (!confirm("최종 매입에 동의하십니까?\n동의하시면 거래가 확정되며, 바로 입금 대기 상태로 전환됩니다.")) {
+                return;
+            }
+            
+            try {
+                const docRef = doc(db, "quotes", docId);
+                await updateDoc(docRef, {
+                    status: "입금대기",
+                    customerAgreedAt: new Date().toISOString()
+                });
+                
+                alert("매입 동의가 완료되었습니다! 신속하게 입금 처리해드리겠습니다.");
+                document.getElementById('contract-modal').style.display = 'none';
+                
+                // Reload mypage to show updated status
+                window.location.reload();
+            } catch(e) {
+                console.error("Agreement error:", e);
+                alert("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+        };
+
+        window.currentTrackingDocId = null;
+
+        window.notifyDispatch = (docId) => {
+            window.currentTrackingDocId = docId;
+            document.getElementById('tracking-courier').value = '';
+            document.getElementById('tracking-number').value = '';
+            document.getElementById('tracking-modal').style.display = 'flex';
+        };
+
+        window.submitTracking = async (bypass = false) => {
+            if (!window.currentTrackingDocId) return;
+            
+            let courier = '미입력';
+            let trackingNum = '미입력';
+            
+            if (!bypass) {
+                courier = document.getElementById('tracking-courier').value;
+                trackingNum = document.getElementById('tracking-number').value.trim();
+                if (!courier || courier === '미입력') { alert("택배사를 선택해주세요."); return; }
+                if (!trackingNum || trackingNum === '미입력') { alert("운송장 번호를 입력해주세요."); return; }
+            } else {
+                if (!confirm("송장번호 입력 없이 발송 완료 처리하시겠습니까?\n(추후 택배 발송 여부만 확인됩니다)")) return;
+            }
+            
+            try {
+                const docRef = doc(db, "quotes", window.currentTrackingDocId);
+                await updateDoc(docRef, {
+                    status: '수거중',
+                    trackingCarrier: courier,
+                    trackingNumber: trackingNum,
+                    trackingSubmittedAt: serverTimestamp()
+                });
+                
+                alert("택배 발송 정보가 등록되었습니다!");
+                document.getElementById('tracking-modal').style.display = 'none';
+                window.location.reload();
+                
+            } catch(e) {
+                console.error(e);
+                alert("처리 중 오류가 발생했습니다.");
+            }
+        };
+    </script>
+
+    <!-- Daum Postcode API -->
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        function execDaumPostcodeProfile() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = '';
+                    var extraAddr = '';
+
+                    if (data.userSelectedType === 'R') {
+                        addr = data.roadAddress;
+                    } else {
+                        addr = data.jibunAddress;
+                    }
+
+                    if(data.userSelectedType === 'R'){
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                            extraAddr += data.bname;
+                        }
+                        if(data.buildingName !== '' && data.apartment === 'Y'){
+                            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        }
+                        if(extraAddr !== ''){
+                            extraAddr = ' (' + extraAddr + ')';
+                        }
+                        addr += extraAddr;
+                    }
+
+                    document.getElementById('profile-zipcode').value = data.zonecode;
+                    document.getElementById("profile-address").value = addr;
+                    document.getElementById("profile-detailAddress").focus();
+                }
+            }).open();
+        }
+    </script>
+
+    <!-- Google Translate Script & Styling -->
+    <style>
+        /* Force Hide Google Translate Top Banner & Tooltips */
+        iframe.goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        .VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        
+        /* Prevent layout shift caused by Google Translate */
+        html, body { top: 0px !important; position: static !important; min-height: 100vh; }
+        
+        /* Hide Default Widget Elements */
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget span { display: none !important; }
+        
+        /* Custom Select Styling */
+        .lang-select {
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 6px 25px 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231e293b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 8px auto;
+            min-width: 90px;
+            font-family: 'Pretendard', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .lang-select:hover {
+            border-color: #2563EB;
+        }
+        
+        @media (max-width: 768px) {
+            /* Protect the Logo and show text comfortably */
+            .navbar .logo { flex-shrink: 0 !important; margin-right: 4px !important; display: flex !important; align-items: center !important; }
+            .logo-icon { width: 34px !important; height: 34px !important; min-width: 34px !important; flex-shrink: 0 !important; }
+            .logo-text-wrapper { display: inline-block !important; font-size: 17px !important; letter-spacing: -1px !important; margin-left: 5px !important; font-weight: 800 !important; }
+            
+            /* Comfortable Language Selector */
+            .lang-select { 
+                padding: 3px 12px 3px 4px; 
+                font-size: 0.75rem; 
+                width: 60px; 
+                min-width: 60px;
+                margin-right: 4px !important;
+                background-position: right 3px top 50%;
+                background-size: 6px auto;
+                letter-spacing: -0.5px;
+            }
+            
+            /* Comfortable Action Buttons & Icons in Navbar */
+            .navbar .mobile-only a[href="quote.html"] { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-auth-link { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only a#mobile-logout-btn { padding: 4px 7px !important; font-size: 0.75rem !important; margin-right: 4px !important; letter-spacing: -0.5px !important; }
+            .navbar .mobile-only button { margin-left: 2px !important; font-size: 1.3rem !important; padding: 0 !important; }
+            
+            /* Navbar Container Tweaks */
+            .navbar .container { padding: 0 6px; flex-wrap: nowrap; overflow-x: visible; justify-content: space-between; }
+            .navbar .mobile-only { gap: 0 !important; }
+        }
+    </style>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'ko',
+                includedLanguages: 'ko,en,zh-CN,ja,vi,ru'
+            }, 'google_translate_element');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var customSelect = document.getElementById('custom_lang_select');
+            if (!customSelect) return;
+            
+            // Initial load cookie check
+            var match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+            if (match) {
+                var lang = match[1].split('/').pop();
+                if (lang && lang !== 'ko') {
+                    customSelect.value = lang;
+                }
+            } else {
+                customSelect.value = 'ko';
+            }
+
+            customSelect.addEventListener('change', function() {
+                var targetLang = this.value;
+                
+                if (targetLang === 'ko') {
+                    // Force cookie clear and reload to perfectly restore original Korean DOM
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+                    window.location.reload();
+                    return;
+                }
+
+                var gtSelect = document.querySelector('.goog-te-combo');
+                if (gtSelect) {
+                    gtSelect.value = targetLang;
+                    gtSelect.dispatchEvent(new Event('change'));
+                }
+                
+                document.cookie = 'googtrans=/ko/' + targetLang + '; path=/';
+                document.cookie = 'googtrans=/ko/' + targetLang + '; domain=' + window.location.hostname + '; path=/';
+                
+                // Small delay to allow the Google Translate script to catch the change, else reload
+                setTimeout(() => {
+                    if(!document.querySelector('.goog-te-combo')) {
+                        window.location.reload();
+                    }
+                }, 300);
+            });
+            
+            // Mutation observer to force remove body top styling injected dynamically by google translate
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'style') {
+                        if (document.body.style.top) {
+                            document.body.style.top = '';
+                        }
+                    }
+                });
+            });
+            observer.observe(document.body, { attributes: true });
+        });
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>

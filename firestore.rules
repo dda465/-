@@ -1,8 +1,63 @@
 rules_version = '2';
+// 쉐라폰 보안 규칙 — 1단계(수정본 v2)
+// 변경 이유: 카톡/네이버 로그인이 Firebase 인증과 분리돼 있어,
+//   규칙에서 "신청의 주인"을 식별할 수 없음 → quotes 수정을 본인제한하면
+//   모든 신청 저장(2차 배송/계좌 업데이트)이 막힘.
+//   그래서 고객이 쓰는 컬렉션은 읽기/작성/수정을 허용하고,
+//   대신 "삭제"와 "내부 데이터(블랙리스트/관리자/채팅)"·"시세/설정 변조"를 차단.
+//   고객 정보 '읽기' 완전 잠금은 조회기능을 Cloud Function으로 옮기는 2단계에서.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'dda465@hanmail.net',
+          'admin@rejuphone.com',
+          'admin@sharaphone.com',
+          'guffy321@naver.com',
+          'test@admin.com'
+        ];
     }
+
+    // 시세표 / 사이트설정: 공개 읽기, 관리자만 수정 (가격·문구 변조 차단)
+    match /products/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // 후기: 공개 읽기 / 작성·수정 허용 / 삭제는 관리자
+    match /reviews/{id} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // 매입신청: 읽기·작성·수정 허용(고객 신청/2차 저장 유지) / 삭제는 관리자만
+    match /quotes/{id} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // 외국인 신청: 동일
+    match /exchange_applications/{id} {
+      allow read, create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // 회원: users 삭제/수정 차단 (users 삭제 잠금) - 읽기/작성 허용, 수정/삭제는 관리자만
+    match /users/{uid} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 방문/퍼널 통계
+    match /analytics/{id} { allow read, write: if true; }
+
+    // ★ 내부 데이터 완전 차단 (외부인 열람·변경 불가) — 핵심 보안
+    match /blacklist/{id} { allow read, write: if isAdmin(); }
+    match /admins/{id}    { allow read: if isAdmin(); allow write: if false; }
+    match /chats/{id}     { allow read, write: if isAdmin(); }
+
+    // 그 외 모든 경로 차단
+    match /{document=**}  { allow read, write: if false; }
   }
 }

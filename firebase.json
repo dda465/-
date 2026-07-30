@@ -5,10 +5,30 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
+      "functions/**",
+      "backup_files/**",
+      "firestore.rules",
+      "storage.rules",
+      "*.bak*",
+      "script.mjs",
+      "script_live.js",
+      "missing.js",
       ".agent/**",
       "*.bat",
       "*.py",
-      "*.txt",
+      "tmp_*.txt",
+      "deploy_log*.txt",
+      "output*.txt",
+      "admin_*.txt",
+      "analysis_report.txt",
+      "console_output.txt",
+      "fb_help.txt",
+      "fetch_func.txt",
+      "parens.txt",
+      "sheet_data_inspect.txt",
+      "temp_view.txt",
+      "tree.txt",
+      "verify_output.txt",
       "google-sheets-key.json",
       "serviceAccountKey.json",
       "package.json",
@@ -41,5 +61,8 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

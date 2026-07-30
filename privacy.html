@@ -11,12 +11,26 @@
 
 
 <head>
+    <!-- 파비콘 (네이버 서치어드바이저 / 검색엔진 / 브라우저 탭) -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!-- DNS Preconnect for faster resource loading -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 
 <!-- Danggeun Market Code -->
-<script src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
+<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
 <script>
-  window.karrotPixel.init('1778656966686481001');
-  window.karrotPixel.track('ViewPage');
+  window.addEventListener('load', function() {
+    if (window.karrotPixel) {
+      window.karrotPixel.init('1778656966686481001');
+      window.karrotPixel.track('ViewPage');
+    }
+  });
 </script>
 <!-- End Danggeun Market Code -->
 
@@ -45,7 +59,7 @@
 
 
 
-    <link rel="stylesheet" href="styles.css?v=1780278690883">
+    <link rel="stylesheet" href="styles.css?v=1785403500">
 
 
 
@@ -243,15 +257,17 @@
 
 
 <!-- NAVER PV SCRIPT -->
-<script type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript"> 
-if (!wcs_add) var wcs_add={};
-wcs_add["wa"] = "s_bfc3561d569";
-if (!_nasa) var _nasa={};
-if(window.wcs){
-wcs.inflow();
-wcs_do();
-}
+<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
+<script type="text/javascript">
+window.addEventListener('load', function() {
+  if (!wcs_add) var wcs_add={};
+  wcs_add["wa"] = "s_bfc3561d569";
+  if (!_nasa) var _nasa={};
+  if(window.wcs){
+    wcs.inflow();
+    wcs_do();
+  }
+});
 </script>
 
 
@@ -342,7 +358,7 @@ wcs_do();
                 <a href="quote.html">내 폰 판매</a>
 
 
-                <a href="reviews.html">이용 후기</a>
+                <a href="faq.html">자주 묻는 질문</a>
 
 
 
@@ -446,7 +462,8 @@ wcs_do();
 
 
 
-                <li><strong>수집 항목:</strong> 성명, 휴대전화번호, CI(연계정보), 기기 회수 주소, 정산용 은행 계좌정보(예금주, 은행명, 계좌번호), 매입 신청 기기 정보(모델명, IMEI 등)
+                <li><strong>수집 항목:</strong> 성명, 휴대전화번호, CI(연계정보), 기기 회수 주소, 정산용 은행 계좌정보(예금주, 은행명, 계좌번호), 매입 신청 기기 정보(모델명, IMEI 등)</li>
+                <li><strong>본인 확인 및 소유권 확인 목적 추가 수집:</strong> 소유권 확인 및 부정거래(도난·분실·명의도용) 방지를 위하여 필요한 경우 신분증 사본을 수집할 수 있으며, 이때 <strong>주민등록번호 뒷자리는 마스킹(가림) 처리</strong>하여 수집합니다.
 
 
 
@@ -543,9 +560,11 @@ wcs_do();
 
 
 
-                <li><strong>택배 수거/배송:</strong> 우체국택배, 로젠택배 등 (이름, 주소, 연락처)</li>
-                <li><strong>고객 상담/채팅:</strong> Channel Corp (채널톡) (이름, 연락처 등 상담 내역)</li>
-                <li><strong>본인 인증:</strong> KG이니시스 (CI, 이름, 연락처)</li>
+                <li><strong>택배 수거/배송:</strong> 한진택배, 우체국택배, 로젠택배 등 (이름, 주소, 연락처)</li>
+                <li><strong>방문수거 접수 대행:</strong> 굿스플로(홈픽) (이름, 연락처, 수거 주소, 기기 정보)</li>
+                <li><strong>알림톡(카카오) 발송:</strong> 솔라피 (이름, 연락처, 매입 진행 정보)</li>
+                <li><strong>고객 상담/채팅:</strong> 채널톡 (이름, 연락처 등 상담 내역)</li>
+                <li><strong>본인 인증:</strong> KG이니시스, 포트원 (CI, 이름, 연락처)</li>
                 <li><strong>데이터 저장/관리:</strong> Google LLC - Firebase (매입 신청 정보 전체)</li>
                 <li><strong>매입 데이터 정산 관리:</strong> Google LLC - Google Sheets (매입 신청 데이터)</li>
                 <li><strong>실시간 알림:</strong> Telegram Bot API (이름, 연락처, 모델, 가격 등 매입 요약 정보)</li>
@@ -624,7 +643,7 @@ wcs_do();
 
 
 
-                <li><strong>연락처:</strong> guffyd321@naver.com / 010-2774-2610</li>
+                <li><strong>연락처:</strong> guffyd321@naver.com / 070-8680-9275</li>
 
 
 
@@ -636,7 +655,31 @@ wcs_do();
 
 
 
-            <p style="margin-top: 40px; text-align: center; color: #888;">공고일자: 2026년 3월 31일<br>시행일자: 2026년 3월 31일</p>
+                        <h2>제9조 (개인정보의 안전성 확보 조치)</h2>
+            <p>회사는 개인정보의 분실, 도난, 유출, 위조, 변조 또는 훼손되지 않도록 안전성 확보를 위하여 다음과 같은 기술적·관리적·물리적 조치를 취하고 있습니다.</p>
+            <ul>
+                <li><strong>개인정보의 암호화:</strong> 이용자의 개인정보 및 계좌정보 등 중요 정보는 저장 및 전송 시 암호화하여 보관·관리하고 있습니다.</li>
+                <li><strong>통신 구간 암호화:</strong> 이용자가 입력하는 정보는 SSL(HTTPS) 보안 프로토콜을 통해 안전하게 전송됩니다.</li>
+                <li><strong>접근 권한 관리:</strong> 개인정보에 접근할 수 있는 담당자를 최소한으로 제한하고, 접근 권한을 관리하여 불필요한 접근과 노출을 통제하고 있습니다.</li>
+                <li><strong>접속 기록의 보관:</strong> 개인정보처리시스템에 접속한 기록을 보관·관리하여 개인정보의 오·남용 및 유출 시도를 확인합니다.</li>
+            </ul>
+
+            <h2>제10조 (만 14세 미만 아동의 개인정보 및 광고성 정보 전송)</h2>
+            <p>
+                1. 회사는 만 14세 미만 아동의 회원가입 및 거래를 원칙적으로 제한하며, 만 14세 미만 아동의 개인정보를 수집하지 않습니다.<br>
+                2. 회사는 이용자의 사전 동의 없이 영리 목적의 광고성 정보를 전송하지 않으며, 광고성 정보를 전송하는 경우 이용자가 수신을 거부할 수 있는 방법을 함께 안내합니다.
+            </p>
+
+            <h2>제11조 (이용자의 권익침해에 대한 구제 방법)</h2>
+            <p>이용자는 개인정보 침해로 인한 상담 및 피해구제를 위하여 아래 기관에 문의하실 수 있습니다. 아래 기관은 회사와 별개의 기관으로, 회사의 자체적인 처리 결과에 만족하지 못하시거나 보다 자세한 도움이 필요하신 경우 문의하시기 바랍니다.</p>
+            <ul>
+                <li>개인정보 침해신고센터 : (국번없이) 118 / privacy.kisa.or.kr</li>
+                <li>개인정보 분쟁조정위원회 : 1833-6972 / kopico.go.kr</li>
+                <li>대검찰청 사이버수사과 : (국번없이) 1301 / spo.go.kr</li>
+                <li>경찰청 사이버수사국 : (국번없이) 182 / ecrm.police.go.kr</li>
+            </ul>
+
+            <p style="margin-top: 40px; text-align: center; color: #888;">공고일자: 2026년 7월 24일<br>시행일자: 2026년 7월 24일</p>
 
 
 
@@ -693,6 +736,7 @@ wcs_do();
 
 
                         사업자 등록번호: <span id="dyn-biz-number">331-77-00487</span><br>
+                        개인정보보호책임자: 박현용 | 대표 연락처: 070-8680-9275
 
 
 
@@ -708,6 +752,12 @@ wcs_do();
                         </div>
                         <div style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: white; padding: 0;">
                             <img src="https://image.inicis.com/mkt/certmark/inipay/inipay_74x74_gray.png" border="0" alt="클릭하시면 이니시스 결제시스템의 유효성을 확인하실 수 있습니다." style="cursor:pointer;" onclick="javascript:window.open('https://mark.inicis.com/mark/popup_v3.php?mid=MIIsharaph','mark','scrollbars=no,resizable=no,width=565,height=683');">
+                        </div>
+                        <div style="display: inline-flex; align-items: center; gap: 12px; border: 1px solid #e5e7eb; padding: 12px 18px; border-radius: 8px; background: white; max-width: 450px;">
+                            <img src="m360_logo.png" alt="M360 Logo" style="height: 38px; object-fit: contain;">
+                            <div style="text-align: left; font-size: 0.8rem; color: #4b5563; line-height: 1.4;">
+                                쉐라폰은 국제 데이터 삭제 보안 인증 기관 <strong>ADISA Certification Limited</strong>의 프로덕트 어슈어런스(Product Assurance) <strong>m360soft</strong>를 사용해 기기 개인정보초기화 및 진단을 시행하고 있습니다.
+                            </div>
                         </div>
                     </div>
 
@@ -734,7 +784,7 @@ wcs_do();
 
 
                         상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
-                        대표 연락처: <span id="dyn-phone">010-2774-2610</span><br><br>
+                        대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
 
 
 

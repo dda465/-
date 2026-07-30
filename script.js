@@ -1,4 +1,4 @@
-import { db, auth, storage } from './firebase-config.js';
+import { db, auth, getStorageLazy } from './firebase-config.js';
 
 
 
@@ -68,6 +68,35 @@ function isAdminCached() {
 
 
 let allProducts = []; // Loaded from Firestore
+
+// XSS 방지: 사용자 입력을 HTML에 넣기 전 특수문자 이스케이프
+function escapeHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// --- products 캐시: 메모리 + sessionStorage (중복 Firestore 조회 제거) ---
+// 한 세션에서 products 전체를 1번만 읽고, 페이지 이동(홈→견적)에도 재사용.
+async function getProductsData() {
+    // 1) 메모리 (같은 페이지 내)
+    if (Array.isArray(allProducts) && allProducts.length) return allProducts;
+    // 2) sessionStorage (같은 탭의 페이지 이동에도 유지, 15분 TTL)
+    try {
+        const raw = sessionStorage.getItem('sr_products_cache');
+        const ts = parseInt(sessionStorage.getItem('sr_products_cache_ts') || '0', 10);
+        if (raw && (Date.now() - ts) < 15 * 60 * 1000) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length) { allProducts = arr; return allProducts; }
+        }
+    } catch (e) {}
+    // 3) Firestore에서 새로 조회
+    const snapshot = await getDocs(query(collection(db, "products")));
+    const arr = [];
+    snapshot.forEach(d => arr.push({ id: d.id, ...d.data() }));
+    allProducts = arr;
+    try {
+        sessionStorage.setItem('sr_products_cache', JSON.stringify(arr));
+        sessionStorage.setItem('sr_products_cache_ts', String(Date.now()));
+    } catch (e) {}
+    return allProducts;
+}
 
 
 
@@ -152,13 +181,14 @@ window.triggerFrontendAlimtalk = async (type, phone, payload) => {
     } 
     // 2. 방문택배로 신청시
     else if (type === "quote_courier") {
-        templateId = "KA01TP260519020631601tko6atKgMI4";
+        templateId = "KA01TP260720081817614kb2py4tJBtG"; // 2026-07 문구 수정본 (방문접수 매입신청 완료)
+        // 변수명은 솔라피에 등록된 템플릿과 정확히 일치해야 한다(하나만 달라도 발송 실패).
+        // 2026-07 수정본 기준: 신청자명 / 방문택배수거일자 / 고객연락처 / 주소 4개만 사용.
+        // (택배사는 템플릿에 '한진택배'로 고정 기재, 고객계정은 문구에서 빠짐)
         variables = {
-            "#{고객명}": payload.name,
+            "#{신청자명}": payload.name,
             "#{방문택배수거일자}": payload.pickupDate || "미지정",
-            "#{고객계정}": payload.email || "미인증/카카오연동",
             "#{고객연락처}": phone,
-            "#{택배사}": "CJ대한통운", // 기본 설정
             "#{주소}": payload.address || "미입력"
         };
     } 
@@ -257,7 +287,7 @@ function injectFloatingWidgets() {
 
     const kakaoBtn = document.createElement('a');
 
-    kakaoBtn.href = 'http://pf.kakao.com/_TEvMK/chat';
+    kakaoBtn.href = 'https://pf.kakao.com/_TEvMK/chat';
 
     kakaoBtn.target = '_blank';
 
@@ -277,7 +307,7 @@ function injectFloatingWidgets() {
 
     // 3. Naver TalkTalk Button
     const naverBtn = document.createElement('a');
-    naverBtn.href = 'http://talk.naver.com/W53PQQM';
+    naverBtn.href = 'https://talk.naver.com/W53PQQM';
     naverBtn.target = '_blank';
     naverBtn.className = 'naver-chat-btn pc-only';
     naverBtn.innerHTML = `
@@ -315,11 +345,18 @@ function injectFloatingWidgets() {
     let source = 'direct';
 
     if (utmSource.includes('naver') || referrer.includes('naver.com') || ua.includes('naver')) {
-        source = 'naver';
+        const utmMedium = (urlParams.get('utm_medium') || '').toLowerCase();
+        if (utmMedium.includes('search')) source = 'naver_search';
+        else if (utmMedium.includes('display')) source = 'naver_display';
+        else source = 'naver';
     } else if (utmSource.includes('daangn') || utmSource.includes('karrot') || referrer.includes('daangn.com') || referrer.includes('karrotmarket') || ua.includes('daangn') || ua.includes('karrot')) {
         source = 'daangn';
     } else if (utmSource.includes('google') || referrer.includes('google.com')) {
         source = 'google';
+    } else if (utmSource.includes('instagram') || referrer.includes('instagram.com') || ua.includes('instagram')) {
+        source = 'instagram';
+    } else if (utmSource.includes('tiktok') || referrer.includes('tiktok.com') || ua.includes('tiktok')) {
+        source = 'tiktok';
     }
 
     sessionStorage.setItem('traffic_source', source);
@@ -429,7 +466,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const savedQuote = sessionStorage.getItem('pendingQuote');
                     if (savedQuote) {
                         currentQuote = JSON.parse(savedQuote);
-                        window.goToStep(7); // Jump to auth step
+                        // ⚠ 예전엔 goToStep(7)이었는데 wizard-step-7 은 존재하지 않는다.
+                        //   모든 단계를 숨긴 뒤 보여줄 대상을 못 찾아 흰 화면이 됐다.
+                        //   (모바일 비회원 휴대폰 본인인증 후 복귀 경로에서만 발생)
+                        window.goToStep('auth');
                     }
                 }, 500);
             } else {
@@ -1033,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const updateSlider = () => {
 
                 // Move the slider container
-                slider.style.transform = `translateX(-${currentIndex * 50}%)`;
+                slider.style.transform = `translateX(-${currentIndex * (100 / totalSlides)}%)`;
 
                 // Update text indicator (hidden, kept for compat)
                 if (currentIndicator) {
@@ -1374,17 +1414,13 @@ async function loadHomepageDynamicPrices() {
             { elId: null, tpsId: 'tps-price-zf6', keywords: ['Z 플립 6', 'Z Flip6', 'Z Flip 6', 'Z플립6'], format: null, tpsFormat: '최고 {priceMan}만원' },
         ];
 
-        // products 컬렉션에서 basePrice가 높은 순으로 충분히 가져오기 (전체 기종을 위해 500개로 확대)
-        const q = query(collection(db, "products"), orderBy("basePrice", "desc"), limit(500));
-        const snapshot = await getDocs(q);
+        // products 전체를 캐시에서 가져오기 (홈·견적 페이지 간 중복 조회 제거)
+        const products = await getProductsData();
 
-        if (snapshot.empty) {
+        if (!products || products.length === 0) {
             console.log('loadHomepageDynamicPrices: No products found, keeping fallback prices');
             return;
         }
-
-        const products = [];
-        snapshot.forEach(d => { products.push(d.data()); });
 
         // Today's Seed
         const d = new Date();
@@ -1437,21 +1473,21 @@ async function loadHomepageDynamicPrices() {
         if (chipsContainer && picked.length > 0) {
             chipsContainer.innerHTML = ''; // Clear hardcoded
             picked.forEach(p => {
-                let iconSrc = 'assets/series/samsung/s시리즈.png';
-                if (p.brand === 'apple') iconSrc = 'assets/series/apple/아이폰15.png';
-                if (p.model.includes('플립') || p.model.toLowerCase().includes('flip')) iconSrc = 'assets/series/samsung/플립 시리즈.png';
-                if (p.model.includes('폴드') || p.model.toLowerCase().includes('fold')) iconSrc = 'assets/series/samsung/폴드 시리즈.png';
+                let iconSrc = 'assets/series/samsung/s시리즈.webp';
+                if (p.brand === 'apple') iconSrc = 'assets/series/apple/아이폰15.webp';
+                if (p.model.includes('플립') || p.model.toLowerCase().includes('flip')) iconSrc = 'assets/series/samsung/플립 시리즈.webp';
+                if (p.model.includes('폴드') || p.model.toLowerCase().includes('fold')) iconSrc = 'assets/series/samsung/폴드 시리즈.webp';
 
                 const priceStr = '최고 ' + new Intl.NumberFormat('ko-KR').format(p.basePrice) + '원';
                 const searchParam = encodeURIComponent(p.model);
 
                 const chipHTML = `
                     <div class="usc-chip" onclick="location.href='quote.html?search=${searchParam}'">
-                        <div class="chip-icon"><img src="${iconSrc}" alt="${p.model}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
+                        <div class="chip-icon"><img src="${iconSrc}" loading="lazy" alt="${p.model}" style="max-width: 60px; max-height: 60px; object-fit: contain;"></div>
                         <div class="chip-info">
                             <div class="chip-name">${p.model}</div>
                             <div class="chip-price">${priceStr}</div>
-                            <div class="chip-tag">기본 용량 A급 기준</div>
+                            <div class="chip-tag">기본 용량 최상급 기준</div>
                         </div>
                     </div>
                 `;
@@ -1944,552 +1980,320 @@ async function initLatestModels(container) {
 
 
                 }
-
-
-
-
-
-
-
                 html += `
-
-
-
                     <div class="price-card highlight-card" onclick="location.href='quote.html'">
-
-
-
                     <div class="phone-info">
-
-
-
                         <h4>${p.model} <span class="badge ${tag === 'NEW' ? 'badge-new' : 'badge-hot'}">${tag}</span></h4>
-
-
-
                         <p>최고가 매입중</p>
-
-
-
                     </div>
-
-
-
                     <div class="price-tag">${formatCurrency(p.basePrice)}</div>
-
-
-
                 </div>
-
-
-
     `;
-
-
-
             });
-
-
-
             container.innerHTML = html;
-
-
-
         } else {
-
-
-
             container.innerHTML = '<div class="text-center" style="width:100%; padding:20px;">등록된 모델이 없습니다.</div>';
-
-
-
         }
-
-
-
-
-
-
-
     } catch (e) {
-
-
-
         console.error("Latest Models Error:", e);
-
-
-
         // Fallback
-
-
-
         const latest = [
-
-
-
             { model: '아이폰 15 프로 맥스', price: 1750000, tag: 'NEW' },
-
-
-
             { model: '갤럭시 S24 울트라', price: 1450000, tag: 'HOT' }
-
-
-
         ];
-
-
-
         let html = '';
-
-
-
         latest.forEach(item => {
-
-
-
             html += `
-
-
-
                     <div class="price-card highlight-card">
-
-
-
                 <div class="phone-info">
-
-
-
                     <h4>${item.model} <span class="badge ${item.tag === 'NEW' ? 'badge-new' : 'badge-hot'}">${item.tag}</span></h4>
-
-
-
                     <p>최고가 매입중</p>
-
-
-
                 </div>
-
-
-
                 <div class="price-tag">${formatCurrency(item.price)}</div>
-
-
-
             </div>
-
-
-
     `;
-
-
-
         });
-
-
-
         container.innerHTML = html;
-
-
-
     }
-
-
-
 }
-
-
-
-
-
-
-
-// --- Price List Functionality (Uses Firestore) ---
-
-
 
 async function initPriceList() {
 
-
-
-    console.log("Initializing Price List...");
-
-
+    console.log("Initializing Price List (Accordion)...");
 
     const tableBody = document.getElementById('price-table-body');
-
-
-
-    const tabs = document.querySelectorAll('.filter-btn');
-
-
-
+    const indexNav = document.getElementById('price-index-nav');
     const searchInput = document.getElementById('model-search');
-
-
-
-
-
-
+    const emptyState = document.getElementById('pl-empty-state');
+    const resultCount = document.getElementById('pl-result-count');
+    const updateDate = document.getElementById('pl-update-date');
+    const indexBarWrapper = document.getElementById('indexBarWrapper');
 
     let currentBrand = 'all'; // Default to 'all'
 
-
-
-
-
-
-
-    // 1. Fetch Data (if not already loaded)
-
-
-
-    if (allProducts.length === 0) {
-
-
-
-        try {
-
-
-
-            const q = query(collection(db, "products"));
-
-
-
-            const snapshot = await getDocs(q);
-
-
-
-            snapshot.forEach(doc => {
-
-
-
-                allProducts.push({ id: doc.id, ...doc.data() });
-
-
-
-            });
-
-
-
-            console.log(`PriceList: Loaded ${allProducts.length} products`);
-
-
-
-        } catch (e) {
-
-
-
-            console.error("PriceList Fetch Error:", e);
-
-
-
-            tableBody.innerHTML = `< tr > <td colspan="4" class="text-center text-danger">시세 데이터를 불러오는데 실패했습니다.<br>${e.message}</td></tr > `;
-
-
-
-            return;
-
-
-
-        }
-
-
-
+    // Set update date
+    if (updateDate) {
+        const now = new Date();
+        updateDate.textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
     }
 
+    // 1. Fetch Data (if not already loaded)
+    if (allProducts.length === 0) {
+        try {
+            await getProductsData();
+            console.log(`PriceList: Loaded ${allProducts.length} products`);
+        } catch (e) {
+            console.error("PriceList Fetch Error:", e);
+            tableBody.innerHTML = `<div style="text-align:center;padding:40px 20px;background:white;border-radius:16px;border:1px solid #e2e8f0;"><p style="color:#64748b;">시세 데이터를 불러오는데 실패했습니다.<br>${e.message}</p></div>`;
+            return;
+        }
+    }
 
+    // Helper functions
+    function formatPrice(n) {
+        return n.toLocaleString('ko-KR') + '원';
+    }
 
+    function plSeriesId(series) {
+        return 'pl-series-' + series.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9가-힣\-]/g, '');
+    }
 
+    function getSeriesGroups(data) {
+        const map = new Map();
+        data.forEach(item => {
+            const seriesKey = item.series || '기타';
+            if (!map.has(seriesKey)) {
+                let brandNorm = (item.brand || '').toLowerCase();
+                if (brandNorm === '애플') brandNorm = 'apple';
+                if (brandNorm === '삼성') brandNorm = 'samsung';
+                map.set(seriesKey, { series: seriesKey, brand: brandNorm, models: [] });
+            }
+            map.get(seriesKey).models.push(item);
+        });
+        return Array.from(map.values());
+    }
 
-
+    // Toggle accordion
+    function toggleAccordion(item) {
+        const body = item.querySelector('.pl-accordion-body');
+        const isOpen = item.classList.contains('open');
+        if (isOpen) {
+            body.style.maxHeight = body.scrollHeight + 'px';
+            requestAnimationFrame(() => { body.style.maxHeight = '0'; });
+            item.classList.remove('open');
+        } else {
+            item.classList.add('open');
+            body.style.maxHeight = body.scrollHeight + 'px';
+            body.addEventListener('transitionend', function handler() {
+                if (item.classList.contains('open')) { body.style.maxHeight = 'none'; }
+                body.removeEventListener('transitionend', handler);
+            });
+        }
+    }
 
     // 2. Render Function
-
-
-
     const renderTable = () => {
-
-
-
         tableBody.innerHTML = '';
+        if (indexNav) indexNav.innerHTML = '';
 
-
-
-        const filterText = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-
-
-
-
-
+        const filterText = searchInput ? searchInput.value.toLowerCase().trim().replace(/\s/g, '') : '';
 
         // Filter: Brand + Search
-
-
-
         let filtered = allProducts.filter(p => {
-
-
-
-            // Brand Mapping
-
-
-
-            let pBrand = p.brand.toLowerCase();
-
-
-
+            let pBrand = (p.brand || '').toLowerCase();
             if (pBrand === '애플') pBrand = 'apple';
-
-
-
             if (pBrand === '삼성') pBrand = 'samsung';
-
-
-
-
-
-
-
             const brandMatch = (currentBrand === 'all' || pBrand === currentBrand);
-
-
-
-            const cleanFilterText = filterText.replace(/\s/g, '');
-            const searchMatch = p.model.toLowerCase().replace(/\s/g, '').includes(cleanFilterText) || (p.series && p.series.toLowerCase().replace(/\s/g, '').includes(cleanFilterText));
-
-
-
+            const cleanModel = (p.model || '').toLowerCase().replace(/\s/g, '');
+            const cleanSeries = (p.series || '').toLowerCase().replace(/\s/g, '');
+            const searchMatch = !filterText || cleanModel.includes(filterText) || cleanSeries.includes(filterText);
             return brandMatch && searchMatch;
-
-
-
         });
 
-
-
-
-
-
-
-        // Sort: Series -> Model (Reverse Series to put new ones on top?)
-
-
-
-        // Let's sort simply by Series (desc) then Model
-
-
-
-        filtered.sort((a, b) => {
-
-
-
-            // Helper to extract number from series for valid sorting? 
-
-
-
-            // String compare is usually fine for "Galaxy S24" vs "Galaxy S23"
-
-
-
-            if (a.series && b.series && a.series !== b.series) {
-
-
-
-                return b.series.localeCompare(a.series); // Descending Series
-
-
-
-            }
-
-
-
-            return a.model.localeCompare(b.model);
-
-
-
-        });
-
-
-
-
-
-
-
-        if (filtered.length === 0) {
-
-
-
-            tableBody.innerHTML = `< tr > <td colspan="4" class="text-center" style="padding: 30px;">검색 결과가 없습니다.</td></tr > `;
-
-
-
-            return;
-
-
-
-        }
-
-
-
-
-
-
-
-        // Deduplicate and calculate average
+        // Deduplicate by model and collect prices
         const modelMap = {};
         filtered.forEach(p => {
             if (!modelMap[p.model]) {
-                modelMap[p.model] = {
-                    ...p,
-                    allPrices: []
-                };
+                modelMap[p.model] = { ...p, prices: {} };
             }
-            // Collect all valid prices for this model across all duplicated docs
             const prices = p.prices || {};
-            const priceS = prices.s || p.basePrice || 0;
-            const priceA = prices.a || 0;
-            const priceB = prices.b || 0;
-            const priceC = prices.c || prices.d || 0;
-            
-            [priceS, priceA, priceB, priceC].forEach(v => {
-                if (v > 0) modelMap[p.model].allPrices.push(v);
-            });
+            const existing = modelMap[p.model].prices;
+            // Merge prices: take the highest found for each grade
+            existing.s = Math.max(existing.s || 0, prices.s || p.basePrice || 0);
+            existing.a = Math.max(existing.a || 0, prices.a || 0);
+            existing.b = Math.max(existing.b || 0, prices.b || 0);
+            existing.c = Math.max(existing.c || 0, prices.c || prices.d || 0);
         });
-
         const uniqueModels = Object.values(modelMap);
 
-        uniqueModels.forEach(p => {
-            const sum = p.allPrices.reduce((a, b) => a + b, 0);
-            const avg = p.allPrices.length > 0 ? Math.floor(sum / p.allPrices.length / 1000) * 1000 : 0;
-            
-            let priceText = '-';
-            if (avg > 0) {
-                priceText = `${avg.toLocaleString()}원`;
+        // Sort by series desc then model
+        uniqueModels.sort((a, b) => {
+            if (a.series && b.series && a.series !== b.series) {
+                return b.series.localeCompare(a.series);
             }
+            return a.model.localeCompare(b.model);
+        });
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: #1e293b; margin-bottom: 4px; word-break: keep-all;">${p.model}</div>
-                    <span style="font-size:0.75rem; color:#64748b; background: #f8fafc; padding: 2px 6px; border-radius: 4px; word-break: keep-all;">${p.series}</span>
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: middle;">
-                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex-wrap: nowrap;">
-                        <span style="font-weight: 700; color: #3b82f6; font-size: 0.95rem; white-space: nowrap; word-break: keep-all;">
-                            ${priceText}
-                        </span>
-                        <a href="quote.html?model=${encodeURIComponent(p.model)}" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 0.75rem; font-weight: 600; padding: 5px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; flex-shrink: 0; transition: background 0.2s, transform 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#eff6ff'; this.style.transform='translateY(0)'">
-                            간편견적 <i class="ri-arrow-right-s-line"></i>
-                        </a>
+        // Group by series
+        const groups = getSeriesGroups(uniqueModels);
+
+        if (groups.length === 0 || uniqueModels.length === 0) {
+            if (emptyState) emptyState.classList.add('show');
+            if (resultCount) resultCount.innerHTML = '';
+            return;
+        }
+        if (emptyState) emptyState.classList.remove('show');
+        if (resultCount) {
+            resultCount.innerHTML = `총 <strong>${uniqueModels.length}</strong>개 모델 · <strong>${groups.length}</strong>개 시리즈`;
+        }
+
+        // Render index bar
+        if (indexNav) {
+            groups.forEach(group => {
+                const pill = document.createElement('button');
+                pill.className = 'pl-index-pill' + (group.brand === 'apple' ? ' apple-pill' : ' samsung-pill');
+                pill.textContent = group.series.replace(' 시리즈', '');
+                pill.dataset.target = plSeriesId(group.series);
+                pill.addEventListener('click', () => {
+                    const target = document.getElementById(pill.dataset.target);
+                    if (target) {
+                        const item = target.querySelector('.pl-accordion-item');
+                        if (item && !item.classList.contains('open')) { toggleAccordion(item); }
+                        const headerH = document.querySelector('.navbar')?.offsetHeight || 0;
+                        const indexH = indexBarWrapper?.offsetHeight || 0;
+                        const top = target.getBoundingClientRect().top + window.scrollY - headerH - indexH - 12;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                        if (item) { item.classList.add('highlight'); setTimeout(() => item.classList.remove('highlight'), 700); }
+                    }
+                });
+                indexNav.appendChild(pill);
+            });
+        }
+
+        // Render accordion groups
+        groups.forEach((group, idx) => {
+            const maxPrice = Math.max(...group.models.map(m => m.prices?.s || 0));
+            const isLatest = idx < 2;
+            const brandLabel = group.brand === 'apple' ? 'APPLE' : 'SAMSUNG';
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pl-accordion-group';
+            wrapper.id = plSeriesId(group.series);
+
+            // Build desktop table rows
+            const tableRows = group.models.map(m => {
+                const ps = m.prices || {};
+                return `<tr>
+                    <td>${m.model}${m.popular ? '<span class="pl-popular-badge"><i class="ri-fire-fill"></i>인기</span>' : ''}</td>
+                    <td class="pl-price-s">${ps.s > 0 ? formatPrice(ps.s) : '-'}</td>
+                    <td class="pl-price-a">${ps.a > 0 ? formatPrice(ps.a) : '-'}</td>
+                    <td class="pl-price-b">${ps.b > 0 ? formatPrice(ps.b) : '-'}</td>
+                    <td class="pl-price-c">${ps.c > 0 ? formatPrice(ps.c) : '-'}</td>
+                    <td><a href="quote.html?model=${encodeURIComponent(m.model)}" class="pl-sell-btn"><i class="ri-arrow-right-line"></i>판매</a></td>
+                </tr>`;
+            }).join('');
+
+            // Build mobile cards
+            const mobileCards = group.models.map(m => {
+                const ps = m.prices || {};
+                return `<div class="pl-mobile-card">
+                    <div class="pl-mobile-card-header">
+                        <div class="pl-mobile-card-model">${m.model}${m.popular ? '<span class="pl-popular-badge"><i class="ri-fire-fill"></i>인기</span>' : ''}</div>
                     </div>
-                </td>
+                    <div class="pl-mobile-grades">
+                        <div class="pl-mobile-grade-item"><span class="pl-mobile-grade-label">S등급</span><span class="pl-mobile-grade-price pl-price-s">${ps.s > 0 ? formatPrice(ps.s) : '-'}</span></div>
+                        <div class="pl-mobile-grade-item"><span class="pl-mobile-grade-label">A등급</span><span class="pl-mobile-grade-price pl-price-a">${ps.a > 0 ? formatPrice(ps.a) : '-'}</span></div>
+                        <div class="pl-mobile-grade-item"><span class="pl-mobile-grade-label">B등급</span><span class="pl-mobile-grade-price pl-price-b">${ps.b > 0 ? formatPrice(ps.b) : '-'}</span></div>
+                        <div class="pl-mobile-grade-item"><span class="pl-mobile-grade-label">C등급</span><span class="pl-mobile-grade-price pl-price-c">${ps.c > 0 ? formatPrice(ps.c) : '-'}</span></div>
+                    </div>
+                    <div class="pl-mobile-card-footer"><a href="quote.html?model=${encodeURIComponent(m.model)}" class="pl-mobile-sell-btn"><i class="ri-arrow-right-line"></i>바로 판매하기</a></div>
+                </div>`;
+            }).join('');
+
+            wrapper.innerHTML = `
+                <div class="pl-accordion-item ${isLatest ? 'open' : ''}">
+                    <div class="pl-accordion-header">
+                        <span class="pl-brand-badge ${group.brand}">${brandLabel}</span>
+                        <span class="pl-series-name">${group.series}</span>
+                        <span class="pl-max-price">최대 ${maxPrice > 0 ? formatPrice(maxPrice) : '-'}~</span>
+                        <span class="pl-chevron"><i class="ri-arrow-down-s-line"></i></span>
+                    </div>
+                    <div class="pl-accordion-body" style="max-height: ${isLatest ? 'none' : '0'}">
+                        <div class="pl-accordion-body-inner">
+                            <table class="pl-price-table">
+                                <thead><tr>
+                                    <th>모델명</th><th>S등급</th><th>A등급</th><th>B등급</th><th>C등급</th><th>바로 판매</th>
+                                </tr></thead>
+                                <tbody>${tableRows}</tbody>
+                            </table>
+                            <div class="pl-mobile-cards">${mobileCards}</div>
+                        </div>
+                    </div>
+                </div>
             `;
-            tableBody.appendChild(tr);
+
+            tableBody.appendChild(wrapper);
+
+            // Bind header click
+            const header = wrapper.querySelector('.pl-accordion-header');
+            const item = wrapper.querySelector('.pl-accordion-item');
+            header.addEventListener('click', () => toggleAccordion(item));
         });
-
-
-
     };
 
+    // 3. Event Listeners — Brand Tabs (new style)
+    document.querySelectorAll('.pl-brand-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.pl-brand-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentBrand = tab.dataset.brand;
+            renderTable();
+        });
+    });
 
-
-
-
-
-
-    // 3. Event Listeners
-
-
-
+    // Legacy filterModels for backward compat (old onclick handlers)
     window.filterModels = (brand) => {
-
-
-
-        // Update active class on buttons
-
-
-
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-
-
-
-            btn.classList.remove('active');
-
-
-
-        });
-
-
-
-
-
-
-
-        // Find the matching button based on onClick param rather than data-tab since it's inline
-
-
-
-        const clickedBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => b.getAttribute('onclick')?.includes(brand) || b.dataset.brand === brand);
-
-
-
-        if (clickedBtn) clickedBtn.classList.add('active');
-
-
-
-
-
-
-
+        document.querySelectorAll('.pl-brand-tab').forEach(t => t.classList.remove('active'));
+        const btn = document.querySelector(`.pl-brand-tab[data-brand="${brand}"]`);
+        if (btn) btn.classList.add('active');
         currentBrand = brand;
-
-
-
         renderTable();
-
-
-
     };
-
-
-
-
-
-
 
     if (searchInput) {
-
-
-
+        let searchTimeout;
         searchInput.addEventListener('input', () => {
-
-
-
-            renderTable();
-
-
-
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => { renderTable(); }, 200);
         });
-
-
-
     }
 
-
-
-
-
-
+    // Index bar scroll shadow & active pill
+    if (indexBarWrapper) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 200) {
+                indexBarWrapper.classList.add('scrolled');
+            } else {
+                indexBarWrapper.classList.remove('scrolled');
+            }
+            // Update active index pill
+            const pills = document.querySelectorAll('.pl-index-pill');
+            const headerH = document.querySelector('.navbar')?.offsetHeight || 0;
+            const indexH = indexBarWrapper?.offsetHeight || 0;
+            const offset = headerH + indexH + 24;
+            let currentActive = null;
+            document.querySelectorAll('.pl-accordion-group').forEach(group => {
+                const rect = group.getBoundingClientRect();
+                if (rect.top <= offset + 10) { currentActive = group.id; }
+            });
+            pills.forEach(p => {
+                p.classList.toggle('active', p.dataset.target === currentActive);
+            });
+        }, { passive: true });
+    }
 
     // Initial Render
-
-
-
     renderTable();
-
-
-
 }
 
 
@@ -2513,11 +2317,15 @@ async function initDeepWizard() {
     const loadingOverlay = document.getElementById('wizard-loading');
 
     // Restore pending quote after login (skip if Naver callback is processing or already restored)
-    const pendingQuoteStr = sessionStorage.getItem('pendingQuote');
+    // 모바일 네이버 로그인 대비: sessionStorage가 없으면 localStorage에서 복원
+    const pendingQuoteStr = sessionStorage.getItem('pendingQuote') || localStorage.getItem('pendingQuote');
     if (pendingQuoteStr && !window.location.hash.includes('access_token') && !window._naverQuoteRestored) {
         try {
+            window._naverQuoteRestored = true;
             currentQuote = JSON.parse(pendingQuoteStr);
             sessionStorage.removeItem('pendingQuote');
+            localStorage.removeItem('pendingQuote');
+            localStorage.removeItem('pendingQuotePage');
             // Slight delay to ensure auth state and DOM are ready before navigating
             setTimeout(() => {
                 goToStep('auth');
@@ -2556,6 +2364,76 @@ async function initDeepWizard() {
         });
         window._wizardPopStateAttached = true;
     }
+
+    // ══ 선택 내역 띠 ══════════════════════════════════════════
+    // 고객이 고른 브랜드·모델·용량·접수방식을 진행바 아래에 쌓아 보여준다.
+    // 항목을 누르면 그 단계로 돌아가 다시 고를 수 있다.
+    const QTRAIL_SERIES_IMG = (brand, series) => {
+        if (!series) return '';
+        if (brand === 'samsung') {
+            const map = {
+                'S 시리즈': 's시리즈', '폴드 시리즈': '폴드 시리즈', '플립 시리즈': '플립 시리즈',
+                '노트 시리즈': '갤럭시노트', 'A 시리즈': 'A시리즈', 'A 시리즈 및 기타기종': 'A시리즈'
+            };
+            const f = map[series];
+            return f ? `assets/series/samsung/${f}.png` : '';
+        }
+        // 애플은 '아이폰 17 시리즈' → '아이폰17'
+        const base = String(series).replace('시리즈', '').replace(/\s+/g, '').toLowerCase();
+        return base ? `assets/series/apple/${base}.png` : '';
+    };
+
+    window.renderQuoteTrail = (step) => {
+        const box = document.getElementById('quote-trail');
+        if (!box) return;
+
+        // 기기 선택 이전(브랜드 화면)과 완료 화면에서는 숨긴다
+        const hideOn = [1, 8, 'auth'];
+        const q = (typeof currentQuote === 'object' && currentQuote) ? currentQuote : {};
+        const segs = [];
+        if (q.brand) segs.push({ t: q.brand === 'apple' ? '애플' : '삼성', go: 1 });
+        if (q.model && q.model.model) segs.push({ t: q.model.model, go: 3 });
+        if (q.storage && q.storage.size && !/용량무관/.test(q.storage.size)) segs.push({ t: q.storage.size, go: 4 });
+        if (q.method) segs.push({ t: q.method === 'simple' ? '간편접수' : '셀프접수', go: 'method' });
+
+        if (!segs.length || hideOn.includes(step)) { box.style.display = 'none'; return; }
+
+        const img = QTRAIL_SERIES_IMG(q.brand, q.series || (q.model && q.model.series));
+        const thumb = img
+            ? `<img src="${img}" alt="" onerror="this.style.display='none'">`
+            : '📱';
+
+        let html = `<div class="qtrail-thumb">${thumb}</div><div class="qtrail-segs">`;
+        segs.forEach((s, i) => {
+            const last = i === segs.length - 1;
+            if (i) html += `<span class="qtrail-arrow">›</span>`;
+            html += `<button type="button" class="qtrail-seg${last ? ' is-last' : ''}" data-goto="${s.go}">${s.t}</button>`;
+        });
+        html += `</div><span class="qtrail-hint">눌러서 수정</span>`;
+        box.innerHTML = html;
+        box.style.display = 'flex';
+
+        box.querySelectorAll('.qtrail-seg:not(.is-last)').forEach(btn => {
+            btn.onclick = () => {
+                const g = btn.dataset.goto;
+                if (g === '1') { window.goToStep(1); return; }
+                if (g === '3') {
+                    // 모델부터 다시 — 이후 선택은 비운다.
+                    // ⚠ storage 를 null 로 두면 calculateFinalPrice 의
+                    //   currentQuote.storage.priceAdjustment 에서 오류가 난다. 빈 객체로 초기화한다.
+                    currentQuote.storage = { size: '', priceAdjustment: 0 };
+                    currentQuote.method = null; currentQuote.grade = null;
+                    window.goToStep(3); return;
+                }
+                if (g === '4') {
+                    currentQuote.method = null; currentQuote.grade = null;
+                    if (typeof window.renderStorage === 'function' && currentQuote.model) window.renderStorage(currentQuote.model);
+                    window.goToStep(4); return;
+                }
+                window.goToStep('method');
+            };
+        });
+    };
 
     window.goToStep = (step, isHistoryNav = false) => {
         console.log("Navigating to step:", step);
@@ -2606,12 +2484,13 @@ async function initDeepWizard() {
 
         const target = document.getElementById(targetId);
 
-
+        // 선택 내역 띠 갱신 — 단계가 바뀔 때마다 다시 그린다
+        try { if (typeof window.renderQuoteTrail === 'function') window.renderQuoteTrail(step); } catch (_) { }
 
         if (target) {
             target.style.display = 'block';
             setTimeout(() => target.classList.add('active'), 10);
-            
+
             if (step === 'auth') {
                 const localUserStr = localStorage.getItem('user_info');
                 let isMember = false;
@@ -3053,6 +2932,71 @@ async function initDeepWizard() {
 
 
 
+    // ===== 견적 화면 추가 혜택 배지 =====
+    // 규칙: 연휴 이벤트만 중복 적용, 나머지(당근/아이폰)는 서로 중복 불가 → 더 유리한 하나만.
+    // 연휴 기간은 한국시간(+09:00) 절대시각으로 판정 → 고객이 해외에 있어도 동일하게 동작.
+    const HOLIDAY_EVENT = {
+        start: new Date('2026-07-17T00:00:00+09:00').getTime(),
+        end: new Date('2026-07-19T23:59:59+09:00').getTime(),
+        amount: 10000,
+        label: '연휴 특별 ~7/19'
+    };
+    // 아이폰 이벤트: 시리즈 번호 = 만원 단위 (11~17), X·8·SE는 5천원
+    function getIphoneBonus(seriesText) {
+        const s = String(seriesText || '');
+        if (!/아이폰|iphone/i.test(s)) return 0;
+        const m = s.match(/(\d{1,2})/);
+        if (m) {
+            const n = parseInt(m[1], 10);
+            if (n >= 11 && n <= 17) return n * 1000;
+            if (n === 8) return 5000;
+        }
+        if (/\bX\b|SE/i.test(s)) return 5000;
+        return 0;
+    }
+    // 현재 고객에게 적용 가능한 혜택 목록 반환
+    function getActiveBonuses() {
+        const out = [];
+        const now = Date.now();
+        if (now >= HOLIDAY_EVENT.start && now <= HOLIDAY_EVENT.end) {
+            out.push({ key: 'holiday', label: HOLIDAY_EVENT.label, amount: HOLIDAY_EVENT.amount, text: '+10,000원', primary: true });
+        }
+        // 당근 · 아이폰은 중복 불가 → 더 유리한 하나만
+        const src = sessionStorage.getItem('traffic_source') || '';
+        const isDaangn = src === 'daangn';
+        const iphoneBonus = getIphoneBonus((currentQuote.model && currentQuote.model.series) || currentQuote.series || (currentQuote.model && currentQuote.model.model));
+        if (isDaangn) {
+            out.push({ key: 'daangn', label: '당근 혜택', amount: 20000, text: '최대 +20,000원' });
+        } else if (iphoneBonus > 0) {
+            out.push({ key: 'iphone', label: '아이폰 이벤트', amount: iphoneBonus, text: '+' + new Intl.NumberFormat('ko-KR').format(iphoneBonus) + '원' });
+        }
+        return out;
+    }
+    // 배지 HTML 생성 (basePrice가 있으면 '최대 ~원까지' 합계도 표시)
+    function renderBonusBadges(basePrice) {
+        const list = getActiveBonuses();
+        if (!list.length) return '';
+        const total = list.reduce((s, b) => s + b.amount, 0);
+        let html = '<div style="margin-top:12px; max-width:340px; margin-left:auto; margin-right:auto; box-sizing:border-box;">';
+        list.forEach(b => {
+            const style = b.primary
+                ? 'background:#1D4ED8; color:#fff;'
+                : (b.key === 'daangn' ? 'background:#FAEEDA; border:1px solid #EF9F27; color:#854F0B;' : 'background:#E1F5EE; border:1px solid #1D9E75; color:#0F6E56;');
+            const sub = b.primary ? 'color:#BFDBFE;' : 'opacity:0.85;';
+            // 모바일 좁은 폭에서도 글자가 쪼개지지 않도록: 줄바꿈 허용 + 각 조각은 통째로 유지
+            html += `<div style="display:flex; align-items:center; justify-content:center; gap:4px 8px; flex-wrap:wrap; ${style} border-radius:12px; padding:8px 12px; margin-bottom:5px; box-sizing:border-box; width:100%;">
+                <span style="font-size:0.78rem; white-space:nowrap; ${sub}">${b.label}</span>
+                <span style="font-size:1rem; font-weight:800; white-space:nowrap;">${b.text}</span>
+            </div>`;
+        });
+        if (basePrice > 0) {
+            html += `<p style="margin:8px 0 0; font-size:0.85rem; color:#2563eb; font-weight:700;">최대 ${formatCurrency(basePrice + total)}원까지</p>`;
+        }
+        html += '</div>';
+        return html;
+    }
+    window.renderBonusBadges = renderBonusBadges;
+
     window.calculateAndShowResult = (isSimpleMode = false) => {
 
 
@@ -3173,7 +3117,9 @@ async function initDeepWizard() {
 
 
 
-                if (group === 'lcd_damage') defects.lcd_damage = (val === 'yes');
+                // 액정은 3단계: 'no'(없음) / 'light'(줄·멍) / 'heavy'(완전 안보임)
+                // (이전엔 val==='yes'로 비교했는데 그런 값이 없어 항상 false → 액정 파손이 등급에 반영되지 않았음)
+                if (group === 'lcd_damage') defects.lcd_damage = val;
 
 
 
@@ -3233,7 +3179,7 @@ async function initDeepWizard() {
 
 
 
-            grade = 's'; // Show Max Price for Simple
+            grade = 'a'; // 간편접수 기본 등급 = A급 (최고가 대신 실제 검수 결과에 가까운 값)
 
 
 
@@ -3253,7 +3199,14 @@ async function initDeepWizard() {
 
 
 
-            const hasBodyDamage = defects.body_damage && defects.body_damage.length > 0;
+            // '카메라 멍/기스'는 기능불량 그룹에 있지만 성격은 외관 하자 → 기능불량에서 제외하고 외관(B급)으로 취급.
+            // (이래야 기능불량 3개 카운트에도 안 들어가 억울한 D급이 안 나옴)
+            const COSMETIC_IN_FUNC = ['camera_lens'];
+            const funcAll = Array.isArray(defects.func_defect) ? defects.func_defect : [];
+            const funcReal = funcAll.filter(v => !COSMETIC_IN_FUNC.includes(v)); // 진짜 기능 하자만
+            const hasCosmeticFunc = funcAll.some(v => COSMETIC_IN_FUNC.includes(v));
+
+            const hasBodyDamage = (defects.body_damage && defects.body_damage.length > 0) || hasCosmeticFunc;
 
 
 
@@ -3269,7 +3222,7 @@ async function initDeepWizard() {
 
 
 
-            const hasFuncDefect = defects.func_defect && defects.func_defect.length > 0;
+            const hasFuncDefect = funcReal.length > 0;
 
 
 
@@ -3301,7 +3254,8 @@ async function initDeepWizard() {
 
 
 
-            if (defects.func_defect?.includes('power') || defects.func_defect?.includes('account') || defects.func_defect?.includes('network')) {
+            // D급: 전원/충전 불량 · 계정잠김 · 기능불량 3개 이상 (액정불량은 D가 아니라 C로 내림)
+            if (funcReal.includes('power') || funcReal.includes('account') || funcReal.length >= 3) {
 
 
 
@@ -3309,7 +3263,7 @@ async function initDeepWizard() {
 
 
 
-            } else if (isLcdDamaged) {
+            } else if (defects.lcd_damage === 'light' || defects.lcd_damage === 'heavy') { // 액정불량(줄·멍 / 완전 안보임) → C
 
 
 
@@ -3317,7 +3271,7 @@ async function initDeepWizard() {
 
 
 
-            } else if (hasFuncDefect || hasBurnIn) {
+            } else if (hasFuncDefect) { // 기능불량 1~2개 → C
 
 
 
@@ -3325,7 +3279,7 @@ async function initDeepWizard() {
 
 
 
-            } else if (hasBodyDamage) {
+            } else if (hasBurnIn || hasBodyDamage) { // 잔상(번인) 또는 파손·찍힘 → B
 
 
 
@@ -3341,7 +3295,8 @@ async function initDeepWizard() {
 
 
 
-                // Just scratches -> A
+                // 미세 기스만 → A (이전엔 대입이 누락돼 S로 남아 최고가가 나갔음)
+                grade = 'a';
 
 
 
@@ -3433,6 +3388,11 @@ async function initDeepWizard() {
 
 
 
+            // 시세표에 해당 등급 단가가 없을 때: 간편접수 등급표와 동일한 비율로 폴백
+            // (이 폴백이 없어서 A/B/C/D 단가가 비어있는 모델은 셀프접수에서 0원 견적이 나갔음)
+            const GRADE_RATES = { s: 1, a: 0.9, b: 0.8, c: 0.6, d: 0.2 };
+            const _base = currentQuote.model.basePrice || (currentQuote.model.prices && currentQuote.model.prices['s']) || 0;
+
             if (grade === 'sealed') {
 
 
@@ -3452,6 +3412,11 @@ async function initDeepWizard() {
                 baseGradePrice = currentQuote.model.basePrice || 0;
 
 
+
+            } else {
+
+                // a / b / c / d : S급 단가 대비 비율로 산정 (간편접수 등급표와 동일 기준)
+                baseGradePrice = Math.round(_base * (GRADE_RATES[grade] || 0));
 
             }
 
@@ -3485,7 +3450,8 @@ async function initDeepWizard() {
 
 
 
-        let finalPrice = baseGradePrice + storageAdj;
+        // 단가 0원 기종은 용량 추가금을 더하지 않는다 (0원짜리에 +8만원이 붙는 것 방지)
+        let finalPrice = baseGradePrice > 0 ? baseGradePrice + storageAdj : 0;
 
 
 
@@ -3585,14 +3551,19 @@ async function initDeepWizard() {
             priceDisplayStr = rangeStr;
             currentQuote.priceRangeText = rangeStr;
         } else {
-            const minPrice = Math.floor(finalPrice / 100000) * 100000;
-            const maxPrice = minPrice + 99000;
-            rangeStr = `${formatCurrency(minPrice)}원 ~ ${formatCurrency(maxPrice)}원`;
-            priceDisplayStr = rangeStr;
-            currentQuote.priceRangeText = rangeStr;
+            // 셀프접수는 문진으로 등급이 확정되므로 범위(물결) 없이 단일 단가로 표시
+            priceDisplayStr = `${formatCurrency(finalPrice)}원`;
+            currentQuote.priceRangeText = priceDisplayStr;
         }
         
         document.getElementById('final-price-display').innerText = priceDisplayStr;
+
+        // 추가 혜택 배지 — 금액 바로 아래(모바일 우선: 세로 배치)
+        const bonusHost = document.getElementById('quote-bonus-badges');
+        if (bonusHost) {
+            // 간편접수는 범위 표시라 합계 기준가가 애매 → 배지만, 셀프접수는 단일가라 '최대 ~원까지'도 표시
+            bonusHost.innerHTML = renderBonusBadges(isSimpleMode ? 0 : finalPrice);
+        }
 
 
 
@@ -3608,7 +3579,7 @@ async function initDeepWizard() {
 
 
 
-            breakdown += `<p style="color:#888; font-size:0.8rem;">* 간편 접수(예상 최고가)</p>`;
+            breakdown += `<p style="color:#888; font-size:0.8rem;">* 간편 접수 — 기기 도착 후 검수를 통해 최종 매입가가 확정됩니다</p>`;
 
 
 
@@ -3740,11 +3711,8 @@ async function initDeepWizard() {
 
 
 
-        const q = query(collection(db, "products"));
-
-
-
-        const snapshot = await getDocs(q);
+        const __cached = await getProductsData();
+        const snapshot = { empty: !__cached || __cached.length === 0, forEach: (cb) => __cached.forEach((d) => cb({ id: d.id, data: () => d })) };
 
 
 
@@ -3838,23 +3806,40 @@ async function initDeepWizard() {
                 currentQuote.series = foundModel.series || foundModel.brand;
                 currentQuote.model = foundModel;
                 
-                const storageOpts = foundModel.storageOptions || [
-                    { size: '128GB', priceAdjustment: 0 },
-                    { size: '256GB', priceAdjustment: 80000 },
-                    { size: '512GB', priceAdjustment: 150000 }
-                ];
-                currentQuote.storage = storageOpts[0];
-                currentQuote.method = 'simple';
-                currentQuote.grade = 's';
-                
-                let sPrice = (currentQuote.model.prices && currentQuote.model.prices['s']) ? currentQuote.model.prices['s'] : (currentQuote.model.basePrice || 0);
-                if (currentQuote.storage) sPrice += (currentQuote.storage.priceAdjustment || 0);
-                currentQuote.finalPrice = Math.floor(sPrice / 1000) * 1000;
+                // ⚠ 예전엔 storageOpts[0]을 무조건 골라버렸다.
+                //   홈에서 '아이폰 17 PRO MAX'를 눌러 들어온 512GB 사용자가
+                //   128GB 기준 금액으로 접수돼 15만원 낮은 견적을 받는 문제가 있었다.
+                //   용량 선택지가 2개 이상이면 반드시 고객이 직접 고르게 한다.
+                const storageOpts = foundModel.storageOptions || [];
+                const isSamsung = foundModel.brand === 'samsung';
+                const needsStorage = !isSamsung && storageOpts.length > 1;
 
-                setTimeout(() => {
-                    if (typeof window.renderGradePriceList === 'function') window.renderGradePriceList();
-                    if (typeof window.goToStep === 'function') window.goToStep('grade-list');
-                }, 300);
+                if (needsStorage) {
+                    // 용량 선택 화면으로 보낸다. 용량을 고르면 기존 흐름(접수방식 선택)으로 이어진다.
+                    setTimeout(() => {
+                        if (typeof window.renderStorage === 'function') window.renderStorage(foundModel);
+                        if (typeof window.goToStep === 'function') window.goToStep(4);
+                    }, 300);
+                } else {
+                    // 삼성(용량무관) 또는 용량 선택지가 하나뿐인 기종 — 기존처럼 바로 등급표로
+                    currentQuote.storage = isSamsung
+                        ? { size: '기본(용량무관)', priceAdjustment: 0 }
+                        : (storageOpts[0] || { size: '기본', priceAdjustment: 0 });
+                    currentQuote.method = 'simple';
+                    currentQuote.grade = 'a'; // 간편접수 기본 등급 = A급 (위 selectMethod와 동일 기준)
+
+                    let sPrice = (currentQuote.model.prices && currentQuote.model.prices['a'] > 0)
+                        ? currentQuote.model.prices['a']
+                        : Math.round((currentQuote.model.basePrice || 0) * 0.9);
+                    // 단가 0원 기종은 용량 추가금을 더하지 않는다
+                    if (sPrice > 0 && currentQuote.storage) sPrice += (currentQuote.storage.priceAdjustment || 0);
+                    currentQuote.finalPrice = Math.floor(sPrice / 1000) * 1000;
+
+                    setTimeout(() => {
+                        if (typeof window.renderGradePriceList === 'function') window.renderGradePriceList();
+                        if (typeof window.goToStep === 'function') window.goToStep('grade-list');
+                    }, 300);
+                }
             }
         }
 
@@ -3904,7 +3889,11 @@ async function initDeepWizard() {
         const btnAuthNaver = document.getElementById('btn-auth-naver');
 
         const savePendingQuote = () => {
-            sessionStorage.setItem('pendingQuote', JSON.stringify(currentQuote));
+            const data = JSON.stringify(currentQuote);
+            sessionStorage.setItem('pendingQuote', data);
+            // 모바일 네이버 로그인(앱 전환) 대비: sessionStorage가 날아가도 복원되도록 localStorage에도 저장
+            localStorage.setItem('pendingQuote', data);
+            localStorage.setItem('pendingQuotePage', 'quote.html');
         };
 
         if (btnAuthLogin) {
@@ -4117,6 +4106,7 @@ async function initDeepWizard() {
 
                 // --- 1차 접수 (리드 확보) ---
                 const payload = {
+                    status: '신청접수',
                     timestamp: new Date().toLocaleString(),
                     brand: currentQuote.brand,
                     model: currentQuote.model.model,
@@ -4159,6 +4149,8 @@ async function initDeepWizard() {
                         const trafficSourceMap = {
                             'daangn': '당근마켓 🥕',
                             'naver': '네이버 🟢',
+                            'naver_search': '네이버 검색 🔎',
+                            'naver_display': '네이버 디스플레이 🖼️',
                             'google': '구글 🔵',
                             'direct': '직접 유입/기타 📱'
                         };
@@ -4299,7 +4291,8 @@ async function initDeepWizard() {
                     return;
                 }
 
-                // If valid, open the pre-sale modal instead of submitting directly
+                // step8(이탈 복귀) 경로는 기존대로 '제출 전 동의' 방식 유지 → 동의 후 executeFinalSubmit 실행
+                window.presaleMode = 'beforeSubmit';
                 if (window.openPresaleModal) window.openPresaleModal();
             };
 
@@ -4334,6 +4327,13 @@ async function initDeepWizard() {
 
         const prices = currentQuote.model.prices || {};
         const basePrice = currentQuote.model.basePrice || 0;
+        // ⚠ 용량 추가금을 더해야 한다.
+        //   예전엔 이 표가 기본 용량 기준 금액만 보여줬다. 제목에는 '(512GB)'라고 뜨는데
+        //   금액은 128GB 기준이라, 실제 접수 금액(finalPrice)과 최대 15~32만원 어긋났다.
+        const storageAdj = (currentQuote.storage && currentQuote.storage.priceAdjustment) || 0;
+        // 단가가 0원인 기종(기타기종 등)은 용량 추가금을 더하지 않는다.
+        // 그냥 더하면 0원짜리가 '+8만원'처럼 표시돼 실제로 지급할 수 없는 금액이 노출된다.
+        const addAdj = (v) => (v > 0 ? v + storageAdj : 0);
 
         // Define Grades to show
         const grades = ['s', 'a', 'b', 'c', 'd'];
@@ -4347,10 +4347,12 @@ async function initDeepWizard() {
                 else if (g === 'c') price = basePrice * 0.6;
                 else if (g === 'd') price = basePrice * 0.2;
             }
+            price = addAdj(price);
+            if (price < 0) price = 0;
             price = Math.floor(price / 1000) * 1000;
 
             const gradeLabels = {
-                s: { title: "S급 (미사용/최고)", desc: "기스 없는 최고 상태" },
+                s: { title: "S급 (최상급)", desc: "하자 없는 최상 상태" },
                 a: { title: "A급 (깨끗)", desc: "미세 기스 1~2곳" },
                 b: { title: "B급 (사용감)", desc: "찍힘/기스 다수" },
                 c: { title: "C급 (파손)", desc: "화면 파손/기능 불량" },
@@ -4369,6 +4371,8 @@ async function initDeepWizard() {
                 </div>
             </div>`;
         });
+        // 등급표 아래 추가 혜택 배지 (연휴/당근/아이폰) — 등급별 금액이 여러 개라 합계는 표시하지 않음
+        html += renderBonusBadges(0);
         container.innerHTML = html;
     };
 
@@ -4397,14 +4401,18 @@ async function initDeepWizard() {
     window.selectMethod = (method) => {
         currentQuote.method = method; // 'simple' or 'self'
         if (method === 'simple') {
-            currentQuote.grade = 's'; // Default to S Grade
+            // 간편접수 기본 등급 = A급.
+            // 예전엔 S급(최고가)을 기본으로 잡아 예상가를 띄웠는데, 실제 검수 결과는 대부분 A~B급이라
+            // 예상가와 실매입가 차이가 커지고 그대로 클레임으로 돌아왔다. 기대치를 실제에 맞춘다.
+            currentQuote.grade = 'a';
             let sPrice = 0;
-            if (currentQuote.model.prices && currentQuote.model.prices['s']) {
-                sPrice = currentQuote.model.prices['s'];
+            if (currentQuote.model.prices && currentQuote.model.prices['a'] > 0) {
+                sPrice = currentQuote.model.prices['a'];
             } else {
-                sPrice = currentQuote.model.basePrice || 0;
+                sPrice = Math.round((currentQuote.model.basePrice || 0) * 0.9); // A급 단가 미등록 시 폴백
             }
-            if (currentQuote.storage) sPrice += (currentQuote.storage.priceAdjustment || 0);
+            // 단가 0원 기종은 용량 추가금을 더하지 않는다
+            if (sPrice > 0 && currentQuote.storage) sPrice += (currentQuote.storage.priceAdjustment || 0);
             currentQuote.finalPrice = Math.floor(sPrice / 1000) * 1000;
 
             renderGradePriceList();
@@ -4680,17 +4688,20 @@ async function initDeepWizard() {
         };
         container.appendChild(customCard);
     }
+    // 홈에서 ?search=/?model= 로 들어온 경우에도 용량 화면을 띄워야 하므로 외부에 노출한다.
+    window.renderStorage = renderStorage;
 
     function calculateFinalPrice() {
         if (!currentQuote.model || !currentQuote.grade) return;
         let baseGradePrice = currentQuote.model.prices[currentQuote.grade] || 0;
         let storageAdj = currentQuote.storage.priceAdjustment || 0;
-        let finalPrice = baseGradePrice + storageAdj;
+        // 단가 0원 기종은 용량 추가금을 더하지 않는다 (0원짜리에 +8만원이 붙는 것 방지)
+        let finalPrice = baseGradePrice > 0 ? baseGradePrice + storageAdj : 0;
         if (finalPrice < 0) finalPrice = 0;
 
         const gradeNames = {
-            sealed: "미개봉 (새상품)",
-            s: "S급 (최고)",
+            sealed: "미개봉 (새상품 · S급 단가)",
+            s: "S급 (최상급)",
             a: "A급 (깨끗)",
             b: "B급 (사용감)",
             c: "C급 (파손)",
@@ -4756,22 +4767,54 @@ async function initDeepWizard() {
             const errorMsg = document.getElementById('delivery-error-msg');
             if (errorMsg) errorMsg.style.display = 'none';
 
-            const needsAddress = ['courier', 'pickup'].includes(deliveryMethod);
-            if (needsAddress && !address) {
+            // --- 유효성 검사 강화 ---
+            const customerNameEl = document.getElementById('auth-name');
+            const customerPhoneEl = document.getElementById('auth-phone');
+            const customerName = customerNameEl ? customerNameEl.value.trim() : '';
+            const customerPhone = customerPhoneEl ? customerPhoneEl.value.trim() : '';
+
+            if (!customerName || customerName.length < 2) {
+                const errMsg = "신청자 이름을 올바르게 입력해주세요 (최소 2자).";
                 if (errorMsg) {
-                    errorMsg.innerText = "상세 주소가 입력되지 않았습니다.";
+                    errorMsg.innerText = errMsg;
                     errorMsg.style.display = 'block';
                 } else {
-                    alert("수거를 위해 주소를 입력해주세요.");
+                    alert(errMsg);
                 }
                 return;
             }
-            if (!accountNum) {
+
+            const rawPhoneDigits = customerPhone.replace(/[^0-9]/g, '');
+            if (rawPhoneDigits.length < 10 || rawPhoneDigits.length > 11) {
+                const errMsg = "올바른 연락처(10~11자리 숫자)를 입력해주세요.";
                 if (errorMsg) {
-                    errorMsg.innerText = "계좌 정보(은행명 및 계좌번호)가 입력되지 않았습니다.";
+                    errorMsg.innerText = errMsg;
                     errorMsg.style.display = 'block';
                 } else {
-                    alert("정산을 위해 계좌 정보를 입력해주세요.");
+                    alert(errMsg);
+                }
+                return;
+            }
+
+            const needsAddress = ['courier', 'pickup'].includes(deliveryMethod);
+            if (needsAddress && (!address || address.length < 5)) {
+                const errMsg = "수거를 위해 정확한 주소를 입력해주세요 (최소 5자 이상).";
+                if (errorMsg) {
+                    errorMsg.innerText = errMsg;
+                    errorMsg.style.display = 'block';
+                } else {
+                    alert(errMsg);
+                }
+                return;
+            }
+
+            if (!accountNum || accountNum.length < 5) {
+                const errMsg = "정산을 위해 올바른 계좌 정보를 입력해주세요 (최소 5자 이상).";
+                if (errorMsg) {
+                    errorMsg.innerText = errMsg;
+                    errorMsg.style.display = 'block';
+                } else {
+                    alert(errMsg);
                 }
                 return;
             }
@@ -4780,101 +4823,167 @@ async function initDeepWizard() {
             btnSubmitDelivery.disabled = true;
 
             try {
-                const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const { doc, updateDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                 const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                 const docRef = doc(db, "quotes", window.currentQuoteDocId);
                 
                 const updatePayload = {
+                    customerName: customerName,
+                    customerPhone: customerPhone,
                     customerAddress: needsAddress ? address : '편의점/직접 택배 발송',
+                    // 우편번호 저장 — 굿스플로 방문수거 자동예약에 필수 (카카오 주소검색이 채워둔 값)
+                    customerZipCode: needsAddress ? (document.getElementById('step8-customer-postcode')?.value || '') : '',
+                    // 상세주소 별도 저장 — 굿스플로 주소2 필드용 (비면 접수 거절됨)
+                    customerAddressDetail: needsAddress ? (document.getElementById('step8-customer-address-detail')?.value.trim() || '') : '',
                     deliveryMethod: deliveryMethod,
                     pickupDate: pickupDate,
                     customerAccount: account,
-                    customerMemo: memo
+                    customerMemo: memo,
+                    // 배송방법이 확정된(=신청이 실제로 완료된) 시각.
+                    // firebaseTimestamp는 본인인증 직후 문서가 처음 만들어진 때라,
+                    // 며칠 뒤에 마무리한 고객은 목록에서 옛 날짜로 묻혀 놓치기 쉽다.
+                    // 관리자 목록은 이 값이 있으면 우선 표시한다.
+                    submittedAt: serverTimestamp()
                 };
                 
                 await updateDoc(docRef, updatePayload);
 
-                // --- Google Sheet Trigger (최종 확정 시) ---
+                // ==========================================
+                // 1. 최우선 전환/분석 코드 실행 (독립 try/catch)
+                // ==========================================
+                
+                // [당근마켓 전환]
+                try {
+                    if (window.karrotPixel) {
+                        window.karrotPixel.track('SubmitApplication');
+                        console.log("✅ [btnSubmitDelivery] 당근 전환 성공");
+                    }
+                } catch(e) {
+                    console.error("당근 전환 실패:", e);
+                }
+
+                // [네이버 전환]
+                try {
+                    if (window.wcs) {
+                        if (!window.wcs_add) window.wcs_add = {};
+                        window.wcs_add["wa"] = "s_bfc3561d569";
+                        var _nasa = {};
+                        if (window.wcs.inflow) window.wcs.inflow("s_bfc3561d569");
+                        _nasa["cnv"] = wcs.cnv("1", "1");
+                        window.wcs_do(_nasa);
+                        console.log("✅ [btnSubmitDelivery] 네이버 전환 성공");
+                    }
+                } catch(e) {
+                    console.error("네이버 전환 실패:", e);
+                }
+
+                // [GA4 / Google Ads 전환]
+                try {
+                    const isIphone = currentQuote.brand && currentQuote.brand.toLowerCase() === 'apple';
+                    const isSamsung = currentQuote.brand && currentQuote.brand.toLowerCase() === 'samsung' || 
+                                      (currentQuote.model && currentQuote.model.model && currentQuote.model.model.includes('갤럭시'));
+                    
+                    if (typeof gtag === 'function') {
+                        if (isIphone) {
+                            gtag('event', 'conversion', {
+                                'send_to': 'AW-18055027970/QL8CCL-Ur68cEIK6p6FD',
+                                'value': currentQuote.finalPrice || 1.0,
+                                'currency': 'KRW',
+                                'transaction_id': window.currentQuoteDocId || ''
+                            });
+                            console.log("✅ [btnSubmitDelivery] GA/Google Ads 아이폰 전환 성공");
+                        } else if (isSamsung) {
+                            gtag('event', 'conversion', {
+                                'send_to': 'AW-18055027970/EYqmCNfnrq8cEIK6p6FD',
+                                'value': currentQuote.finalPrice || 1.0,
+                                'currency': 'KRW',
+                                'transaction_id': window.currentQuoteDocId || ''
+                            });
+                            console.log("✅ [btnSubmitDelivery] GA/Google Ads 삼성 전환 성공");
+                        }
+                    }
+                } catch(e) {
+                    console.error("GA/Google Ads 전환 실패:", e);
+                }
+
+                // [퍼널 추적]
+                try {
+                    window.trackFunnel("quote_complete");
+                    console.log("✅ [btnSubmitDelivery] 퍼널 분석 성공");
+                } catch(e) {
+                    console.error("퍼널 분석 실패:", e);
+                }
+
+                // ==========================================
+                // 2. 외부 서비스 및 알림 발송 (독립 try/catch, 실패해도 UI 완료)
+                // ==========================================
+
+                // [구글 시트 연동 + 텔레그램 알림]
                 try {
                     const snap = await getDoc(docRef);
                     if (snap.exists()) {
                         const fullData = snap.data();
                         
-                        // 구글 시트 및 Google Ads 전환 추적 (isIphone, isSamsung 로직 포함)
-                        const isIphone = fullData.brand && fullData.brand.toLowerCase() === 'apple';
-                        const isSamsung = fullData.brand && fullData.brand.toLowerCase() === 'samsung' || 
-                                          (fullData.model && fullData.model.includes('갤럭시'));
-                        
-                        if (isIphone) {
-                            if (typeof gtag === 'function') {
-                                gtag('event', 'conversion', {
-                                    'send_to': 'AW-18055027970/QL8CCL-Ur68cEIK6p6FD',
-                                    'value': fullData.price || fullData.expectedPrice || 1.0,
-                                    'currency': 'KRW',
-                                    'transaction_id': window.currentQuoteDocId || ''
-                                });
-                            }
-                        } else if (isSamsung) {
-                            if (typeof gtag === 'function') {
-                                gtag('event', 'conversion', {
-                                    'send_to': 'AW-18055027970/EYqmCNfnrq8cEIK6p6FD',
-                                    'value': fullData.price || fullData.expectedPrice || 1.0,
-                                    'currency': 'KRW',
-                                    'transaction_id': window.currentQuoteDocId || ''
-                                });
-                            }
-                        }
-                        
-                        const mapValueToKoLocal = (val) => {
-                            const dict = {
-                                'true': '미개봉', 'false': '개봉', 'yes': '있음/불량', 'no': '없음/정상',
-                                'scratch': '흠집', 'dent': '찍힘', 'break': '파손',
-                                'lcd_broken': '액정파손/LCD불량', 'lcd_backlight': '백라이트 불량',
-                                'burn_in_mild': '미세 잔상', 'burn_in_severe': '심한 잔상',
-                                'camera': '카메라 불량', 'wifi': '와이파이 불량', 'power': '전원 버튼 불량',
-                                'volume': '볼륨 버튼 불량', 'speaker': '스피커 불량', 'mic': '마이크 불량',
-                                'charge': '충전 불량', 'biometrics': '생체인식 불량', 'gps': 'GPS 불량',
-                                'network': '네트워크(유심) 불량', 'account': '계정 잠김(매입불가)'
+                        // 구글 시트 연동
+                        try {
+                            const mapValueToKoLocal = (val) => {
+                                const dict = {
+                                    'true': '미개봉', 'false': '개봉', 'yes': '있음/불량', 'no': '없음/정상',
+                                    'scratch': '흠집', 'dent': '찍힘', 'break': '파손',
+                                    'lcd_broken': '액정파손/LCD불량', 'lcd_backlight': '백라이트 불량',
+                                    'burn_in_mild': '미세 잔상', 'burn_in_severe': '심한 잔상',
+                                    'camera': '카메라 불량', 'wifi': '와이파이 불량', 'power': '전원 버튼 불량',
+                                    'volume': '볼륨 버튼 불량', 'speaker': '스피커 불량', 'mic': '마이크 불량',
+                                    'charge': '충전 불량', 'biometrics': '생체인식 불량', 'gps': 'GPS 불량',
+                                    'network': '네트워크(유심) 불량', 'account': '계정 잠김(매입불가)'
+                                };
+                                return dict[val] || val;
                             };
-                            return dict[val] || val;
-                        };
-                        const formatDefectsLocal = (defects) => {
-                            if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
-                            let parts = [];
-                            if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '미개봉' : '개봉'}`);
-                            if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
-                            if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
-                            for (const key in defects) {
-                                if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
-                                if (Array.isArray(defects[key]) && defects[key].length > 0) {
-                                    const mappedValues = defects[key].map(mapValueToKoLocal).join(', ');
-                                    let groupName = key;
-                                    if (key === 'func_defect') groupName = '기능';
-                                    else if (key === 'body_defect' || key === 'body') groupName = '외관';
-                                    parts.push(`${groupName}: ${mappedValues}`);
+                            const formatDefectsLocal = (defects) => {
+                                if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
+                                let parts = [];
+                                if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '미개봉' : '개봉'}`);
+                                if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
+                                if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
+                                for (const key in defects) {
+                                    if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
+                                    if (Array.isArray(defects[key]) && defects[key].length > 0) {
+                                        const mappedValues = defects[key].map(mapValueToKoLocal).join(', ');
+                                        let groupName = key;
+                                        if (key === 'func_defect') groupName = '기능';
+                                        else if (key === 'body_defect' || key === 'body') groupName = '외관';
+                                        parts.push(`${groupName}: ${mappedValues}`);
+                                    }
                                 }
-                            }
-                            return parts.join(', ');
-                        };
-                        
-                        const sheetPayload = {
-                            ...fullData,
-                            id: window.currentQuoteDocId || '',
-                            defects: formatDefectsLocal(fullData.defectsDetails)
-                        };
+                                return parts.join(', ');
+                            };
+                            
+                            const sheetPayload = {
+                                ...fullData,
+                                id: window.currentQuoteDocId || '',
+                                defects: formatDefectsLocal(fullData.defectsDetails)
+                            };
 
-                        fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify(sheetPayload)
-                        }).catch(e => console.error("Google Sheet Fetch Error:", e));
+                            fetch(GOOGLE_SCRIPT_URL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'text/plain' },
+                                body: JSON.stringify(sheetPayload)
+                            }).catch(e => console.error("Google Sheet Fetch Error:", e));
+                            console.log("✅ [btnSubmitDelivery] 구글 시트 데이터 전송 요청 완료");
+                        } catch(sheetErr) {
+                            console.error("구글 시트 연동 오류:", sheetErr);
+                        }
 
-                        // --- 배송 방법 확정 텔레그램 알림 (상세 내용 포함) ---
+                        // 텔레그램 알림 발송
                         try {
                             const trafficSourceMap = {
                                 'daangn': '당근마켓 🥕',
                                 'naver': '네이버 🟢',
+                                'naver_search': '네이버 검색 🔎',
+                                'naver_display': '네이버 디스플레이 🖼️',
                                 'google': '구글 🔵',
+                                'instagram': '인스타 📷',
+                                'tiktok': '틱톡 🎵',
                                 'direct': '직접 유입/기타 📱'
                             };
                             const trafficSource = trafficSourceMap[fullData.trafficSource || sessionStorage.getItem('traffic_source')] || '직접 유입/기타 📱';
@@ -4892,28 +5001,14 @@ async function initDeepWizard() {
                             
                             const mapValueToKo = (val) => {
                                 const dict = {
-                                    'true': '미개봉',
-                                    'false': '개봉',
-                                    'yes': '있음/불량',
-                                    'no': '없음/정상',
-                                    'scratch': '흠집',
-                                    'dent': '찍힘',
-                                    'break': '파손',
-                                    'lcd_broken': '액정파손/LCD불량',
-                                    'lcd_backlight': '백라이트 불량',
-                                    'burn_in_mild': '미세 잔상',
-                                    'burn_in_severe': '심한 잔상',
-                                    'camera': '카메라 불량',
-                                    'wifi': '와이파이 불량',
-                                    'power': '전원 버튼 불량',
-                                    'volume': '볼륨 버튼 불량',
-                                    'speaker': '스피커 불량',
-                                    'mic': '마이크 불량',
-                                    'charge': '충전 불량',
-                                    'biometrics': '생체인식 불량',
-                                    'gps': 'GPS 불량',
-                                    'network': '네트워크(유심) 불량',
-                                    'account': '계정 잠김(매입불가)'
+                                    'true': '미개봉', 'false': '개봉', 'yes': '있음/불량', 'no': '없음/정상',
+                                    'scratch': '흠집', 'dent': '찍힘', 'break': '파손',
+                                    'lcd_broken': '액정파손/LCD불량', 'lcd_backlight': '백라이트 불량',
+                                    'burn_in_mild': '미세 잔상', 'burn_in_severe': '심한 잔상',
+                                    'camera': '카메라 불량', 'wifi': '와이파이 불량', 'power': '전원 버튼 불량',
+                                    'volume': '볼륨 버튼 불량', 'speaker': '스피커 불량', 'mic': '마이크 불량',
+                                    'charge': '충전 불량', 'biometrics': '생체인식 불량', 'gps': 'GPS 불량',
+                                    'network': '네트워크(유심) 불량', 'account': '계정 잠김(매입불가)'
                                 };
                                 return dict[val] || val;
                             };
@@ -4965,55 +5060,57 @@ ${defectInfo}
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ message: tgMessage })
-                            }).catch(e => console.error("Telegram Error:", e));
-                        } catch (e) {
-                            console.error("Telegram send error inside submitAuthDelivery:", e);
+                            }).catch(e => console.error("Telegram Send Fetch Error:", e));
+                            console.log("✅ [btnSubmitDelivery] 텔레그램 메시지 전송 요청 완료");
+                        } catch(tgErr) {
+                            console.error("텔레그램 알림 생성 오류:", tgErr);
                         }
                     }
-                } catch(e) {
-                    console.error("Google Sheet Integration Error:", e);
+                } catch(snapErr) {
+                    console.error("Firestore getDoc(전체 조회) 오류:", snapErr);
                 }
-                
-                // --- Alimtalk Trigger ---
-                const customerPhone = document.getElementById('auth-phone').value.trim();
-                const customerName = document.getElementById('auth-name').value.trim();
-                if (window.triggerFrontendAlimtalk) {
-                    if (deliveryMethod === 'courier') {
-                        window.triggerFrontendAlimtalk("quote_courier", customerPhone, {
-                            name: customerName,
-                            pickupDate: pickupDate,
-                            address: updatePayload.customerAddress
-                        });
-                    } else if (deliveryMethod === 'cvs') {
-                        window.triggerFrontendAlimtalk("quote_cvs", customerPhone, {});
+
+                // [알림톡 발송]
+                try {
+                    if (window.triggerFrontendAlimtalk) {
+                        if (deliveryMethod === 'courier') {
+                            window.triggerFrontendAlimtalk("quote_courier", customerPhone, {
+                                name: customerName,
+                                pickupDate: pickupDate,
+                                address: needsAddress ? address : '편의점/직접 택배 발송'
+                            });
+                        } else if (deliveryMethod === 'cvs') {
+                            window.triggerFrontendAlimtalk("quote_cvs", customerPhone, {});
+                        }
                     }
+                } catch(alimtalkErr) {
+                    console.error("알림톡 발송 프로세스 오류:", alimtalkErr);
                 }
 
-                // --- NAVER 신청완료(lead) SCRIPT ---
-                if(window.wcs){
-                    if(!window.wcs_add) window.wcs_add = {};
-                    window.wcs_add["wa"] = "s_bfc3561d569";
-                    var _nasa={};
-                    if(window.wcs.inflow) window.wcs.inflow("s_bfc3561d569");
-                    _nasa["cnv"] = wcs.cnv("1","1");
-                    window.wcs_do(_nasa);
-                }
-
-                // UI Transition
+                // ==========================================
+                // 3. UI 완료 화면 처리
+                // ==========================================
                 document.getElementById('step8-delivery-section').style.display = 'none';
                 document.getElementById('step8-final-section').style.display = 'block';
                 
                 const instr = document.getElementById('success-instruction');
                 if (deliveryMethod === 'cvs') {
-                    instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-3263-5672</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
+                    instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-5173-5382</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                 } else {
                     instr.innerHTML = `<p><strong>📦 택배 방문수거 접수 완료</strong></p><p>선택하신 수거일자(${pickupDate})에 맞춰 박스를 포장해 문 앞에 두시면, 택배 기사님이 안전하게 수거해 갈 예정입니다.</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                 }
+
+                // 접수가 완전히 끝난 뒤 '발송 전 확인사항'(초기화·유심폐기) 안내를 띄운다.
+                // 저장/전환추적/알림톡 이후에 실행되므로 이 모달이 실패해도 접수에는 영향이 없다.
+                try {
+                    window.presaleMode = 'afterSubmit'; // 안내 전용 — 닫아도 재제출하지 않음
+                    if (window.openPresaleModal) setTimeout(() => window.openPresaleModal(), 400);
+                } catch (e) { console.error("발송 전 안내 모달 표시 실패:", e); }
                 
             } catch (e) {
-                console.error("2차 접수 업데이트 오류:", e);
-                alert("저장 중 오류가 발생했습니다.");
-                btnSubmitDelivery.textContent = '기기 발송 방법 확정';
+                console.error("2차 접수 업데이트 전체 프로세스 오류:", e);
+                alert("저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                btnSubmitDelivery.textContent = '접수 완료하기 ✅';
                 btnSubmitDelivery.disabled = false;
             }
         });
@@ -5065,6 +5162,7 @@ ${defectInfo}
         btnSubmit.disabled = true;
 
         const payload = {
+            status: '신청접수',
             timestamp: new Date().toLocaleString(),
             brand: currentQuote.brand,
             model: currentQuote.model.model,
@@ -5076,6 +5174,10 @@ ${defectInfo}
             customerName: name,
             customerPhone: phone,
             customerAddress: needsAddress ? address : '편의점/직접 택배 발송',
+            // 우편번호 저장 — 굿스플로 방문수거 자동예약에 필수 (카카오 주소검색이 채워둔 값)
+            customerZipCode: needsAddress ? (document.getElementById('step8-customer-postcode')?.value || '') : '',
+            // 상세주소 별도 저장 — 굿스플로는 주소1/주소2를 나눠 받으며 주소2가 비면 접수를 거절함
+            customerAddressDetail: needsAddress ? (document.getElementById('step8-customer-address-detail')?.value.trim() || '') : '',
             deliveryMethod: deliveryMethod,
             pickupDate: pickupDate,
             customerAccount: account,
@@ -5094,7 +5196,9 @@ ${defectInfo}
 
             firebaseTimestamp: serverTimestamp(),
 
-
+            // 배송방법 확정(=신청완료) 시각. 이 경로는 한 번에 제출되므로 접수시각과 동일하지만,
+            // 관리자 목록이 항상 submittedAt을 기준으로 정렬·표시할 수 있게 함께 기록한다.
+            submittedAt: serverTimestamp(),
 
             method: currentQuote.method || 'simple',
 
@@ -5111,92 +5215,115 @@ ${defectInfo}
 
 
         try {
-
-
-
             if (!auth.currentUser) {
-
-
-
-                await signInAnonymously(auth);
-
-
-
-            }
-
-
-
-            const docRef = await addDoc(collection(db, "quotes"), payload);
-            window.trackFunnel("quote_complete");
-
-            // --- Alimtalk Trigger (방문택배 or 직접발송) ---
-            if (window.triggerFrontendAlimtalk) {
-                if (payload.deliveryMethod === 'courier') {
-                    window.triggerFrontendAlimtalk("quote_courier", payload.customerPhone, {
-                        name: payload.customerName,
-                        pickupDate: payload.pickupDate,
-                        email: payload.userId !== 'anonymous' ? '인증된 계정' : '미인증',
-                        address: payload.customerAddress
-                    });
-                } else if (payload.deliveryMethod === 'cvs') {
-                    window.triggerFrontendAlimtalk("quote_cvs", payload.customerPhone, {});
+                try {
+                    await signInAnonymously(auth);
+                } catch (authErr) {
+                    console.error("signInAnonymously 실패:", authErr);
+                    throw authErr; // 인증 실패 시 신청 중단
                 }
             }
 
-            // --- NAVER 신청완료(lead) SCRIPT ---
-            if(window.wcs){
-                window.wcs_add = window.wcs_add || {};
-                window.wcs_add['wa'] = 's_bfc3561d569';
-                var _conv = {};
-                _conv.type = 'lead';
-                wcs.trans(_conv);
+            let docRef;
+            try {
+                docRef = await addDoc(collection(db, "quotes"), payload);
+                console.log("✅ 신청서 Firestore 저장 성공, docId:", docRef.id);
+                window.currentQuoteDocId = docRef.id; // currentQuoteDocId 전역 할당 누락 복구
+            } catch (addDocErr) {
+                console.error("addDoc(신청서 저장) 실패:", addDocErr);
+                throw addDocErr; // 저장 실패 시 신청 중단
             }
 
-            // --- DAANGN(Karrot) 신청완료 SCRIPT ---
-            if(window.karrotPixel) {
-                window.karrotPixel.track('SubmitApplication');
-            }
+            // === 신청서 저장 성공 이후: 전환/분석 코드 (각각 독립 try/catch) ===
 
-            // --- GA4 Event Tracking: Quote Completed ---
-            if (typeof gtag !== 'undefined') {
-
-                gtag('event', 'quote_completed', {
-
-                    'event_category': 'quote',
-
-                    'event_label': payload.modelName || 'Unknown Model',
-
-                    'value': payload.expectedPrice || 0
-                });
-
-                const isIphone = (payload.brand && payload.brand.toLowerCase() === 'apple') || 
-                                 (payload.series && payload.series.includes('아이폰')) ||
-                                 (payload.model && payload.model.includes('아이폰'));
-                const isSamsung = (payload.brand && payload.brand.toLowerCase() === 'samsung') || 
-                                  (payload.brand === '삼성') || 
-                                  (payload.series && payload.series.includes('갤럭시')) ||
-                                  (payload.model && payload.model.includes('갤럭시'));
-
-                // --- Google Ads Conversion Tracking (아이폰/삼성 개별) ---
-                if (isIphone) {
-                    console.log("🔥 [Google Ads] 아이폰 매입 신청 전환 발생 (QL8CCL-Ur68cEIK6p6FD)");
-                    gtag('event', 'conversion', {
-                        'send_to': 'AW-18055027970/QL8CCL-Ur68cEIK6p6FD',
-                        'value': payload.price || payload.expectedPrice || 1.0,
-                        'currency': 'KRW',
-                        'transaction_id': payload.orderId || ''
-                    });
-                } else if (isSamsung) {
-                    console.log("🔥 [Google Ads] 삼성(갤럭시) 매입 신청 전환 발생 (EYqmCNfnrq8cEIK6p6FD)");
-                    gtag('event', 'conversion', {
-                        'send_to': 'AW-18055027970/EYqmCNfnrq8cEIK6p6FD',
-                        'value': payload.price || payload.expectedPrice || 1.0,
-                        'currency': 'KRW',
-                        'transaction_id': payload.orderId || ''
-                    });
-                } else {
-                    console.log("⚠️ [Google Ads] 전환 트리거 스킵됨 - 알 수 없는 브랜드:", payload.brand);
+            // 1. 당근(Karrot) 전환 - 가장 먼저 호출
+            try {
+                if (window.karrotPixel) {
+                    window.karrotPixel.track('SubmitApplication');
+                    console.log("✅ karrotPixel.track('SubmitApplication') 호출 완료");
                 }
+            } catch(e) {
+                console.error('karrotPixel 전환 에러:', e);
+            }
+
+            // 2. 네이버 전환(lead)
+            try {
+                if (window.wcs) {
+                    window.wcs_add = window.wcs_add || {};
+                    window.wcs_add['wa'] = 's_bfc3561d569';
+                    var _conv = {};
+                    _conv.type = 'lead';
+                    wcs.trans(_conv);
+                    console.log("✅ 네이버 wcs.trans 호출 완료");
+                }
+            } catch(e) {
+                console.error('네이버 wcs 전환 에러:', e);
+            }
+
+            // 3. GA4 이벤트 + Google Ads 전환
+            try {
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'quote_completed', {
+                        'event_category': 'quote',
+                        'event_label': payload.modelName || 'Unknown Model',
+                        'value': payload.expectedPrice || 0
+                    });
+
+                    const isIphone = (payload.brand && payload.brand.toLowerCase() === 'apple') || 
+                                     (payload.series && payload.series.includes('아이폰')) ||
+                                     (payload.model && payload.model.includes('아이폰'));
+                    const isSamsung = (payload.brand && payload.brand.toLowerCase() === 'samsung') || 
+                                      (payload.brand === '삼성') || 
+                                      (payload.series && payload.series.includes('갤럭시')) ||
+                                      (payload.model && payload.model.includes('갤럭시'));
+
+                    if (isIphone) {
+                        console.log("🔥 [Google Ads] 아이폰 매입 신청 전환 발생 (QL8CCL-Ur68cEIK6p6FD)");
+                        gtag('event', 'conversion', {
+                            'send_to': 'AW-18055027970/QL8CCL-Ur68cEIK6p6FD',
+                            'value': payload.price || payload.expectedPrice || 1.0,
+                            'currency': 'KRW',
+                            'transaction_id': payload.orderId || ''
+                        });
+                    } else if (isSamsung) {
+                        console.log("🔥 [Google Ads] 삼성(갤럭시) 매입 신청 전환 발생 (EYqmCNfnrq8cEIK6p6FD)");
+                        gtag('event', 'conversion', {
+                            'send_to': 'AW-18055027970/EYqmCNfnrq8cEIK6p6FD',
+                            'value': payload.price || payload.expectedPrice || 1.0,
+                            'currency': 'KRW',
+                            'transaction_id': payload.orderId || ''
+                        });
+                    } else {
+                        console.log("⚠️ [Google Ads] 전환 트리거 스킵됨 - 알 수 없는 브랜드:", payload.brand);
+                    }
+                }
+            } catch(e) {
+                console.error('GA4/Google Ads 전환 에러:', e);
+            }
+
+            // 4. 퍼널 추적
+            try {
+                window.trackFunnel("quote_complete");
+            } catch(e) {
+                console.error('trackFunnel 에러:', e);
+            }
+
+            // 5. 알림톡 트리거 - 전환 완료 후 가장 마지막에 안전하게 실행
+            try {
+                if (window.triggerFrontendAlimtalk) {
+                    if (payload.deliveryMethod === 'courier') {
+                        window.triggerFrontendAlimtalk("quote_courier", payload.customerPhone, {
+                            name: payload.customerName,
+                            pickupDate: payload.pickupDate,
+                            email: payload.userId !== 'anonymous' ? '인증된 계정' : '미인증',
+                            address: payload.customerAddress
+                        });
+                    } else if (payload.deliveryMethod === 'cvs') {
+                        window.triggerFrontendAlimtalk("quote_cvs", payload.customerPhone, {});
+                    }
+                }
+            } catch(alimtalkErr) {
+                console.error("알림톡 발송 프로세스 오류:", alimtalkErr);
             }
 
             const mapValueToKoLocal = (val) => {
@@ -5256,6 +5383,8 @@ ${defectInfo}
             const trafficSourceMap = {
                 'daangn': '당근마켓 🥕',
                 'naver': '네이버 🟢',
+                'naver_search': '네이버 검색 🔎',
+                'naver_display': '네이버 디스플레이 🖼️',
                 'google': '구글 🔵',
                 'direct': '직접 유입/기타 📱'
             };
@@ -5413,7 +5542,7 @@ ${defectInfo}
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0; font-size: 0.95rem; line-height: 1.6;">
                     받는 이: <strong>쉐라폰</strong><br>
                     주소: <strong>부산시 부산진구 동천로 116 한신밴빌딩 1003호</strong><br>
-                    연락처: <span style="color: #666;">010-3263-5672</span>
+                    연락처: <span style="color: #666;">010-5173-5382</span>
                 </div>
 
 
@@ -5427,38 +5556,17 @@ ${defectInfo}
 
 
 
-
-
-
-            if (typeof gtag !== 'undefined') {
-
-
-
-                gtag('event', 'generate_lead', {
-
-
-
-                    'event_category': 'Quote',
-
-
-
-                    'event_label': `${payload.brand} ${payload.model}`,
-
-
-
-                    'value': payload.price,
-
-
-
-                    'currency': 'KRW'
-
-
-
-                });
-
-
-
-            }
+            // 6. GA4 generate_lead 이벤트
+            try {
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'generate_lead', {
+                        'event_category': 'Quote',
+                        'event_label': `${payload.brand} ${payload.model}`,
+                        'value': payload.price,
+                        'currency': 'KRW'
+                    });
+                }
+            } catch(e) { console.error('GA4 generate_lead 에러:', e); }
 
 
 
@@ -5542,19 +5650,9 @@ let allReviewsData = [];
 
 
 
-// Call initReviews if on reviews page
-
-
-
-if (document.getElementById('reviews-list')) {
-
-
-
-    initReviews();
-
-
-
-}
+// initReviews()는 메인 init(약 666줄)에서 1회만 호출됨.
+// 여기서 중복 호출하면 loadReviews가 두 번 돌아 allReviewsData가
+// 두 배로 쌓이는 레이스가 발생(PC 리뷰 두 개씩 표시 버그) → 제거함.
 
 
 
@@ -5762,7 +5860,7 @@ async function loadRecentReviewsForHomepage() {
 
 
 
-                    <span class="home-review-device">${deviceStr}</span>
+                    <span class="home-review-device">${escapeHtml(deviceStr)}</span>
 
 
 
@@ -5778,7 +5876,7 @@ async function loadRecentReviewsForHomepage() {
 
 
 
-                    <p class="home-review-text">"${safeText.replace(/\n/g, '<br>')}"</p>
+                    <p class="home-review-text">"${escapeHtml(safeText).replace(/\n/g, '<br>')}"</p>
 
 
 
@@ -5802,7 +5900,7 @@ async function loadRecentReviewsForHomepage() {
 
 
 
-                   <span class="home-review-author">${safeName}</span>
+                   <span class="home-review-author">${escapeHtml(safeName)}</span>
 
 
 
@@ -6159,7 +6257,11 @@ async function loadReviews() {
 
 
 
-        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(25)); // Show max 5 pages (5 reviews per page)
+        // 후기 목록 상한 — 화면은 페이지당 5개씩만 그리고(이미지도 그만큼만 로드) 페이지 번호도
+        // 현재 주변 3개만 노출하므로, 이 값을 키워도 렌더 부담은 늘지 않는다.
+        // 후기 문서는 텍스트+이미지URL로 가벼워 500개까지 불러와도 로딩에 무리 없다.
+        // (후기가 수천 개로 늘면 그때 '더 보기' 커서 방식으로 전환)
+        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(500));
 
 
 
@@ -6315,7 +6417,7 @@ async function renderReviews(page) {
 
 
 
-        const safeName = data.userName || '익명'; // Restore the missing variable
+        const safeName = escapeHtml(data.userName || '익명'); // Restore the missing variable
         let displayTitle = safeName; // Default to user name
 
 
@@ -6332,11 +6434,11 @@ async function renderReviews(page) {
 
 
 
-            if (data.deviceModel) parts.push(data.deviceModel);
+            if (data.deviceModel) parts.push(escapeHtml(data.deviceModel));
 
 
 
-            if (data.deviceStorage) parts.push(`(${data.deviceStorage})`);
+            if (data.deviceStorage) parts.push(`(${escapeHtml(data.deviceStorage)})`);
 
 
 
@@ -6356,7 +6458,7 @@ async function renderReviews(page) {
 
 
 
-                displayTitle = `${safeName} <span style="font-weight: normal; font-size: 0.85rem; color: #666;">| ${deviceStr} - ${data.transactionPrice}</span>`;
+                displayTitle = `${safeName} <span style="font-weight: normal; font-size: 0.85rem; color: #666;">| ${deviceStr} - ${escapeHtml(data.transactionPrice)}</span>`;
 
 
 
@@ -6545,7 +6647,7 @@ async function renderReviews(page) {
 
 
 
-                <div class="review-content">${(data.text || '').replace(/\n/g, '<br>')}</div>
+                <div class="review-content">${escapeHtml(data.text || '').replace(/\n/g, '<br>')}</div>
 
 
 
@@ -6768,39 +6870,53 @@ document.addEventListener('DOMContentLoaded', () => {
             '2025-10-09', '2025-12-25',
             '2026-01-01', '2026-02-15', '2026-02-16', '2026-02-17', '2026-02-18',
             '2026-03-01', '2026-03-02', '2026-05-05', '2026-05-24', '2026-05-25',
-            '2026-06-03', '2026-06-06', '2026-08-15',
+            '2026-06-03', '2026-06-06',
+            '2026-07-17', // 제헌절 — 2026년부터 공휴일로 재지정(2026-05-11 시행). 택배 집하 없음
+            '2026-08-15',
             '2026-09-24', '2026-09-25', '2026-09-26',
             '2026-10-03', '2026-10-09', '2026-12-25',
         ];
         
         const isWeekendOrHoliday = (date) => {
-            const day = date.getDay();
+            // ※ 아래 날짜 계산은 모두 '한국 시간 벽시계'를 UTC 게터로 읽는 방식.
+            //    고객 PC/폰의 시간대가 한국이 아니어도(해외 이용자) 동일한 날짜가 나오게 하기 위함.
+            const day = date.getUTCDay();
             if (day === 0) return true; // 일요일(0) 제외 (토요일은 수거 가능하므로 허용)
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return koreanHolidays.includes(`${yyyy}-${mm}-${dd}`);
+            return koreanHolidays.includes(date.toISOString().slice(0, 10));
         };
 
+        const KST_MS = 9 * 3600000;
+        const kstNow = new Date(Date.now() + KST_MS); // UTC 게터로 읽으면 한국 벽시계
+
+        // 늦은 밤 신청 대응 — 한진택배는 '당일 22시까지 접수분'만 다음날 수거로 잡힌다(실측 확인).
+        // 마감에 걸리면 우리가 예약 버튼을 누르기 전에 날짜가 넘어가므로, 여유를 두고 21:30부터
+        // 하루 더 뒤(이튿날)부터 제시한다.
+        //   예) 7/20 21:40 신청 → 가장 빠른 수거일 7/22
+        const CUTOFF_MIN = 21 * 60 + 30; // 21:30 (한국시간) — 한진 익일수거 마감이 22시라 여유를 두고 앞당김
+        const kstMinutes = kstNow.getUTCHours() * 60 + kstNow.getUTCMinutes();
+        const startOffset = kstMinutes >= CUTOFF_MIN ? 2 : 1;
+
         const validDates = [];
-        let currentDate = new Date();
-        
-        // 최소 5일치 날짜를 채움 (일요일/공휴일 및 6/3 제외, 토요일은 수거 가능하므로 포함)
+        // 한국 기준 오늘 자정에서 출발
+        const cursor = new Date(Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate()));
+        cursor.setUTCDate(cursor.getUTCDate() + startOffset - 1); // 아래 루프가 먼저 +1 하므로 1을 뺌
+
+        // 최소 5일치 날짜를 채움 (일요일/공휴일 제외, 토요일은 수거 가능하므로 포함)
         while (validDates.length < 5) {
-            currentDate.setDate(currentDate.getDate() + 1);
-            if (!isWeekendOrHoliday(currentDate)) {
-                validDates.push(new Date(currentDate));
+            cursor.setUTCDate(cursor.getUTCDate() + 1);
+            if (!isWeekendOrHoliday(cursor)) {
+                validDates.push(new Date(cursor));
             }
         }
-        
+
         const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
         const formatOption = (date) => {
-            const m = (date.getMonth() + 1).toString().padStart(2, '0');
-            const d = date.getDate().toString().padStart(2, '0');
-            const dayName = dayNames[date.getDay()];
+            const m = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+            const d = date.getUTCDate().toString().padStart(2, '0');
+            const dayName = dayNames[date.getUTCDay()];
             return `<option value="${m}/${d}">${m}/${d} (${dayName})</option>`;
         };
-        
+
         selectEl.innerHTML = validDates.map(formatOption).join('');
     };
 
@@ -6817,12 +6933,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const courierBlock = document.getElementById('method-courier-date');
             const cvsBlock = document.getElementById('method-cvs-info');
             
+            // 수거 주소는 방문수거일 때만 필요 — 개인발송(편의점/우체국) 고객에겐 숨긴다.
+            // (직접 보내는데 주소를 요구하면 납득이 안 되고 이탈 요인이 됨)
+            const addrLabel = document.getElementById('step8-address-label');
+            const addrSection = document.getElementById('step8-address-section');
+
             if (method === 'courier') {
                 if(courierBlock) courierBlock.style.display = 'block';
                 if(cvsBlock) cvsBlock.style.display = 'none';
+                if(addrLabel) addrLabel.style.display = 'flex';
+                if(addrSection) addrSection.style.display = 'block';
             } else if (method === 'cvs') {
                 if(courierBlock) courierBlock.style.display = 'none';
                 if(cvsBlock) cvsBlock.style.display = 'block';
+                if(addrLabel) addrLabel.style.display = 'none';
+                if(addrSection) addrSection.style.display = 'none';
             }
         });
     });
@@ -6834,6 +6959,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+// 리뷰 사진 업로드 전 자동 압축 (긴 변 1280px, JPEG 80%). 실패 시 원본 그대로 업로드.
+async function compressImage(file, maxDim = 1280, quality = 0.8) {
+    if (!file || !file.type || !file.type.startsWith('image/')) return file;
+    try {
+        const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+        const img = await new Promise((resolve, reject) => {
+            const im = new Image();
+            im.onload = () => resolve(im);
+            im.onerror = reject;
+            im.src = dataUrl;
+        });
+        const longEdge = Math.max(img.width, img.height);
+        const scale = Math.min(1, maxDim / longEdge);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+        if (!blob || blob.size >= file.size) return file; // 압축 이득 없으면 원본 유지
+        return blob;
+    } catch (e) {
+        console.warn('리뷰 이미지 압축 실패, 원본 업로드:', e);
+        return file;
+    }
+}
 
 async function submitReview() {
 
@@ -7023,7 +7180,10 @@ async function submitReview() {
 
 
 
-                const storageRef = ref(storage, `reviews/${Date.now()}_${file.name}`);
+                const storageInstance = await getStorageLazy();
+                const compressedFile = await compressImage(file);
+                const uploadName = (compressedFile !== file) ? `${(file.name || 'review').replace(/\.[^.]+$/, '')}.jpg` : file.name;
+                const storageRef = ref(storageInstance, `reviews/${Date.now()}_${uploadName}`);
 
 
 
@@ -7035,7 +7195,7 @@ async function submitReview() {
 
 
 
-                const uploadTask = await uploadBytesResumable(storageRef, file);
+                const uploadTask = await uploadBytesResumable(storageRef, compressedFile);
 
 
 
@@ -7828,7 +7988,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             document.getElementById('presale-step-2').style.display = 'none';
             document.getElementById('p-btn-prev').style.display = 'none';
-            document.getElementById('p-btn-next').textContent = '동의 후 다음';
+            document.getElementById('p-btn-next').textContent = (window.presaleMode === 'afterSubmit') ? '다음' : '동의 후 다음';
             document.getElementById('p-dot-1').classList.add('active');
             document.getElementById('p-dot-2').classList.remove('active');
         } else {
@@ -7836,7 +7996,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('presale-step-1-samsung').style.display = 'none';
             document.getElementById('presale-step-2').style.display = 'block';
             document.getElementById('p-btn-prev').style.display = 'block';
-            document.getElementById('p-btn-next').textContent = '동의 후 최종 신청완료';
+            document.getElementById('p-btn-next').textContent = (window.presaleMode === 'afterSubmit') ? '확인했습니다' : '동의 후 최종 신청완료';
             document.getElementById('p-dot-1').classList.remove('active');
             document.getElementById('p-dot-2').classList.add('active');
         }
@@ -7844,11 +8004,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.presaleGoNext = () => {
         if (document.getElementById('presale-step-2').style.display === 'block') {
+            // 접수 완료 후 '안내' 용도로 띄우므로 여기서 다시 제출하지 않는다.
+            // (예전엔 이 모달이 제출 직전에 떴기 때문에 executeFinalSubmit을 호출했으나,
+            //  지금은 이미 저장·전환추적·알림톡이 끝난 뒤라 재호출하면 중복 접수가 발생함)
             window.closePresaleModal();
-            if (window.executeFinalSubmit) {
-                window.executeFinalSubmit(); // Trigger final submission!
-            } else {
-                alert('제출 처리 함수에 접근할 수 없습니다.');
+            if (window.presaleMode === 'beforeSubmit' && window.executeFinalSubmit) {
+                window.executeFinalSubmit();
             }
         } else {
             window.presaleShowStep(2);
@@ -7915,7 +8076,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (docSnap.exists()) {
             const data = docSnap.data();
+
+            // 노출기간 검사 — startAt/endAt은 +09:00이 명시된 절대시각이라
+            // 고객이 어느 시간대에 있든 한국시간 기준으로 동일하게 판정된다.
+            const nowMs = Date.now();
+            const startMs = data.startAt ? new Date(data.startAt).getTime() : null;
+            const endMs = data.endAt ? new Date(data.endAt).getTime() : null;
+            const notStarted = startMs && !isNaN(startMs) && nowMs < startMs;
+            const alreadyEnded = endMs && !isNaN(endMs) && nowMs > endMs;
+            if (notStarted || alreadyEnded) return; // 기간 밖이면 아예 표시하지 않음
+
             if (data.isActive) {
+                // 남은 시간 타이머 (종료일시가 있고 표시 옵션이 켜진 경우)
+                const cdWrap = document.getElementById('global-popup-countdown');
+                if (cdWrap) {
+                    if (data.showCountdown && endMs && !isNaN(endMs)) {
+                        cdWrap.style.display = 'flex';
+                        const pad = (n) => (n < 10 ? '0' + n : '' + n);
+                        const setCd = () => {
+                            const left = Math.max(0, endMs - Date.now());
+                            const d = document.getElementById('gp-cd-d');
+                            const h = document.getElementById('gp-cd-h');
+                            const m = document.getElementById('gp-cd-m');
+                            const s = document.getElementById('gp-cd-s');
+                            if (d) d.textContent = Math.floor(left / 86400000);
+                            if (h) h.textContent = pad(Math.floor(left % 86400000 / 3600000));
+                            if (m) m.textContent = pad(Math.floor(left % 3600000 / 60000));
+                            if (s) s.textContent = pad(Math.floor(left % 60000 / 1000));
+                            if (left <= 0 && window._gpCdTimer) clearInterval(window._gpCdTimer);
+                        };
+                        setCd();
+                        if (window._gpCdTimer) clearInterval(window._gpCdTimer);
+                        window._gpCdTimer = setInterval(setCd, 1000);
+                    } else {
+                        cdWrap.style.display = 'none';
+                    }
+                }
                 const titleEl = document.getElementById('global-popup-title');
                 const contentEl = document.getElementById('global-popup-content');
                 const linkBtn = document.getElementById('global-popup-link-btn');

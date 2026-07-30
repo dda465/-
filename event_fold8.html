@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- 파비콘 -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>갤럭시 Z 폴드8 · 플립8 출시 기념 매입 이벤트 - 쉐라폰</title>
+    <meta name="description" content="갤럭시 Z 폴드8·플립8 출시 기념! 쓰던 폰 매입가에 따라 최대 3만원을 추가로 드립니다. 2026.08.04 ~ 09.07">
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="styles.css?v=1785403500">
+
+    <style>
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 500;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+        }
+        @font-face {
+            font-family: 'GmarketSans';
+            font-weight: 700;
+            font-style: normal;
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+        }
+
+        :root {
+            --primary-blue: #2563EB;
+            --samsung-blue: #1428A0;
+            --dark-navy: #0F172A;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #F8FAFC;
+            color: #334155;
+            padding-top: 72px;
+            overflow-x: hidden;
+        }
+
+        /* 네비게이션 - PC 가로 정렬 강제 */
+        .navbar .container {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100%;
+        }
+
+        .event-landing-page {
+            max-width: 1000px;
+            margin: 20px auto 120px;
+            padding: 0 20px;
+        }
+
+        /* ===== 히어로 ===== */
+        .fold-hero-banner {
+            position: relative;
+            background: linear-gradient(135deg, #0a192f 0%, #172a45 50%, #1e3a8a 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 50px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            padding: 50px 40px;
+            color: white;
+            min-height: 400px;
+        }
+
+        .fold-hero-banner::after {
+            content: '';
+            position: absolute;
+            right: -80px;
+            top: -80px;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(96,165,250,0.25) 0%, rgba(96,165,250,0) 70%);
+            pointer-events: none;
+        }
+
+        .hero-content { flex: 1; z-index: 10; }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #60a5fa;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-title {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1.3;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .hero-title .highlight { color: #fbbf24; }
+
+        .hero-sub {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            word-break: keep-all;
+        }
+
+        .hero-period {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .hero-image-wrapper {
+            width: 340px;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-image-wrapper svg {
+            width: 100%;
+            max-width: 290px;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* ===== 섹션 타이틀 ===== */
+        .section-title {
+            text-align: center;
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 2.1rem;
+            color: var(--dark-navy);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title span { color: var(--primary-blue); }
+
+        .section-desc {
+            text-align: center;
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 40px;
+            word-break: keep-all;
+        }
+
+        /* ===== 구간별 혜택 ===== */
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto 30px;
+        }
+
+        .tier-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px 22px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-blue);
+        }
+
+        .tier-card.best {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 14px 30px rgba(245, 158, 11, 0.18);
+        }
+
+        .tier-flag {
+            position: absolute;
+            top: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f59e0b;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .tier-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .tier-range {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--dark-navy);
+            margin-bottom: 18px;
+            word-break: keep-all;
+        }
+
+        .tier-arrow {
+            color: #cbd5e1;
+            font-size: 1.4rem;
+            line-height: 1;
+            margin-bottom: 14px;
+        }
+
+        .tier-bonus {
+            font-family: 'GmarketSans', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #e11d48;
+            background: #ffe4e6;
+            padding: 12px 10px;
+            border-radius: 12px;
+        }
+
+        .tier-card.best .tier-bonus {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        .tier-note {
+            text-align: center;
+            font-size: 0.88rem;
+            color: #94a3b8;
+            margin-bottom: 60px;
+        }
+
+        /* ===== 이용 순서 ===== */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            max-width: 900px;
+            margin: 0 auto 60px;
+        }
+
+        .step-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 26px 20px;
+            text-align: center;
+        }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+
+        .step-card h4 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+            color: var(--dark-navy);
+            font-weight: 700;
+        }
+
+        .step-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        /* ===== 유의사항 ===== */
+        .notice-box {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .notice-box h4 {
+            margin: 0 0 12px;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1rem;
+        }
+
+        .notice-box ul {
+            margin: 0;
+            padding-left: 20px;
+            line-height: 1.7;
+        }
+
+        .notice-box li { margin-bottom: 6px; word-break: keep-all; }
+
+        /* ===== 하단 고정 CTA ===== */
+        .bottom-sticky-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #e2e8f0;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+        }
+
+        .bottom-cta-btn {
+            background: var(--samsung-blue);
+            color: white;
+            text-decoration: none;
+            padding: 16px 30px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(20, 40, 160, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .bottom-cta-btn:hover {
+            background: #0f1e80;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(20, 40, 160, 0.4);
+        }
+
+        /* ===== 모바일 ===== */
+        @media (max-width: 768px) {
+            .event-landing-page { margin-top: 10px; padding: 0 15px; }
+
+            .fold-hero-banner {
+                flex-direction: column;
+                padding: 30px 20px;
+                text-align: center;
+                border-radius: 16px;
+                min-height: 0;
+            }
+
+            .hero-title { font-size: 1.8rem; }
+            .hero-sub { font-size: 0.95rem; }
+
+            .hero-image-wrapper { width: 100%; margin-top: 24px; }
+            .hero-image-wrapper svg { max-width: 210px; }
+
+            .section-title { font-size: 1.5rem; }
+            .section-desc { font-size: 0.92rem; margin-bottom: 25px; }
+
+            .tier-grid { grid-template-columns: 1fr; gap: 22px; margin-bottom: 18px; }
+            .tier-card { padding: 24px 20px; }
+            .tier-card.best { margin-top: 6px; }
+
+            .step-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 40px; }
+            .tier-note { margin-bottom: 40px; }
+
+            .bottom-cta-btn { font-size: 1rem; padding: 14px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="sr_logo.webp" alt="SR 로고" style="height: 36px; width: 36px; border-radius: 50%;">
+                <span style="font-family: 'Pretendard', sans-serif; font-weight: 800; font-size: 22px; color: #1E3A8A; margin-left: 8px;">쉐라폰</span>
+            </a>
+            <div>
+                <a href="quote.html" style="font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:6px 14px; border-radius:20px; text-decoration:none; font-size: 0.9rem;">판매하기</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="event-landing-page">
+
+        <!-- 히어로 -->
+        <div class="fold-hero-banner">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="ri-smartphone-line"></i>
+                    갤럭시 Z 폴드8 · 플립8 출시 기념
+                </div>
+                <div class="hero-title">
+                    새 폰은 <span style="color:#60a5fa;">폴더블</span>로,<br>
+                    헌 폰은 <span class="highlight">쉐라폰</span>으로!
+                </div>
+                <div class="hero-sub">
+                    쓰시던 폰, 지금이 가장 좋은 시기입니다.<br>
+                    매입가에 따라 <strong style="color:#fbbf24;">최대 3만원</strong>을 추가로 더 드립니다.
+                </div>
+                <div class="hero-period">
+                    <i class="ri-calendar-event-line"></i> 이벤트 기간: 2026.08.04 ~ 09.07
+                </div>
+            </div>
+            <div class="hero-image-wrapper">
+                <!-- 폴더블 일러스트 (펼친 폰 + 접힌 폰) -->
+                <svg viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="폴더블 스마트폰 일러스트">
+                    <defs>
+                        <linearGradient id="screenA" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6"/>
+                            <stop offset="55%" stop-color="#6366f1"/>
+                            <stop offset="100%" stop-color="#8b5cf6"/>
+                        </linearGradient>
+                        <linearGradient id="screenB" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#0ea5e9"/>
+                            <stop offset="100%" stop-color="#2563eb"/>
+                        </linearGradient>
+                        <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#e2e8f0"/>
+                            <stop offset="100%" stop-color="#94a3b8"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- 펼친 폴드 -->
+                    <g transform="translate(24,26)">
+                        <rect x="0" y="0" width="176" height="176" rx="14" fill="url(#frame)"/>
+                        <rect x="5" y="5" width="166" height="166" rx="11" fill="#0f172a"/>
+                        <rect x="9" y="9" width="158" height="158" rx="9" fill="url(#screenA)" opacity="0.92"/>
+                        <!-- 힌지 -->
+                        <rect x="86" y="5" width="4" height="166" fill="rgba(255,255,255,0.22)"/>
+                        <!-- 펀치홀 -->
+                        <circle cx="140" cy="24" r="4.5" fill="#0f172a" opacity="0.75"/>
+                        <!-- 화면 위젯 -->
+                        <rect x="22" y="34" width="52" height="52" rx="10" fill="rgba(255,255,255,0.28)"/>
+                        <rect x="22" y="96" width="52" height="10" rx="5" fill="rgba(255,255,255,0.35)"/>
+                        <rect x="22" y="112" width="34" height="10" rx="5" fill="rgba(255,255,255,0.22)"/>
+                        <rect x="102" y="60" width="46" height="10" rx="5" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="102" y="78" width="32" height="10" rx="5" fill="rgba(255,255,255,0.2)"/>
+                        <rect x="102" y="112" width="46" height="34" rx="8" fill="rgba(255,255,255,0.16)"/>
+                    </g>
+
+                    <!-- 접힌 플립 -->
+                    <g transform="translate(176,120)">
+                        <rect x="0" y="0" width="96" height="104" rx="16" fill="url(#frame)"/>
+                        <rect x="4" y="4" width="88" height="96" rx="13" fill="#0f172a"/>
+                        <rect x="8" y="8" width="80" height="88" rx="11" fill="url(#screenB)" opacity="0.9"/>
+                        <!-- 카메라 -->
+                        <circle cx="26" cy="26" r="8" fill="#0f172a" opacity="0.8"/>
+                        <circle cx="26" cy="26" r="3.4" fill="#60a5fa" opacity="0.9"/>
+                        <circle cx="48" cy="26" r="8" fill="#0f172a" opacity="0.8"/>
+                        <circle cx="48" cy="26" r="3.4" fill="#60a5fa" opacity="0.9"/>
+                        <!-- 커버 화면 텍스트 -->
+                        <rect x="18" y="52" width="60" height="9" rx="4.5" fill="rgba(255,255,255,0.4)"/>
+                        <rect x="18" y="68" width="38" height="9" rx="4.5" fill="rgba(255,255,255,0.25)"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 구간별 혜택 -->
+        <h2 class="section-title">매입가가 높을수록 <span>더 드립니다</span></h2>
+        <p class="section-desc">
+            검수 완료 후 확정된 매입가 구간에 따라 추가 금액이 자동으로 합산됩니다.
+        </p>
+
+        <div class="tier-grid">
+            <div class="tier-card">
+                <div class="tier-label">BASIC</div>
+                <div class="tier-range">매입가<br>30만원 미만</div>
+                <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
+                <div class="tier-bonus">+10,000원</div>
+            </div>
+
+            <div class="tier-card">
+                <div class="tier-label">PLUS</div>
+                <div class="tier-range">매입가<br>30만원 이상</div>
+                <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
+                <div class="tier-bonus">+20,000원</div>
+            </div>
+
+            <div class="tier-card best">
+                <div class="tier-flag">가장 많이 받는 구간</div>
+                <div class="tier-label">MAX</div>
+                <div class="tier-range">매입가<br>50만원 이상</div>
+                <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
+                <div class="tier-bonus">+30,000원</div>
+            </div>
+        </div>
+
+        <p class="tier-note">
+            기종 제한 없이 아이폰 · 갤럭시 등 모든 스마트폰에 적용됩니다.
+        </p>
+
+        <!-- 이용 순서 -->
+        <h2 class="section-title">진행은 <span>3단계</span>면 끝납니다</h2>
+        <p class="section-desc">별도 신청이나 쿠폰 입력 없이 자동으로 적용됩니다.</p>
+
+        <div class="step-grid">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h4>시세 조회 후 접수</h4>
+                <p>내 기종을 선택하고 상태를 입력하면 예상 매입가가 바로 나옵니다.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h4>무료 방문수거</h4>
+                <p>원하시는 날짜에 택배기사가 방문합니다. 택배비는 쉐라폰이 부담합니다.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h4>검수 후 당일 입금</h4>
+                <p>검수가 끝나면 매입대금에 이벤트 추가금을 합산해 입금해 드립니다.</p>
+            </div>
+        </div>
+
+        <!-- 유의사항 -->
+        <div class="notice-box">
+            <h4><i class="ri-information-line"></i> 이벤트 유의사항</h4>
+            <ul>
+                <li>추가 금액 구간은 <strong>검수 완료 후 확정된 최종 매입가</strong>를 기준으로 적용됩니다. 홈페이지에서 조회되는 예상 매입가와 최종 매입가는 기기 상태에 따라 달라질 수 있습니다.</li>
+                <li>정상 작동하는 <strong>모든 스마트폰 기종</strong>에 적용됩니다. (단, 매입 단가 0원인 폐폰 및 매입 불가 판정 기기는 제외)</li>
+                <li>당근마켓 전용 채널 이벤트 등 <strong>타 혜택과 중복 적용이 불가</strong>합니다.</li>
+                <li>추가 금액은 별도 신청 없이 최종 매입 대금 송금 시 함께 합산하여 지급됩니다.</li>
+                <li>매입 대금 및 추가 금액은 도난 · 분실폰 방지를 위해 반드시 <strong>접수자 본인 명의의 계좌</strong>로만 입금 가능합니다.</li>
+                <li>이벤트 기간 내 홈페이지를 통해 <strong>매입 접수가 완료된 건</strong>에 한하여 적용되며, 본 이벤트는 당사 사정에 따라 조기 종료될 수 있습니다.</li>
+                <li>본 이벤트는 쉐라폰이 자체적으로 진행하는 행사로, 삼성전자 및 이동통신사와 무관합니다.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- 하단 고정 CTA -->
+    <div class="bottom-sticky-cta">
+        <a href="quote.html" class="bottom-cta-btn">
+            <i class="ri-search-line"></i>
+            내 폰 시세 조회하고 최대 3만원 더 받기
+        </a>
+    </div>
+
+    <script type="module" src="script.js?v=1785403500"></script>
+
+</body>
+</html>

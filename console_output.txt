@@ -1,12 +1,16 @@
+[CONSOLE] log: Traffic source initialized: direct
 [CONSOLE] log: Fetching products...
 [CONSOLE] log: Navbar: No user detected
-[CONSOLE] log: Loaded 83 products
+[CONSOLE] log: Loaded 130 products
 [CONSOLE] log: Attaching wizard listeners...
-[CONSOLE] log: Found delivery buttons: 2
+[CONSOLE] log: Found delivery buttons: 4
+[CONSOLE] log: Funnel tracked: quote_start Source: direct for 2026-06-11
 [CONSOLE] error: Failed to load resource: the server responded with a status of 401 ()
+[CONSOLE] log: Navigating to step: grade-list
+[CONSOLE] log: Funnel tracked: quote_model Source: direct for 2026-06-11
 [EVAL STATE]: {
-  "wizardStep1": "",
-  "wizardGradeList": "",
+  "wizardStep1": "none",
+  "wizardGradeList": "block",
   "allProductsLength": "undefined",
-  "currentQuote": "undefined"
+  "currentQuote": "{\"brand\":\"apple\",\"series\":\"아이폰 15 시리즈\",\"model\":{\"id\":\"아이폰-15\",\"lastUpdated\":{\"seconds\":1780640117,\"nanoseconds\":287000000},\"storageOptions\":[{\"priceAdjustment\":0,\"size\":\"128GB\"},{\"priceAdjustment\":60000,\"size\":\"256GB\"},{\"priceAdjustment\":100000,\"size\":\"512GB\"}],\"basePrice\":642000,\"brand\":\"apple\",\"prices\":{\"a\":579000,\"s\":642000,\"c\":366000,\"b\":490000,\"d\":244000,\"sealed\":0},\"series\":\"아이폰 15 시리즈\",\"model\":\"아이폰 15 \"},\"storage\":{\"priceAdjustment\":0,\"size\":\"128GB\"},\"grade\":\"s\",\"defects\":[],\"method\":\"simple\",\"finalPrice\":642000}"
 }
