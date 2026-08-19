@@ -25,7 +25,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <!-- Main Style Sheet Link -->
-    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link rel="stylesheet" href="styles.css?v=1785539000">
     <link rel="stylesheet" href="event-shared.css?v=1783305600">
     
     <style>
@@ -486,9 +486,9 @@
                 <a href="quote.html" style="font-size:0.8rem; font-weight:700; color:#2563EB; border: 1px solid #2563EB; padding:3px 8px; border-radius:16px; margin-right:6px; white-space:nowrap; flex-shrink:0; min-width:max-content;">판매하기</a>
                 <a href="login.html" id="mobile-auth-link" style="font-size:0.8rem; font-weight:700; color:#1e293b; border: 1px solid #e2e8f0; padding:3px 8px; border-radius:16px; white-space:nowrap; flex-shrink:0; min-width:max-content;">로그인</a>
                 <a href="admin.html" id="mobile-admin-btn" style="font-size:1.4rem; color:#e11d48; display:none; margin-left:6px;"><i class="ri-dashboard-2-line"></i></a>
-                <button onclick="ChannelIO('show')" style="background:none; border:none; font-size:1.6rem; color:#1e293b; cursor:pointer; padding:0; display:flex; align-items:center; margin-left:6px;">
+                <a href="https://pf.kakao.com/_TEvMK/chat" target="_blank" rel="noopener" aria-label="카카오톡 상담" style="background:none; border:none; font-size:1.6rem; color:#1e293b; cursor:pointer; padding:0; display:flex; align-items:center; margin-left:6px;" text-decoration:none;">
                     <i class="ri-customer-service-2-line"></i>
-                </button>
+                </a>
             </div>
 
             <div class="nav-links pc-only">
@@ -641,7 +641,7 @@
             <i class="ri-chat-quote-line"></i>
             <span>이용후기</span>
         </a>
-        <a href="#" class="nav-item" onclick="ChannelIO('show'); return false;">
+        <a href="https://pf.kakao.com/_TEvMK/chat" target="_blank" rel="noopener" class="nav-item">
             <i class="ri-headphone-line"></i>
             <span>고객센터</span>
         </a>
@@ -649,13 +649,20 @@
 
     <!-- ===== FOOTER ===== -->
     <footer style="background: #1e293b; color: rgba(255,255,255,0.6); padding: 40px 20px; text-align: center; font-size: 0.8rem; line-height: 1.6;">
+        <!--
+            2026-08-18 — 이 자리에 **다른 회사의 사업자 정보**가 들어가 있었다.
+            (대표자명·사업자등록번호·통신판매업 신고번호·주소·연락처 전부 남의 것)
+            페이지를 만들 때 참고한 곳의 푸터가 그대로 남은 것으로 보인다.
+            남의 통신판매업 신고번호를 우리 사이트에 게시하는 건 문제가 되므로
+            faq.html 푸터와 **같은 값**으로 바로잡았다. 사업자 정보를 고칠 땐 여기도 같이 볼 것.
+        -->
         <div style="margin-bottom: 12px;">
-            <strong style="color: #fff;">쉐라폰</strong> | 대표: 안재현
+            <strong style="color: #fff;">쉐라폰</strong> | 상호명: 에스알커머스 | 대표자명: 박현용
         </div>
         <div>
-            사업자등록번호: 529-22-02538 | 통신판매업: 제2025-인천미추홀-0522호<br>
-            주소: 인천광역시 미추홀구 경인로 229, 8층 802호<br>
-            이메일: cs@sharaphone.com | 고객센터: 070-8098-0684
+            사업자등록번호: 331-77-00487<br>
+            사업장 주소: <span class="dyn-address">부산시 동천로 116 한신밴빌딩 1003호</span><br>
+            이메일: guffyd321@naver.com | 대표 연락처: 070-8680-9275
         </div>
         <div style="margin-top: 16px; color: rgba(255,255,255,0.3);">
             © 2026 쉐라폰. All rights reserved.
@@ -716,7 +723,7 @@
         });
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script type="module" src="script.js?v=1785403500"></script>
+    <script type="module" src="script.js?v=1787021722"></script>
 
 </body>
 </html>

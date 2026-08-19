@@ -35,7 +35,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>개별 택배 발송 유의사항 - 쉐라폰</title>
-    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link rel="stylesheet" href="styles.css?v=1785539000">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -89,7 +89,14 @@
             <h2>4. 박스 표기 사항</h2>
             <p>박스 겉면에 크게 <strong>"쉐라폰 검수건"</strong>이라고 적어주시면 도착 시 더 신속한 검수 처리가 가능합니다.</p>
 
-            <h2>5. 택배 발송 주소 안내</h2>
+            <h2>5. 접수 시 물품가액 입력</h2>
+            <p>편의점·우체국에서 접수하실 때 <strong>물품가액은 50만원 미만</strong>으로 적어주세요.</p>
+            <div style="background: #FFF7ED; border: 1px solid #FDBA74; padding: 15px; border-radius: 8px; margin-top: 10px; line-height: 1.7; color: #7C2D12;">
+                물품가액을 높게 적으면 <strong>배송비가 크게 올라갑니다.</strong> 실제로 7,000원이 넘게 나온 경우도 있습니다.<br>
+                착불로 보내주시면 배송비는 쉐라폰이 부담하므로, 가액을 낮게 적으셔도 고객님께 불이익은 없습니다.
+            </div>
+
+            <h2>6. 택배 발송 주소 안내</h2>
             <p>원하시는 편의점이나 우체국 택배를 이용하여 아래 주소로 안전하게 발송해 주세요.</p>
             <div style="background: #f8f9fa; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-top: 10px;">
                 <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; color: #333;">
@@ -151,7 +158,7 @@
                                 상담/주문 이메일: <span id="dyn-email">guffyd321@naver.com</span><br>
                         대표 연락처: <span id="dyn-phone">070-8680-9275</span><br><br>
                                 <strong>CS운영시간</strong><br>
-                                연중무휴 24시간 채널톡으로 상담가능
+                                연중무휴 24시간 카카오톡 채널로 상담가능
                             </p>
                         </div>
                         <div class="footer-col">
@@ -171,46 +178,6 @@
             <script type="module" src="script.js"></script>
 
             <!-- Channel Plugin Scripts -->
-            <script>
-                (function () {
-                    var w = window;
-                    if (w.ChannelIO) {
-                        return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.');
-                    }
-                    var ch = function () {
-                        ch.c(arguments);
-                    };
-                    ch.q = [];
-                    ch.c = function (args) {
-                        ch.q.push(args);
-                    };
-                    w.ChannelIO = ch;
-                    function l() {
-                        if (w.ChannelIOInitialized) {
-                            return;
-                        }
-                        w.ChannelIOInitialized = true;
-                        var s = document.createElement('script');
-                        s.type = 'text/javascript';
-                        s.async = true;
-                        s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
-                        s.charset = 'UTF-8';
-                        var x = document.getElementsByTagName('script')[0];
-                        x.parentNode.insertBefore(s, x);
-                    }
-                    if (document.readyState === 'complete') {
-                        l();
-                    } else if (window.attachEvent) {
-                        window.attachEvent('onload', l);
-                    } else {
-                        window.addEventListener('DOMContentLoaded', l, false);
-                        window.addEventListener('load', l, false);
-                    }
-                })();
-                ChannelIO('boot', {
-                    "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
-                });
-            </script>
             
 <!-- NAVER PV SCRIPT -->
 <script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 

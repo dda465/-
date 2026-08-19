@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뱃지 표시 점검</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;background:#f8fafc;margin:0;padding:20px;color:#0f172a}
+  .wrap{max-width:1060px;margin:0 auto}
+  h1{font-size:1.25rem;margin:0 0 4px}
+  .sub{color:#64748b;font-size:.85rem;margin-bottom:16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:1rem;margin:0 0 4px}
+  .card .cd{font-size:.82rem;color:#64748b;margin:0 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:.84rem}
+  th,td{padding:8px 10px;border-bottom:1px solid #eef2f7;text-align:left;vertical-align:top}
+  th{background:#f1f5f9;font-weight:700;color:#475569}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  button{background:#2563EB;color:#fff;border:0;border-radius:8px;padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  button:disabled{background:#94a3b8;cursor:default}
+  #status{margin:12px 0;font-size:.86rem;color:#334155;white-space:pre-line}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:.83rem;line-height:1.7;margin-top:12px}
+  .ok{color:#059669;font-weight:700}
+  .bad{color:#dc2626;font-weight:700}
+  .bg-r{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80}
+  .bg-b{background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE}
+  .bg-a{background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5}
+  .bg-e{background:#EDE9FE;color:#5B21B6;border:1px solid #C4B5FD}
+  .pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:.72rem;font-weight:700}
+  .st{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .st div{flex:1;min-width:150px;background:#f8fafc;border-radius:10px;padding:13px}
+  .st b{display:block;font-size:1.5rem;font-weight:800;margin-top:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>관리자 뱃지 표시 점검</h1>
+  <div class="sub">읽기 전용입니다. 관리자 목록과 똑같은 로직을 돌려 뱃지가 붙어야 할 건을 찾아냅니다.</div>
+
+  <div class="card">
+    <button id="run">점검 시작</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="card" id="sum-card" style="display:none">
+    <h2>① 뱃지별 대상 건수</h2>
+    <p class="cd">관리자 '접수·수거' 목록에 실제로 몇 개가 붙어야 하는지</p>
+    <div class="st" id="sum"></div>
+    <div id="sum-note"></div>
+  </div>
+
+  <div class="card" id="dup-card" style="display:none">
+    <h2>② 진행중(중복 접수) — 같은 번호로 살아있는 신청이 2건 이상</h2>
+    <p class="cd">각 행에 빨간 '진행중 N' 뱃지가 붙어야 합니다</p>
+    <table id="dup"></table>
+  </div>
+
+  <div class="card" id="rev-card" style="display:none">
+    <h2>③ 재방문 · 반송이력 — 진행중 목록에 뜬 고객 중 과거 이력이 있는 분</h2>
+    <p class="cd">요약 문서(stats/returning_customers) 기준입니다</p>
+    <table id="rev"></table>
+  </div>
+
+  <div class="card" id="esc-card" style="display:none">
+    <h2>④ 이탈 중복 — 이탈건인데 같은 번호로 정상 신청·매입 이력이 있는 건</h2>
+    <p class="cd">'중복 표시' 버튼을 눌렀을 때 표시되어야 하는 건</p>
+    <table id="esc"></table>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { collection, getDocs, query, orderBy, limit, startAfter, documentId, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const $ = s => document.querySelector(s);
+const say = t => $('#status').textContent = t;
+const esc = s => String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+const fmtPhone = p => String(p || '').replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+
+// admin.js 와 완전히 같은 기준을 쓴다 — 다르면 점검 의미가 없다
+const TERMINAL_FOR_LIST = ["입금완료", "취소", "반송접수", "삭제"];
+const isReal = v => !v.isDeleted && !(v.isForeigner === true || v.method === 'foreigner' || v.series === 'Foreigner');
+const normPhone = v => { const d = String(v || '').replace(/\D/g, ''); return d.length >= 9 ? d : ''; };
+
+const toDate = v => {
+  if (!v) return null;
+  if (v.toDate) return v.toDate();
+  if (v.seconds) return new Date(v.seconds * 1000);
+  const d = new Date(v); return isNaN(d) ? null : d;
+};
+const fmtD = d => d ? `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '-';
+
+$('#run').addEventListener('click', async () => {
+  $('#run').disabled = true;
+  say('전체 신청 내역을 나눠 읽는 중...');
+  try {
+    const rows = [];
+    let cursor = null;
+    while (true) {
+      const parts = [orderBy(documentId()), limit(500)];
+      if (cursor) parts.push(startAfter(cursor));
+      const snap = await getDocs(query(collection(db, "quotes"), ...parts));
+      if (snap.empty) break;
+      snap.forEach(d => rows.push({ id: d.id, ...d.data() }));
+      cursor = snap.docs[snap.docs.length - 1];
+      say(`읽는 중... ${rows.length.toLocaleString()}건`);
+      if (snap.size < 500) break;
+    }
+
+    // 요약 문서 (재방문·반송이력 기준)
+    say('재방문 요약표 확인 중...');
+    let rc = null;
+    try {
+      const rcSnap = await getDoc(doc(db, 'stats', 'returning_customers'));
+      if (rcSnap.exists()) rc = rcSnap.data().counts || {};
+    } catch (_) { }
+
+    // 관리자 '접수·수거' 목록에 실제로 뜨는 건 = 종결 상태가 아닌 건
+    const listed = rows.filter(v => isReal(v) && !TERMINAL_FOR_LIST.includes(v.status));
+    // 진행중 판정 대상도 동일
+    const activeByPhone = new Map();
+    listed.forEach(v => {
+      const p = normPhone(v.customerPhone);
+      if (!p) return;
+      if (!activeByPhone.has(p)) activeByPhone.set(p, []);
+      activeByPhone.get(p).push(v);
+    });
+
+    // ② 진행중 중복
+    const dupGroups = Array.from(activeByPhone.entries()).filter(([, arr]) => arr.length >= 2);
+    // 같은 기종이 섞인 건(실수 접수 가능성)을 위로 올린다
+    const hasDupModel = arr => { const m = arr.map(x => `${x.brand || ''} ${x.model || ''}`.trim()); return m.some((v, i) => m.indexOf(v) !== i); };
+    dupGroups.sort((a, b) => (hasDupModel(b[1]) - hasDupModel(a[1])) || (b[1].length - a[1].length));
+
+    // ③ 재방문·반송이력
+    const revRows = [];
+    if (rc) {
+      const seen = new Set();
+      listed.forEach(v => {
+        const p = normPhone(v.customerPhone);
+        if (!p || seen.has(p)) return;
+        seen.add(p);
+        const c = rc[p];
+        if (!c) return;
+        if ((c.paid || 0) > 0 || (c.returned || 0) > 0) {
+          revRows.push({ p, name: v.customerName, paid: c.paid || 0, ret: c.returned || 0, cancel: c.canceled || 0 });
+        }
+      });
+      revRows.sort((a, b) => (b.paid + b.ret) - (a.paid + a.ret));
+    }
+
+    // ④ 이탈 중복 — admin.js markEscapeeDuplicates 와 같은 기준
+    const validPhones = new Set();
+    rows.forEach(v => {
+      const p = String(v.customerPhone || '').replace(/\D/g, '');
+      if (!p) return;
+      if (v.deliveryMethod === 'courier' || v.deliveryMethod === 'cvs' || v.status === '입금완료') validPhones.add(p);
+    });
+    const escapees = listed.filter(v => !v.deliveryMethod || v.deliveryMethod === 'pending');
+    const escDup = escapees.filter(v => validPhones.has(String(v.customerPhone || '').replace(/\D/g, '')));
+
+    // ── 표시 ──
+    const dupBadgeCount = dupGroups.reduce((s, [, arr]) => s + arr.length, 0);
+    $('#sum').innerHTML = `
+      <div><span style="font-size:.8rem;color:#64748b">목록에 뜨는 건</span><b>${listed.length}</b></div>
+      <div><span style="font-size:.8rem;color:#64748b">진행중 뱃지</span><b class="${dupBadgeCount ? 'bad' : ''}">${dupBadgeCount}</b></div>
+      <div><span style="font-size:.8rem;color:#64748b">재방문·반송 뱃지</span><b>${revRows.length}</b></div>
+      <div><span style="font-size:.8rem;color:#64748b">이탈 중복</span><b>${escDup.length}</b></div>`;
+    $('#sum-note').innerHTML = `<div class="note">
+      ${rc ? `요약 문서 정상 — 번호 <b>${Object.keys(rc).length.toLocaleString()}개</b>` : `<b class="bad">요약 문서(stats/returning_customers)가 없습니다.</b> 재방문·반송 뱃지가 예전 방식으로 동작합니다.`}<br>
+      아래 목록과 실제 관리자 화면을 비교해 보세요. 여기 있는데 화면에 없으면 뱃지가 안 뜨는 것입니다.</div>`;
+    $('#sum-card').style.display = '';
+
+    $('#dup').innerHTML = `<thead><tr><th>연락처</th><th>고객명</th><th class="num">건수</th><th>각 건 (접수일 · 모델 · 상태)</th></tr></thead><tbody>${
+      dupGroups.length ? dupGroups.map(([p, arr]) => `<tr>
+        <td>${fmtPhone(p)}</td>
+        <td>${esc(arr[0].customerName)}</td>
+        <td class="num">${(() => {
+          const models = arr.map(x => `${x.brand || ''} ${x.model || ''}`.trim());
+          const hasSame = models.some((m, i) => models.indexOf(m) !== i);
+          return hasSame
+            ? `<span class="pill bg-a">같은기종 ${arr.length - 1}</span>`
+            : `<span class="pill" style="background:#F1F5F9;color:#475569;border:1px solid #CBD5E1">여러대 ${arr.length - 1}</span>`;
+        })()}</td>
+        <td>${arr.map(v => `${fmtD(toDate(v.submittedAt) || toDate(v.firebaseTimestamp))} · ${esc(v.brand)} ${esc(v.model)} · ${esc(v.status)}`).join('<br>')}</td>
+      </tr>`).join('') : '<tr><td colspan="4" class="ok">중복 접수 없음</td></tr>'}</tbody>`;
+    $('#dup-card').style.display = '';
+
+    $('#rev').innerHTML = `<thead><tr><th>연락처</th><th>고객명</th><th>붙어야 할 뱃지</th><th class="num">매입완료</th><th class="num">반송</th><th class="num">취소</th></tr></thead><tbody>${
+      revRows.length ? revRows.map(r => `<tr>
+        <td>${fmtPhone(r.p)}</td><td>${esc(r.name)}</td>
+        <td>${r.paid ? `<span class="pill bg-r">재방문${r.paid > 1 ? ' ' + r.paid : ''}</span> ` : ''}${r.ret ? `<span class="pill bg-b">반송이력${r.ret > 1 ? ' ' + r.ret : ''}</span>` : ''}</td>
+        <td class="num">${r.paid}</td><td class="num">${r.ret}</td><td class="num">${r.cancel}</td>
+      </tr>`).join('') : `<tr><td colspan="6">${rc ? '해당 고객 없음' : '요약 문서가 없어 확인 불가'}</td></tr>`}</tbody>`;
+    $('#rev-card').style.display = '';
+
+    $('#esc').innerHTML = `<thead><tr><th>접수일</th><th>연락처</th><th>고객명</th><th>모델</th></tr></thead><tbody>${
+      escDup.length ? escDup.slice(0, 50).map(v => `<tr>
+        <td>${fmtD(toDate(v.firebaseTimestamp))}</td>
+        <td>${fmtPhone(String(v.customerPhone || '').replace(/\D/g, ''))}</td>
+        <td>${esc(v.customerName)}</td>
+        <td>${esc(v.brand)} ${esc(v.model)}</td></tr>`).join('')
+        : `<tr><td colspan="4" class="ok">이탈 중복 없음 (전체 이탈 ${escapees.length}건)</td></tr>`}</tbody>`;
+    $('#esc-card').style.display = '';
+
+    say(`점검 완료. 전체 ${rows.length.toLocaleString()}건 중 목록 대상 ${listed.length}건`);
+  } catch (e) {
+    say('오류: ' + e.message + '\n관리자 계정으로 로그인되어 있는지 확인하세요.');
+    console.error(e);
+  } finally { $('#run').disabled = false; }
+});
+</script>
+</body>
+</html>

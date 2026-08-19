@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>접수방식별 입금완료율</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;background:#f8fafc;margin:0;padding:20px;color:#0f172a}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:1.25rem;margin:0 0 4px}
+  .sub{color:#64748b;font-size:.85rem;margin-bottom:16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:1rem;margin:0 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{padding:9px 10px;border-bottom:1px solid #eef2f7;text-align:left}
+  th{background:#f1f5f9;font-weight:700;color:#475569}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  button{background:#2563EB;color:#fff;border:0;border-radius:8px;padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  button:disabled{background:#94a3b8;cursor:default}
+  #status{margin:12px 0;font-size:.86rem;color:#334155;white-space:pre-line}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:.83rem;line-height:1.7;margin-top:14px}
+  .big{font-size:1.8rem;font-weight:800}
+  .simple{color:#0369A1}
+  .self{color:#6B21A8}
+  .bar{height:22px;background:#e2e8f0;border-radius:4px;overflow:hidden;display:flex}
+  .bar i{display:block;height:100%}
+  .lg{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:#475569;margin-top:8px}
+  .lg span{display:flex;align-items:center;gap:5px}
+  .sw{width:11px;height:11px;border-radius:2px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>접수방식별 입금완료율</h1>
+  <div class="sub">읽기 전용입니다. 간편접수와 셀프접수 중 실제로 매입까지 이어진 비율을 비교합니다.</div>
+
+  <div class="card">
+    <button id="run">집계 시작</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="card" id="head-card" style="display:none">
+    <h2>① 결론 — 입금완료율</h2>
+    <div id="head"></div>
+  </div>
+
+  <div class="card" id="detail-card" style="display:none">
+    <h2>② 상태별 상세</h2>
+    <table id="detail"></table>
+    <div id="detail-note"></div>
+  </div>
+
+  <div class="card" id="month-card" style="display:none">
+    <h2>③ 월별 추이</h2>
+    <table id="month"></table>
+  </div>
+
+  <div class="card" id="day-card" style="display:none">
+    <h2>④ 최근 14일 · 날짜별 간편/셀프 비율</h2>
+    <p style="font-size:.83rem;color:#64748b;margin:0 0 10px">
+      접수 시각(배송방법 확정 기준) 기준입니다. 취소·삭제·외국인 건은 제외했습니다.</p>
+    <table id="day"></table>
+    <div id="day-note"></div>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { collection, getDocs, query, orderBy, limit, startAfter, documentId } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const $ = s => document.querySelector(s);
+const say = t => $('#status').textContent = t;
+const pct = (a, b) => b ? (a / b * 100) : 0;
+const f1 = n => n.toFixed(1);
+
+const toDate = v => {
+  if (!v) return null;
+  if (v.toDate) return v.toDate();
+  if (v.seconds) return new Date(v.seconds * 1000);
+  const d = new Date(v); return isNaN(d) ? null : d;
+};
+
+// 종결 상태만 '결과가 난 건'으로 본다.
+// 아직 진행 중인 건은 결과를 모르므로 비율 계산에서 빼야 공정하다.
+const TERMINAL = ['입금완료', '취소', '반송접수'];
+
+$('#run').addEventListener('click', async () => {
+  $('#run').disabled = true;
+  say('전체 신청 내역을 나눠 읽는 중...');
+  try {
+    const t0 = performance.now();
+    const rows = [];
+    let cursor = null;
+    while (true) {
+      const parts = [orderBy(documentId()), limit(500)];
+      if (cursor) parts.push(startAfter(cursor));
+      const snap = await getDocs(query(collection(db, "quotes"), ...parts));
+      if (snap.empty) break;
+      snap.forEach(d => rows.push({ id: d.id, ...d.data() }));
+      cursor = snap.docs[snap.docs.length - 1];
+      say(`읽는 중... ${rows.length.toLocaleString()}건`);
+      if (snap.size < 500) break;
+    }
+
+    // 외국인 신청과 삭제 건은 제외 (일반 매입 흐름이 아님)
+    const data = rows.filter(v => !v.isDeleted && v.isForeigner !== true && v.method !== 'foreigner' && v.series !== 'Foreigner');
+
+    const mk = () => ({ total: 0, done: 0, cancel: 0, ret: 0, prog: 0 });
+    const g = { simple: mk(), self: mk() };
+    const byMonth = {};
+
+    data.forEach(v => {
+      const key = v.method === 'self' ? 'self' : 'simple';   // admin.js 와 같은 판정 기준
+      const b = g[key];
+      b.total++;
+      if (v.status === '입금완료') b.done++;
+      else if (v.status === '취소') b.cancel++;
+      else if (v.status === '반송접수') b.ret++;
+      else b.prog++;
+
+      const d = toDate(v.firebaseTimestamp);
+      if (d) {
+        const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        byMonth[m] = byMonth[m] || { simple: mk(), self: mk() };
+        const mb = byMonth[m][key];
+        mb.total++;
+        if (v.status === '입금완료') mb.done++;
+        else if (v.status === '취소') mb.cancel++;
+        else if (v.status === '반송접수') mb.ret++;
+        else mb.prog++;
+      }
+    });
+
+    const settled = b => b.done + b.cancel + b.ret;   // 결과가 난 건
+    const card = (name, b, cls) => {
+      const s = settled(b);
+      return `<div style="flex:1;min-width:230px;border:1px solid #e2e8f0;border-radius:10px;padding:16px">
+        <div style="font-weight:700;margin-bottom:6px" class="${cls}">${name}</div>
+        <div class="big ${cls}">${f1(pct(b.done, s))}%</div>
+        <div style="font-size:.8rem;color:#64748b;margin-top:4px">
+          결과 난 ${s.toLocaleString()}건 중 입금완료 ${b.done.toLocaleString()}건<br>
+          (전체 접수 ${b.total.toLocaleString()}건 · 진행중 ${b.prog.toLocaleString()}건 제외)
+        </div></div>`;
+    };
+
+    const sS = settled(g.simple), sF = settled(g.self);
+    const rateS = pct(g.simple.done, sS), rateF = pct(g.self.done, sF);
+    const diff = rateS - rateF;
+
+    $('#head').innerHTML = `<div style="display:flex;gap:14px;flex-wrap:wrap">
+        ${card('간편접수', g.simple, 'simple')}${card('셀프접수', g.self, 'self')}
+      </div>
+      <div class="note"><b>간편접수가 셀프접수보다 입금완료율이 ${diff >= 0 ? '' : '낮'}${f1(Math.abs(diff))}%p ${diff >= 0 ? '높습니다' : '습니다'}.</b><br>
+      진행 중인 건은 결과를 모르므로 계산에서 뺐습니다. 접수 건수가 적은 쪽은 비율이 흔들릴 수 있으니 건수도 함께 보세요.</div>`;
+    $('#head-card').style.display = '';
+
+    const line = (name, b, cls) => {
+      const s = settled(b);
+      return `<tr><td class="${cls}" style="font-weight:700">${name}</td>
+        <td class="num">${b.total.toLocaleString()}</td>
+        <td class="num">${b.done.toLocaleString()}</td>
+        <td class="num">${b.ret.toLocaleString()}</td>
+        <td class="num">${b.cancel.toLocaleString()}</td>
+        <td class="num">${b.prog.toLocaleString()}</td>
+        <td class="num" style="font-weight:700">${f1(pct(b.done, s))}%</td>
+        <td class="num">${f1(pct(b.ret, s))}%</td>
+        <td style="width:180px"><div class="bar">
+          <i style="width:${pct(b.done, s)}%;background:#059669"></i>
+          <i style="width:${pct(b.ret, s)}%;background:#d97706"></i>
+          <i style="width:${pct(b.cancel, s)}%;background:#dc2626"></i>
+        </div></td></tr>`;
+    };
+    $('#detail').innerHTML = `<thead><tr><th>접수방식</th><th class="num">전체접수</th><th class="num">입금완료</th>
+      <th class="num">반송</th><th class="num">취소</th><th class="num">진행중</th>
+      <th class="num">입금완료율</th><th class="num">반송률</th><th>구성</th></tr></thead>
+      <tbody>${line('간편접수', g.simple, 'simple')}${line('셀프접수', g.self, 'self')}</tbody>`;
+    $('#detail-note').innerHTML = `<div class="lg">
+      <span><i class="sw" style="background:#059669"></i>입금완료</span>
+      <span><i class="sw" style="background:#d97706"></i>반송</span>
+      <span><i class="sw" style="background:#dc2626"></i>취소</span></div>`;
+    $('#detail-card').style.display = '';
+
+    const months = Object.keys(byMonth).sort().reverse().slice(0, 8);
+    $('#month').innerHTML = `<thead><tr><th>월</th>
+      <th class="num">간편 접수</th><th class="num">간편 완료율</th>
+      <th class="num">셀프 접수</th><th class="num">셀프 완료율</th><th class="num">차이</th></tr></thead>
+      <tbody>${months.map(m => {
+        const a = byMonth[m].simple, b = byMonth[m].self;
+        const ra = pct(a.done, settled(a)), rb = pct(b.done, settled(b));
+        const d = ra - rb;
+        return `<tr><td>${m}</td>
+          <td class="num">${a.total}</td><td class="num simple">${settled(a) ? f1(ra) + '%' : '-'}</td>
+          <td class="num">${b.total}</td><td class="num self">${settled(b) ? f1(rb) + '%' : '-'}</td>
+          <td class="num" style="font-weight:700;color:${d >= 0 ? '#059669' : '#dc2626'}">${settled(a) && settled(b) ? (d >= 0 ? '+' : '') + f1(d) + '%p' : '-'}</td></tr>`;
+      }).join('')}</tbody>`;
+    $('#month-card').style.display = '';
+
+    // ── 4. 날짜별 간편/셀프 비율 ──
+    // 흐름 변경 효과를 보려면 '접수가 언제 일어났는지'로 갈라야 한다.
+    // 배송방법을 확정한 시각(submittedAt)이 실제 접수 완료 시점이고, 없으면 유입 시각을 쓴다.
+    // 취소 건은 관리자 '금일 매입신청' 카드와 같은 기준으로 뺀다.
+    const byDay = {};
+    data.forEach(v => {
+      if (v.status === '취소') return;
+      const d = toDate(v.submittedAt) || toDate(v.firebaseTimestamp);
+      if (!d) return;
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      byDay[key] = byDay[key] || { simple: 0, self: 0 };
+      if (v.method === 'self') byDay[key].self++; else byDay[key].simple++;
+    });
+
+    const days = Object.keys(byDay).sort().reverse().slice(0, 14);
+    const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+    $('#day').innerHTML = '<thead><tr><th>날짜</th><th class="num">간편</th><th class="num">셀프</th>'
+      + '<th class="num">합계</th><th class="num">간편 비율</th><th>구성</th></tr></thead><tbody>'
+      + days.map(function (k) {
+        const b = byDay[k], tot = b.simple + b.self, r = pct(b.simple, tot);
+        const dd = new Date(k + 'T00:00:00');
+        return '<tr><td>' + k.slice(5) + ' (' + DOW[dd.getDay()] + ')</td>'
+          + '<td class="num simple">' + b.simple + '</td>'
+          + '<td class="num self">' + b.self + '</td>'
+          + '<td class="num">' + tot + '</td>'
+          + '<td class="num" style="font-weight:700">' + f1(r) + '%</td>'
+          + '<td style="width:150px"><div class="bar"><i style="width:' + r + '%;background:#0369A1"></i>'
+          + '<i style="width:' + (100 - r) + '%;background:#A855F7"></i></div></td></tr>';
+      }).join('') + '</tbody>';
+
+    // 흐름 변경일(8/2) 앞뒤 비교
+    const CUT = '2026-08-02';
+    const sumBy = function (test) {
+      return Object.keys(byDay).filter(test).reduce(function (a, k) {
+        return { s: a.s + byDay[k].simple, f: a.f + byDay[k].self };
+      }, { s: 0, f: 0 });
+    };
+    const before = sumBy(function (k) { return k < CUT; });
+    const after = sumBy(function (k) { return k >= CUT; });
+    const rb = pct(before.s, before.s + before.f), ra = pct(after.s, after.s + after.f);
+    $('#day-note').innerHTML = '<div class="note"><b>흐름 변경(8/2) 앞뒤 비교</b><br>'
+      + '변경 전 — 간편 ' + before.s + '건 / 셀프 ' + before.f + '건 → 간편 비율 <b>' + f1(rb) + '%</b><br>'
+      + '변경 후 — 간편 ' + after.s + '건 / 셀프 ' + after.f + '건 → 간편 비율 <b>' + f1(ra) + '%</b><br>'
+      + '<b style="color:' + (ra >= rb ? '#059669' : '#dc2626') + '">' + (ra >= rb ? '+' : '') + f1(ra - rb) + '%p</b>'
+      + ' <span style="color:#94a3b8">며칠치라 표본이 작습니다. 방향만 참고하세요.</span></div>';
+    $('#day-card').style.display = '';
+
+    say(`집계 완료. 전체 ${rows.length.toLocaleString()}건 중 분석 대상 ${data.length.toLocaleString()}건 (${Math.round(performance.now() - t0).toLocaleString()}ms)`);
+  } catch (e) {
+    say('오류: ' + e.message + '\n관리자 계정으로 로그인되어 있는지 확인하세요.');
+    console.error(e);
+  } finally { $('#run').disabled = false; }
+});
+</script>
+</body>
+</html>

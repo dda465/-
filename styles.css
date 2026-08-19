@@ -352,12 +352,15 @@ ul {
     background: #fff; border: 1px solid #dbe7fb; border-radius: 13px;
     padding: 9px 12px; box-sizing: border-box;
 }
+/* 시리즈 이미지는 여러 색상 폰이 부채꼴로 나란한 가로 사진이다.
+   ⚠ 예전엔 정사각형 칸(38×38)에 넣고 cover + scale(1.5)로 한 대만 확대해 잘라 썼는데,
+     이미지마다 비율이 제각각(308×215 ~ 629×618)이라 어떤 건 맞고 어떤 건 이상하게 잘렸다.
+   → 칸을 가로로 넓히고 contain 으로 사진 전체가 보이게 한다. 잘리지도, 찌그러지지도 않는다. */
 .qtrail-thumb {
-    flex: 0 0 38px; height: 38px; border-radius: 9px; background: #f0f6ff;
+    flex: 0 0 58px; height: 38px; border-radius: 9px; background: #f0f6ff;
     display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-/* 시리즈 이미지는 여러 색상 폰이 나란히 있는 형태라 왼쪽 한 대만 잘라 채운다 */
-.qtrail-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: 9% center; transform: scale(1.5); }
+.qtrail-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 2px; box-sizing: border-box; }
 .qtrail-segs { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 3px 5px; }
 .qtrail-seg {
     font-size: 0.79rem; font-weight: 700; color: #1E3A8A; background: #eef4ff;
@@ -371,7 +374,7 @@ ul {
 
 @media (max-width: 768px) {
     .qtrail { margin: 0 0 14px; padding: 8px 10px; gap: 9px; }
-    .qtrail-thumb { flex: 0 0 34px; height: 34px; }
+    .qtrail-thumb { flex: 0 0 50px; height: 32px; }
     .qtrail-seg { font-size: 0.75rem; padding: 3px 8px; }
     .qtrail-hint { display: none; }
 }
@@ -387,6 +390,55 @@ ul {
     #wizard-step-2 .card-icon-img { height: 26px !important; margin-bottom: 6px; }
     #wizard-step-1 .card-title,
     #wizard-step-2 .card-title { font-size: 0.88rem; }
+}
+
+/* ══ 판매하기 · 모바일 세로 압축 (2026-08) ══════════════════════════
+   접수 단계를 스크롤 없이 넘길 수 있게 모바일에서만 줄인다.
+   ⚠ PC(769px 이상)는 이 블록의 영향을 받지 않는다 — 지금 그대로 유지된다.
+
+   원인: 제목이 2rem(32px)에 아래 여백 30px 로, PC 기준 값이 모바일에 그대로 적용됐다.
+        모든 단계 상단에서 100px 가까이 먹어 선택지가 화면 밖으로 밀렸다.
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* 단계 제목 — 가장 크게 절약되는 곳 */
+    .wizard-step .step-header { margin-bottom: 14px; }
+    .wizard-step .step-header h2 { font-size: 1.32rem; line-height: 1.3; margin-bottom: 4px; }
+    .wizard-step .step-header p { font-size: 0.82rem; line-height: 1.45; }
+
+    /* 진행바 */
+    #wizard-progress { margin-bottom: 16px !important; }
+    #wizard-progress .wiz-step-circle { width: 25px; height: 25px; font-size: 0.7rem; }
+    #wizard-progress .wiz-step-label { font-size: 0.62rem; margin-top: 3px; }
+
+    /* 선택 카드 — 모델(3) 화면은 카드가 많아 여기서 크게 절약된다 */
+    #wizard-step-3 .selection-card { padding: 13px 8px; }
+    #wizard-step-3 .card-title { font-size: 0.9rem; }
+    #wizard-step-4 .selection-card { padding: 12px 8px; }
+
+    /* 등급표 — 낱장 카드 사이 여백(12px×5=60px)이 통째로 낭비였다.
+       한 덩어리 목록으로 묶어 경계선만 남긴다. */
+    #wizard-step-grade-list .grade-list-card {
+        margin-bottom: 0; border-radius: 0; border-bottom: none;
+    }
+    #wizard-step-grade-list .grade-list-card:first-child { border-radius: 11px 11px 0 0; }
+    #wizard-step-grade-list .grade-list-card:last-child {
+        border-radius: 0 0 11px 11px; border-bottom: 1px solid #eee;
+    }
+    #wizard-step-grade-list .grade-row { padding: 9px 13px !important; }
+    #wizard-step-grade-list .grade-info h4 { font-size: 0.9rem !important; }
+    #wizard-step-grade-list .grade-info p { font-size: 0.72rem !important; }
+    #wizard-step-grade-list .grade-price { font-size: 1rem !important; }
+    #wizard-step-grade-list #simple-quote-model-title { font-size: 0.95rem !important; margin-bottom: 8px !important; }
+
+    /* 등급표 화면 — 버튼까지 한 화면에 담기 위해 남은 여백을 더 줄인다 */
+    #wizard-step-grade-list .step-header { margin-bottom: 6px !important; }
+    #wizard-step-grade-list .step-header h2 { font-size: 1.1rem !important; }
+    /* 선택 내역 띠 */
+    .qtrail { margin-bottom: 9px !important; padding: 5px 8px !important; }
+    /* 이벤트 배지 — script.js 가 인라인 스타일로 그려서 클래스가 없다.
+       등급 목록 다음에 오는 마지막 div 가 배지 묶음이라 그걸 집어 여백만 줄인다. */
+    #grade-price-list-target > div:last-child { margin-top: 7px !important; }
 }
 
 /* ══ 판매하기 · 화면 하단 신뢰 요소 ══
@@ -1717,14 +1769,19 @@ footer {
     background: var(--bg-primary);
 }
 
+/* ⚠ 예전엔 width: 400% / 슬라이드 25% 로 '4개'가 하드코딩돼 있었다.
+   슬라이드를 하나 더 넣으면 폭이 어긋나 화면이 잘리고 옆 슬라이드가 비쳤다.
+   개수와 무관하게 동작하도록 각 슬라이드를 화면 폭(100%)에 고정한다.
+   이동은 script.js 에서 translateX(-currentIndex * 100%) 로 계산한다. */
 #hero-slider {
     display: flex;
-    width: 400%;
+    width: 100%;
     transition: transform 0.5s ease-in-out;
 }
 
 .hero-slide {
-    width: 25%;
+    flex: 0 0 100%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;

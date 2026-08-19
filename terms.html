@@ -59,7 +59,7 @@
 
 
 
-    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link rel="stylesheet" href="styles.css?v=1785539000">
 
 
 
@@ -206,7 +206,7 @@
                 3. 중고 기기의 시세는 변동성이 큰 특성이 있어, <strong>판매 신청 시점의 예상 시세와 실제 검수·매입 확정 시점의 시세가 다를 수 있으며, 최종 매입가는 검수 결과를 회원에게 안내하는 시점의 기준으로 산정</strong>됩니다.<br>
                 4. 기기와 함께 동봉된 박스, 충전기, 케이스, 필름 등 <strong>일체의 구성품 및 부속품은 검수 과정에서 임의 폐기됩니다. 따라서 매입 취소 및 반송이 결정되더라도 본체(기기) 외의 폐기된 구성품은 절대 반환되거나 보상되지 않음을 원칙</strong>으로 합니다.<br>
                 5. 정상적인 검수가 불가능한 기기(완전 파손 등)의 경우, 별도의 검수비가 청구되거나 착불로 반송될 수 있습니다.<br>
-                6. 회원은 검수 결과 및 최종 매입가에 이의가 있는 경우, <strong>전자매매계약서 송부일로부터 3일(영업일 기준) 이내에 회사에 서면(이메일, 채널톡 등)으로 이의를 제기</strong>해야 합니다. 이 기간 내 이의 제기가 없는 경우 검수 결과에 동의한 것으로 간주합니다.<br>
+                6. 회원은 검수 결과 및 최종 매입가에 이의가 있는 경우, <strong>전자매매계약서 송부일로부터 3일(영업일 기준) 이내에 회사에 서면(이메일, 카카오톡 채널 등)으로 이의를 제기</strong>해야 합니다. 이 기간 내 이의 제기가 없는 경우 검수 결과에 동의한 것으로 간주합니다.<br>
                 7. <strong>회사가 전자매매계약서(최종 견적서)를 송부한 후, 회원의 반송 또는 매입 거부 의사표시 없이 영업일 기준 7일이 경과한 경우, 회원이 전자매매계약서의 내용에 동의한 것으로 간주</strong>합니다. 이 경우 회사는 회원이 안내한 계좌로 매입 대금을 입금한 후 매입 절차를 완료하며, 이후에는 거래 취소 및 기기 반환을 요구할 수 없습니다.<br>
                 8. <strong>미개봉 상품(밀봉 패키지 및 씰 기부착 제품)</strong>의 경우, 회사는 기기의 외관 상태 및 정상 작동(내부 기능 등) 여부를 검수하기 위해 <strong>해당 제품의 포장 및 밀봉(씰)을 해제(개봉)하여 검수를 진행</strong>합니다. 이에 따라 매입 취소 및 반송이 결정되더라도 기기는 개봉된 상태로 반송되며, <strong>회사는 포장 및 밀봉(씰) 훼손으로 인한 상품 가치 하락이나 원상 복구에 대해 일체의 배상 또는 보상 책임을 지지 않습니다.</strong>
             </p>
@@ -350,7 +350,7 @@
 
 
 
-                        연중무휴 24시간 채널톡으로 상담가능
+                        연중무휴 24시간 카카오톡 채널로 상담가능
 
 
 
@@ -412,166 +412,6 @@
 
 
             <!-- Channel Plugin Scripts -->
-
-
-
-            <script>
-
-
-
-                (function () {
-
-
-
-                    var w = window;
-
-
-
-                    if (w.ChannelIO) {
-
-
-
-                        return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.');
-
-
-
-                    }
-
-
-
-                    var ch = function () {
-
-
-
-                        ch.c(arguments);
-
-
-
-                    };
-
-
-
-                    ch.q = [];
-
-
-
-                    ch.c = function (args) {
-
-
-
-                        ch.q.push(args);
-
-
-
-                    };
-
-
-
-                    w.ChannelIO = ch;
-
-
-
-                    function l() {
-
-
-
-                        if (w.ChannelIOInitialized) {
-
-
-
-                            return;
-
-
-
-                        }
-
-
-
-                        w.ChannelIOInitialized = true;
-
-
-
-                        var s = document.createElement('script');
-
-
-
-                        s.type = 'text/javascript';
-
-
-
-                        s.async = true;
-
-
-
-                        s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
-
-
-
-                        s.charset = 'UTF-8';
-
-
-
-                        var x = document.getElementsByTagName('script')[0];
-
-
-
-                        x.parentNode.insertBefore(s, x);
-
-
-
-                    }
-
-
-
-                    if (document.readyState === 'complete') {
-
-
-
-                        l();
-
-
-
-                    } else if (window.attachEvent) {
-
-
-
-                        window.attachEvent('onload', l);
-
-
-
-                    } else {
-
-
-
-                        window.addEventListener('DOMContentLoaded', l, false);
-
-
-
-                        window.addEventListener('load', l, false);
-
-
-
-                    }
-
-
-
-                })();
-
-
-
-                ChannelIO('boot', {
-
-
-
-                    "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
-
-
-
-                });
-
-
-
-            </script>
 
 
 

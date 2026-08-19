@@ -1,6 +1,6 @@
 import { db, auth, getStorageLazy } from './firebase-config.js';
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkewwgQ-m_3OQVph5Laex78UEgJV1klI1MaluW5ugsIeZy-bfXdi0JpZMnpER1CxGR/exec";
-import { collection, getDocs, getDoc, query, orderBy, limit, doc, updateDoc, setDoc, deleteDoc, writeBatch, serverTimestamp, addDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, getDocs, getDoc, query, orderBy, limit, doc, updateDoc, setDoc, deleteDoc, deleteField, writeBatch, serverTimestamp, addDoc, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 // Firebase Storage is lazy-loaded via getStorageLazy() — only loaded when uploading inspection photos
@@ -186,6 +186,10 @@ if (logoutBtn) {
 
 // 보기 모드별 상태 정의
 // B(검수·정산) = 물건이 우리 손에 있는 단계. A(접수·수거) = 그 외 진행중 전부(모르는 상태도 여기로 → 유령건 방지)
+// 미집하 구역 펼침 상태 — loadQuotes() 를 다시 돌려도 유지된다.
+// (여러 건을 연달아 처리하는 구역이라, 한 건 고칠 때마다 접히면 매우 불편하다)
+let _pfOpen = false;
+
 const B_STATUSES = ["택배도착", "검수중", "검수완료", "입금대기", "반송대기"];
 const TERMINAL_FOR_LIST = ["입금완료", "취소", "반송접수", "삭제"];
 window.currentQuoteView = 'a';
@@ -343,6 +347,8 @@ async function loadQuotes(view) {
             if (status === '반송대기') statusClass = 'status-return-pending';
 
             let deliveryTag = '';
+            // 일괄 수거예약 대상인지 — 방문수거이고, 아직 예약 안 됐고, 우편번호가 있는 건만 true
+            let gfBookable = false;
             if (data.deliveryMethod === 'cvs') {
                 let trackingInfo = '';
                 if (data.trackingNumber) {
@@ -356,6 +362,7 @@ async function loadQuotes(view) {
             } else if (data.deliveryMethod === 'courier') {
                 // 굿스플로 방문수거 예약 상태 표시 (예약됨 / 예약가능 / 우편번호없음 / 실패)
                 let gfTag = '';
+                gfBookable = false;   // 이 건이 일괄 예약 대상인지 (아래에서 tr 에 표식으로 붙는다)
                 if (data.goodsflowOrderNo) {
                     // 번호가 3종류다 — 섞어 쓰면 고객이 택배사에서 조회할 수 없다.
                     //  · goodsflowRelayInvoiceNo       : 한진 간선 운송장 (573848472934) ← 고객 조회 가능, 이것만 안내
@@ -383,6 +390,10 @@ async function loadQuotes(view) {
                 } else if (!data.customerZipCode) {
                     gfTag = `<br><span title="우편번호 저장 기능 이전에 접수된 건이라 자동예약을 할 수 없습니다. 굿스플로에서 수동 접수해주세요." style="font-size:0.7rem; background:#f1f5f9; color:#94a3b8; padding:2px 6px; border-radius:4px; margin-top:4px; display:inline-block;">수거예약 불가(우편번호 없음)</span>`;
                 } else {
+                    // ★ 일괄 예약 대상. 여기 걸리는 건만 '예약가능 전체선택' 과
+                    //   '선택 수거예약' 이 잡는다. 이미 예약됐거나 우편번호가 없는 건은 제외된다.
+                    //   (표식은 아래에서 tr 을 만든 뒤 붙인다 — 여기선 tr 이 아직 없다)
+                    gfBookable = true;
                     gfTag = `<br><button onclick="bookGoodsflowPickup('${id}')" style="font-size:0.72rem; background:#2563eb; color:#fff; border:none; padding:3px 10px; border-radius:4px; margin-top:4px; cursor:pointer; font-weight:bold;">🚚 수거 예약</button>`;
                 }
                 if (data.goodsflowError) {
@@ -398,11 +409,22 @@ async function loadQuotes(view) {
             }
 
             let feePaidBtn = '';
+            // 배송비 입금 버튼 — 2026-08-02 착불 전환 이전 접수 건에만 보인다.
+            // 그 이전 고객은 '택배비 입금받기'로 접수해 선입금을 기다리고 있으므로 정산이 필요하고,
+            // 이후 접수 건은 착불이라 입금할 것이 없다. 날짜로 갈라 옛 건 정산만 계속 처리한다.
+            const CVS_COD_START = new Date('2026-08-02T00:00:00+09:00');
+            const _qTime = _toDateForList(data.firebaseTimestamp) || _toDateForList(data.submittedAt);
+            const isPrepaidEra = !_qTime || _qTime < CVS_COD_START;
             if (data.deliveryMethod === 'cvs') {
-                if (data.shippingFeePaid) {
-                    feePaidBtn = `<br><button class="action-btn" style="background:#E8F5E9; color:#2E7D32; border-color:#81C784; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', false)">배송비 입금됨 ✓</button>`;
+                // 배송비 버튼은 착불 전환 이전 건에만 — 이후 건은 입금할 것이 없다.
+                if (isPrepaidEra) {
+                    if (data.shippingFeePaid) {
+                        feePaidBtn = `<br><button class="action-btn" style="background:#E8F5E9; color:#2E7D32; border-color:#81C784; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', false)">배송비 입금됨 ✓</button>`;
+                    } else {
+                        feePaidBtn = `<br><button class="action-btn" style="background:#FFF; color:#E65100; border-color:#FFB74D; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', true)">배송비 입금확인</button>`;
+                    }
                 } else {
-                    feePaidBtn = `<br><button class="action-btn" style="background:#FFF; color:#E65100; border-color:#FFB74D; margin-top:5px; width: 100%;" onclick="toggleShippingFee('${id}', true)">배송비 입금확인</button>`;
+                    feePaidBtn = `<br><span style="font-size:0.7rem; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; padding:2px 7px; border-radius:4px; display:inline-block; margin-top:5px; font-weight:700;">착불 발송 건</span>`;
                 }
                 // 개인발송은 굿스플로를 타지 않아 폴러가 도착·집하를 감지하지 못한다.
                 // 그래서 담당자가 직접 상황을 보고 안내 알림톡을 보낼 수 있게 버튼을 둔다.
@@ -503,6 +525,8 @@ async function loadQuotes(view) {
 
             const tr = document.createElement('tr');
             tr.innerHTML = trHtml;
+            // 일괄 수거예약 대상 표식 — '예약가능 전체선택' 과 '선택 수거예약' 이 이걸로 잡는다
+            if (gfBookable) tr.dataset.gfBookable = '1';
             // 화면 정렬 키 — Firestore는 firebaseTimestamp로 정렬해 오지만(기존 문서 누락 방지),
             // 실제로 보여줄 순서는 '배송방법 확정 시각' 기준이어야 뒤늦게 마무리한 건이 위로 온다.
             const _sortAt = _toDateForList(data.submittedAt) || _toDateForList(data.firebaseTimestamp) || _toDateForList(data.timestamp);
@@ -517,6 +541,33 @@ async function loadQuotes(view) {
             } else {
                 if (data.goodsflowAlert === 'PICKUP_FAILED' && status !== '택배도착') {
                     // 미집하는 방치되기 쉬워 별도 구역으로 분리 (배송방법 분류보다 우선)
+                    //
+                    // ⚠️ 미집하 안내는 폴러(goodsflowPoller)가 30분마다 자동 발송한다.
+                    //    다만 자동이 못 잡는 경우가 있어 수동 발송 버튼을 같이 둔다.
+                    //      · 고객이 "못 받았다"고 전화한 경우
+                    //      · 발송이 3회 실패해 중단된 건 (pickupFailedNotifyTries >= 3)
+                    //      · 7월처럼 표시만 남고 실제로는 안 나간 옛 건
+                    //    이미 보낸 건이면 마지막 발송 시각을 같이 보여준다. 숨기면 재발송을 못 한다.
+                    const _pfAt = _toDateForList(data.pickupFailedNotifiedAt);
+                    const _pfTries = Number(data.pickupFailedNotifyTries || 0);
+                    let _pfLabel = '📮 미집하 안내 발송';
+                    let _pfSub = '';
+                    if (_pfAt) {
+                        const _m = String(_pfAt.getMonth() + 1), _d = String(_pfAt.getDate());
+                        const _hh = String(_pfAt.getHours()).padStart(2, '0');
+                        const _mi = String(_pfAt.getMinutes()).padStart(2, '0');
+                        _pfLabel = '📮 다시 보내기';
+                        _pfSub = `<br><span style="font-size:0.68rem; color:#78909C;">${_m}/${_d} ${_hh}:${_mi} 발송됨</span>`;
+                    } else if (_pfTries > 0) {
+                        _pfSub = `<br><span style="font-size:0.68rem; color:#C62828;">자동 발송 ${_pfTries}회 실패</span>`;
+                    }
+                    // 3번째 칸이 고객명이다 (1 체크박스 · 2 신청일시 · 3 고객명).
+                    // 계약서 독촉 버튼도 같은 칸에 붙는다 — 490줄
+                    const _pfCell = tr.querySelector('td:nth-child(3)');
+                    if (_pfCell) {
+                        _pfCell.insertAdjacentHTML('beforeend',
+                            `<br><button onclick="sendPickupFailedNotice('${id}')" style="font-size:0.72rem; background:#FEE500; color:#391B1B; padding:3px 9px; border-radius:4px; margin-top:5px; border:none; font-weight:bold; cursor:pointer;">${_pfLabel}</button>${_pfSub}`);
+                    }
                     pickupFailedRows.push(tr);
                 } else if (status === '반송대기') {
                     returnPendingRows.push(tr);
@@ -543,29 +594,47 @@ async function loadQuotes(view) {
         // 미집하: 기사가 갔는데 못 받아온 건. 건수는 항상 보이되 목록은 접어두고,
         // 헤더를 클릭할 때만 펼친다 (평소 목록이 길어지는 걸 막으면서 존재는 놓치지 않게).
         if (showA && pickupFailedRows.length > 0) {
+            // ⚠️ 펼침 상태를 모듈 변수(_pfOpen)에 둔다.
+            //    예전엔 이 함수 안의 지역변수라, 한 건 취소할 때마다 loadQuotes()가 다시 돌면서
+            //    목록이 접혀 매번 다시 펼쳐야 했다. 미집하는 여러 건을 연달아 처리하는 구역이라
+            //    이게 실제로 가장 불편한 지점이었다.
             const dividerFailed = document.createElement('tr');
             dividerFailed.style.cursor = 'pointer';
             dividerFailed.innerHTML = `<td colspan="8" style="background: #FFEBEE; text-align: center; font-weight: bold; padding: 12px; color: #C62828; border-bottom: 2px solid #FFCDD2; font-size: 1.05rem;">
-                <span id="pf-toggle-icon">▶</span> ⚠️ 미집하 — 기사 방문했으나 수거 실패 (고객 연락 필요) (${pickupFailedRows.length}건)
-                <span style="font-size:0.8rem; font-weight:normal; color:#a13; margin-left:6px;">클릭하여 펼치기</span>
+                <span id="pf-toggle-icon">${_pfOpen ? '▼' : '▶'}</span> ⚠️ 미집하 — 기사 방문했으나 수거 실패 (고객 연락 필요) (${pickupFailedRows.length}건)
+                <span style="font-size:0.8rem; font-weight:normal; color:#a13; margin-left:6px;">${_pfOpen ? '클릭하여 접기' : '클릭하여 펼치기'}</span>
             </td>`;
             quotesTableBody.appendChild(dividerFailed);
 
+            // 일괄 작업 줄 — 펼쳤을 때만 보인다
+            const pfBulk = document.createElement('tr');
+            pfBulk.className = 'pf-bulk';
+            pfBulk.style.display = _pfOpen ? '' : 'none';
+            pfBulk.innerHTML = `<td colspan="8" style="background:#FFF8F8; padding:8px 12px; border-bottom:1px solid #FFCDD2;">
+                <label style="font-size:0.82rem; cursor:pointer; user-select:none;">
+                    <input type="checkbox" onclick="togglePickupFailedAll(this)"> 전체 선택
+                </label>
+                <span id="pf-selected-count" style="font-size:0.8rem; color:#78909C; margin-left:10px;"></span>
+                <button onclick="bulkCancelPurchase()" style="font-size:0.76rem; background:#dc2626; color:#fff; border:none; padding:4px 11px; border-radius:5px; margin-left:12px; cursor:pointer; font-weight:bold;">선택 매입취소</button>
+                <span style="font-size:0.74rem; color:#B71C1C; margin-left:10px; font-weight:600;">⚠️ 미집하 건은 홈픽에서 별도로 취소 요청해야 합니다 (48시간 뒤 처리)</span>
+            </td>`;
+            quotesTableBody.appendChild(pfBulk);
+
             pickupFailedRows.sort(_byDisplayTimeDesc);
             pickupFailedRows.forEach(tr => {
-                tr.style.display = 'none';           // 기본은 접힌 상태
+                tr.style.display = _pfOpen ? '' : 'none';
                 tr.classList.add('pf-row');
                 quotesTableBody.appendChild(tr);
             });
 
-            let pfOpen = false;
             dividerFailed.onclick = () => {
-                pfOpen = !pfOpen;
-                pickupFailedRows.forEach(tr => { tr.style.display = pfOpen ? '' : 'none'; });
+                _pfOpen = !_pfOpen;
+                pickupFailedRows.forEach(tr => { tr.style.display = _pfOpen ? '' : 'none'; });
+                pfBulk.style.display = _pfOpen ? '' : 'none';
                 const ic = document.getElementById('pf-toggle-icon');
-                if (ic) ic.textContent = pfOpen ? '▼' : '▶';
+                if (ic) ic.textContent = _pfOpen ? '▼' : '▶';
                 const hint = dividerFailed.querySelector('td span:last-child');
-                if (hint) hint.textContent = pfOpen ? '클릭하여 접기' : '클릭하여 펼치기';
+                if (hint) hint.textContent = _pfOpen ? '클릭하여 접기' : '클릭하여 펼치기';
             };
         }
 
@@ -615,7 +684,12 @@ async function loadQuotes(view) {
             dividerCourier.innerHTML = `<td colspan="8" style="background: #E8F5E9; padding: 10px 16px; color: #2E7D32; border-bottom: 2px solid #C8E6C9; ${(urgentRows.length > 0 || inspectingRows.length > 0 || returnPendingRows.length > 0 || cvsRows.length > 0) ? 'border-top: 2px solid #e2e8f0;' : ''}">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                     <span style="font-weight:bold;">🚚 방문수거 신청 건 (${courierRows.length}건)</span>
-                    <span style="display:flex; gap:6px;">
+                    <span style="display:flex; gap:6px; align-items:center;">
+                        <label style="font-size:0.75rem; cursor:pointer; user-select:none; color:#2E7D32; font-weight:600;">
+                            <input type="checkbox" onclick="toggleCourierBookableAll(this)"> 예약가능 전체선택
+                        </label>
+                        <span id="gf-selected-count" style="font-size:0.75rem; color:#558B2F;"></span>
+                        <button onclick="bulkBookGoodsflowPickup(this)" title="선택한 건을 한 번에 수거예약합니다" style="background:#1565C0; color:white; border:none; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer;">🚚 선택 수거예약</button>
                         <button onclick="reconcileGoodsflow(this)" title="굿스플로에만 남아있는 예약(기사 헛출동 위험)을 찾아 정리합니다" style="background:#fff; color:#2E7D32; border:1px solid #2E7D32; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer;">🔍 굿스플로 대조</button>
                         <button onclick="pollGoodsflowNow(this)" title="굿스플로에서 배송상태를 조회해 도착한 건을 '택배도착'으로 넘깁니다" style="background:#2E7D32; color:white; border:none; padding:5px 12px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer;">📦 배송상태 확인</button>
                     </span>
@@ -690,6 +764,7 @@ async function loadQuotes(view) {
 // 목록 렌더가 끝난 뒤 비동기로 돌아 로딩을 늦추지 않고, 결과는 세션 캐시에 남겨 재조회를 줄인다.
 let _paidPhoneCounts = null;      // 번호 → 입금완료 건수 (세션 1회 로드)
 let _paidDocIdsByPhone = null;    // 번호 → 입금완료 문서ID 집합 (자기 자신 제외용)
+let _returnedPhoneCounts = null;  // 번호 → 반송 건수 (요약 문서에서만 채워짐)
 
 // 뱃지 작업 실행 시점 조절.
 // PC는 여유가 있어 바로 돌리지만, 모바일은 자바스크립트가 3~5배 느려서
@@ -722,14 +797,50 @@ async function markReturningCustomers() {
     //  · 재방문 : 과거에 거래가 성사된(입금완료) 이력 → 단골 고객
     //  · 진행중 : 지금 이 사람의 '다른' 신청이 살아있음 → 중복 접수일 수 있어 확인 필요
     //             (예: 미집하로 방치된 건이 있는데 새로 신청한 경우)
-    const render = (els, paidCount, activeCount) => {
-        if (!paidCount && !activeCount) return;
+    // 뱃지에 올렸을 때 뜨는 설명.
+    // 같은 번호의 다른 신청을 '기종 · 시각 · 간격'까지 보여줘야 담당자가 바로 판단한다.
+    //  · 같은 기종 + 몇 분 차이  → 접수된 줄 모르고 다시 누른 경우가 대부분
+    //  · 기종이 다르거나 하루 차이 → 폰 여러 대를 파는 정상 접수
+    const buildDupTip = (me, others) => {
+        if (!others.length) return '';
+        const fmt = (d) => d ? `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '시각미상';
+        const gap = (a, b) => {
+            if (!a || !b) return '';
+            const m = Math.abs(a - b) / 60000;
+            if (m < 60) return `${Math.round(m)}분 차이`;
+            if (m < 1440) return `${Math.round(m / 60)}시간 차이`;
+            return `${Math.round(m / 1440)}일 차이`;
+        };
+        const lines = others.map(o => {
+            const same = me && o.model === me.model ? ' ※같은 기종' : '';
+            const g = me ? gap(me.at, o.at) : '';
+            return `· ${fmt(o.at)}  ${o.model}  ${o.status}${g ? '  (' + g + ')' : ''}${same}`;
+        });
+        return `같은 번호로 진행 중인 다른 신청 ${others.length}건\n\n${lines.join('\n')}\n\n`
+            + `같은 기종이고 시간 차이가 짧으면 접수된 줄 모르고 다시 누른 경우일 수 있습니다.\n`
+            + `기종이 다르면 여러 대를 판매하시는 정상 접수입니다.`;
+    };
+
+    const render = (els, paidCount, activeCount, returnedCount, dup) => {
+        if (!paidCount && !activeCount && !returnedCount) return;
         let html = '';
         if (paidCount) {
             html += `<span title="과거 입금완료 ${paidCount}건 — 재거래 고객" style="display:inline-block; margin-left:6px; padding:1px 6px; border-radius:10px; background:#FFF3E0; color:#E65100; border:1px solid #FFCC80; font-size:0.7rem; font-weight:700; vertical-align:middle;">재방문${paidCount > 1 ? ' ' + paidCount : ''}</span>`;
         }
+        // 반송 이력 — 지난번 검수가에 동의하지 않았던 고객.
+        // 검수·안내에 더 신경 써야 하므로 재거래와 구분해서 보여준다.
+        if (returnedCount) {
+            html += `<span title="과거 반송 ${returnedCount}건 — 지난번 매입가에 동의하지 않으셨던 고객입니다. 검수 안내에 유의하세요." style="display:inline-block; margin-left:4px; padding:1px 6px; border-radius:10px; background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE; font-size:0.7rem; font-weight:700; vertical-align:middle;">반송이력${returnedCount > 1 ? ' ' + returnedCount : ''}</span>`;
+        }
         if (activeCount) {
-            html += `<span title="같은 연락처로 진행 중인 다른 신청이 ${activeCount}건 있습니다. 중복 접수인지 확인하세요." style="display:inline-block; margin-left:4px; padding:1px 6px; border-radius:10px; background:#FEE2E2; color:#B91C1C; border:1px solid #FCA5A5; font-size:0.7rem; font-weight:700; vertical-align:middle;">진행중 ${activeCount}</span>`;
+            // 같은 기종이 섞였으면 빨강(확인 필요), 기종이 다르면 회색(정상 다건 접수)
+            const same = dup && dup.sameModel;
+            const tip = (dup && dup.tip) || `같은 연락처로 진행 중인 다른 신청이 ${activeCount}건 있습니다.`;
+            const style = same
+                ? 'background:#FEE2E2; color:#B91C1C; border:1px solid #FCA5A5;'
+                : 'background:#F1F5F9; color:#475569; border:1px solid #CBD5E1;';
+            const label = same ? `같은기종 ${activeCount}` : `여러대 ${activeCount}`;
+            html += `<span title="${String(tip).replace(/"/g, '&quot;')}" style="display:inline-block; margin-left:4px; padding:1px 6px; border-radius:10px; ${style} font-size:0.7rem; font-weight:700; vertical-align:middle; cursor:help;">${label}</span>`;
         }
         els.forEach(el => { el.innerHTML = html; });
     };
@@ -741,6 +852,36 @@ async function markReturningCustomers() {
     //   그 뒤로는 메모리에서 대조한다. 왕복 22회 → 1회.
     //   집합은 세션 동안 재사용하므로 탭을 오가도 다시 조회하지 않는다.
     try {
+        // ── 1순위: 미리 세어둔 요약 문서 1건만 읽는다 ──────────────────
+        //   stats/returning_customers 에 번호별 { paid, returned, canceled } 가 들어 있다.
+        //   서버(Cloud Functions)가 매입완료·반송·취소 때마다 갱신하므로 항상 최신이다.
+        //   문서 1건이라 수십 ms면 끝나고, 매입이 쌓여도 느려지지 않는다.
+        if (!_paidPhoneCounts) {
+            try {
+                const rcSnap = await getDoc(doc(db, 'stats', 'returning_customers'));
+                if (rcSnap.exists()) {
+                    const counts = rcSnap.data().counts || {};
+                    _paidPhoneCounts = new Map();
+                    _returnedPhoneCounts = new Map();
+                    for (const p in counts) {
+                        const c = counts[p] || {};
+                        if (c.paid) _paidPhoneCounts.set(p, c.paid);
+                        if (c.returned) _returnedPhoneCounts.set(p, c.returned);
+                    }
+                    // 요약표에는 '어느 문서였는지'가 없으므로, 화면에 뜬 자기 자신을 빼는 보정은
+                    // 아래 집계에서 상태값으로 대신 처리한다.
+                    _paidDocIdsByPhone = null;
+                    console.log(`[성능] 재방문 요약표 사용 ${Math.round(performance.now() - _rt0)}ms / 번호 ${_paidPhoneCounts.size}개`);
+                } else {
+                    console.warn('[재방문표] 요약 문서(stats/returning_customers)가 아직 없습니다. ' +
+                        'admin_rc_backfill.html 에서 ② 저장하기를 실행하세요. 지금은 기존 방식으로 동작합니다.');
+                }
+            } catch (e) {
+                console.warn('[재방문표] 요약 문서 읽기 실패 — 기존 방식으로 진행합니다:', e && e.message);
+            }
+        }
+
+        // ── 2순위(안전망): 요약 문서가 아직 없으면 예전 방식으로 계산 ──
         // 브라우저 세션에도 저장해 새로고침·탭이동 시 재조회를 없앤다(입금완료 건은 자주 안 바뀜).
         const CACHE_KEY = 'sr_paid_phone_cache_v1';
         const CACHE_TTL = 30 * 60 * 1000; // 30분
@@ -758,7 +899,19 @@ async function markReturningCustomers() {
             } catch (_) { }
         }
         if (!_paidPhoneCounts) {
-            const snap = await getDocs(query(collection(db, "quotes"), where("status", "==", "입금완료")));
+            // ★ 속도 개선 (2026-08)
+            //   예전: where(status=="입금완료") 만 걸고 전체를 훑었다 → 554건에 6~77초.
+            //   측정해 보니 '정렬 없이 훑는 조회'가 건당 13배 느렸다.
+            //   (건수만 세기 95ms / 정렬+제한 300건 272ms / 정렬없이 554건 6,742ms)
+            //   orderBy 를 붙이면 이미 만들어 둔 색인(status + firebaseTimestamp)을 타서 빨라진다.
+            //   limit 으로 상한을 둬, 매입이 쌓여도 이 조회가 계속 무거워지지 않게 한다.
+            const PAID_SCAN_LIMIT = 600;   // 최근 매입완료 600건 기준으로 재방문 판별
+            const snap = await getDocs(query(
+                collection(db, "quotes"),
+                where("status", "==", "입금완료"),
+                orderBy("firebaseTimestamp", "desc"),
+                limit(PAID_SCAN_LIMIT)
+            ));
             _paidPhoneCounts = new Map();
             _paidDocIdsByPhone = new Map();
             snap.forEach(d => {
@@ -781,17 +934,29 @@ async function markReturningCustomers() {
 
         // 진행 중인 건은 상태가 수시로 바뀌므로 캐시하지 않고 매번 조회한다(수십~수백 건이라 가볍다).
         // 종결 상태(입금완료·취소·반송접수·삭제)를 뺀 나머지가 '살아있는 신청'이다.
-        const activeByPhone = new Map();   // 번호 → 문서ID 집합
+        // 번호 → [{ id, model, at }] — 뱃지에 기종·시각을 함께 보여주기 위해 내용까지 담는다.
+        //
+        // ★ 왜 내용이 필요한가
+        //   같은 번호로 2건이 있어도 '실수로 두 번 누른 것'과 '폰 두 대를 파는 것'은
+        //   데이터만으로 구분할 수 없다. 같은 기종 두 대를 보내는 고객도 실제로 있다.
+        //   그래서 판단은 담당자가 하고, 시스템은 판단에 필요한 정보(기종·간격)만 보여준다.
+        //   뱃지에 마우스를 올리면 각 건이 뜨므로 목록에서 바로 판단할 수 있다.
+        const activeByPhone = new Map();
         try {
             const aSnap = await getDocs(query(collection(db, "quotes"), where("status", "not-in", TERMINAL_FOR_LIST)));
             aSnap.forEach(d => {
                 const v = d.data();
                 if (v.isDeleted) return;
-                if (v.isForeigner === true || v.method === 'foreigner') return;
+                if (v.isForeigner === true || v.method === 'foreigner' || v.series === 'Foreigner') return;
                 const key = String(v.customerPhone || '').replace(/\D/g, '');
                 if (key.length < 9) return;
-                if (!activeByPhone.has(key)) activeByPhone.set(key, new Set());
-                activeByPhone.get(key).add(d.id);
+                if (!activeByPhone.has(key)) activeByPhone.set(key, []);
+                activeByPhone.get(key).push({
+                    id: d.id,
+                    model: `${v.brand || ''} ${v.model || ''}`.trim() || '기종미상',
+                    at: _toDateForList(v.submittedAt) || _toDateForList(v.firebaseTimestamp),
+                    status: v.status || ''
+                });
             });
         } catch (e) {
             console.warn('진행중 중복 조회 실패:', e && e.message);
@@ -799,19 +964,34 @@ async function markReturningCustomers() {
 
         byPhone.forEach((els, p) => {
             // 재방문 — 과거 입금완료 건수 (화면에 뜬 그 건 자신은 제외)
+            // 요약 문서를 쓸 땐 _paidDocIdsByPhone 이 없다(문서ID를 담지 않으므로).
+            // 뱃지는 '진행중' 목록에만 붙어 그 행 자체가 입금완료일 수 없으니 보정이 필요 없다.
             let paid = _paidPhoneCounts.get(p) || 0;
-            const paidIds = _paidDocIdsByPhone.get(p);
+            const paidIds = _paidDocIdsByPhone ? _paidDocIdsByPhone.get(p) : null;
             if (paidIds) els.forEach(el => { if (paidIds.has(el.getAttribute('data-self'))) paid--; });
 
-            // 진행중 — 같은 번호로 살아있는 다른 신청 (자기 자신은 제외)
-            const actIds = activeByPhone.get(p);
-            let active = 0;
-            if (actIds) {
-                const selfIds = new Set(els.map(el => el.getAttribute('data-self')));
-                actIds.forEach(docId => { if (!selfIds.has(docId)) active++; });
-            }
+            // 반송 이력 — 요약 문서가 있을 때만 채워진다
+            const returned = _returnedPhoneCounts ? (_returnedPhoneCounts.get(p) || 0) : 0;
 
-            render(els, Math.max(0, paid), active);
+            // 진행중 — 같은 번호로 살아있는 '다른' 신청 수.
+            // ⚠ 예전엔 화면에 뜬 같은 번호 행들을 한꺼번에 selfIds 로 묶어 빼버렸다.
+            //   그래서 중복 접수 두 건이 둘 다 목록에 보이면 남는 게 0이 되어
+            //   정작 확인이 가장 필요한 경우에 뱃지가 안 떴다.
+            //   각 행 기준으로 '자기 자신만' 빼고 세야 서로를 가리킨다.
+            const actList = activeByPhone.get(p) || [];
+
+            els.forEach(el => {
+                const selfId = el.getAttribute('data-self');
+                const others = actList.filter(x => x.id !== selfId);
+                const me = actList.find(x => x.id === selfId);
+
+                // 같은 기종이 섞여 있으면 '실수로 두 번' 가능성이 높아 색을 달리한다.
+                // 다만 같은 기종 두 대를 파는 고객도 있어 단정하지 않고 색으로만 힌트를 준다.
+                const sameModel = me ? others.some(x => x.model === me.model) : false;
+                const tip = buildDupTip(me, others);
+
+                render([el], Math.max(0, paid), others.length, returned, { sameModel, tip });
+            });
         });
         console.log(`[성능] 재방문·중복 표시 ${Math.round(performance.now() - _rt0)}ms / 번호 ${byPhone.size}개`);
     } catch (e) {
@@ -1388,7 +1568,9 @@ async function loadUsers() {
                 <td>${data.account || '-'}</td>
 
                 <td>
-
+${data.isWithdrawn === true
+    ? `<span style="font-size:0.78rem; color:#94a3b8;">탈퇴됨</span>`
+    : `<button class="action-btn" onclick="withdrawUser('${doc.id}', '${String(data.nickname || data.email || '').replace(/'/g, "\\'")}')" style="color:#2563eb;">탈퇴 처리</button>`}
                     <button class="action-btn" onclick="deleteUser('${doc.id}')" style="color:red;">삭제</button>
 
                 </td>
@@ -1414,6 +1596,52 @@ async function loadUsers() {
 
 
 // Global Delete User
+
+// ════════════════════════════════════════════════════════════════
+// 회원 탈퇴 처리 — ⚠️ 아래 deleteUser(완전삭제)와 **다른 것이다**
+// ════════════════════════════════════════════════════════════════
+//
+//   탈퇴 처리   문서를 남기고 개인정보만 비운다. 거래 이력이 유지된다  ← 정상 절차
+//   완전 삭제   문서를 통째로 지운다. 과거 매입 건과 연결이 끊긴다     ← 예외 상황용
+//
+// ⚠️ 고객이 "탈퇴해 달라"고 요청한 경우는 **탈퇴 처리**가 맞다.
+//    mypage.html 1456줄의 고객 셀프 탈퇴와 같은 결과를 만든다.
+//
+// ⚠️ 이 버튼이 필요한 이유 —
+//    보안 규칙이 `kakao_*` 만 셀프 탈퇴를 허용하고 있어서
+//    **네이버 회원(`naver_*`)은 마이페이지에서 탈퇴가 거부된다** (auth.js 607줄).
+//    규칙을 고치기 전까지는 여기서 대신 처리한다.
+window.withdrawUser = async (userId, label) => {
+    const who = label || userId;
+    if (!confirm(
+        `${who} 회원을 탈퇴 처리하시겠습니까?\n\n` +
+        `· 이름·연락처·이메일·닉네임·주소를 비웁니다\n` +
+        `· 매입 거래 이력은 그대로 남습니다\n\n` +
+        `되돌릴 수 없습니다.`
+    )) return;
+
+    try {
+        await updateDoc(doc(db, "users", userId), {
+            isWithdrawn: true,
+            withdrawnAt: new Date(),
+            // 개인정보 파기 — 고객 셀프 탈퇴와 같은 항목을 비운다
+            name: "",
+            nickname: "",
+            phone: "",
+            phoneNumber: "",
+            email: "",
+            address: "",
+            profileImage: "",
+            // 누가 처리했는지 남긴다 (고객이 셀프로 한 것과 구분)
+            withdrawnBy: document.getElementById('admin-email')?.textContent || 'admin'
+        });
+        alert("탈퇴 처리되었습니다.");
+        loadUsers();
+    } catch (e) {
+        console.error("탈퇴 처리 실패:", e);
+        alert("탈퇴 처리 실패: " + e.message);
+    }
+};
 
 window.deleteUser = async (userId) => {
 
@@ -1565,6 +1793,87 @@ async function gfAuthHeader() {
     return { "Content-Type": "application/json", "Authorization": "Bearer " + token };
 }
 
+// ===================================================================
+// 방문수거 일괄 예약
+// -------------------------------------------------------------------
+// 방문수거 건이 하루 200건이 넘어가면서 하나씩 누르는 게 불가능해졌다.
+//
+// ⚠️ 예약은 실제로 돈이 나가는 요청이고 취소가 자유롭지 않다.
+//    그래서 '전체 선택' 은 **예약 가능한 건만** 잡는다.
+//    이미 예약된 건 · 우편번호 없는 건은 애초에 선택되지 않는다.
+// ===================================================================
+
+/** 예약 가능한 행의 체크박스만 (tr.dataset.gfBookable 이 붙은 행) */
+function _gfBookableCheckboxes() {
+    return Array.from(document.querySelectorAll('tr[data-gf-bookable="1"] .quote-checkbox'));
+}
+
+function _gfUpdateCount() {
+    const el = document.getElementById('gf-selected-count');
+    if (!el) return;
+    const n = _gfBookableCheckboxes().filter(cb => cb.checked).length;
+    el.textContent = n > 0 ? `${n}건 선택` : '';
+}
+
+window.toggleCourierBookableAll = (source) => {
+    _gfBookableCheckboxes().forEach(cb => { cb.checked = source.checked; });
+    _gfUpdateCount();
+};
+
+// 개별 체크에도 숫자가 따라오게
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.classList?.contains('quote-checkbox')) _gfUpdateCount();
+});
+
+window.bulkBookGoodsflowPickup = async (btn) => {
+    const ids = _gfBookableCheckboxes().filter(cb => cb.checked).map(cb => cb.value).filter(Boolean);
+    if (ids.length === 0) {
+        alert("선택된 건이 없습니다.\n\n예약 가능한 건(🚚 수거 예약 버튼이 있는 건)만 선택됩니다.\n이미 예약됐거나 우편번호가 없는 건은 제외됩니다.");
+        return;
+    }
+    if (!confirm(`선택한 ${ids.length}건의 방문수거를 굿스플로에 예약합니다.\n\n⚠️ 실제 기사 배차가 발생하고 건당 배송비가 나갑니다.\n취소가 자유롭지 않으니 건수를 확인해 주세요.\n\n계속할까요?`)) return;
+
+    const orig = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; }
+
+    let ok = 0;
+    const shifted = [];   // 희망일로 접수가 안 돼 날짜가 밀린 건 — 고객 안내가 필요하다
+    const fails = [];
+
+    for (let i = 0; i < ids.length; i++) {
+        if (btn) btn.textContent = `예약 중… ${i + 1}/${ids.length}`;
+        const id = ids[i];
+        try {
+            const res = await fetch(GOODSFLOW_API + "/createOrder", {
+                method: "POST",
+                headers: await gfAuthHeader(),
+                body: JSON.stringify({ quoteId: id })
+            });
+            const out = await res.json().catch(() => ({ ok: false, error: "응답을 해석할 수 없습니다." }));
+            if (!res.ok || !out.ok) { fails.push(`${id.slice(0, 6)}… ${out.error || `오류 ${res.status}`}`); continue; }
+            ok++;
+            // 지난 날짜·일요일·공휴일이면 서버가 다음 가능일로 민다.
+            // 조용히 넘어가면 고객이 원래 날짜에 기다리다 문의가 들어온다.
+            if (out.dateShifted) {
+                shifted.push(`· 희망 ${out.customerWanted || '미지정'} → ${out.pickupRequestDateTime}`);
+            }
+        } catch (e) {
+            fails.push(`${id.slice(0, 6)}… ${e.message}`);
+        }
+    }
+
+    if (btn) { btn.disabled = false; btn.textContent = orig || '🚚 선택 수거예약'; }
+
+    let msg = `수거예약 ${ok}건 완료`;
+    if (shifted.length > 0) {
+        msg += `\n\n⚠️ 아래 ${shifted.length}건은 희망일로 접수할 수 없어 날짜가 밀렸습니다.\n`
+             + `고객에게 변경된 날짜를 안내해 주세요.\n\n` + shifted.join('\n');
+    }
+    if (fails.length > 0) msg += `\n\n실패 ${fails.length}건:\n${fails.join('\n')}`;
+    alert(msg);
+    loadQuotes();
+};
+
 window.bookGoodsflowPickup = async (id) => {
     if (!confirm("이 건의 방문수거를 굿스플로에 예약합니다.\n실제 기사 배차가 발생합니다. 진행할까요?")) return;
     const btn = event && event.target;
@@ -1659,7 +1968,24 @@ window.reconcileGoodsflow = async (btn) => {
 };
 
 window.cancelGoodsflowPickup = async (id, force) => {
-    if (!force && !confirm("굿스플로 수거 예약을 취소합니다. 진행할까요?")) return;
+    // ⚠️ 미집하 건은 이미 택배사로 이관돼서, API 는 '취소됨' 으로 응답하지만
+    //    홈픽에는 그대로 남는다. 우리 화면만 취소로 바뀌고 기사는 계속 간다.
+    //    그래서 미집하 건이면 눌러도 소용없다는 걸 먼저 알려준다.
+    if (!force) {
+        let isPickupFailed = false;
+        try {
+            const snap = await getDoc(doc(db, "quotes", id));
+            isPickupFailed = snap.exists() && snap.data().goodsflowAlert === 'PICKUP_FAILED';
+        } catch (e) { /* 조회 실패해도 아래 기본 확인창으로 진행 */ }
+
+        if (isPickupFailed) {
+            alert("미집하 건은 여기서 취소되지 않습니다.\n\n"
+                + "이미 택배사로 이관된 상태라, 취소해도 화면만 바뀌고 홈픽에는 그대로 남습니다.\n"
+                + "기사 방문을 막으려면 홈픽 페이지에서 직접 취소를 요청해 주세요. (48시간 뒤 처리)");
+            return;
+        }
+        if (!confirm("굿스플로 수거 예약을 취소합니다. 진행할까요?")) return;
+    }
     try {
         const res = await fetch(GOODSFLOW_API + "/cancelOrder", {
             method: "POST",
@@ -1737,7 +2063,6 @@ window.switchTab = (tabName, event) => {
     if (tabName === 'foreigner') loadForeignerQuotes();
     if (tabName === 'monthly-stats') loadMonthlyStats();
     if (tabName === 'daily-stats') loadDailyStats();
-    if (tabName === 'inventory') window.loadInventory();
     if (tabName === 'statistics') window.loadStatistics();
     if (tabName === 'users') loadUsers();
     if (tabName === 'blacklist') loadBlacklist();
@@ -1746,6 +2071,8 @@ window.switchTab = (tabName, event) => {
     if (tabName === 'analytics') window.loadFunnelData();
     if (tabName === 'popup' && typeof window.loadPopupSettings === 'function') window.loadPopupSettings();
     if (tabName === 'settings' && typeof window.loadGeneralSettings === 'function') window.loadGeneralSettings();
+    if (tabName === 'reconcile') window.runReconciliation();
+    if (tabName === 'pickup-notice') window.loadPickupNotice();
 };
 
 window.toggleFunnelDateInput = () => {
@@ -2005,7 +2332,7 @@ window.loadFunnelData = async () => {
             const exits = [
                 { key: 'exit_kakao', label: '카카오 채널 1:1 상담 클릭' },
                 { key: 'exit_naver_map', label: '네이버 지도 매장 확인 클릭' },
-                { key: 'exit_channeltalk', label: '채널톡 고객센터 버튼 클릭' },
+                { key: 'exit_channeltalk', label: '고객센터 문의 클릭 (구 채널톡)' },
                 { key: 'move_reviews', label: '메인메뉴 → 이용 후기 페이지 클릭' },
                 { key: 'move_price_list', label: '메인메뉴 → 시세표 페이지 클릭' },
                 { key: 'move_terms', label: '푸터 → 이용약관 클릭' },
@@ -2944,9 +3271,19 @@ window.viewDetail = async (id) => {
 
 
 
-                if (d.lcd_damage === true) {
+                // ⚠️ 액정 값이 두 가지 형태다.
+                //      현재: 'no'(없음) · 'light'(줄·멍) · 'heavy'(완전 안 보임)
+                //      과거: true / false (불리언)
+                //    예전엔 `=== true` 로만 비교해서, 지금 들어오는 문자열 값은
+                //    **파손이어도 화면에 아예 안 떴다.**
+                //    반대로 `d.lcd_damage ?` 로 쓰면 'no'(없음)가 참이라 뒤집힌다.
+                const _lcd = d.lcd_damage;
+                if (_lcd === true || _lcd === 'light' || _lcd === 'heavy') {
 
-                    defectsHtml += '<li style="color:red;"><strong>LCD 손상:</strong> 있음 (줄/멍/파손)</li>';
+                    const _lcdText = _lcd === 'light' ? '있음 (줄·멍)'
+                                   : _lcd === 'heavy' ? '있음 (완전 안 보임)'
+                                   : '있음 (줄/멍/파손)';
+                    defectsHtml += `<li style="color:red;"><strong>LCD 손상:</strong> ${_lcdText}</li>`;
 
                 }
 
@@ -3182,7 +3519,9 @@ window.sendDropoffAlert = async (docId) => {
 // 개인발송(cvs)은 굿스플로를 타지 않아 집하·도착 자동 알림톡이 나가지 않는다.
 // 담당자가 상황을 보고 직접 보낼 수 있도록 버튼으로 제공한다.
 // 템플릿 ID는 솔라피 승인 후 아래 값만 교체하면 된다.
-const CVS_ALIMTALK_TEMPLATE_ID = "KA01TP2606022004288667NGejVJlt9L";
+// 2026-08 교체 (이전: KA01TP2606022004288667NGejVJlt9L)
+// 새 템플릿은 치환 변수가 없어 고정 문구로 발송된다.
+const CVS_ALIMTALK_TEMPLATE_ID = "KA01TP260728070417812B8ANssPJatL";
 
 window.sendCvsAlimtalk = async (docId) => {
     if (!CVS_ALIMTALK_TEMPLATE_ID) {
@@ -3205,12 +3544,9 @@ window.sendCvsAlimtalk = async (docId) => {
             body: JSON.stringify({
                 phone: phone,
                 templateId: CVS_ALIMTALK_TEMPLATE_ID,
-                variables: {
-                    "#{고객성함}": data.customerName || "-",
-                    "#{고객명}": data.customerName || "-",
-                    "#{기종}": `${data.brand || ""} ${data.model || ""}`.trim() || "-",
-                    "#{모델}": `${data.brand || ""} ${data.model || ""}`.trim() || "-"
-                }
+                // 새 템플릿은 치환 변수가 없다.
+                // 템플릿에 없는 변수를 보내면 솔라피가 거부할 수 있어 빈 값으로 보낸다.
+                variables: {}
             })
         });
         const body = await res.text();
@@ -3224,6 +3560,158 @@ window.sendCvsAlimtalk = async (docId) => {
         loadQuotes();
     } catch (e) {
         console.error("개인발송 알림톡 오류:", e);
+        alert("발송 중 오류가 발생했습니다.\n\n" + e.message);
+    }
+};
+
+// ===================================================================
+// 미집하 — 일괄 처리
+// -------------------------------------------------------------------
+// 미집하는 여러 건을 연달아 처리하는 구역이다. 하나씩 누르면 오래 걸린다.
+//
+// 두 가지는 뜻이 다르다.
+//   예약취소 — 굿스플로 수거 예약만 취소. 신청건은 살아 있다 (재예약 가능)
+//   매입취소 — 신청 자체를 '취소' 로. 굿스플로 예약도 같이 취소된다
+// ===================================================================
+
+/** 미집하 구역의 체크박스만 모은다 (다른 구역까지 건드리면 안 된다) */
+function _pfCheckedIds() {
+    return Array.from(document.querySelectorAll('tr.pf-row .quote-checkbox:checked'))
+        .map(cb => cb.value)
+        .filter(Boolean);
+}
+
+function _pfUpdateCount() {
+    const el = document.getElementById('pf-selected-count');
+    if (!el) return;
+    const n = _pfCheckedIds().length;
+    el.textContent = n > 0 ? `${n}건 선택됨` : '';
+}
+
+window.togglePickupFailedAll = (source) => {
+    document.querySelectorAll('tr.pf-row .quote-checkbox').forEach(cb => { cb.checked = source.checked; });
+    _pfUpdateCount();
+};
+
+// 개별 체크에도 숫자가 따라오게 (미집하 구역만)
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.classList?.contains('quote-checkbox') && e.target.closest('tr.pf-row')) {
+        _pfUpdateCount();
+    }
+});
+
+/** 선택한 건들을 '취소' 상태로 — 굿스플로 예약도 함께 취소된다 */
+window.bulkCancelPurchase = async () => {
+    const ids = _pfCheckedIds();
+    if (ids.length === 0) { alert("선택된 건이 없습니다."); return; }
+    if (!confirm(`선택한 ${ids.length}건을 매입취소 처리합니다.\n\n신청건이 '취소' 상태가 되고, 굿스플로 수거 예약도 함께 취소됩니다.\n계속할까요?`)) return;
+
+    let ok = 0;
+    const fails = [];
+    const needHomepick = [];   // 홈픽에서 손으로 취소해야 하는 건
+    for (const id of ids) {
+        try {
+            const ref = doc(db, "quotes", id);
+            const snap = await getDoc(ref);
+            const data = snap.exists() ? snap.data() : {};
+
+            await updateDoc(ref, { status: '취소' });
+            ok++;
+
+            // ⚠️ 굿스플로 API 취소를 여기서 부르지 않는다.
+            //    미집하 건은 이미 택배사로 이관돼서, API 는 '취소됨' 으로 응답하지만
+            //    홈픽에는 그대로 남는다. 우리는 끝난 줄 알고 손을 떼는데 기사는 계속 간다.
+            //    → 취소는 홈픽에서 직접 요청해야 하고, 48시간 뒤에 처리된다.
+            //    자동으로 처리할 방법이 없으므로 사람이 할 일로 남겨 목록에 모아 보여준다.
+            if (data.goodsflowOrderNo) {
+                needHomepick.push(`${data.customerName || '이름없음'} · 주문 ${data.goodsflowOrderNo}`);
+            }
+        } catch (e) {
+            fails.push(`${id.slice(0, 6)}… ${e.message}`);
+        }
+    }
+    // 매입완료 집계 캐시가 낡으므로 버린다
+    _paidPhoneCounts = null;
+
+    let msg = `매입취소 ${ok}건 처리했습니다.`;
+    if (needHomepick.length > 0) {
+        msg += `\n\n⚠️ 아래 ${needHomepick.length}건은 홈픽에서 직접 취소 요청하셔야 합니다.\n`
+             + `(미집하 건은 택배사로 이관돼 API 로는 취소되지 않습니다. 요청 후 48시간 뒤 처리)\n\n`
+             + needHomepick.join('\n');
+    }
+    if (fails.length) msg += `\n\n처리 실패 ${fails.length}건:\n${fails.join('\n')}`;
+    alert(msg);
+    loadQuotes();
+};
+
+// ===================================================================
+// 미집하 안내 — 수동 발송
+// -------------------------------------------------------------------
+// 평소에는 goodsflowPoller 가 30분마다 자동 발송한다 (functions/index.js 1361줄).
+// 이 버튼은 자동이 못 잡는 경우를 위한 것이다.
+//   · 고객이 "안내를 못 받았다"고 전화한 경우
+//   · 자동 발송이 3회 실패해 중단된 건
+//   · 표시만 남고 실제로는 안 나간 옛 건 (7월에 다수 발생)
+//
+// ⚠️ 알림톡은 한 번 나가면 되돌릴 수 없다. 이미 보낸 건은 확인을 한 번 더 받는다.
+// ⚠️ 누가 보냈는지 남긴다. 자동 발송에는 이 정보가 없어서, 나중에
+//    "왜 두 번 갔지"를 추적하려면 수동분은 구분돼야 한다.
+// ===================================================================
+const PICKUP_FAILED_TEMPLATE_ID = "KA01TP260601181544930IFU2hB2wtIC"; // 변수 없는 고정 문구
+
+window.sendPickupFailedNotice = async (docId) => {
+    if (!docId) return;
+    try {
+        const docRef = doc(db, "quotes", docId);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) { alert("신청건을 찾을 수 없습니다."); return; }
+        const data = snap.data();
+
+        const phone = String(data.customerPhone || '').replace(/\D/g, '');
+        if (!phone) { alert("고객 연락처가 없습니다."); return; }
+
+        const prevAt = _toDateForList(data.pickupFailedNotifiedAt);
+        const who = data.customerName || '고객';
+        const msg = prevAt
+            ? `${who}님에게 미집하 안내를 다시 보냅니다.\n\n` +
+              `이미 ${prevAt.toLocaleString('ko-KR')} 에 발송된 건입니다.\n` +
+              `고객이 알림톡을 두 번 받게 됩니다. 계속할까요?`
+            : `${who}님(${phone})에게 미집하 안내 알림톡을 발송할까요?`;
+        if (!confirm(msg)) return;
+
+        const res = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/alimtalkApi/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                phone: phone,
+                templateId: PICKUP_FAILED_TEMPLATE_ID,
+                variables: {}   // 이 템플릿은 변수가 없다
+            })
+        });
+        const result = await res.json().catch(() => ({}));
+
+        // ★ 성공했을 때만 발송 표시를 남긴다.
+        //   먼저 찍고 보내면, 실패해도 '보냄'으로 남아 영영 재시도가 안 된다.
+        //   (7월 건 다수가 그 상태였다 — functions/index.js 1357줄 주석 참고)
+        if (!res.ok || result.error) {
+            alert("발송 실패\n\n" + (result.error || result.message || `HTTP ${res.status}`));
+            return;
+        }
+
+        await updateDoc(docRef, {
+            pickupFailedNotifiedAt: serverTimestamp(),
+            // 로그인한 관리자 이메일 — 화면 상단에 표시된 값을 그대로 쓴다
+            // (계정을 공유해 쓰고 있어 사람까지는 구분되지 않는다. 직원 앱으로 넘어가면 해결됨)
+            pickupFailedNotifyBy: (document.getElementById('admin-email')?.textContent || '관리자'),
+            pickupFailedNotifyManual: true,
+            pickupFailedNotifyTries: 0,                                  // 재시도 횟수 초기화
+            pickupFailedNotifyError: deleteField()
+        });
+
+        alert("미집하 안내 알림톡을 발송했습니다.");
+        loadQuotes();
+    } catch (e) {
+        console.error("미집하 안내 발송 오류:", e);
         alert("발송 중 오류가 발생했습니다.\n\n" + e.message);
     }
 };
@@ -4932,221 +5420,9 @@ window.bulkSendPendingAlimtalk = async (selectedOnly) => {
     }
 };
 
-window.inventoryDataCache = []; // 캐싱용 변수
-
-window.loadInventory = async function() {
-    const tableBody = document.getElementById('inventory-table-body');
-    if (!tableBody) return;
-    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">재고 데이터를 불러오는 중입니다...</td></tr>';
-    
-    try {
-        const q = query(collection(db, "quotes"));
-        const querySnapshot = await getDocs(q);
-        
-        window.inventoryDataCache = [];
-        
-        querySnapshot.forEach((docSnapshot) => {
-            const data = docSnapshot.data();
-            const status = data.status || '신청접수';
-            
-            if (status !== '입금완료') return;
-            if (data.isDeleted) return;
-            
-            window.inventoryDataCache.push({ id: docSnapshot.id, ...data });
-        });
-
-        // Helper to get time value for sorting
-        const getQuotePaidTime = (data) => {
-            if (data.paidAt) {
-                if (typeof data.paidAt.toDate === 'function') return data.paidAt.toDate().getTime();
-                if (data.paidAt.seconds) return data.paidAt.seconds * 1000;
-                const d = new Date(data.paidAt);
-                if (!isNaN(d.getTime())) return d.getTime();
-            }
-            if (data.customerAgreedAt) {
-                if (typeof data.customerAgreedAt.toDate === 'function') return data.customerAgreedAt.toDate().getTime();
-                if (data.customerAgreedAt.seconds) return data.customerAgreedAt.seconds * 1000;
-                const d = new Date(data.customerAgreedAt);
-                if (!isNaN(d.getTime())) return d.getTime();
-            }
-            if (data.inspectionData && data.inspectionData.inspectedAt) {
-                const d = new Date(data.inspectionData.inspectedAt);
-                if (!isNaN(d.getTime())) return d.getTime();
-            }
-            if (data.firebaseTimestamp) {
-                if (typeof data.firebaseTimestamp.toDate === 'function') return data.firebaseTimestamp.toDate().getTime();
-                if (data.firebaseTimestamp.seconds) return data.firebaseTimestamp.seconds * 1000;
-            }
-            if (data.timestamp) {
-                if (data.timestamp.seconds) return data.timestamp.seconds * 1000;
-                if (typeof data.timestamp === 'string') {
-                    const koMatch = data.timestamp.match(/(\d+)\.\s*(\d+)\.\s*(\d+)\.\s*(오전|오후)\s*(\d+):(\d+):(\d+)/);
-                    if (koMatch) {
-                        const year = parseInt(koMatch[1]);
-                        const month = parseInt(koMatch[2]) - 1;
-                        const day = parseInt(koMatch[3]);
-                        const ampm = koMatch[4];
-                        let hour = parseInt(koMatch[5]);
-                        const minute = parseInt(koMatch[6]);
-                        const second = parseInt(koMatch[7]);
-                        if (ampm === '오후' && hour < 12) hour += 12;
-                        else if (ampm === '오전' && hour === 12) hour = 0;
-                        return new Date(year, month, day, hour, minute, second).getTime();
-                    }
-                    const match = data.timestamp.match(/(\d+):(\d+):(\d+)\s+(\d+)\/(\d+)\/(\d+)/);
-                    if (match) {
-                        const hours = parseInt(match[1]);
-                        const minutes = parseInt(match[2]);
-                        const seconds = parseInt(match[3]);
-                        const day = parseInt(match[4]);
-                        const month = parseInt(match[5]) - 1;
-                        const year = parseInt(match[6]);
-                        return new Date(year, month, day, hours, minutes, seconds).getTime();
-                    }
-                    const d = new Date(data.timestamp);
-                    if (!isNaN(d.getTime())) return d.getTime();
-                }
-            }
-            return 0;
-        };
-
-        // Sort by payment completion date descending (most recently paid first)
-        window.inventoryDataCache.sort((a, b) => {
-            return getQuotePaidTime(b) - getQuotePaidTime(a);
-        });
-        
-        renderInventoryTable(window.inventoryDataCache);
-        
-    } catch(e) {
-        console.error("Inventory load error:", e);
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">재고 로드 실패: ${e.message}</td></tr>`;
-    }
-};
-
-window.renderInventoryTable = function(dataList) {
-    const tableBody = document.getElementById('inventory-table-body');
-    if (!tableBody) return;
-    tableBody.innerHTML = '';
-    
-    if (dataList.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">해당하는 재고 내역이 없습니다.</td></tr>';
-        return;
-    }
-    
-    dataList.forEach(data => {
-        const tr = document.createElement('tr');
-        const id = data.id;
-        const modelText = `${data.brand || ''} ${data.model || ''} ${data.storage || ''}`.trim();
-        const priceText = `${new Intl.NumberFormat('ko-KR').format(data.price || 0)}원`;
-        
-        // Format reception date
-        let reqDateText = '날짜없음';
-        if (data.firebaseTimestamp) {
-            const d = data.firebaseTimestamp.toDate ? data.firebaseTimestamp.toDate() : new Date(data.firebaseTimestamp.seconds ? data.firebaseTimestamp.seconds * 1000 : data.firebaseTimestamp);
-            if (d && !isNaN(d.getTime())) reqDateText = d.toLocaleDateString('ko-KR');
-        } else if (data.timestamp) {
-            const d = new Date(data.timestamp);
-            if (!isNaN(d.getTime())) {
-                reqDateText = d.toLocaleDateString('ko-KR');
-            } else {
-                const parts = String(data.timestamp).split('.');
-                if (parts.length >= 3) {
-                    const yr = parseInt(parts[0]);
-                    const mo = parseInt(parts[1]);
-                    const dy = parseInt(parts[2]);
-                    reqDateText = `${yr}. ${String(mo).padStart(2,'0')}. ${String(dy).padStart(2,'0')}.`;
-                } else {
-                    reqDateText = data.timestamp;
-                }
-            }
-        }
-        
-        // Format remittance date (paidAt)
-        let paidDateText = '확인대기';
-        let pDateObj = null;
-        if (data.paidAt) {
-            pDateObj = data.paidAt.toDate ? data.paidAt.toDate() : new Date(data.paidAt.seconds ? data.paidAt.seconds * 1000 : data.paidAt);
-        } else if (data.customerAgreedAt) {
-            pDateObj = data.customerAgreedAt.toDate ? data.customerAgreedAt.toDate() : new Date(data.customerAgreedAt.seconds ? data.customerAgreedAt.seconds * 1000 : data.customerAgreedAt);
-        } else if (data.inspectionData && data.inspectionData.inspectedAt) {
-            pDateObj = new Date(data.inspectionData.inspectedAt);
-        }
-        
-        if (pDateObj && !isNaN(pDateObj.getTime())) {
-            paidDateText = pDateObj.toLocaleDateString('ko-KR');
-        } else {
-            // Legacy quotes fallback to request date
-            paidDateText = reqDateText;
-        }
-        
-        const dateStr = `${reqDateText} / ${paidDateText}`;
-        const customerText = `${data.customerName || '익명'} / ${data.customerPhone || '연락처없음'}`;
-        
-        const formatDefectsLocal = (defects) => {
-            if (!defects || Object.keys(defects).length === 0) return '특이사항 없음';
-            let parts = [];
-            if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '예' : '아니오'}`);
-            if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
-            if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
-            const dict = {
-                'true': '미개봉', 'false': '개봉', 'yes': '있음/불량', 'no': '없음/정상',
-                'scratch': '흠집', 'dent': '찍힘', 'break': '파손',
-                'lcd_broken': '액정파손/LCD불량', 'lcd_backlight': '백라이트 불량',
-                'burn_in_mild': '미세 잔상', 'burn_in_severe': '심한 잔상',
-                'camera': '카메라 불량', 'wifi': '와이파이 불량', 'power': '전원 버튼 불량',
-                'volume': '볼륨 버튼 불량', 'speaker': '스피커 불량', 'mic': '마이크 불량',
-                'charge': '충전 불량', 'biometrics': '생체인식 불량', 'gps': 'GPS 불량',
-                'network': '네트워크(유심) 불량', 'account': '계정 잠김(매입불가)',
-                'camera_lens': '카메라 멍/기스', 'camera_fail': '카메라 작동불가', 'faceid': '페이스ID/지문',
-                'compass': '나침반/GPS', 'unknown_part': '알수없는부품오류', 'sound': '스피커/마이크',
-                'vibration': '진동 불량', 'touch': '터치 불량', 'battery': '배터리성능 80%↓'
-            };
-            for (const key in defects) {
-                if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
-                if (Array.isArray(defects[key]) && defects[key].length > 0) {
-                    const mappedValues = defects[key].map(v => dict[v] || v).join(', ');
-                    let groupName = key;
-                    if (key === 'func_defect') groupName = '기능';
-                    else if (key === 'body_defect' || key === 'body_damage' || key === 'body') groupName = '외관';
-                    else if (key === 'micro_scratch') groupName = '미세기스';
-                    parts.push(`${groupName}: ${mappedValues}`);
-                }
-            }
-            return parts.length > 0 ? parts.join(', ') : '특이사항 없음';
-        };
-        const memoText = formatDefectsLocal(data.defectsDetails);
-        
-        tr.innerHTML = `
-            <td><input type="checkbox" class="quote-checkbox" value="${id}" /></td>
-            <td><span class="status-badge status-paid">보관중</span></td>
-            <td style="font-weight:bold;">${modelText}</td>
-            <td style="color:#1976D2; font-weight:bold;">${priceText}</td>
-            <td>${dateStr}</td>
-            <td>${customerText}</td>
-            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${memoText}</td>
-        `;
-        tableBody.appendChild(tr);
-    });
-};
-
-window.filterInventory = function() {
-    const searchInput = document.getElementById('inventory-search-input');
-    if (!searchInput) return;
-    
-    const queryStr = searchInput.value.toLowerCase().trim();
-    if (!queryStr) {
-        renderInventoryTable(window.inventoryDataCache);
-        return;
-    }
-    
-    const matched = window.inventoryDataCache.filter(item => {
-        const name = (item.customerName || '').toLowerCase();
-        const model = (`${item.brand || ''} ${item.model || ''} ${item.storage || ''}`).toLowerCase();
-        return name.includes(queryStr) || model.includes(queryStr);
-    });
-    
-    renderInventoryTable(matched);
-};
+// [삭제됨] 재고 현황 대시보드 — 매입완료 시트로 관리하므로 관리자에서 제거 (2026-08)
+//   loadInventory / renderInventoryTable / filterInventory 및 inventoryDataCache 삭제.
+//   loadInventory 는 quotes 컬렉션을 통째로 읽어 무거웠다.
 
 let chartDailyTrend = null;
 let chartBrandRatio = null;
@@ -5837,4 +6113,1262 @@ window.filterQuotes = function() {
     if (currentDivider) {
         currentDivider.style.display = visibleInSection > 0 ? '' : 'none';
     }
+};
+
+// ==========================================
+// 3-3 대조 도구 & 근태 승인 대기 수량 (recountAttendancePending) Implementation
+// ==========================================
+
+window.recountAttendancePending = async () => {
+    const btn1 = document.getElementById('btn-recount-attendance');
+    const btn2 = document.getElementById('btn-recount-attendance-warn');
+    if (btn1) { btn1.disabled = true; btn1.innerText = '다시 세는 중...'; }
+    if (btn2) { btn2.disabled = true; btn2.innerText = '다시 세는 중...'; }
+    try {
+        const { getFunctions, httpsCallable } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js");
+        const functions = getFunctions(undefined, 'asia-northeast3');
+        const recountFn = httpsCallable(functions, 'recountAttendancePending');
+        const res = await recountFn();
+        alert(`근태 대기 건수 재집계가 완료되었습니다.\n(이전: ${res.data.before}건 → 변경: ${res.data.count}건)`);
+        if (typeof window.runReconciliation === 'function') window.runReconciliation();
+    } catch (e) {
+        console.error("recountAttendancePending error:", e);
+        alert(`재집계 실패: ${e.message}`);
+    } finally {
+        if (btn1) { btn1.disabled = false; btn1.innerText = '🔄 다시 세기 (recountAttendancePending)'; }
+        if (btn2) { btn2.disabled = false; btn2.innerText = '🔄 대기 숫자 다시 세기 (recount)'; }
+    }
+};
+
+window.openReconcileDocModal = async (docId) => {
+    const modal = document.getElementById('reconcile-doc-modal');
+    const content = document.getElementById('reconcile-doc-modal-content');
+    if (!modal || !content) return;
+
+    modal.style.display = 'flex';
+    content.innerHTML = '<p style="color:#64748b; font-size:0.95rem;">문서 상세 정보(ID: ' + docId + ')를 읽어오는 중...</p>';
+
+    try {
+        const docRef = doc(db, 'quotes', docId);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) {
+            content.innerHTML = `<p style="color:#dc2626; font-weight:bold;">해당 문서가 존재하지 않습니다. (ID: ${docId})</p>`;
+            return;
+        }
+        const d = snap.data();
+        const formattedDate = formatDate(d.submittedAt || d.firebaseTimestamp || d.timestamp);
+        const formattedPrice = formatCurrency(d.price);
+
+        content.innerHTML = `
+            <div style="font-size: 0.9rem; line-height: 1.8; color: #1e293b;">
+                <div style="background:#f8fafc; padding:12px 16px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:14px;">
+                    <div style="font-size:0.8rem; color:#64748b; font-weight:bold; margin-bottom:4px;">문서 ID</div>
+                    <code style="font-size:0.95rem; color:#2563eb; font-weight:bold;">${docId}</code>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+                    <div><strong>고객명:</strong> ${d.customerName || '-'}</div>
+                    <div><strong>연락처:</strong> ${d.customerPhone || '-'}</div>
+                    <div><strong>기종:</strong> ${d.brand || ''} ${d.model || ''}</div>
+                    <div><strong>상태등급:</strong> ${d.condition || '-'}</div>
+                    <div><strong>매입가:</strong> <span style="color:#2563eb; font-weight:bold;">${formattedPrice}</span></div>
+                    <div><strong>접수일시:</strong> ${formattedDate}</div>
+                </div>
+                <div style="border-top:1px solid #e2e8f0; padding-top:12px; margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><strong>상태 (status):</strong> <span class="status-badge status-new" style="background:#e0f2fe; color:#0369a1;">${d.status || '신청접수'}</span></div>
+                    <div><strong>이전 상태 (prevStatus):</strong> ${d.prevStatus || '-'}</div>
+                    <div><strong>배송 방식 (deliveryMethod):</strong> ${d.deliveryMethod || '(미선택/pending)'}</div>
+                    <div><strong>운송장 (trackingNumber):</strong> ${d.trackingNumber || '-'}</div>
+                    <div><strong>굿스플로 알림:</strong> ${d.goodsflowAlert || '-'}</div>
+                    <div><strong>삭제 플래그 (isDeleted):</strong> ${d.isDeleted ? '<span style="color:#dc2626; font-weight:bold;">true (삭제됨)</span>' : 'false'}</div>
+                    <div><strong>외국인 플래그:</strong> ${d.isForeigner || d.method === 'foreigner' || d.series === 'Foreigner' ? '<span style="color:#d97706; font-weight:bold;">true (외국인)</span>' : 'false'}</div>
+                </div>
+            </div>
+            <details style="margin-top: 16px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                <summary style="font-size: 0.82rem; font-weight: bold; color: #475569; cursor: pointer;">RAW JSON 데이터 보기</summary>
+                <pre style="font-size: 0.75rem; color: #334155; margin-top: 8px; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">${JSON.stringify(d, null, 2)}</pre>
+            </details>
+        `;
+    } catch (e) {
+        console.error("openReconcileDocModal error:", e);
+        content.innerHTML = `<p style="color:#dc2626;">문서 조회 실패: ${e.message}</p>`;
+    }
+};
+
+window.runReconciliation = async () => {
+    const statusBar = document.getElementById('reconcile-status-bar');
+    const statusText = document.getElementById('reconcile-status-text');
+    const timeText = document.getElementById('reconcile-time-text');
+
+    if (statusBar) statusBar.style.display = 'flex';
+    if (statusText) statusText.innerHTML = '🔄 3-3 대조 데이터를 집계하는 중입니다... (getCountFromServer 쿼리 & 기존 메모리 기준 대조)';
+    if (timeText) timeText.innerText = '계산 중...';
+
+    const _t0 = performance.now();
+
+    try {
+        // --- 0. Check stats/attendance_pending (Directive ③) ---
+        const attCountDisplay = document.getElementById('reconcile-attendance-count-display');
+        const attWarnBanner = document.getElementById('reconcile-attendance-warning');
+        const attWarnText = document.getElementById('reconcile-attendance-warning-text');
+        
+        try {
+            const attSnap = await getDoc(doc(db, "stats", "attendance_pending"));
+            const rawCount = attSnap.exists() ? (attSnap.data().count || 0) : 0;
+            if (rawCount < 0) {
+                if (attCountDisplay) attCountDisplay.innerHTML = `<span style="color:#dc2626; font-weight:bold;">0건 (실제집계: ${rawCount}건)</span>`;
+                if (attWarnBanner) attWarnBanner.style.display = 'block';
+                if (attWarnText) attWarnText.innerText = `근태 승인 대기 숫자가 어긋났습니다 (현재 ${rawCount}건) — 다시 세기`;
+            } else {
+                if (attCountDisplay) attCountDisplay.innerHTML = `<strong style="font-size:1.25rem; color:#2563eb;">${rawCount}건</strong>`;
+                if (attWarnBanner) attWarnBanner.style.display = 'none';
+            }
+        } catch (e) {
+            console.warn("attendance_pending check warning:", e);
+        }
+
+        const quotesRef = collection(db, "quotes");
+        const B_STATUSES = ["택배도착", "검수중", "검수완료", "입금대기", "반송대기"];
+        const TERMINAL_STATUSES = ["입금완료", "취소", "반송접수", "삭제"];
+        const ALL_13_STATUSES = [
+            "신청접수", "수거중", "택배도착", "검수중", "검수완료",
+            "입금대기", "입금완료", "반송대기", "반송접수", "취소",
+            "삭제", "간편접수", "임시저장"
+        ];
+
+        // 1. Fetch raw documents once for legacy memory calculation & mismatch document ID collection
+        const allSnap = await getDocs(quotesRef);
+
+        const isForeignerDoc = (d) => d.isForeigner === true || d.method === 'foreigner' || d.series === 'Foreigner';
+
+        // Legacy in-memory aggregations
+        const legacy = {
+            stages: { a: 0, b: 0, terminal: 0 },
+            statuses: {},
+            monthlyPaid: { count: 0, amount: 0 },
+            special: { pickupFailed: 0, noTracking: 0, abandoned: 0 },
+            trash: 0,
+            docs: []
+        };
+        ALL_13_STATUSES.forEach(st => legacy.statuses[st] = 0);
+
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth();
+
+        allSnap.forEach(docSnap => {
+            const d = docSnap.data();
+            const id = docSnap.id;
+            const isDel = d.isDeleted === true;
+            const isFor = isForeignerDoc(d);
+            const st = d.status || '신청접수';
+
+            legacy.docs.push({ id, d, isDel, isFor, st });
+
+            // Trash
+            if (isDel || st === '삭제') legacy.trash++;
+
+            // Main tabs ignore isDeleted & isForeigner
+            if (isDel || isFor) return;
+
+            // Stage
+            if (B_STATUSES.includes(st)) {
+                legacy.stages.b++;
+            } else if (TERMINAL_STATUSES.includes(st)) {
+                legacy.stages.terminal++;
+            } else {
+                legacy.stages.a++;
+            }
+
+            // Status 13
+            if (legacy.statuses[st] !== undefined) {
+                legacy.statuses[st]++;
+            } else {
+                legacy.statuses[st] = 1;
+            }
+
+            // Monthly Paid
+            if (st === '입금완료') {
+                let pDate = null;
+                if (d.paidAt) pDate = d.paidAt.toDate ? d.paidAt.toDate() : new Date(d.paidAt.seconds ? d.paidAt.seconds * 1000 : d.paidAt);
+                else if (d.customerAgreedAt) pDate = d.customerAgreedAt.toDate ? d.customerAgreedAt.toDate() : new Date(d.customerAgreedAt.seconds ? d.customerAgreedAt.seconds * 1000 : d.customerAgreedAt);
+                else if (d.inspectionData && d.inspectionData.inspectedAt) pDate = new Date(d.inspectionData.inspectedAt);
+                else if (d.firebaseTimestamp) pDate = d.firebaseTimestamp.toDate ? d.firebaseTimestamp.toDate() : new Date(d.firebaseTimestamp.seconds ? d.firebaseTimestamp.seconds * 1000 : d.firebaseTimestamp);
+
+                if (pDate && pDate.getFullYear() === curYear && pDate.getMonth() === curMonth) {
+                    legacy.monthlyPaid.count++;
+                    legacy.monthlyPaid.amount += (d.price || 0);
+                }
+            }
+
+            // Special
+            if (d.goodsflowAlert === 'PICKUP_FAILED' && st !== '택배도착') legacy.special.pickupFailed++;
+            if (d.deliveryMethod === 'cvs' && (!d.trackingNumber || d.trackingNumber === '미입력')) legacy.special.noTracking++;
+            if ((!d.deliveryMethod || d.deliveryMethod === 'pending') && !TERMINAL_STATUSES.includes(st)) legacy.special.abandoned++;
+        });
+
+        // 2. New App Server-Side Counting (getCountFromServer) - Rule 3 Compliance
+        // Stages
+        const snapB = await getCountFromServer(query(quotesRef, where("status", "in", B_STATUSES)));
+        const newAppB = snapB.data().count;
+
+        const snapTerm = await getCountFromServer(query(quotesRef, where("status", "in", TERMINAL_STATUSES)));
+        const newAppTerm = snapTerm.data().count;
+
+        const snapA = await getCountFromServer(query(quotesRef, where("status", "not-in", [...B_STATUSES, ...TERMINAL_STATUSES])));
+        const newAppA = snapA.data().count;
+
+        // 13 Statuses getCountFromServer
+        const newAppStatuses = {};
+        for (const st of ALL_13_STATUSES) {
+            try {
+                if (st === '삭제') {
+                    const s = await getCountFromServer(query(quotesRef, where("isDeleted", "==", true)));
+                    newAppStatuses[st] = s.data().count;
+                } else {
+                    const s = await getCountFromServer(query(quotesRef, where("status", "==", st)));
+                    newAppStatuses[st] = s.data().count;
+                }
+            } catch (err) {
+                newAppStatuses[st] = 0;
+            }
+        }
+
+        // Monthly Paid range
+        const startOfMonth = new Date(curYear, curMonth, 1);
+        const endOfMonth = new Date(curYear, curMonth + 1, 0, 23, 59, 59);
+        let newAppMonthlyCount = 0;
+        let newAppMonthlyAmount = 0;
+        try {
+            const sMonth = await getCountFromServer(query(quotesRef, where("status", "==", "입금완료"), where("firebaseTimestamp", ">=", startOfMonth), where("firebaseTimestamp", "<=", endOfMonth)));
+            newAppMonthlyCount = sMonth.data().count;
+        } catch (err) { }
+
+        // Sum amount for matched range
+        allSnap.forEach(docSnap => {
+            const d = docSnap.data();
+            if (d.status === '입금완료' && d.firebaseTimestamp) {
+                const ft = d.firebaseTimestamp.toDate ? d.firebaseTimestamp.toDate() : new Date(d.firebaseTimestamp.seconds * 1000);
+                if (ft >= startOfMonth && ft <= endOfMonth) {
+                    newAppMonthlyAmount += (d.price || 0);
+                }
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════
+        // 특수 분류 3항목 — **셋 다 서버 카운트로 셀 수 없다. 메모리에서 센다.**
+        // -------------------------------------------------------------------
+        // ⚠️⚠️ 2026-08-18 — 이 절의 '새 앱' 열은 **새 앱이 아니었다.**
+        //    `getCountFromServer` 로 대충 비슷한 쿼리를 날려놓고 '새 앱' 이라고 적어서,
+        //    세 행 모두 실제 앱 화면과 다른 숫자를 보여주고 있었다.
+        //
+        //      미집하    where alert=='PICKUP_FAILED'      → 삭제·외국인·종결이 다 들어감
+        //      송장미입력 where trackingNumber=='미입력'    → 새 앱과 **정반대 집합**
+        //      이탈건    where deliveryMethod=='pending'   → 위 + **필드가 없는 문서를 못 셈**
+        //
+        //    ⭐ 특히 이탈건은 `deliveryMethod` **필드가 아예 없는 문서**가 대상에 들어가는데
+        //       Firestore 는 "필드 없음" 을 조회할 수 없다. 서버 카운트로는 **원리상 불가능**하다.
+        //
+        // ⚠️ 규칙 ③(건수는 서버 카운트)을 어기는 게 아니다. 규칙 ③은 **문서를 다 읽어서
+        //    세지 말라**는 뜻인데, 이 절은 이미 위에서 전체를 훑어 `legacy.docs` 에 담아뒀다.
+        //    같은 배열을 한 번 더 도는 비용은 0에 가깝고, **조회가 하나도 안 는다.**
+        //
+        // ⚠️ 그래서 `catch (e) { }` 로 실패를 삼키던 문제도 같이 사라진다 — 쿼리가 없다.
+        //
+        // 【판정 근거】 직원 앱 소스와 한 줄씩 맞춘 것이다
+        //    미집하   types/quote.ts `isPickupFailed`   = alert === 'PICKUP_FAILED'
+        //             lib/delivery.ts `listPickupFailed` 가 종결을 뺀다
+        //    이탈건   types/quote.ts `isDropoff`        = rawDeliveryMethod 가 '' 또는 'pending'
+        //    두 화면 모두 진행중 캐시(`useActiveQuotes`) 위에서 도므로 삭제·외국인·종결이 빠진다.
+        // ═══════════════════════════════════════════════════════════════════
+        let newAppPf = 0, newAppNt = 0, newAppAb = 0;
+
+        // 미집하 — 두 기준이 **서로 반대 방향으로** 어긋난다
+        //   새 앱만 셈 : `택배도착` (기존 관리자는 이걸 뺀다)
+        //   기존만 셈 : 종결 건    (새 앱은 이걸 뺀다)
+        let pfCommon = 0, pfArrivedOnly = 0, pfTerminalOnly = 0, pfExcluded = 0;
+        // 이탈건 — 두 기준이 같아야 한다. 다르면 그 자체가 신호다
+        let abCount = 0, abExcluded = 0;
+
+        legacy.docs.forEach(({ d, st, isDel, isFor }) => {
+            if (d.goodsflowAlert === 'PICKUP_FAILED') {
+                if (isDel || isFor) pfExcluded++;                              // 양쪽 다 안 셈
+                else if (st === '택배도착') pfArrivedOnly++;                    // 새 앱만
+                else if (TERMINAL_STATUSES.includes(st)) pfTerminalOnly++;     // 기존 관리자만
+                else pfCommon++;                                               // 양쪽 다
+            }
+            // ⚠️ `!d.deliveryMethod` — 필드가 **아예 없는** 문서를 잡는다. 서버 쿼리로는 못 한다
+            if (!d.deliveryMethod || d.deliveryMethod === 'pending') {
+                if (isDel || isFor) abExcluded++;
+                else if (!TERMINAL_STATUSES.includes(st)) abCount++;
+            }
+        });
+        newAppPf = pfCommon + pfArrivedOnly;
+        newAppAb = abCount;
+
+        // ═══════════════════════════════════════════════════════════════════
+        // 송장 미입력 — **서버 카운트로 셀 수 없다. 메모리에서 센다.**
+        // -------------------------------------------------------------------
+        // ⚠️⚠️ 2026-08-18 — 여기가 **틀려 있었다.**
+        //
+        //   전에 쓰던 쿼리:  cvs  AND  trackingNumber == '미입력'
+        //
+        //   그런데 새 앱은 `'미입력'`(= 송장없이 발송완료)을 **일부러 뺀다.**
+        //   즉 이 쿼리는 새 앱이 세는 것과 **정확히 반대 집합**을 세고 있었다.
+        //   그래서 이 행의 '차이' 숫자는 아무 의미가 없었다.
+        //
+        // ⚠️ Firestore 는 "필드가 없는 문서" 를 조회할 수 없다. 송장이 **아예 없는**
+        //    건이 대상이라 서버 카운트로는 애초에 표현이 안 된다.
+        //    → 이미 메모리에 올려둔 allDocs 로 **새 앱과 같은 규칙**으로 센다.
+        //
+        // 【새 앱 규칙】 src/types/quote.ts 의 isMissingTracking()
+        //    종결 아님 · deliveryMethod === 'cvs' · 송장번호 없음(‘미입력’ 제외)
+        //    · 굿스플로 송장(간선·집하)도 없음
+        //    (삭제·외국인은 위 forEach 에서 이미 빠졌다)
+        //
+        // ⚠️ 기존 관리자페이지는 `'미입력'` 도 미입력으로 센다 —
+        //    **일부러 다르게 둔 유일한 지점**이라 이 행은 항상 차이가 난다.
+        //    '미입력' 건은 4단계 '발송했다는데 도착 안 한 건' 에서 따로 본다.
+        // ═══════════════════════════════════════════════════════════════════
+        // ⚠️⚠️ 2026-08-18 (2차) — **차이를 끝까지 쪼개지 않았던 것을 고친다.**
+        //    처음엔 `'미입력'` 하나로 다 설명된다고 적었는데, 실제로 돌려보니
+        //    새 앱 46 / 기존 188 로 **142건**이 벌어졌고 `'미입력'` 은 6건뿐이었다.
+        //    나머지 136건은 **기존 관리자가 종결 건을 안 빼기 때문**이었다.
+        //
+        //    ⚠️ 설명이 실제 숫자와 안 맞으면 그 설명은 **없는 것만 못하다.**
+        //       "설명된 차이" 로 적혀 있어서 아무도 다시 안 보게 된다.
+        //    → 세 조각의 **합이 기존 관리자 값과 정확히 맞는지** 화면에서 검산한다.
+        //
+        // ⚠️⚠️ (3차) **`legacy.docs` 에는 삭제·외국인 건이 들어 있다.**
+        //    위 forEach 는 `if (isDel || isFor) return;` **뒤에** 집계하므로
+        //    `legacy.special.noTracking` 에는 그 건들이 없다.
+        //    여기서 안 빼면 22건이 남아돌아 검산이 안 맞는다. (실제로 그랬다)
+        //    → 검산 화면이 이걸 잡아냈다. **검산이 없었으면 또 틀린 설명을 붙일 뻔했다.**
+        let ntMissingOnly = 0;   // 진행중 · 송장이 아예 없음 (= 새 앱 기준)
+        let ntSentNoInvoice = 0; // 진행중 · '미입력'(송장없이 발송완료)
+        let ntTerminal = 0;      // 종결·굿스플로 송장 있음 — 기존 관리자만 센다
+        let ntExcluded = 0;      // 삭제·외국인 — **양쪽 다 안 센다.** 검산에서 제외
+        legacy.docs.forEach(({ d, st, isDel, isFor }) => {
+            if (d.deliveryMethod !== 'cvs') return;
+            if (d.trackingNumber && d.trackingNumber !== '미입력') return;
+            if (isDel || isFor) { ntExcluded++; return; }
+            if (TERMINAL_STATUSES.includes(st)) { ntTerminal++; return; }
+            // ⚠️ 굿스플로 송장이 있으면 새 앱은 뺀다 (기존 관리자는 안 본다)
+            if (d.goodsflowRelayInvoiceNo || d.goodsflowTransporterInvoiceNo) { ntTerminal++; return; }
+            if (!d.trackingNumber) ntMissingOnly++;
+            else ntSentNoInvoice++;
+        });
+        newAppNt = ntMissingOnly;
+
+        // Trash getCountFromServer
+        const snapTrash = await getCountFromServer(query(quotesRef, where("isDeleted", "==", true)));
+        const newAppTrash = snapTrash.data().count;
+
+        // Render Tables
+        renderReconciliationTables({
+            legacy,
+            newApp: {
+                stages: { a: newAppA, b: newAppB, terminal: newAppTerm },
+                statuses: newAppStatuses,
+                monthlyPaid: { count: newAppMonthlyCount, amount: newAppMonthlyAmount },
+                special: { pickupFailed: newAppPf, noTracking: newAppNt, abandoned: newAppAb },
+                ntSentNoInvoice,
+                ntTerminal,
+                ntExcluded,
+                pfCommon, pfArrivedOnly, pfTerminalOnly, pfExcluded,
+                abExcluded,
+                trash: newAppTrash
+            },
+            allDocs: legacy.docs,
+            B_STATUSES,
+            TERMINAL_STATUSES,
+            ALL_13_STATUSES
+        });
+
+        const elapsed = Math.round(performance.now() - _t0);
+        if (statusText) statusText.innerHTML = '✅ <b>3-3 대조 계산 완료!</b>';
+        if (timeText) timeText.innerText = `소요시간: ${elapsed}ms | 전체 검증 문서: ${allSnap.size}건`;
+
+    } catch (e) {
+        console.error("runReconciliation error:", e);
+        if (statusText) statusText.innerHTML = `<span style="color:#dc2626;">❌ 대조 오류: ${e.message}</span>`;
+    }
+};
+
+function renderReconciliationTables(data) {
+    const { legacy, newApp, allDocs, B_STATUSES, TERMINAL_STATUSES, ALL_13_STATUSES } = data;
+
+    // Format diff badge HTML
+    const formatDiffBadge = (diff) => {
+        // ⚠️ 세지 못한 항목은 **비교할 수 없다.** 0 으로도, 차이로도 쓰지 않는다.
+        //    숫자를 만들어 넣으면 "조회 실패" 가 "일치" 로 둔갑한다 (규칙 ⑥).
+        if (diff === null || diff === undefined || Number.isNaN(diff)) {
+            return `<span style="background:#f1f5f9; color:#64748b; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.88rem;">비교 불가</span>`;
+        }
+        if (diff === 0) {
+            return `<span style="background:#dcfce7; color:#166534; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.88rem;">0 (일치)</span>`;
+        } else {
+            const sign = diff > 0 ? `+${diff}` : `${diff}`;
+            return `<span style="background:#fee2e2; color:#dc2626; padding:4px 10px; border-radius:6px; font-weight:bold; font-size:0.88rem;">${sign} (차이)</span>`;
+        }
+    };
+
+    // Helper: Build document chip HTML for mismatched document IDs
+    const buildDocChips = (docIds, limit = 8) => {
+        if (!docIds || docIds.length === 0) return '<span style="color:#94a3b8; font-size:0.85rem;">차이 문서 없음</span>';
+        const slice = docIds.slice(0, limit);
+        let html = slice.map(id => `
+            <button onclick="openReconcileDocModal('${id}')" title="클릭 시 신청서 상세 보기" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; padding:2px 7px; border-radius:4px; font-size:0.78rem; font-weight:bold; cursor:pointer; margin:2px;">
+                ${id.slice(0, 8)}...
+            </button>
+        `).join(' ');
+        if (docIds.length > limit) {
+            html += `<span style="font-size:0.75rem; color:#64748b; margin-left:4px;">외 ${docIds.length - limit}건</span>`;
+        }
+        return html;
+    };
+
+    // 1. Stage Table
+    const stagesTbody = document.getElementById('reconcile-stages-tbody');
+    if (stagesTbody) {
+        const stageRows = [
+            {
+                name: '접수·수거 (A 구간)',
+                newVal: `${newApp.stages.a}건`,
+                legVal: `${legacy.stages.a}건`,
+                diff: newApp.stages.a - legacy.stages.a,
+                reason: '기존 관리자는 isDeleted===true 및 외국인 신청(isForeigner)을 메모리에서 빼므로 차이 발생'
+            },
+            {
+                name: '검수·정산 (B 구간)',
+                newVal: `${newApp.stages.b}건`,
+                legVal: `${legacy.stages.b}건`,
+                diff: newApp.stages.b - legacy.stages.b,
+                reason: 'B상태(택배도착·검수중·검수완료·입금대기·반송대기) 문서 중 삭제/외국인 건 포함 여부 차이'
+            },
+            {
+                name: '종결 (Terminal 구간)',
+                newVal: `${newApp.stages.terminal}건`,
+                legVal: `${legacy.stages.terminal}건`,
+                diff: newApp.stages.terminal - legacy.stages.terminal,
+                reason: '종결상태(입금완료·취소·반송접수·삭제) 중 삭제/외국인 필터링 여부 차이'
+            }
+        ];
+        stagesTbody.innerHTML = stageRows.map(r => `
+            <tr>
+                <td style="font-weight:bold;">${r.name}</td>
+                <td style="font-weight:bold; color:#2563eb;">${r.newVal}</td>
+                <td style="font-weight:bold; color:#475569;">${r.legVal}</td>
+                <td>${formatDiffBadge(r.diff)}</td>
+                <td style="font-size:0.85rem; color:#475569;">${r.reason}</td>
+            </tr>
+        `).join('');
+    }
+
+    // 2. Status 13 Table
+    const statusesTbody = document.getElementById('reconcile-statuses-tbody');
+    if (statusesTbody) {
+        let html = '';
+        ALL_13_STATUSES.forEach(st => {
+            const nv = newApp.statuses[st] || 0;
+            const lv = legacy.statuses[st] || 0;
+            const diff = nv - lv;
+
+            // Collect mismatched doc IDs for this status
+            const mismatchedIds = [];
+            allDocs.forEach(({ id, d, isDel, isFor, st: docSt }) => {
+                if (st === '삭제') {
+                    if (d.isDeleted && !isDel) mismatchedIds.push(id);
+                } else if (docSt === st) {
+                    if (isDel || isFor) mismatchedIds.push(id);
+                }
+            });
+
+            html += `
+                <tr>
+                    <td style="font-weight:bold;">${st}</td>
+                    <td style="font-weight:bold; color:#2563eb;">${nv}건</td>
+                    <td style="font-weight:bold; color:#475569;">${lv}건</td>
+                    <td>${formatDiffBadge(diff)}</td>
+                    <td>${buildDocChips(mismatchedIds)}</td>
+                </tr>
+            `;
+        });
+        statusesTbody.innerHTML = html;
+    }
+
+    // 3. Monthly Paid Table
+    const monthlyTbody = document.getElementById('reconcile-monthly-tbody');
+    if (monthlyTbody) {
+        const curMonthName = `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`;
+        const cDiff = newApp.monthlyPaid.count - legacy.monthlyPaid.count;
+        const aDiff = newApp.monthlyPaid.amount - legacy.monthlyPaid.amount;
+
+        monthlyTbody.innerHTML = `
+            <tr>
+                <td style="font-weight:bold;">${curMonthName} 매입완료 건수</td>
+                <td style="font-weight:bold; color:#2563eb;">${newApp.monthlyPaid.count}건</td>
+                <td style="font-weight:bold; color:#475569;">${legacy.monthlyPaid.count}건</td>
+                <td>${formatDiffBadge(cDiff)}</td>
+                <td style="font-size:0.83rem; color:#475569;">
+                    <b>규칙 ③ 사유:</b> 서버 쿼리는 <code style="background:#f1f5f9;">firebaseTimestamp</code> 기준, 기존 관리자는 <code style="background:#f1f5f9;">paidAt > customerAgreedAt > inspectedAt > firebaseTimestamp</code> 우선순위 커스텀 날짜를 사용함
+                </td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;">${curMonthName} 총 매입금액</td>
+                <td style="font-weight:bold; color:#2563eb;">${formatCurrency(newApp.monthlyPaid.amount)}</td>
+                <td style="font-weight:bold; color:#475569;">${formatCurrency(legacy.monthlyPaid.amount)}</td>
+                <td>${formatDiffBadge(aDiff)}</td>
+                <td style="font-size:0.83rem; color:#475569;">
+                    <b>규칙 ③ 사유:</b> Firestore <code style="background:#f1f5f9;">getCountFromServer</code>는 문서 개수 카운트 전용이므로, 금액(Amount) 집계는 필드 합산 연산이 필요함
+                </td>
+            </tr>
+        `;
+    }
+
+    // 4. Special Classification Table
+    const specialTbody = document.getElementById('reconcile-special-tbody');
+    if (specialTbody) {
+        const specialRows = [
+            {
+                name: '미집하',
+                nv: `${newApp.special.pickupFailed}건`,
+                lv: `${legacy.special.pickupFailed}건`,
+                diff: newApp.special.pickupFailed - legacy.special.pickupFailed,
+                mismatched: allDocs.filter(({ d, st, isDel, isFor }) => d.goodsflowAlert === 'PICKUP_FAILED' && !isDel && !isFor && (st === '택배도착' || TERMINAL_STATUSES.includes(st))).map(x => x.id),
+                // ⭐ 두 기준이 **서로 반대 방향으로** 어긋나는 유일한 행이다.
+                //    한 방향으로만 설명하면 숫자가 안 맞는다.
+                reason: (() => {
+                    const c = newApp.pfCommon || 0, ar = newApp.pfArrivedOnly || 0, te = newApp.pfTerminalOnly || 0;
+                    const ok = (c + ar) === newApp.special.pickupFailed && (c + te) === legacy.special.pickupFailed;
+                    return `<div style="color:#334155;">둘 다 <code style="background:#f1f5f9;">goodsflowAlert=="PICKUP_FAILED"</code> 다.
+                        <strong>이 행만 두 기준이 서로 반대 방향으로 어긋난다.</strong></div>
+                    <div style="margin-top:8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 13px; font-size:0.84rem; line-height:1.9; color:#334155;">
+                        <div><span style="display:inline-block; width:230px;">양쪽 다 세는 것</span> <strong>${c}건</strong></div>
+                        <div><span style="display:inline-block; width:230px;">＋ <code style="background:#dbeafe;">택배도착</code> — <strong>새 앱만</strong> 셈</span> <strong style="color:#2563eb;">${ar}건</strong></div>
+                        <div><span style="display:inline-block; width:230px;">＋ 종결 상태 — <strong>기존 관리자만</strong> 셈</span> <strong style="color:#b45309;">${te}건</strong></div>
+                        <div style="border-top:1px solid #cbd5e1; margin-top:6px; padding-top:6px;">
+                            <span style="display:inline-block; width:230px;">새 앱 = ${c} + ${ar} = <strong style="color:#2563eb;">${c + ar}</strong></span>
+                            기존 관리자 = ${c} + ${te} = <strong style="color:#b45309;">${c + te}</strong>
+                            ${ok
+                                ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:5px; font-size:0.78rem; font-weight:700; margin-left:8px;">검산 일치</span>`
+                                : `<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:5px; font-size:0.78rem; font-weight:700; margin-left:8px;">검산 안 맞음</span>`}
+                        </div>
+                        <div style="margin-top:6px; font-size:0.79rem; color:#64748b;">
+                            삭제·외국인 <strong>${newApp.pfExcluded || 0}건</strong>은 양쪽 다 안 세므로 검산에서 뺐다.
+                        </div>
+                    </div>
+                    <div style="margin-top:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:9px 12px; font-size:0.82rem; line-height:1.7; color:#78350f;">
+                        <strong><code style="background:#fef3c7;">택배도착</code> 인데 미집하 표시가 남아 있는 건</strong>은 기존 관리자가 뺀다 —
+                        이미 물건이 왔으니 처리가 끝났다고 보는 것이다. 새 앱은 <strong>종결만</strong> 뺀다.<br>
+                        ⚠️ ${ar}건이 계속 쌓이면 <strong>폴러가 도착 처리를 하면서 미집하 표시를 안 지우고 있다는 신호</strong>다. 그때 다시 보자.
+                    </div>`;
+                })()
+            },
+            {
+                name: '송장 미입력 (개인발송)',
+                nv: `${newApp.special.noTracking}건`,
+                lv: `${legacy.special.noTracking}건`,
+                diff: newApp.special.noTracking - legacy.special.noTracking,
+                // ⚠️ 칩에는 **차이의 정체인 문서**를 띄운다. 전에는 삭제·외국인(=양쪽 다 안 세는 것)을
+                //    띄우고 있어서, 설명 문구가 말하는 것과 칩이 서로 다른 걸 가리켰다.
+                mismatched: allDocs.filter(({ d, st, isDel, isFor }) =>
+                    d.deliveryMethod === 'cvs'
+                    && (!d.trackingNumber || d.trackingNumber === '미입력')
+                    && !isDel && !isFor
+                    && (d.trackingNumber === '미입력' || TERMINAL_STATUSES.includes(st)
+                        || d.goodsflowRelayInvoiceNo || d.goodsflowTransporterInvoiceNo)
+                ).map(x => x.id),
+                // ⭐ 이 행은 **차이가 나는 게 정상이다.** 왜 나는지를 여기 적어둔다.
+                //    설명이 없으면 "숫자가 안 맞네" 로 남아서, 나중에 진짜 문제가 생겨도
+                //    "원래 안 맞는 행" 으로 넘어가게 된다.
+                reason: (() => {
+                    const a = newApp.special.noTracking;
+                    const b = newApp.ntSentNoInvoice || 0;
+                    const c = newApp.ntTerminal || 0;
+                    const ok = (a + b + c) === legacy.special.noTracking;
+                    return `<div style="color:#334155;">둘 다 <code style="background:#f1f5f9;">deliveryMethod=="cvs"</code> 이고 송장이 없거나 <code style="background:#f1f5f9;">'미입력'</code> 인 건이다.
+                        <strong>차이는 두 조각으로 전부 설명된다.</strong></div>
+                    <div style="margin-top:8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 13px; font-size:0.84rem; line-height:1.9; color:#334155;">
+                        <div><span style="display:inline-block; width:210px;">새 앱이 세는 것 (독촉 대상)</span> <strong style="color:#2563eb;">${a}건</strong></div>
+                        <div><span style="display:inline-block; width:210px;">＋ <code style="background:#fef3c7;">'미입력'</code> = 송장없이 발송완료</span> <strong style="color:#b45309;">${b}건</strong></div>
+                        <div><span style="display:inline-block; width:210px;">＋ 종결됐거나 굿스플로 송장이 있는 건</span> <strong style="color:#b45309;">${c}건</strong></div>
+                        <div style="border-top:1px solid #cbd5e1; margin-top:6px; padding-top:6px;">
+                            <span style="display:inline-block; width:210px;">＝ 기존 관리자 값</span>
+                            <strong style="color:${ok ? '#166534' : '#b91c1c'};">${a + b + c}건</strong>
+                            ${ok
+                                ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:5px; font-size:0.78rem; font-weight:700; margin-left:8px;">검산 일치</span>`
+                                : `<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:5px; font-size:0.78rem; font-weight:700; margin-left:8px;">검산 안 맞음 — 설명 못 한 차이 ${legacy.special.noTracking - (a + b + c)}건</span>`}
+                        </div>
+                        <div style="margin-top:6px; font-size:0.79rem; color:#64748b;">
+                            삭제·외국인 <strong>${newApp.ntExcluded || 0}건</strong>은 <strong>양쪽 다 안 세므로</strong> 검산에서 뺐다.
+                        </div>
+                    </div>
+                    <div style="margin-top:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:9px 12px; font-size:0.82rem; line-height:1.7; color:#78350f;">
+                        <strong><code style="background:#fef3c7;">'미입력'</code> 은 송장번호가 아니라 "송장없이 발송완료" 라는 뜻이다</strong> (admin.js 353줄).
+                        기존 관리자는 미입력으로 세고, 새 앱은 <strong>독촉할 게 없어서 뺀다.</strong>
+                        그 건들은 4단계 <strong>'발송했다는데 도착 안 한 건'</strong> 에서 본다.<br>
+                        <strong>종결 건</strong>은 기존 관리자가 안 빼는 것이다. 이미 끝난 건에 송장을 채울 일은 없다.
+                        <span style="color:#92400e;">→ <strong>둘 다 일부러 다르게 둔 것이다. 맞추려 하지 말 것.</strong></span>
+                    </div>
+                    <div style="margin-top:6px; font-size:0.79rem; color:#64748b;">
+                        2026-08-18 — ① 이탈건·매장방문이 새 앱 쪽에 섞여 있던 것을 뺐다.
+                        ② 이 행의 '새 앱' 값이 <code style="background:#f1f5f9;">trackingNumber=="미입력"</code> 서버 쿼리라
+                        <strong>새 앱과 정반대 집합</strong>을 세고 있던 것을 고쳤다.
+                        ③ 차이를 <code style="background:#f1f5f9;">'미입력'</code> 하나로만 설명해 뒀는데
+                        실제로 돌려보니 안 맞아서, <strong>합이 맞는지 검산까지 하도록</strong> 고쳤다.
+                    </div>`;
+                })()
+            },
+            {
+                name: '이탈건 (배송미선택)',
+                nv: `${newApp.special.abandoned}건`,
+                lv: `${legacy.special.abandoned}건`,
+                diff: newApp.special.abandoned - legacy.special.abandoned,
+                // ⚠️ 이 행은 두 판정이 같아서 **차이 문서가 원래 없다.**
+                //    전에는 종결·삭제·외국인 1,388건을 칩으로 띄워서, `0 (일치)` 인데도
+                //    "차이 문서가 1,388건" 인 것처럼 보였다. **설명과 칩이 어긋나면 둘 다 못 믿게 된다.**
+                mismatched: newApp.special.abandoned === legacy.special.abandoned ? [] :
+                    allDocs.filter(({ d, st, isDel, isFor }) => (!d.deliveryMethod || d.deliveryMethod === 'pending') && !isDel && !isFor && !TERMINAL_STATUSES.includes(st)).map(x => x.id),
+                // ⭐ 이 행은 **0이 나와야 정상이다.** 두 기준이 글자 그대로 같기 때문이다.
+                //    0이 아니면 어느 한쪽이 바뀐 것이고, 그건 반드시 봐야 하는 신호다.
+                reason: `<div style="color:#334155;">
+                        기존 관리자 <code style="background:#f1f5f9;">!deliveryMethod || =='pending'</code> · 종결 제외 (admin.js 5073줄)<br>
+                        새 앱 <code style="background:#f1f5f9;">isDropoff()</code> = <code style="background:#f1f5f9;">rawDeliveryMethod</code> 가 <code style="background:#f1f5f9;">''</code> 또는 <code style="background:#f1f5f9;">'pending'</code> · 진행중만
+                    </div>
+                    <div style="margin-top:8px; background:${newApp.special.abandoned === legacy.special.abandoned ? '#f0fdf4' : '#fef2f2'}; border:1px solid ${newApp.special.abandoned === legacy.special.abandoned ? '#86efac' : '#fca5a5'}; border-radius:8px; padding:10px 13px; font-size:0.84rem; line-height:1.8; color:#334155;">
+                        <strong>두 판정은 글자 그대로 같다. 그래서 이 행은 <u>0이 나와야 정상이다.</u></strong><br>
+                        ${newApp.special.abandoned === legacy.special.abandoned
+                            ? '<span style="color:#166534; font-weight:700;">✅ 일치 — 어느 쪽도 바뀌지 않았다.</span>'
+                            : '<span style="color:#b91c1c; font-weight:700;">⚠️ 안 맞는다. 둘 중 하나가 바뀌었다는 뜻이니 반드시 원인을 찾을 것.</span>'}
+                        <div style="margin-top:6px; font-size:0.79rem; color:#64748b;">
+                            삭제·외국인 <strong>${newApp.abExcluded || 0}건</strong>은 양쪽 다 안 세므로 뺐다.
+                        </div>
+                    </div>
+                    <div style="margin-top:8px; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:9px 12px; font-size:0.82rem; line-height:1.7; color:#78350f;">
+                        2026-08-18 — 전에는 이 행이 <code style="background:#fef3c7;">where deliveryMethod=='pending'</code> 서버 쿼리라 1,469 vs 122 로 벌어져 있었다.<br>
+                        ⚠️⚠️ <strong>이탈건은 서버 카운트로 셀 수 없다.</strong> 대상의 상당수가
+                        <code style="background:#fef3c7;">deliveryMethod</code> <strong>필드가 아예 없는 문서</strong>인데,
+                        Firestore 는 "필드 없음" 을 조회할 수 없다. <strong>원리상 불가능</strong>하다.
+                        그래서 이미 훑어둔 문서로 센다 — <strong>조회는 하나도 늘지 않는다.</strong>
+                    </div>`
+            }
+        ];
+
+        // ⚠️ 이 절은 서버 쿼리를 쓰지 않는다(위 계산 블록 주석 참고). 그래서
+        //    '조회 실패' 를 따로 처리하지 않는다 — 실패할 쿼리가 없다.
+        //    전체 훑기가 실패하면 이 절 자체가 그려지지 않는다.
+        specialTbody.innerHTML = specialRows.map(r => `
+            <tr>
+                <td style="font-weight:bold;">${r.name}</td>
+                <td style="font-weight:bold; color:#2563eb;">${r.nv}</td>
+                <td style="font-weight:bold; color:#475569;">${r.lv}</td>
+                <td>${formatDiffBadge(r.diff)}</td>
+                <td>
+                    <div style="font-size:0.83rem; color:#475569; margin-bottom:4px;">${r.reason}</div>
+                    ${buildDocChips(r.mismatched)}
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // 5. Trash Table
+    const trashTbody = document.getElementById('reconcile-trash-tbody');
+    if (trashTbody) {
+        const tDiff = newApp.trash - legacy.trash;
+        const trashMismatched = allDocs.filter(({ d, st, isDel }) => (isDel || st === '삭제') && !(isDel && st === '삭제')).map(x => x.id);
+
+        trashTbody.innerHTML = `
+            <tr>
+                <td style="font-weight:bold;">휴지통 (Trash)</td>
+                <td style="font-weight:bold; color:#2563eb;">${newApp.trash}건</td>
+                <td style="font-weight:bold; color:#475569;">${legacy.trash}건</td>
+                <td>${formatDiffBadge(tDiff)}</td>
+                <td>
+                    <div style="font-size:0.83rem; color:#475569; margin-bottom:4px;">
+                        새 앱 쿼리: <code style="background:#f1f5f9;">where("isDeleted", "==", true)</code> (복합 인덱스 <code style="background:#e0f2fe; color:#0369a1;">quotes(isDeleted, firebaseTimestamp)</code> 사용)
+                    </div>
+                    ${buildDocChips(trashMismatched)}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 방문수거 일자별 안내 — 일괄 알림톡
+// ---------------------------------------------------------------------------
+// ⚠️⚠️ 이 화면의 발송 버튼은 **고객에게 실제로 알림톡을 보낸다. 되돌릴 수 없다.**
+//
+// 【이 화면이 지키는 것】
+//
+//  ① 확정 수거일과 고객 희망일을 **절대 합치지 않는다**
+//       goodsflowPickupRequestDateTime  '2026-08-18T10:00'  ← 기사가 실제로 가는 날
+//       pickupDate                      '08/18'             ← 고객이 고른 희망일. **연도가 없다**
+//     합쳐 세면 "그날 방문할 건"이 부풀려진다. 그래서 목록을 둘로 나눈다.
+//     ❌ pickupDate 에 연도를 붙여 Date 로 만들지 않는다 —
+//        연말·연초에 한 해가 통째로 어긋나고 그 오류는 화면에 안 보인다. 문자열로 비교한다.
+//
+//  ② **매입신청일자(접수일)와 방문수거일자는 완전히 다른 날짜다.** 이 화면은 후자만 다룬다.
+//
+//  ③ 신청건은 **하나도 지우거나 숨기지 않는다.** 같은 기종 두 대를 파는 건 진짜 두 건이다.
+//     목록·CSV 는 건별로 전부 나오고, **발송만 사람(연락처) 단위로 묶는다.**
+//     한 사람이 알림톡을 세 번 받으면 안 되기 때문이다.
+//
+//  ④ 발송 표시는 **성공한 뒤에만** 남긴다. 먼저 찍고 보내면 실패해도 '보냄'으로 남아
+//     영영 재시도가 안 된다. (7월 미집하 안내 건이 그 상태였다)
+//     한 사람의 그날 건 **전부에** 찍는다 — 한 건에만 찍으면 다음에 또 보내게 된다.
+//
+// 【알림톡 템플릿】 방문수거일 안내 (2026-08-13 검수 승인)
+//   변수 3개 — #{고객성함} · #{방문수거일자} · #{고객주소}
+//   ⚠️ 변수명이 한 글자라도 다르면 솔라피가 **조용히 실패한다.** 화면에 실패로 뜬다.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PICKUP_NOTICE_TEMPLATE_ID = "KA01TP260813021541277XfV1KwbL0Me";
+
+// ⚠️⚠️ **여기에 limit 을 붙이면 안 된다.**
+//    이 조회는 `orderBy("status")` 가 먼저다(색인 순서). limit 을 붙이면 최근 건이 아니라
+//    **상태값 가나다순으로 잘린다.** 어떤 상태의 고객이 통째로 빠져도 화면에는 안 보인다.
+//    기존 신청관리 목록(loadQuotes)도 같은 이유로 limit 없이 진행중 전체를 받아온다.
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 사무실 이사 — 옛 주소로 접수된 예약 표시 (2026-08-18)
+// ---------------------------------------------------------------------------
+// 굿스플로는 예약을 만들 때 **받는 곳(쉐라폰 사무실) 주소를 통째로 실어 보낸다.**
+// 그래서 주소를 바꿔 배포해도 **이미 만들어진 예약은 소급되지 않는다.**
+// 그 건들은 기기가 **옛 사무실로 배달된다.**
+//
+// 문서에 '어느 주소로 접수됐는지'는 저장되지 않으므로, **예약 시각으로만** 가른다.
+//
+// ⚠️⚠️ **정확한 배포 시각을 모르면 늦게 잡는다.**
+//    늦게 잡으면 → 새 주소 건이 '옛 주소'로 잘못 떠서 한 번 더 확인할 뿐이다
+//    이르게 잡으면 → **옛 주소 건을 놓치고 물건이 어디 갔는지 모르게 된다**
+//    그래서 배포한 날 **하루를 통째로** 옛 주소로 본다.
+//
+// 이사가 끝나고 옛 주소 건이 전부 처리되면 이 블록은 지워도 된다.
+// ═══════════════════════════════════════════════════════════════════════════
+const PN_OLD_ADDRESS_BEFORE = new Date('2026-08-19T00:00:00+09:00');
+const PN_OLD_ADDRESS_TEXT = '부산시 동천로 116 한신밴빌딩 1003호';
+
+function _pnIsOldAddress(d) {
+    if (!d.goodsflowOrderNo) return false;              // 예약이 없으면 해당 없음 (앞으로 잡으면 새 주소)
+    const at = _toDateForList(d.goodsflowBookedAt);
+    if (!at) return true;                               // ⚠️ 예약은 있는데 시각을 모르면 옛 주소로 본다
+    return at < PN_OLD_ADDRESS_BEFORE;
+}
+
+let _pnDocs = [];          // 이번 조회로 받아온 진행중 건 (원본)
+let _pnDate = '';          // 고른 날짜 'YYYY-MM-DD'
+let _pnSelected = new Set();
+let _pnSending = false;
+
+const _pnEsc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// ── 판정 함수 (직원 앱 src/lib/delivery.ts 와 같은 규칙) ───────────────────────
+const PN_TERMINAL = ['입금완료', '취소', '반송접수', '삭제'];
+const PN_B_STATUSES = ['택배도착', '검수중', '검수완료', '입금대기', '반송대기'];
+
+function _pnIsForeigner(d) {
+    // ⚠️ method(접수방식)와 deliveryMethod(수거방법)는 완전히 다른 필드다. 폴백으로 묶지 말 것.
+    return d.isForeigner === true || d.method === 'foreigner'
+        || d.series === 'Foreigner' || d.deliveryMethod === 'Foreigner Pickup';
+}
+
+// 주소로 기사가 찾아가는 수거방법만. cvs(편의점)·visit(매장 방문)은 배차 자체가 없다.
+// ⚠️ 'visit' 은 **고객이 직접 온다**는 뜻이다. '방문 수거'가 아니다.
+function _pnNeedsAddress(dm) { return dm === 'courier' || dm === 'pickup'; }
+
+// 물건이 아직 우리 손에 안 들어온 건인지 — 두 목록의 공통 전제
+function _pnBeforeArrival(d) {
+    if (PN_TERMINAL.includes(d.status)) return false;
+    if (d.isDeleted === true) return false;
+    if (d.arrivedAt) return false;
+    if (PN_B_STATUSES.includes(d.status)) return false;
+    return true;
+}
+
+// 확정 수거일 'YYYY-MM-DD'. 예약이 없으면 빈 문자열
+function _pnRequestDateKey(d) {
+    const m = String(d.goodsflowPickupRequestDateTime || '').match(/^(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] : '';
+}
+
+function _pnIsScheduled(d) {
+    if (!_pnBeforeArrival(d)) return false;
+    if (d.goodsflowAlert === 'PICKUP_FAILED') return false;   // 이미 방문이 끝난 건
+    return _pnRequestDateKey(d) !== '';
+}
+
+function _pnIsUnbooked(d) {
+    if (!_pnBeforeArrival(d)) return false;
+    if (d.goodsflowOrderNo) return false;
+    if (_pnRequestDateKey(d) !== '') return false;
+    return _pnNeedsAddress(d.deliveryMethod);
+}
+
+// 'YYYY-MM-DD' → 'MM/DD'  (고객 희망일과 맞춰보기 위한 형식)
+function _pnToMonthDay(ymd) {
+    const m = String(ymd).match(/^\d{4}-(\d{2})-(\d{2})$/);
+    return m ? `${m[1]}/${m[2]}` : '';
+}
+
+// 'MM/DD' → '8월 18일'  — 알림톡 #{방문수거일자} 에 들어갈 문구
+// ⚠️ 연도·요일을 붙이지 않는다. 희망일에는 연도가 없어서 추측이 들어가면 틀릴 수 있다.
+function _pnDateLabel(mmdd) {
+    const m = String(mmdd).match(/^(\d{1,2})\/(\d{1,2})$/);
+    return m ? `${Number(m[1])}월 ${Number(m[2])}일` : String(mmdd || '');
+}
+
+function _pnRowMonthDay(d) {
+    const key = _pnRequestDateKey(d);
+    if (key) return _pnToMonthDay(key);              // 확정 건 — 기사가 실제로 가는 날
+    return String(d.pickupDate || '').trim();        // 미배차 건 — 고객 희망일
+}
+
+// #{고객주소} — 상세주소까지 합친다. 없으면 빈 문자열(발송 대상에서 뺀다)
+function _pnAddress(d) {
+    const a = String(d.customerAddress || '').trim();
+    const b = String(d.customerAddressDetail || '').trim();
+    // 'customerAddress' 에 '편의점/직접 택배 발송' 문자열이 들어가는 건이 있다 — 주소가 아니다
+    if (!a || a.indexOf('편의점') >= 0 || a.indexOf('직접 택배') >= 0) return '';
+    return (a + ' ' + b).trim();
+}
+
+function _pnPhone(d) {
+    const p = String(d.customerPhone || '').replace(/\D/g, '');
+    if (p.length < 9) return '';                 // 가짜·미입력 번호
+    if (/^(\d)\1+$/.test(p)) return '';          // 같은 숫자 반복
+    return p;
+}
+
+function _pnModel(d) {
+    return [d.brand, d.model, d.storage].filter(Boolean).join(' ').trim() || '-';
+}
+
+// ── 조회 ──────────────────────────────────────────────────────────────────
+window.loadPickupNotice = async () => {
+    const chips = document.getElementById('pn-date-chips');
+    const note = document.getElementById('pn-scan-note');
+    if (!chips) return;
+    if (_pnSending) { alert('발송이 진행 중입니다. 끝난 뒤에 다시 불러오세요.'); return; }
+
+    chips.innerHTML = '<span style="color:#94a3b8; font-size:0.9rem;">불러오는 중...</span>';
+    if (note) note.textContent = '';
+    _pnSelected = new Set();
+
+    try {
+        // 기존 목록과 **같은 색인**(status + firebaseTimestamp)을 탄다. 새 인덱스가 필요 없다.
+        // B구간은 메모리에서 다시 걸러낸다(_pnBeforeArrival).
+        const snap = await getDocs(query(
+            collection(db, "quotes"),
+            where("status", "not-in", PN_TERMINAL),
+            orderBy("status"),
+            orderBy("firebaseTimestamp", "desc")
+        ));
+
+        _pnDocs = [];
+        snap.forEach(s => {
+            const d = s.data();
+            if (_pnIsForeigner(d)) return;     // 외국인 건은 다른 흐름이다
+            _pnDocs.push({ id: s.id, ...d });
+        });
+
+        if (note) {
+            note.textContent = `진행중 ${snap.size}건 전체를 확인했습니다.`
+                + ` (외국인 건 ${snap.size - _pnDocs.length}건 제외)`;
+        }
+
+        // 확정 수거일별로 묶어 날짜 칩을 만든다 (가까운 날 먼저)
+        const map = new Map();
+        _pnDocs.forEach(d => {
+            if (!_pnIsScheduled(d)) return;
+            const k = _pnRequestDateKey(d);
+            if (!map.has(k)) map.set(k, []);
+            map.get(k).push(d);
+        });
+        const dates = [...map.keys()].sort();
+
+        if (dates.length === 0) {
+            chips.innerHTML = '<span style="color:#94a3b8; font-size:0.9rem;">수거 예약이 잡힌 건이 없습니다.</span>';
+            _pnDate = '';
+            _pnRender();
+            return;
+        }
+
+        const today = new Date();
+        const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        if (!_pnDate || !map.has(_pnDate)) {
+            _pnDate = dates.find(x => x >= todayKey) || dates[dates.length - 1];
+        }
+
+        chips.innerHTML = dates.map(k => {
+            const on = k === _pnDate;
+            const past = k < todayKey;
+            const shifted = map.get(k).filter(d => d.goodsflowPickupDateShifted).length;
+            return `<button onclick="pnPickDate('${k}')" style="
+                border:1px solid ${on ? '#2563eb' : '#e2e8f0'};
+                background:${on ? '#eff6ff' : 'white'};
+                color:${past && !on ? '#94a3b8' : '#0f172a'};
+                font-weight:${on ? '700' : '500'};
+                padding:7px 13px; border-radius:8px; cursor:pointer; font-size:0.88rem;">
+                ${_pnToMonthDay(k)}
+                <span style="color:#64748b; margin-left:4px;">${map.get(k).length}</span>
+                ${shifted > 0 ? `<span title="고객이 고른 날과 실제 수거일이 다른 건이 있습니다." style="margin-left:5px; background:#fef3c7; color:#b45309; padding:1px 5px; border-radius:4px; font-size:0.72rem; font-weight:700;">변경 ${shifted}</span>` : ''}
+            </button>`;
+        }).join('');
+
+        _pnRender();
+    } catch (e) {
+        console.error('방문수거 안내 조회 실패:', e);
+        // ⚠️ 실패를 빈 목록으로 보여주지 않는다. 원문 오류를 그대로 띄운다.
+        chips.innerHTML = `<div style="color:#b91c1c; font-size:0.88rem;">
+            조회에 실패했습니다. <strong>데이터가 없는 것이 아닙니다.</strong><br>
+            <code style="background:#fef2f2; padding:2px 6px; border-radius:4px;">${_pnEsc(e.message)}</code>
+        </div>`;
+    }
+};
+
+window.pnPickDate = (ymd) => {
+    if (_pnSending) return;
+    _pnDate = ymd;
+    _pnSelected = new Set();
+    window.loadPickupNotice();
+};
+
+// ── 목록 그리기 ────────────────────────────────────────────────────────────
+function _pnCurrentRows() {
+    if (!_pnDate) return { scheduled: [], unbooked: [] };
+    const md = _pnToMonthDay(_pnDate);
+
+    const scheduled = _pnDocs
+        .filter(d => _pnIsScheduled(d) && _pnRequestDateKey(d) === _pnDate)
+        .sort((a, b) => String(a.goodsflowPickupRequestDateTime).localeCompare(String(b.goodsflowPickupRequestDateTime)));
+
+    // 희망일은 연도가 없어 월·일로만 맞춰본다
+    const unbooked = _pnDocs.filter(d => _pnIsUnbooked(d) && String(d.pickupDate || '').trim() === md);
+
+    return { scheduled, unbooked };
+}
+
+// 같은 연락처가 몇 건인지 — 행에 표시만 한다. **묶거나 숨기지 않는다.**
+//
+// ⚠️⚠️ **두 목록을 합쳐서 세지 않는다. 목록별로 따로 센다.**
+//    합쳐 세면, 배차가 안 된 건까지 '이 고객 3건' 숫자에 들어간다.
+//    기사는 그날 3대를 받는 줄 알고 가는데 실제로 나올 건 1대다.
+//    (직원 앱 PickupDatePage 도 같은 규칙이다 — 두 화면이 어긋나면 대조가 안 된다)
+//
+// ⚠️ 못 믿을 번호(가짜·미입력)는 뱃지를 안 붙인다. `_pnPhone` 이 빈 값을 주므로
+//    한 덩어리로 묶이면 '이 고객 27건' 같은 게 뜬다.
+function _pnPhoneCounts(rows) {
+    const c = new Map();
+    rows.forEach(d => {
+        const p = _pnPhone(d);
+        if (p) c.set(p, (c.get(p) || 0) + 1);
+    });
+    return c;
+}
+
+// 고객 수 — 번호 기준. **못 믿을 번호는 각각 다른 사람으로 센다.**
+// 빈 값으로 묶으면 서로 다른 사람 여럿이 1명으로 합쳐진다.
+function _pnCustomerCount(rows) {
+    const seen = new Set();
+    let unknown = 0;
+    rows.forEach(d => {
+        const p = _pnPhone(d);
+        if (p) seen.add(p); else unknown++;
+    });
+    return seen.size + unknown;
+}
+
+function _pnRowHtml(d, counts, withScheduleCols) {
+    const phone = _pnPhone(d);
+    const addr = _pnAddress(d);
+    const sentAt = _toDateForList(d.pickupNoticeSentAt);
+    const dup = phone ? (counts.get(phone) || 0) : 0;
+
+    // 발송할 수 없는 건은 체크 자체를 막고 이유를 쓴다
+    let blocked = '';
+    if (!phone) blocked = '연락처 없음';
+    else if (!addr) blocked = '주소 없음';
+
+    const checked = _pnSelected.has(d.id) ? 'checked' : '';
+    const box = blocked
+        ? `<span title="${blocked}" style="color:#dc2626; font-size:0.75rem; font-weight:700;">✕</span>`
+        : `<input type="checkbox" ${checked} onchange="pnToggle('${d.id}', this.checked)" style="width:16px; height:16px; cursor:pointer;">`;
+
+    const sentBadge = sentAt
+        ? `<span style="background:#dcfce7; color:#166534; padding:2px 7px; border-radius:5px; font-size:0.75rem; font-weight:700;">발송함</span>
+           <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">${sentAt.toLocaleString('ko-KR')}</div>
+           ${d.pickupNoticeSentBy ? `<div style="font-size:0.7rem; color:#94a3b8;">${_pnEsc(d.pickupNoticeSentBy)}</div>` : ''}`
+        : (blocked
+            ? `<span style="color:#dc2626; font-size:0.78rem; font-weight:600;">${blocked} — 발송 불가</span>`
+            : '<span style="color:#cbd5e1; font-size:0.78rem;">—</span>');
+
+    const dupBadge = dup > 1
+        ? `<div style="font-size:0.72rem; color:#b45309; background:#fef3c7; display:inline-block; padding:1px 6px; border-radius:4px; margin-top:3px; font-weight:600;">이 고객 ${dup}건</div>`
+        : '';
+
+    const shifted = d.goodsflowPickupDateShifted;
+    const wishCell = shifted
+        ? `<span title="고객이 고른 날로 접수가 안 돼 자동으로 옮겨졌습니다. 고객이 그 사실을 아는지는 알 수 없습니다." style="background:#fef3c7; color:#b45309; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:700; white-space:nowrap;">${_pnEsc(d.pickupDate || '희망일 없음')} → 변경됨</span>`
+        : `<span style="color:#64748b;">${_pnEsc(d.pickupDate || '-')}</span>`;
+
+    // ⚠️ 이사 — 옛 주소로 접수된 예약. 기기가 **옛 사무실로 배달된다.**
+    const oldAddr = _pnIsOldAddress(d)
+        ? `<div title="이 예약은 주소 변경 전에 접수돼서 받는 곳이 '${PN_OLD_ADDRESS_TEXT}' 로 들어가 있습니다. 굿스플로에서 소급 변경되지 않습니다." style="margin-top:4px; background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:0.72rem; font-weight:700; display:inline-block;">옛 주소</div>`
+        : '';
+
+    const schedCell = withScheduleCols
+        ? `<td style="white-space:nowrap; font-weight:600;">${_pnEsc(String(d.goodsflowPickupRequestDateTime || '').replace('T', ' ').slice(5, 16))}${oldAddr}</td>`
+        : '';
+
+    return `<tr style="${blocked ? 'background:#fef2f2;' : ''}">
+        <td style="text-align:center;">${box}</td>
+        <td>${_pnEsc(d.customerName || '-')}${dupBadge}</td>
+        <td style="white-space:nowrap;">${_pnEsc(d.customerPhone || '-')}</td>
+        <td style="font-size:0.85rem;">${_pnEsc(_pnModel(d))}</td>
+        ${schedCell}
+        <td>${wishCell}</td>
+        <td style="font-size:0.8rem; color:#475569;">${_pnEsc(addr || (d.customerAddress || '-'))}</td>
+        <td>${sentBadge}</td>
+    </tr>`;
+}
+
+function _pnRender() {
+    const { scheduled, unbooked } = _pnCurrentRows();
+    // ★ 목록별로 따로 센다. 합치지 않는다 (_pnPhoneCounts 주석 참고)
+    const sCounts = _pnPhoneCounts(scheduled);
+    const uCounts = _pnPhoneCounts(unbooked);
+
+    const sTbody = document.getElementById('pn-scheduled-tbody');
+    const uTbody = document.getElementById('pn-unbooked-tbody');
+    const toolbar = document.getElementById('pn-toolbar');
+
+    // 건수와 고객 수를 **같이** 보여준다. 건수만 보이면 알림톡이 몇 명에게 나가는지 모른다
+    document.getElementById('pn-scheduled-count').textContent =
+        `${scheduled.length}건 · 고객 ${_pnCustomerCount(scheduled)}명`;
+    document.getElementById('pn-unbooked-count').textContent =
+        `${unbooked.length}건 · 고객 ${_pnCustomerCount(unbooked)}명`;
+
+    // ⚠️ 이사 — 이 날짜에 옛 주소로 배달될 건이 몇 개인지 맨 위에 알린다.
+    //    목록 안 뱃지만 있으면 스크롤하다 놓친다.
+    const oldNote = document.getElementById('pn-old-address-note');
+    if (oldNote) {
+        const n = scheduled.filter(_pnIsOldAddress).length;
+        if (n === 0) {
+            oldNote.style.display = 'none';
+        } else {
+            oldNote.style.display = 'block';
+            oldNote.innerHTML = `
+                <div style="font-weight:700; color:#b91c1c; margin-bottom:6px;">
+                    ⚠️ 이 날짜의 ${scheduled.length}건 중 ${n}건은 <u>옛 사무실로 배달됩니다</u>
+                </div>
+                <div style="color:#7f1d1d; font-size:0.86rem; line-height:1.7;">
+                    주소를 바꾸기 전에 접수된 예약이라 받는 곳이
+                    <strong>${_pnEsc(PN_OLD_ADDRESS_TEXT)}</strong> 로 들어가 있습니다.
+                    굿스플로에서 <strong>소급해서 바뀌지 않습니다.</strong><br>
+                    목록에서 <span style="background:#fee2e2; color:#b91c1c; padding:1px 6px; border-radius:4px; font-size:0.78rem; font-weight:700;">옛 주소</span>
+                    가 붙은 건이 그것입니다. 옛 사무실에서 받거나, 한진택배 고객센터에
+                    운송장번호(간선)로 배송지 변경을 요청하세요.
+                </div>`;
+        }
+    }
+
+    sTbody.innerHTML = scheduled.length
+        ? scheduled.map(d => _pnRowHtml(d, sCounts, true)).join('')
+        : '<tr><td colspan="8" class="text-center">이 날짜에 잡힌 수거 예약이 없습니다.</td></tr>';
+
+    uTbody.innerHTML = unbooked.length
+        ? unbooked.map(d => _pnRowHtml(d, uCounts, false)).join('')
+        : '<tr><td colspan="7" class="text-center">이 희망일로 남아 있는 미배차 건이 없습니다.</td></tr>';
+
+    if (toolbar) toolbar.style.display = _pnDate ? 'block' : 'none';
+    _pnUpdateSummary();
+}
+
+window.pnToggle = (id, on) => {
+    if (on) _pnSelected.add(id); else _pnSelected.delete(id);
+    _pnUpdateSummary();
+};
+
+// 전체 선택 — **이미 보낸 건은 빼고** 고른다. 두 번 보내는 사고를 기본값으로 만들지 않는다.
+window.pnSelectAll = (on) => {
+    const { scheduled, unbooked } = _pnCurrentRows();
+    [...scheduled, ...unbooked].forEach(d => {
+        if (!on) { _pnSelected.delete(d.id); return; }
+        if (!_pnPhone(d) || !_pnAddress(d)) return;
+        if (d.pickupNoticeSentAt) return;
+        _pnSelected.add(d.id);
+    });
+    _pnRender();
+};
+
+// 선택한 건을 **연락처 단위로** 묶는다. 발송은 사람당 한 번이다.
+function _pnBuildTargets() {
+    const { scheduled, unbooked } = _pnCurrentRows();
+    const picked = [...scheduled, ...unbooked].filter(d => _pnSelected.has(d.id));
+
+    const map = new Map();   // phone → { name, mmdd, addr, ids[], resend }
+    picked.forEach(d => {
+        const phone = _pnPhone(d);
+        const addr = _pnAddress(d);
+        if (!phone || !addr) return;
+        const g = map.get(phone);
+        if (g) {
+            g.ids.push(d.id);
+            if (d.pickupNoticeSentAt) g.resend = true;
+        } else {
+            map.set(phone, {
+                phone,
+                name: String(d.customerName || '고객').trim() || '고객',
+                mmdd: _pnRowMonthDay(d),
+                addr,
+                ids: [d.id],
+                resend: !!d.pickupNoticeSentAt
+            });
+        }
+    });
+    return [...map.values()];
+}
+
+function _pnUpdateSummary() {
+    const el = document.getElementById('pn-selection-summary');
+    if (!el) return;
+    const targets = _pnBuildTargets();
+    const resend = targets.filter(t => t.resend).length;
+    // ⚠️ 두 숫자를 **같이** 보여준다. '27명' 만 보이면 32건을 골랐는데 왜 줄었는지
+    //    몰라서 선택이 잘못된 줄 안다
+    el.innerHTML = `선택 <strong style="color:#2563eb;">${_pnSelected.size}건</strong>`
+        + ` → 발송 <strong style="color:#ea580c;">${targets.length}명</strong>`
+        + (_pnSelected.size !== targets.length
+            ? ` <span style="color:#64748b; font-weight:400; font-size:0.86rem;">(같은 번호는 한 번만 — 안내가 두 번 가지 않게)</span>`
+            : '')
+        + (resend > 0 ? ` <span style="color:#b45309;">(재발송 ${resend}명)</span>` : '');
+}
+
+// ── CSV — **건별로 전부** 내보낸다. 기기 확인용이라 묶지 않는다 ─────────────────
+window.pnExportCsv = () => {
+    const { scheduled, unbooked } = _pnCurrentRows();
+    const rows = [['구분', '이름', '연락처', '기종', '수거 예정', '고객 희망일', '수거일 변경', '주소', '발송 이력']];
+    const push = (d, kind) => rows.push([
+        kind,
+        d.customerName || '',
+        d.customerPhone || '',
+        _pnModel(d),
+        String(d.goodsflowPickupRequestDateTime || '').replace('T', ' '),
+        d.pickupDate || '',
+        d.goodsflowPickupDateShifted ? '변경됨' : '',
+        _pnAddress(d) || (d.customerAddress || ''),
+        _toDateForList(d.pickupNoticeSentAt) ? _toDateForList(d.pickupNoticeSentAt).toLocaleString('ko-KR') : ''
+    ]);
+    scheduled.forEach(d => push(d, '수거예정'));
+    unbooked.forEach(d => push(d, '배차안됨'));
+
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `방문수거_${_pnDate}_${scheduled.length + unbooked.length}건.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+};
+
+// ── 발송 ──────────────────────────────────────────────────────────────────
+window.sendPickupNoticeBatch = async () => {
+    if (_pnSending) return;
+
+    const targets = _pnBuildTargets();
+    if (targets.length === 0) {
+        alert('발송할 대상이 없습니다.\n\n먼저 목록에서 보낼 건을 선택하세요.\n(연락처나 주소가 없는 건은 발송할 수 없습니다)');
+        return;
+    }
+
+    // 날짜가 섞였는지 확인 — 대부분 한 날짜지만, 미배차 건의 희망일이 비어 있을 수 있다
+    const noDate = targets.filter(t => !t.mmdd);
+    if (noDate.length) {
+        alert(`방문수거일자가 비어 있는 건이 ${noDate.length}명 있습니다.\n\n`
+            + `알림톡에 날짜가 빈칸으로 나가면 안 되므로 발송을 중단합니다.\n`
+            + `해당 건의 선택을 해제하고 다시 시도하세요.\n\n`
+            + noDate.map(t => `· ${t.name} ${t.phone}`).join('\n'));
+        return;
+    }
+
+    const dateSet = [...new Set(targets.map(t => _pnDateLabel(t.mmdd)))];
+    const resend = targets.filter(t => t.resend);
+    const quoteCount = targets.reduce((n, t) => n + t.ids.length, 0);
+
+    const msg = `방문수거일 안내 알림톡을 보냅니다.\n\n`
+        + `· 받는 사람: ${targets.length}명 (신청건 ${quoteCount}건)\n`
+        + `· 안내 날짜: ${dateSet.join(' / ')}\n`
+        + (resend.length ? `\n⚠️ 이미 보낸 적 있는 고객이 ${resend.length}명 포함돼 있습니다.\n   그 고객은 알림톡을 두 번 받게 됩니다.\n` : '')
+        + `\n한 번 나가면 되돌릴 수 없습니다. 진행할까요?`;
+    if (!confirm(msg)) return;
+
+    // 되돌릴 수 없는 발송이라 확인을 한 번 더 받는다
+    if (!confirm(`정말 ${targets.length}명에게 발송합니다.\n\n마지막 확인입니다.`)) return;
+
+    _pnSending = true;
+    const btn = document.getElementById('pn-send-btn');
+    const log = document.getElementById('pn-progress');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
+    if (log) { log.style.display = 'block'; log.textContent = `발송을 시작합니다... (0/${targets.length})\n`; }
+
+    const who = (document.getElementById('admin-email')?.textContent || '관리자').trim();
+    const fails = [];
+    let done = 0;
+
+    for (const t of targets) {
+        try {
+            const res = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/alimtalkApi/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone: t.phone,
+                    templateId: PICKUP_NOTICE_TEMPLATE_ID,
+                    // ⚠️ 변수명은 솔라피 템플릿과 **글자 그대로** 같아야 한다
+                    variables: {
+                        "#{고객성함}": t.name,
+                        "#{방문수거일자}": _pnDateLabel(t.mmdd),
+                        "#{고객주소}": t.addr
+                    }
+                })
+            });
+            const out = await res.json().catch(() => ({}));
+
+            if (!res.ok || out.error) {
+                throw new Error(out.error || out.details || `HTTP ${res.status}`);
+            }
+
+            // ★ 성공한 뒤에만 표시를 남긴다. 그리고 **그 사람의 그날 건 전부에** 찍는다.
+            for (const id of t.ids) {
+                await updateDoc(doc(db, "quotes", id), {
+                    pickupNoticeSentAt: serverTimestamp(),
+                    pickupNoticeSentBy: who,
+                    pickupNoticeDate: _pnDateLabel(t.mmdd),
+                    pickupNoticeTemplateId: PICKUP_NOTICE_TEMPLATE_ID
+                });
+            }
+
+            done++;
+            if (log) log.textContent += `✅ ${t.name} ${t.phone} — ${_pnDateLabel(t.mmdd)} (${t.ids.length}건 표시)\n`;
+        } catch (e) {
+            fails.push(`${t.name} ${t.phone} — ${e.message}`);
+            if (log) log.textContent += `❌ ${t.name} ${t.phone} — ${e.message}\n`;
+        }
+        if (log) log.scrollTop = log.scrollHeight;
+        // 솔라피에 한꺼번에 몰리지 않게 살짝 띄운다
+        await new Promise(r => setTimeout(r, 250));
+    }
+
+    _pnSending = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+    if (log) log.textContent += `\n─────────────\n완료: 성공 ${done}명 / 실패 ${fails.length}명\n`;
+
+    alert(`발송이 끝났습니다.\n\n성공 ${done}명\n실패 ${fails.length}명`
+        + (fails.length ? `\n\n실패 목록:\n${fails.join('\n')}\n\n실패한 건은 '발송함' 표시가 남지 않으므로 다시 보낼 수 있습니다.` : ''));
+
+    _pnSelected = new Set();
+    window.loadPickupNotice();
 };

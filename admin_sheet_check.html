@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매입완료 시트 전송 점검</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;background:#f8fafc;margin:0;padding:20px;color:#0f172a}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:1.25rem;margin:0 0 4px}
+  .sub{color:#64748b;font-size:.85rem;margin-bottom:16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:1rem;margin:0 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:.84rem}
+  th,td{padding:8px 10px;border-bottom:1px solid #eef2f7;text-align:left;vertical-align:top}
+  th{background:#f1f5f9;font-weight:700;color:#475569}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .bad{color:#dc2626;font-weight:700}
+  .ok{color:#059669;font-weight:700}
+  .warn{color:#d97706;font-weight:700}
+  input{padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:.9rem;width:200px}
+  button{background:#2563EB;color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:.9rem;font-weight:700;cursor:pointer;margin-left:6px}
+  button:disabled{background:#94a3b8;cursor:default}
+  #status{margin:12px 0;font-size:.86rem;color:#334155;white-space:pre-line}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:.82rem;line-height:1.7;margin-top:12px}
+  .kv{font-size:.84rem;line-height:1.9}
+  .kv b{display:inline-block;width:130px;color:#475569}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>매입완료 시트 전송 점검</h1>
+  <div class="sub">읽기 전용입니다. 고객명으로 신청 건을 찾아 시트 전송 조건이 충족됐는지 확인합니다.</div>
+
+  <div class="card">
+    <input id="name" placeholder="고객명 (예: 정지원)" value="정지원">
+    <button id="find">고객 찾기</button>
+    <button id="scan" style="background:#059669">입금완료 전체 점검</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="card" id="one-card" style="display:none">
+    <h2>① 해당 고객 신청 건</h2>
+    <div id="one"></div>
+  </div>
+
+  <div class="card" id="all-card" style="display:none">
+    <h2>② 입금완료 건 중 시트로 못 넘어갔을 건</h2>
+    <div id="all-sum"></div>
+    <table><thead><tr><th>입금완료 처리일</th><th>고객명</th><th>모델</th><th>빠진 이유</th></tr></thead><tbody id="all-body"></tbody></table>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { collection, getDocs, query, where, orderBy, limit, startAfter, documentId } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const $ = s => document.querySelector(s);
+const say = t => $('#status').textContent = t;
+const esc = s => String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+
+const toDate = v => {
+  if (!v) return null;
+  if (v.toDate) return v.toDate();
+  if (v.seconds) return new Date(v.seconds * 1000);
+  const d = new Date(v); return isNaN(d) ? null : d;
+};
+const fmt = d => d ? d.toLocaleString('ko-KR') : '-';
+
+// Cloud Functions 의 전송 조건과 똑같이 판정한다.
+//   if (status 바뀜 && customerAddress 있음) { ... if (status === '입금완료') 시트전송 }
+function whyMissing(v) {
+  const reasons = [];
+  if (v.status !== '입금완료') reasons.push(`상태가 '${v.status || '없음'}'`);
+  const addr = String(v.customerAddress || '').trim();
+  if (!addr) reasons.push('주소(customerAddress)가 비어 있음 → 시트 전송 조건 불충족');
+  if (v.isDeleted) reasons.push('삭제(휴지통) 처리됨');
+  return reasons;
+}
+
+$('#find').addEventListener('click', async () => {
+  const name = $('#name').value.trim();
+  if (!name) return;
+  $('#find').disabled = true;
+  say(`'${name}' 검색 중... 전체를 나눠 읽습니다.`);
+  try {
+    const hits = [];
+    let cursor = null, scanned = 0;
+    while (true) {
+      const parts = [orderBy(documentId()), limit(500)];
+      if (cursor) parts.push(startAfter(cursor));
+      const snap = await getDocs(query(collection(db, "quotes"), ...parts));
+      if (snap.empty) break;
+      snap.forEach(d => {
+        scanned++;
+        const v = d.data();
+        if (String(v.customerName || '').includes(name)) hits.push({ id: d.id, ...v });
+      });
+      cursor = snap.docs[snap.docs.length - 1];
+      say(`읽는 중... ${scanned.toLocaleString()}건`);
+      if (snap.size < 500) break;
+    }
+
+    if (!hits.length) { say(`'${name}' 이름으로 신청 건을 찾지 못했습니다.`); return; }
+
+    hits.sort((a, b) => (toDate(b.firebaseTimestamp) || 0) - (toDate(a.firebaseTimestamp) || 0));
+    $('#one').innerHTML = hits.map(v => {
+      const reasons = whyMissing(v);
+      const okSheet = reasons.length === 0;
+      return `<div style="border-top:1px solid #eef2f7;padding:14px 0">
+        <div class="kv">
+          <b>신청일시</b> ${fmt(toDate(v.firebaseTimestamp))}<br>
+          <b>고객명</b> ${esc(v.customerName)} / ${esc(v.customerPhone)}<br>
+          <b>모델</b> ${esc(v.brand)} ${esc(v.model)} ${esc(typeof v.storage === 'object' ? (v.storage && v.storage.size) : v.storage)}<br>
+          <b>상태</b> ${esc(v.status)}<br>
+          <b>수거방식</b> ${v.deliveryMethod === 'cvs' ? '개인발송' : v.deliveryMethod === 'courier' ? '방문수거' : esc(v.deliveryMethod) || '-'}<br>
+          <b>주소</b> ${esc(v.customerAddress) || '<span class="bad">(비어 있음)</span>'}<br>
+          <b>문서ID</b> <span style="font-family:monospace;font-size:.78rem">${v.id}</span><br>
+          <b>storage 형태</b> ${typeof v.storage === 'object' ? '<span class="warn">객체 — 시트에 이상하게 찍힐 수 있음</span>' : '문자열 (정상)'}<br>
+          <b>시트 전송 조건</b> ${okSheet ? '<span class="ok">충족 (전송됐어야 함)</span>' : '<span class="bad">불충족</span> — ' + reasons.join(' / ')}
+        </div></div>`;
+    }).join('');
+    $('#one-card').style.display = '';
+    say(`${hits.length}건 찾았습니다. (전체 ${scanned.toLocaleString()}건 확인)`);
+  } catch (e) {
+    say('오류: ' + e.message);
+    console.error(e);
+  } finally { $('#find').disabled = false; }
+});
+
+$('#scan').addEventListener('click', async () => {
+  $('#scan').disabled = true;
+  say('입금완료 건 전체를 확인하는 중...');
+  try {
+    const snap = await getDocs(query(collection(db, "quotes"), where("status", "==", "입금완료"),
+      orderBy("firebaseTimestamp", "desc"), limit(1000)));
+    const missing = [];
+    let objStorage = 0;
+    snap.forEach(d => {
+      const v = d.data();
+      if (typeof v.storage === 'object' && v.storage !== null) objStorage++;
+      const addr = String(v.customerAddress || '').trim();
+      if (!addr) missing.push({ id: d.id, ...v });
+    });
+    $('#all-sum').innerHTML = `<p style="margin:0 0 10px">입금완료 <b>${snap.size}건</b> 중
+      주소가 비어 시트로 <b class="${missing.length ? 'bad' : 'ok'}">못 넘어갔을 건: ${missing.length}건</b></p>
+      ${objStorage ? `<div class="note">용량(storage)이 문자열이 아니라 <b>객체</b>로 저장된 건이 <b>${objStorage}건</b> 있습니다.
+       시트에는 용량이 제대로 안 찍혔을 수 있습니다.</div>` : ''}`;
+    const tb = $('#all-body'); tb.innerHTML = '';
+    missing.slice(0, 50).forEach(v => tb.insertAdjacentHTML('beforeend',
+      `<tr><td>${fmt(toDate(v.firebaseTimestamp))}</td><td>${esc(v.customerName)}</td>
+       <td>${esc(v.brand)} ${esc(v.model)}</td><td class="bad">주소 비어 있음</td></tr>`));
+    if (!missing.length) tb.innerHTML = '<tr><td colspan="4" class="ok">모두 조건을 충족합니다.</td></tr>';
+    $('#all-card').style.display = '';
+    say('점검 완료.');
+  } catch (e) {
+    say('오류: ' + e.message);
+    console.error(e);
+  } finally { $('#scan').disabled = false; }
+});
+</script>
+</body>
+</html>

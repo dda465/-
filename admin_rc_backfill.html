@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재방문 요약표 채우기 (일회성)</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;background:#f8fafc;margin:0;padding:20px;color:#0f172a}
+  .wrap{max-width:920px;margin:0 auto}
+  h1{font-size:1.25rem;margin:0 0 4px}
+  .sub{color:#64748b;font-size:.85rem;margin-bottom:16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:16px}
+  .warn{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:.85rem;line-height:1.7;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{padding:8px 10px;border-bottom:1px solid #eef2f7;text-align:left}
+  th{background:#f1f5f9;font-weight:700;color:#475569}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  button{border:0;border-radius:8px;padding:11px 20px;font-size:.9rem;font-weight:700;cursor:pointer;margin-right:8px}
+  #scan{background:#2563EB;color:#fff}
+  #save{background:#059669;color:#fff}
+  button:disabled{background:#94a3b8;cursor:default}
+  #status{margin:12px 0;font-size:.88rem;color:#334155;white-space:pre-line}
+  .ok{color:#059669;font-weight:700}
+  .big{font-size:1.5rem;font-weight:800;color:#1e3a8a}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>재방문 요약표 채우기 (일회성)</h1>
+  <div class="sub">기존 신청 내역 전체를 번호별로 집계해 요약 문서를 만듭니다.</div>
+
+  <div class="warn">
+    <b>2단계로 진행합니다.</b><br>
+    ① <b>집계해보기</b> — 읽기만 합니다. 결과를 먼저 확인하세요.<br>
+    ② <b>저장하기</b> — 확인 후 눌러야 실제로 기록됩니다.<br>
+    이미 요약 문서가 있으면 <b>덮어씁니다.</b> 한 번만 실행하면 되고, 이후에는 자동으로 갱신됩니다.
+  </div>
+
+  <div class="card">
+    <button id="scan">① 집계해보기 (읽기만)</button>
+    <button id="save" disabled>② 저장하기</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="card" id="result" style="display:none">
+    <h2 style="font-size:1rem;margin:0 0 12px">집계 결과</h2>
+    <div id="summary"></div>
+    <h3 style="font-size:.9rem;margin:16px 0 8px">재방문 고객 (이력 2건 이상) 상위 30명</h3>
+    <table><thead><tr><th>연락처</th><th class="num">매입완료</th><th class="num">반송</th><th class="num">취소</th><th class="num">합계</th></tr></thead>
+    <tbody id="top"></tbody></table>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { collection, getDocs, query, doc, setDoc, serverTimestamp, orderBy, limit, startAfter, documentId } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const STATUS_FIELD = { '입금완료': 'paid', '반송접수': 'returned', '취소': 'canceled' };
+const $ = s => document.querySelector(s);
+const say = t => $('#status').textContent = t;
+let built = null;
+
+// 번호 정규화 + 가짜 번호 제외.
+// 000-0000-0000 같은 자리표시용 번호에 서로 다른 고객이 뭉쳐 있어,
+// 그대로 세면 엉뚱한 사람에게 "재방문 25" 딱지가 붙는다.
+// (functions/index.js 의 rcNormalizePhone 과 같은 기준을 쓴다)
+const norm = v => {
+  const d = String(v || '').replace(/\D/g, '');
+  if (d.length < 9) return '';
+  if (/^(\d)\1+$/.test(d)) return '';   // 0000000000, 1111111111 …
+  return d;
+};
+
+$('#scan').addEventListener('click', async () => {
+  $('#scan').disabled = true; $('#save').disabled = true;
+  say('전체 신청 내역을 읽는 중입니다...');
+  try {
+    const t0 = performance.now();
+    const counts = {};
+    let scanned = 0, skippedNoPhone = 0, skippedStatus = 0;
+
+    // ★ 전체를 한 번에 읽지 않고 문서ID 순서로 500건씩 나눠 읽는다.
+    //   이 프로젝트에선 '정렬 없이 전체를 훑는 조회'가 비정상적으로 느려서
+    //   (측정: 건당 13ms, 554건에 6~77초) 한 번에 읽으면 끝나지 않는다.
+    //   문서ID 정렬은 기본 색인을 타서 빠르고, 필드가 없는 옛 문서도 빠짐없이 포함된다.
+    const PAGE = 500;
+    let cursor = null, pages = 0;
+    while (true) {
+      const parts = [orderBy(documentId()), limit(PAGE)];
+      if (cursor) parts.push(startAfter(cursor));
+      const snap = await getDocs(query(collection(db, "quotes"), ...parts));
+      if (snap.empty) break;
+
+      snap.forEach(d => {
+        const v = d.data();
+        scanned++;
+        const field = STATUS_FIELD[v.status];
+        if (!field) { skippedStatus++; return; }        // 진행중인 건은 이력이 아니므로 제외
+        const p = norm(v.customerPhone);
+        if (!p) { skippedNoPhone++; return; }
+        if (!counts[p]) counts[p] = { paid: 0, returned: 0, canceled: 0 };
+        counts[p][field]++;
+      });
+
+      pages++;
+      cursor = snap.docs[snap.docs.length - 1];
+      say(`읽는 중... ${scanned.toLocaleString()}건 (${Math.round((performance.now() - t0) / 1000)}초 경과)`);
+      if (snap.size < PAGE) break;
+      if (pages > 200) { say('안전장치: 200페이지에서 중단했습니다.'); break; }
+    }
+
+    if (scanned === 0) {
+      say('신청 내역을 한 건도 읽지 못했습니다.\n관리자 계정으로 로그인되어 있는지, 그리고 콘솔(F12)에 오류가 있는지 확인해 주세요.');
+      $('#scan').disabled = false;
+      return;
+    }
+
+    const phones = Object.keys(counts);
+    const repeat = phones.filter(p => (counts[p].paid + counts[p].returned + counts[p].canceled) >= 2);
+    const totalPaid = phones.reduce((s, p) => s + counts[p].paid, 0);
+    const bytes = JSON.stringify(counts).length;
+
+    built = counts;
+    $('#summary').innerHTML = `
+      <p style="margin:0 0 10px">전체 <b>${scanned.toLocaleString()}건</b>을 ${Math.round(performance.now() - t0).toLocaleString()}ms 만에 읽었습니다.</p>
+      <table>
+        <tr><th>집계된 연락처</th><td class="num"><span class="big">${phones.length.toLocaleString()}</span>명</td></tr>
+        <tr><th>재방문 고객 (이력 2건 이상)</th><td class="num"><span class="big">${repeat.length.toLocaleString()}</span>명</td></tr>
+        <tr><th>매입완료 이력 합계</th><td class="num">${totalPaid.toLocaleString()}건</td></tr>
+        <tr><th>진행중이라 제외</th><td class="num">${skippedStatus.toLocaleString()}건</td></tr>
+        <tr><th>번호가 없어 제외</th><td class="num">${skippedNoPhone.toLocaleString()}건</td></tr>
+        <tr><th>요약 문서 크기</th><td class="num">${(bytes / 1024).toFixed(1)} KB <span style="color:#64748b">(한도 1MB)</span></td></tr>
+      </table>`;
+
+    const tb = $('#top'); tb.innerHTML = '';
+    repeat.map(p => ({ p, ...counts[p], sum: counts[p].paid + counts[p].returned + counts[p].canceled }))
+      .sort((a, b) => b.sum - a.sum).slice(0, 30)
+      .forEach(r => tb.insertAdjacentHTML('beforeend',
+        `<tr><td>${r.p.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3')}</td>
+         <td class="num">${r.paid}</td><td class="num">${r.returned}</td><td class="num">${r.canceled}</td>
+         <td class="num"><b>${r.sum}</b></td></tr>`));
+
+    $('#result').style.display = '';
+    say('집계 완료. 위 숫자가 맞아 보이면 ② 저장하기를 누르세요.');
+    $('#save').disabled = false;
+  } catch (e) {
+    say('오류: ' + e.message + '\n관리자 계정으로 로그인되어 있는지 확인하세요.');
+    console.error(e);
+  } finally { $('#scan').disabled = false; }
+});
+
+$('#save').addEventListener('click', async () => {
+  if (!built) return;
+  if (!confirm('요약 문서를 저장합니다. 기존 내용이 있으면 덮어씁니다.\n계속할까요?')) return;
+  $('#save').disabled = true;
+  say('저장 중입니다...');
+  try {
+    await setDoc(doc(db, 'stats', 'returning_customers'), {
+      counts: built,
+      updatedAt: serverTimestamp(),
+      builtBy: 'backfill'
+    });
+    say('✅ 저장이 끝났습니다. 이제 관리자 페이지가 이 문서를 읽습니다.\n이 도구는 다시 실행할 필요가 없습니다.');
+    $('#status').classList.add('ok');
+  } catch (e) {
+    say('저장 실패: ' + e.message + '\n보안 규칙에서 stats 쓰기가 막혔을 수 있습니다.');
+    $('#save').disabled = false;
+    console.error(e);
+  }
+});
+</script>
+</body>
+</html>

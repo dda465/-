@@ -48,7 +48,7 @@
 
     <meta name="description" content="3분이면 끝! 내 폰의 정확한 판매 금액을 확인하고 바로 판매 신청하세요.">
 
-    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link rel="stylesheet" href="styles.css?v=1785539000">
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -297,14 +297,14 @@ window.addEventListener('load', function() {
     <!-- OpenGraph SEO Tags -->
     <meta property="og:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
     <meta property="og:description" content="사용하시던 중고폰, 집에서 편하게 최고가로 판매하세요. 1분만에 예상 매입가를 확인하고 당일 입금 받으세요!">
-    <meta property="og:image" content="https://rejeuphone.web.app/sr_logo.png">
-    <meta property="og:url" content="https://rejeuphone.web.app">
+    <meta property="og:image" content="https://sharaphone.com/sr_logo.png">
+    <meta property="og:url" content="https://sharaphone.com/quote.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="쉐라폰">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="쉐라폰 - 최고가 중고폰 매입 플랫폼">
     <meta name="twitter:description" content="사용하시던 중고폰, 집에서 편하게 최고가로 판매하세요. 1분만에 예상 매입가를 확인하고 당일 입금 받으세요!">
-    <meta name="twitter:image" content="https://rejeuphone.web.app/sr_logo.png">
+    <meta name="twitter:image" content="https://sharaphone.com/sr_logo.png">
 
 </head>
 
@@ -564,11 +564,16 @@ window.addEventListener('load', function() {
 
                 flex-direction: column;
 
-                margin: 20px auto;
+                margin: 6px auto;
 
-                padding: 10px;
+                padding: 4px 10px;
 
             }
+
+            /* 상단 여백이 layout margin(20) + layout padding(10) + interaction padding(20)
+               으로 세 겹 쌓여 진행바 위가 50px 비어 있었다. 모바일에서만 걷어낸다. */
+            .interaction-area { padding: 2px 0 !important; }
+            .wiz-steps { margin-bottom: 4px !important; }
 
             .showcase-area {
 
@@ -938,32 +943,34 @@ window.addEventListener('load', function() {
 
 
 
-            <div class="text-center" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+            <!-- 접수방법 고르는 단계를 없애고 여기서 두 갈래로 나눈다 (2026-08).
+                 주 버튼만 채운 파란색으로 두고 보조는 테두리만 — 시선이 한 곳으로 모이게 한다. -->
+            <div style="max-width: 600px; margin: 18px auto 0;">
 
-                <button onclick="goToStep('defects')" class="btn btn-dark" style="flex: 1; max-width: 200px;">내 기기로
+                <button onclick="bookSimple()" class="btn btn-primary"
+                    style="width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 800;">판매 신청하기</button>
 
-                    등록</button>
+                <button onclick="selectMethod('self')" class="btn"
+                    style="width: 100%; margin-top: 10px; padding: 14px; font-size: 0.95rem; font-weight: 700; background: #fff; color: #2563EB; border: 1.5px solid #2563EB;">기기 상태 직접 입력하기</button>
 
-                <button onclick="calculateAndShowResult(true); goToStep('auth');" class="btn btn-primary"
-
-                    style="flex: 1; max-width: 200px;">예약하기</button>
                     </div>
 
             <div class="text-center" style="margin-top: 20px;">
 
-                <button onclick="goToStep('method')" class="back-btn">이전 단계로</button>
+                <button onclick="backFromGradeList()" class="back-btn">이전 단계로</button>
                     </div>
 
 
 
             <div
 
-                style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem; color: #666; text-align: left;">
+                class="grade-help" style="margin-top: 22px; background: #f8f9fa; padding: 14px; border-radius: 8px; font-size: 0.82rem; color: #666; text-align: left;">
 
-                <p><strong>📱 [내 기기로 등록]</strong>: 등록 후 변경되는 시세를 편하게 확인하세요.</p>
+                <p><strong>판매 신청하기</strong> — 상태 체크 없이 접수합니다. 정확한 금액은 기기 도착 후 검수해 안내드립니다.</p>
 
-                <p style="margin-top:5px;"><strong>👉 [예약하기]</strong>: 정확한 가격은 상품 도착 후 빠르게 검수하고 알려 드릴게요.</p>
-                    </div>
+                <p style="margin-top:6px;"><strong>기기 상태 직접 입력하기</strong> — 상태를 입력하면 예상가를 미리 확인할 수 있습니다.</p>
+
+                                    </div>
                     </div>
 
 
@@ -1125,6 +1132,11 @@ window.addEventListener('load', function() {
             <style>
                 .defect-sub-step { animation: fadeIn 0.3s ease; }
                 .defect-sub-step .step-header h2 { font-size: 1.6rem; }
+                /* 모바일에서는 6문항을 스크롤 없이 넘길 수 있게 줄인다 (PC는 위 1.6rem 그대로) */
+                @media(max-width: 768px) {
+                    .defect-sub-step .step-header h2 { font-size: 1.28rem; }
+                    .defect-sub-step .btn-check-opt { padding: 13px 12px !important; font-size: 0.95rem !important; }
+                }
                 .defect-sub-step .btn-check-opt {
                     padding: 18px 16px; font-size: 1.05rem; border-radius: 14px;
                     border: 2px solid #e2e8f0; background: white; cursor: pointer;
@@ -1250,6 +1262,7 @@ window.addEventListener('load', function() {
                 <div class="mb-4">
                     <label class="form-label">이름 <span style="color:red">*</span></label>
                     <input type="text" id="auth-name" class="search-input" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="실명을 입력해주세요">
+                    <p style="margin: 5px 0 0; font-size: 0.76rem; color: #64748b;">택배 기사님이 이 이름으로 확인합니다. 별명·이모지는 사용할 수 없습니다.</p>
                 </div>
 
                 <div class="mb-4">
@@ -1298,26 +1311,29 @@ window.addEventListener('load', function() {
                     <!-- 배송 방법 선택 -->
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📦 배송 방법 선택<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
                     <div style="display: grid; gap: 10px; margin-bottom: 12px;">
-                        <div class="selection-card method-btn" data-method="cvs" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
-                            <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
-                            <div>
-                                <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배비 입금받기 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
-                                <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">편의점/우체국에서 직접 발송</div>
+                        <div class="selection-card method-btn active" data-method="courier" style="padding: 15px 16px; text-align: left; display: flex; align-items: center; gap: 13px; border-width: 2px;">
+                            <div style="background: #DCFCE7; width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">📦</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="card-title" style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0 0 3px; text-align: left; display: block;">택배 방문수거</div>
+                                <div class="card-sub" style="font-size: 0.81rem; color: #475569; margin: 0; text-align: left; line-height: 1.45;">문 앞에 두시면 기사님이 가져갑니다</div>
+                            </div>
+                            <span style="flex: 0 0 auto; background: #2563EB; color: #ffffff; font-size: 0.68rem; padding: 4px 9px; border-radius: 6px; font-weight: 800; white-space: nowrap; align-self: flex-start;">추천</span>
+                        </div>
+                        <div class="selection-card method-btn" data-method="cvs" style="padding: 15px 16px; text-align: left; display: flex; align-items: center; gap: 13px;">
+                            <div style="background: #F1F5F9; width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🏪</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="card-title" style="font-size: 0.95rem; font-weight: 700; color: #334155; margin: 0 0 3px; text-align: left; display: block;">착불로 직접 보낼게요</div>
+                                <div class="card-sub" style="font-size: 0.79rem; color: #64748b; margin: 0; text-align: left; line-height: 1.45;">편의점·우체국에 직접 방문해 접수</div>
                             </div>
                         </div>
-                        <div class="selection-card method-btn active" data-method="courier" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
-                            <div style="background: #E8F5E9; padding: 10px; border-radius: 50%;">📦</div>
-                            <div>
-                                <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배 방문수거 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
-                                <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">문 앞에 두시면 수거 (검수 당일입금)</div>
-                            </div>
-                        </div>
+                        <p style="margin: 9px 0 0; font-size: 0.78rem; color: #059669; font-weight: 700; text-align: center;">두 방법 모두 배송비는 쉐라폰이 부담합니다</p>
                     </div>
 
                     <!-- CVS 보내실 곳 -->
                     <div id="auth-method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
-                        <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
-                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-5173-5382</p>
+                        <p style="font-weight: 700; margin: 0 0 8px; font-size: 0.9rem; color: #0f172a;">보내실 곳</p>
+                        <p style="font-size: 0.84rem; color: #1D4ED8; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:6px; padding:9px 11px; margin: 0 0 9px; font-weight:700; line-height:1.5;">반드시 <strong>착불(수신자부담)</strong>로 보내주세요<br><span style="font-weight:600; color:#2563EB; font-size:0.95em;">배송비는 쉐라폰이 부담합니다</span></p>
+                        <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.6;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-5173-5382</p>
                         <p style="font-size: 0.8rem; color: #2563eb; margin-top: 8px; font-weight: 600;">💡 보내실 곳 정보는 마이페이지에서도 확인하실 수 있습니다.</p>
                     </div>
 
@@ -1422,27 +1438,30 @@ window.addEventListener('load', function() {
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.85rem; color: #64748b; font-weight: 600;">📦 배송 방법 선택<span style="flex: 1; border-bottom: 1px solid #e2e8f0;"></span></div>
                     <div style="margin-bottom: 15px; text-align: left;">
                         <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
-                            <div class="selection-card method-btn" data-method="cvs" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
-                                <div style="background: #E3F2FD; padding: 10px; border-radius: 50%;">🏪</div>
-                                <div>
-                                    <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배비 입금받기 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
-                                    <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">편의점/우체국에서 직접 발송</div>
-                                </div>
+                            <div class="selection-card method-btn active" data-method="courier" style="padding: 15px 16px; text-align: left; display: flex; align-items: center; gap: 13px; border-width: 2px;">
+                            <div style="background: #DCFCE7; width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">📦</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="card-title" style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0 0 3px; text-align: left; display: block;">택배 방문수거</div>
+                                <div class="card-sub" style="font-size: 0.81rem; color: #475569; margin: 0; text-align: left; line-height: 1.45;">문 앞에 두시면 기사님이 가져갑니다</div>
                             </div>
-                            <div class="selection-card method-btn active" data-method="courier" style="padding: 15px; text-align: left; display: flex; align-items: center; gap: 15px;">
-                                <div style="background: #E8F5E9; padding: 10px; border-radius: 50%;">📦</div>
-                                <div>
-                                    <div class="card-title" style="font-size: 0.95rem; margin: 0; text-align: left; display: flex; align-items: center;">택배 방문수거 <span style="background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 800;">택배비 무료 🆓</span></div>
-                                    <div class="card-sub" style="font-size: 0.75rem; margin: 0; text-align: left;">문 앞에 두시면 수거 (검수 당일입금)</div>
-                                </div>
+                            <span style="flex: 0 0 auto; background: #2563EB; color: #ffffff; font-size: 0.68rem; padding: 4px 9px; border-radius: 6px; font-weight: 800; white-space: nowrap; align-self: flex-start;">추천</span>
+                        </div>
+                            <div class="selection-card method-btn" data-method="cvs" style="padding: 15px 16px; text-align: left; display: flex; align-items: center; gap: 13px;">
+                            <div style="background: #F1F5F9; width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">🏪</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="card-title" style="font-size: 0.95rem; font-weight: 700; color: #334155; margin: 0 0 3px; text-align: left; display: block;">착불로 직접 보낼게요</div>
+                                <div class="card-sub" style="font-size: 0.79rem; color: #64748b; margin: 0; text-align: left; line-height: 1.45;">편의점·우체국에 직접 방문해 접수</div>
                             </div>
                         </div>
+                        </div>
+                        <p style="margin: 9px 0 0; font-size: 0.78rem; color: #059669; font-weight: 700; text-align: center;">두 방법 모두 배송비는 쉐라폰이 부담합니다</p>
                     </div>
 
                     <!-- CVS 보내실 곳 -->
                     <div id="method-cvs-info" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #ddd;">
-                        <p style="font-weight: 600; margin-bottom: 5px;">[보내실 곳]</p>
-                        <p style="font-size: 0.9rem; color: #555;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-5173-5382</p>
+                        <p style="font-weight: 700; margin: 0 0 8px; font-size: 0.9rem; color: #0f172a;">보내실 곳</p>
+                        <p style="font-size: 0.84rem; color: #1D4ED8; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:6px; padding:9px 11px; margin: 0 0 9px; font-weight:700; line-height:1.5;">반드시 <strong>착불(수신자부담)</strong>로 보내주세요<br><span style="font-weight:600; color:#2563EB; font-size:0.95em;">배송비는 쉐라폰이 부담합니다</span></p>
+                        <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.6;">받는 이: 쉐라폰<br>부산시 부산진구 동천로 116 한신밴빌딩 1003호<br>연락처: 010-5173-5382</p>
                         <p style="font-size: 0.8rem; color: #2563eb; margin-top: 8px; font-weight: 600;">💡 보내실 곳 정보는 마이페이지에서도 확인하실 수 있습니다.</p>
                     </div>
 
@@ -1627,7 +1646,7 @@ window.addEventListener('load', function() {
 
 
 
-                        연중무휴 24시간 채널톡으로 상담가능
+                        연중무휴 24시간 카카오톡 채널로 상담가능
 
 
 
@@ -2054,7 +2073,7 @@ window.addEventListener('load', function() {
         }
     </script>
 
-    <script type="module" src="script.js?v=1785403500"></script>
+    <script type="module" src="script.js?v=1786609111"></script>
 
 
 
@@ -2357,86 +2376,6 @@ window.addEventListener('load', function() {
                 }
 
             }
-
-        });
-
-    </script>
-
-    <script>
-
-        (function () {
-
-            var w = window;
-
-            if (w.ChannelIO) {
-
-                return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.');
-
-            }
-
-            var ch = function () {
-
-                ch.c(arguments);
-
-            };
-
-            ch.q = [];
-
-            ch.c = function (args) {
-
-                ch.q.push(args);
-
-            };
-
-            w.ChannelIO = ch;
-
-            function l() {
-
-                if (w.ChannelIOInitialized) {
-
-                    return;
-
-                }
-
-                w.ChannelIOInitialized = true;
-
-                var s = document.createElement('script');
-
-                s.type = 'text/javascript';
-
-                s.async = true;
-
-                s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
-
-                s.charset = 'UTF-8';
-
-                var x = document.getElementsByTagName('script')[0];
-
-                x.parentNode.insertBefore(s, x);
-
-            }
-
-            if (document.readyState === 'complete') {
-
-                l();
-
-            } else if (window.attachEvent) {
-
-                window.attachEvent('onload', l);
-
-            } else {
-
-                window.addEventListener('DOMContentLoaded', l, false);
-
-                window.addEventListener('load', l, false);
-
-            }
-
-        })();
-
-        ChannelIO('boot', {
-
-            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
 
         });
 

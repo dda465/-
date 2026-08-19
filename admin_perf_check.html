@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>관리자 속도 진단 · 시트 대조</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;background:#f8fafc;margin:0;padding:20px;color:#0f172a}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:1.3rem;margin:0 0 4px}
+  .sub{color:#64748b;font-size:.85rem;margin-bottom:18px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:1rem;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{padding:8px 10px;border-bottom:1px solid #eef2f7;text-align:left}
+  th{background:#f1f5f9;font-weight:700;color:#475569}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .bad{color:#dc2626;font-weight:700}
+  .warn{color:#d97706;font-weight:700}
+  .ok{color:#059669;font-weight:700}
+  button{background:#2563EB;color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:.9rem;font-weight:700;cursor:pointer}
+  button:disabled{background:#94a3b8;cursor:default}
+  #status{margin:10px 0;font-size:.85rem;color:#475569}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:.82rem;line-height:1.6;margin-top:12px}
+  .bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;min-width:60px}
+  .bar>i{display:block;height:100%;background:#2563EB}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>관리자 속도 진단 · 매입완료 시트 대조</h1>
+  <div class="sub">읽기 전용입니다. 데이터를 바꾸지 않습니다. 관리자 계정으로 로그인된 상태에서 실행하세요.</div>
+
+  <button id="run">진단 시작</button>
+  <div id="status"></div>
+
+  <div class="card" id="perf-card" style="display:none">
+    <h2>① 관리자 첫 화면이 실행하는 조회들</h2>
+    <table id="perf-tbl">
+      <thead><tr><th>조회 내용</th><th class="num">건수</th><th class="num">소요</th><th>비중</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div id="perf-note"></div>
+  </div>
+
+  <div class="card" id="size-card" style="display:none">
+    <h2>③ 문서 1건이 얼마나 무거운가 (느린 진짜 이유 확인)</h2>
+    <table id="size-tbl">
+      <thead><tr><th>구분</th><th class="num">건수</th><th class="num">평균 크기</th><th class="num">가장 큰 건</th><th class="num">합계 전송량</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div id="size-note"></div>
+  </div>
+
+  <div class="card" id="iso-card" style="display:none">
+    <h2>④ 어디서 막히는지 좁히기 — 같은 조회를 방식만 바꿔 실행</h2>
+    <table id="iso-tbl">
+      <thead><tr><th>실행 방식</th><th class="num">건수</th><th class="num">소요</th><th>해석</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div id="iso-note"></div>
+  </div>
+
+  <div class="card" id="sheet-card" style="display:none">
+    <h2>② 8월 입금완료(매입완료) 건 — 시트와 대조용</h2>
+    <div id="sheet-sum"></div>
+    <table id="sheet-tbl">
+      <thead><tr><th>입금완료 처리일</th><th>고객명</th><th>모델</th><th>용량</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { collection, getDocs, query, where, orderBy, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const TERMINAL = ["입금완료", "취소", "반송접수"];
+const $ = s => document.querySelector(s);
+const setStatus = t => $('#status').textContent = t;
+
+async function timed(label, q) {
+  const t = performance.now();
+  const snap = await getDocs(q);
+  return { label, ms: Math.round(performance.now() - t), n: snap.size, snap };
+}
+
+const toDate = v => {
+  if (!v) return null;
+  if (v.toDate) return v.toDate();
+  if (v.seconds) return new Date(v.seconds * 1000);
+  const d = new Date(v); return isNaN(d) ? null : d;
+};
+
+$('#run').addEventListener('click', async () => {
+  const btn = $('#run'); btn.disabled = true;
+  const rows = [];
+  try {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    setStatus('1/5 진행중 목록 조회...');
+    rows.push(await timed('진행중 목록 (첫 화면 표)',
+      query(collection(db, "quotes"), where("status", "not-in", TERMINAL), orderBy("status"), orderBy("firebaseTimestamp", "desc"))));
+
+    setStatus('2/5 재방문 판별용 입금완료 전체 조회... (가장 오래 걸릴 수 있음)');
+    const paid = await timed('재방문 뱃지용 — 입금완료 "전체"', query(collection(db, "quotes"), where("status", "==", "입금완료")));
+    rows.push(paid);
+
+    setStatus('3/5 진행중 중복 조회...');
+    rows.push(await timed('중복 판별용 — 진행중 전체', query(collection(db, "quotes"), where("status", "not-in", TERMINAL))));
+
+    setStatus('4/5 이번달 매입완료 조회...');
+    const monthly = await timed('이번달 입금완료',
+      query(collection(db, "quotes"), where("status", "==", "입금완료"), where("firebaseTimestamp", ">=", monthStart), orderBy("firebaseTimestamp", "desc")));
+    rows.push(monthly);
+
+    setStatus('5/5 금일 카드 조회...');
+    rows.push(await timed('금일 접수', query(collection(db, "quotes"), where("firebaseTimestamp", ">=", dayStart))));
+    rows.push(await timed('금일 도착', query(collection(db, "quotes"), where("arrivedAt", ">=", dayStart))));
+
+    // ── 결과 표 ──
+    const total = rows.reduce((s, r) => s + r.ms, 0);
+    const max = Math.max(...rows.map(r => r.ms));
+    const tb = $('#perf-tbl tbody');
+    rows.sort((a, b) => b.ms - a.ms).forEach(r => {
+      const pct = Math.round(r.ms / total * 100);
+      const cls = r.ms > 1500 ? 'bad' : (r.ms > 600 ? 'warn' : 'ok');
+      tb.insertAdjacentHTML('beforeend',
+        `<tr><td>${r.label}</td><td class="num">${r.n.toLocaleString()}건</td>
+         <td class="num ${cls}">${r.ms.toLocaleString()}ms</td>
+         <td><div class="bar"><i style="width:${Math.round(r.ms / max * 100)}%"></i></div>${pct}%</td></tr>`);
+    });
+    tb.insertAdjacentHTML('beforeend',
+      `<tr><td><b>합계</b></td><td class="num"><b>${rows.reduce((s, r) => s + r.n, 0).toLocaleString()}건</b></td><td class="num"><b>${total.toLocaleString()}ms</b></td><td></td></tr>`);
+
+    const worst = rows[0];
+    $('#perf-note').innerHTML =
+      `<div class="note"><b>가장 오래 걸린 조회: ${worst.label} — ${worst.n.toLocaleString()}건, ${worst.ms.toLocaleString()}ms (전체의 ${Math.round(worst.ms / total * 100)}%)</b><br>
+       입금완료 건수는 매달 쌓이기만 하므로, 이 조회가 원인이면 시간이 갈수록 계속 느려집니다.</div>`;
+    $('#perf-card').style.display = '';
+
+    // ── 어디서 막히는지 좁히기 ──
+    // 같은 '입금완료' 조회를 방식만 바꿔 돌려본다.
+    // 어느 방식에서 느려지는지에 따라 원인이 갈린다.
+    setStatus('추가 진단: 조회 방식별 비교 중... (최대 2~3분 걸릴 수 있습니다)');
+    const isoRows = [];
+    const runIso = async (label, fn, hint) => {
+      const t = performance.now();
+      let n = '-';
+      try { n = await fn(); } catch (e) { n = '오류: ' + e.code; }
+      const ms = Math.round(performance.now() - t);
+      isoRows.push({ label, n, ms, hint });
+      const cls = ms > 5000 ? 'bad' : (ms > 1000 ? 'warn' : 'ok');
+      $('#iso-tbl tbody').insertAdjacentHTML('beforeend',
+        `<tr><td>${label}</td><td class="num">${n}</td><td class="num ${cls}">${ms.toLocaleString()}ms</td><td style="font-size:.8rem;color:#64748b">${hint}</td></tr>`);
+      $('#iso-card').style.display = '';
+    };
+
+    await runIso('건수만 세기 (문서 안 받음)',
+      async () => (await getCountFromServer(query(collection(db, "quotes"), where("status", "==", "입금완료")))).data().count + '건',
+      '빠르면 색인은 정상 → 문서 받아오는 구간이 문제');
+
+    await runIso('입금완료 + 최신 50건만',
+      async () => (await getDocs(query(collection(db, "quotes"), where("status", "==", "입금완료"), orderBy("firebaseTimestamp", "desc"), limit(50)))).size + '건',
+      '빠르면 건수에 비례해 느려지는 것');
+
+    await runIso('입금완료 + 최신 300건',
+      async () => (await getDocs(query(collection(db, "quotes"), where("status", "==", "입금완료"), orderBy("firebaseTimestamp", "desc"), limit(300)))).size + '건',
+      '50건과 비교해 몇 배 느려지는지 확인');
+
+    await runIso('취소 상태 전체 (다른 상태값)',
+      async () => (await getDocs(query(collection(db, "quotes"), where("status", "==", "취소")))).size + '건',
+      '이것도 느리면 입금완료만의 문제가 아님');
+
+    await runIso('입금완료 전체 다시 (2회차)',
+      async () => (await getDocs(query(collection(db, "quotes"), where("status", "==", "입금완료")))).size + '건',
+      '매번 느리면 일시적 문제가 아님');
+
+    const cnt = isoRows[0], l50 = isoRows[1], l300 = isoRows[2], cancel = isoRows[3];
+    let verdict;
+    if (cnt.ms < 1500 && l50.ms < 1500 && l300.ms > 8000) verdict = '색인은 정상인데 <b>받아오는 건수가 늘수록 급격히 느려집니다</b> → 조회 건수를 줄이는 방식(화면에 뜬 번호만 조회)이 정답입니다.';
+    else if (cnt.ms > 8000) verdict = '<b>건수만 세는 것도 느립니다</b> → 색인/서버 쪽 문제입니다. 조회 방식을 바꿔도 해결되지 않습니다.';
+    else if (cancel.ms > 8000) verdict = '<b>다른 상태값도 느립니다</b> → 입금완료만의 문제가 아니라 quotes 컬렉션 전반의 문제입니다.';
+    else verdict = '위 수치를 보고 판단이 필요합니다.';
+    $('#iso-note').innerHTML = `<div class="note">${verdict}</div>`;
+
+    // ── 문서 크기 측정 ──
+    // 같은 컬렉션인데 '입금완료'만 유독 느리다면 건수가 아니라 문서 무게가 원인일 수 있다.
+    // 검수 사진·첨부파일이 문서 안에 통째로 들어가 있으면 1건이 수백 KB가 된다.
+    const measure = (snap, label) => {
+      let total = 0, max = 0, maxField = '', maxId = '';
+      snap.forEach(d => {
+        const v = d.data();
+        const s = JSON.stringify(v).length;
+        total += s;
+        if (s > max) {
+          max = s; maxId = d.id;
+          // 어떤 항목이 제일 무거운지 찾아본다
+          let bf = '', bs = 0;
+          for (const k in v) { const ks = JSON.stringify(v[k] || '').length; if (ks > bs) { bs = ks; bf = k; } }
+          maxField = `${bf} (${fmtKB(bs)})`;
+        }
+      });
+      return { label, n: snap.size, avg: snap.size ? total / snap.size : 0, max, total, maxField, maxId };
+    };
+    const fmtKB = b => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024).toLocaleString() + ' KB';
+
+    const sizes = [measure(paid.snap, '입금완료 (느린 쪽)'), measure(rows.find(r => r.label.startsWith('중복')).snap, '진행중 (빠른 쪽)')];
+    const stb2 = $('#size-tbl tbody');
+    sizes.forEach(s => stb2.insertAdjacentHTML('beforeend',
+      `<tr><td>${s.label}</td><td class="num">${s.n}건</td>
+       <td class="num ${s.avg > 51200 ? 'bad' : 'ok'}">${fmtKB(s.avg)}</td>
+       <td class="num">${fmtKB(s.max)}</td>
+       <td class="num ${s.total > 20971520 ? 'bad' : 'ok'}">${fmtKB(s.total)}</td></tr>`));
+    const ratio = sizes[1].avg > 0 ? (sizes[0].avg / sizes[1].avg) : 0;
+    $('#size-note').innerHTML = `<div class="note">
+      입금완료 문서가 진행중보다 <b>${ratio.toFixed(1)}배</b> 무겁습니다.
+      가장 큰 문서에서 자리를 제일 많이 차지한 항목: <b>${sizes[0].maxField || '-'}</b><br>
+      전송량 합계 <b>${fmtKB(sizes[0].total)}</b> — 이 값이 크면 건수가 아니라 <b>문서 무게</b>가 느린 원인입니다.
+      </div>`;
+    $('#size-card').style.display = '';
+
+    // ── 8월 매입완료 목록 ──
+    const items = [];
+    monthly.snap.forEach(d => { const v = d.data(); items.push({ d: toDate(v.paidAt) || toDate(v.firebaseTimestamp), name: v.customerName || '', model: `${v.brand || ''} ${v.model || ''}`.trim(), st: (v.storage && v.storage.size) || v.storage || '' }); });
+    items.sort((a, b) => (b.d || 0) - (a.d || 0));
+    $('#sheet-sum').innerHTML = `<p style="margin:0 0 10px"><b>${monthStart.getMonth() + 1}월 입금완료 ${items.length}건</b> — 매입완료 시트의 ${monthStart.getMonth() + 1}월 행 수와 같은지 비교하세요.</p>`;
+    const stb = $('#sheet-tbl tbody');
+    items.forEach(it => stb.insertAdjacentHTML('beforeend',
+      `<tr><td>${it.d ? it.d.toLocaleString('ko-KR') : '-'}</td><td>${it.name}</td><td>${it.model}</td><td>${it.st}</td></tr>`));
+    $('#sheet-card').style.display = '';
+
+    setStatus('완료');
+  } catch (e) {
+    setStatus('오류: ' + e.message + ' — 관리자 계정으로 로그인되어 있는지 확인하세요.');
+    console.error(e);
+  } finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>

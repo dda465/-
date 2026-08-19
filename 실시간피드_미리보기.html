@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실시간 접수 피드 — 미리보기</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<!--
+  ════════════════════════════════════════════════════════════════
+  이 파일은 **미리보기 전용**입니다. 실제 사이트와 무관합니다.
+  더블클릭해서 열어보시고, 확정되면 지우셔도 됩니다.
+
+  index.html 에 들어간 CSS 를 그대로 복사했고, 줄 내용만 예시입니다.
+  실제로는 Firestore(settings/live_feed)에서 내려옵니다.
+  ════════════════════════════════════════════════════════════════
+-->
+<style>
+    body {
+        margin: 0; padding: 24px 0 60px;
+        background: #f8fafc;
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+        color: #1e293b;
+    }
+    .phone {
+        max-width: 400px; margin: 0 auto;
+        background: #fff; border-radius: 20px; padding: 14px 0 20px;
+        box-shadow: 0 10px 40px rgba(15,23,42,0.08);
+    }
+    .note {
+        max-width: 400px; margin: 0 auto 16px; padding: 0 4px;
+        font-size: 0.8rem; color: #64748b; line-height: 1.7;
+    }
+    .note b { color: #1e293b; }
+
+    /* ── index.html 에서 그대로 가져온 부분 ────────────────── */
+    .fast-search-section {
+        background: linear-gradient(180deg, #f0f4fa 0%, #e4ecf5 100%);
+        margin: 0 15px; padding: 12px 15px;
+        border-radius: 16px; box-sizing: border-box;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    }
+    .usc-header { text-align: left; margin-bottom: 13px; }
+    .usc-header h2 { font-size: 1.12rem; font-weight: 800; margin: 0 0 3px; line-height: 1.4; letter-spacing: -0.5px; }
+    .usc-header p { font-size: 0.78rem; color: #64748b; margin: 0; }
+    .usc-search-bar {
+        padding: 5px 5px 5px 13px; margin-bottom: 4px;
+        display: flex; align-items: center; gap: 8px;
+        background: #fff; border: 1.5px solid #2563EB; border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(37,99,235,0.09);
+    }
+    .usc-search-bar input {
+        flex: 1 1 auto; min-width: 0; padding: 9px 0; font-size: 0.93rem;
+        background: transparent; border: none; outline: none; color: #1e293b;
+    }
+    .usc-button {
+        flex: 0 0 auto; padding: 10px 15px; font-size: 0.85rem;
+        background: #2563EB; color: #fff; border: none; border-radius: 10px;
+        font-weight: 700; white-space: nowrap; cursor: pointer;
+    }
+    .usc-quick-title {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin: 14px 0 9px; font-size: 0.83rem; font-weight: 800; color: #64748b;
+    }
+
+    .lf-title-row { display: flex; align-items: center; gap: 8px; }
+    .lf-live {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #FEF2F2; color: #DC2626;
+        font-size: 0.62rem; font-weight: 800; letter-spacing: 0.5px;
+        padding: 3px 8px; border-radius: 999px;
+    }
+    .lf-dot { width: 5px; height: 5px; border-radius: 50%; background: #DC2626; animation: lf-blink 1.4s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .lf-dot { animation: none; } }
+    @keyframes lf-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+    .lf-list {
+        list-style: none; margin: 0; padding: 0 12px;
+        background: #fff; border: 1px solid #EEF2F7; border-radius: 14px;
+    }
+    .lf-item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid #F3F6FA; }
+    .lf-item:first-child { border-top: none; }
+    .lf-item.is-new { animation: lf-in 2.4s ease-out; }
+    @keyframes lf-in { 0% { background: #EFF6FF; } 100% { background: transparent; } }
+    .lf-ico {
+        width: 26px; height: 26px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: #F1F5F9; color: #64748B; border-radius: 8px; font-size: 0.8rem;
+    }
+    .lf-model { font-size: 0.8rem; font-weight: 700; color: #1E293B; letter-spacing: -0.3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lf-grade { flex-shrink: 0; font-size: 0.62rem; font-weight: 800; color: #0369A1; background: #E0F2FE; padding: 1px 5px; border-radius: 6px; }
+    .lf-time { margin-left: auto; flex-shrink: 0; font-size: 0.66rem; font-weight: 600; color: #94A3B8; }
+    .lf-time.is-fresh { color: #2563EB; }
+</style>
+</head>
+<body>
+
+<p class="note">
+    <b>미리보기입니다.</b> 실제 사이트가 아니라 이 파일 안의 예시 줄이에요.<br>
+    없앤 <b>인기 기종 3카드</b> 자리에 이게 들어갑니다. 아래 버튼으로 새 신청이 들어올 때 어떻게 보이는지 확인하실 수 있어요.
+</p>
+
+<div class="phone">
+    <section class="fast-search-section">
+        <div class="usc-header">
+            <h2>내 폰, 지금 얼마일까요?</h2>
+            <p>기종만 알려주시면 3초 안에 시세를 알려드립니다.</p>
+        </div>
+
+        <div class="usc-search-bar">
+            <i class="ri-search-line" style="color:#94a3b8"></i>
+            <input type="text" placeholder="예) 아이폰 15, 갤럭시 S24">
+            <button class="usc-button">시세 조회</button>
+        </div>
+
+        <div class="lf-block" id="live-feed-block">
+            <div class="usc-quick-title lf-title-row">
+                <span class="lf-live"><i class="lf-dot"></i>LIVE</span>
+                <span>지금 들어온 판매 신청</span>
+            </div>
+            <ul class="lf-list" id="live-feed-list"></ul>
+        </div>
+    </section>
+</div>
+
+<p class="note" style="margin-top:18px; text-align:center;">
+    <button onclick="addFake()" style="padding:9px 16px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; font-weight:700; cursor:pointer;">
+        새 신청이 들어온 것처럼 해보기
+    </button>
+</p>
+
+<script>
+// ── 예시 데이터 — 실제로는 Firestore(settings/live_feed)에서 내려옵니다 ──
+const MIN = 60 * 1000;
+let items = [
+    { model: '아이폰 15 Pro', storage: '256GB', grade: 'A급',  minsAgo: 4 },
+    { model: '갤럭시 S24 울트라', storage: '512GB', grade: '',    minsAgo: 21 },
+    { model: '아이폰 14',       storage: '128GB', grade: 'B급',  minsAgo: 48 },
+    { model: '갤럭시 Z 플립5',  storage: '256GB', grade: '',    minsAgo: 95 },
+    { model: '아이폰 16 Pro',   storage: '128GB', grade: '미개봉', minsAgo: 160 },
+    { model: '갤럭시 S23',      storage: '256GB', grade: 'C급',  minsAgo: 320 },
+    { model: '아이폰 13 mini',  storage: '128GB', grade: '',    minsAgo: 1500 },
+];
+
+// script.js 의 lfTimeText 와 같은 규칙 — 분 단위
+function timeText(minsAgo) {
+    if (minsAgo < 1) return { text: '방금 전', fresh: true };
+    if (minsAgo < 60) return { text: minsAgo + '분 전', fresh: true };
+    const h = Math.floor(minsAgo / 60);
+    if (h < 24) return { text: h + '시간 전', fresh: false };
+    return { text: Math.floor(h / 24) + '일 전', fresh: false };
+}
+
+function render(newestIsNew) {
+    const list = document.getElementById('live-feed-list');
+    list.innerHTML = items.slice(0, 4).map((it, i) => {
+        const t = timeText(it.minsAgo);
+        const model = [it.model, it.storage].filter(Boolean).join(' ');
+        return '<li class="lf-item' + (newestIsNew && i === 0 ? ' is-new' : '') + '">'
+            + '<span class="lf-ico"><i class="ri-smartphone-line"></i></span>'
+            + '<span class="lf-model">' + model + '</span>'
+            + (it.grade ? '<span class="lf-grade">' + it.grade + '</span>' : '')
+            + '<span class="lf-time' + (t.fresh ? ' is-fresh' : '') + '">' + t.text + '</span>'
+            + '</li>';
+    }).join('');
+}
+
+const POOL = [
+    { model: '아이폰 16', storage: '256GB', grade: 'A급' },
+    { model: '갤럭시 S25 울트라', storage: '512GB', grade: '' },
+    { model: '아이폰 15', storage: '128GB', grade: '' },
+    { model: '갤럭시 Z 폴드6', storage: '512GB', grade: 'S급' },
+    { model: '아이폰 14 Pro Max', storage: '256GB', grade: 'B급' },
+];
+function addFake() {
+    const p = POOL[Math.floor(Math.random() * POOL.length)];
+    items.unshift({ ...p, minsAgo: 0 });
+    render(true);
+}
+
+render(false);
+</script>
+
+</body>
+</html>

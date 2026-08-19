@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=1785403500">
+    <link rel="stylesheet" href="styles.css?v=1785539000">
 
     <style>
         @font-face {
@@ -138,9 +138,11 @@
             align-items: center;
         }
 
-        .hero-image-wrapper svg {
+        .hero-image-wrapper img {
             width: 100%;
-            max-width: 290px;
+            max-width: 330px;
+            height: auto;
+            border-radius: 14px;
             filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
             animation: float 6s ease-in-out infinite;
         }
@@ -178,6 +180,16 @@
             max-width: 900px;
             margin: 0 auto 30px;
         }
+
+        /* 4구간 — 10만 미만 / 10~30 / 30~50 / 50 이상 */
+        .tier-grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+            max-width: 960px;
+            gap: 14px;
+        }
+        .tier-grid-4 .tier-card { padding: 26px 14px; }
+        .tier-grid-4 .tier-range { font-size: 1.05rem; }
+        .tier-grid-4 .tier-bonus { font-size: 1.45rem; }
 
         .tier-card {
             background: #ffffff;
@@ -387,12 +399,20 @@
             .hero-sub { font-size: 0.95rem; }
 
             .hero-image-wrapper { width: 100%; margin-top: 24px; }
-            .hero-image-wrapper svg { max-width: 210px; }
+            .hero-image-wrapper img { max-width: 260px; }
 
             .section-title { font-size: 1.5rem; }
             .section-desc { font-size: 0.92rem; margin-bottom: 25px; }
 
             .tier-grid { grid-template-columns: 1fr; gap: 22px; margin-bottom: 18px; }
+            /* 4구간은 모바일에서 2×2 — 1열로 쌓으면 너무 길어진다 */
+            .tier-grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .tier-grid-4 .tier-card { padding: 18px 8px 15px; }
+            .tier-grid-4 .tier-label { font-size: 0.72rem; margin-bottom: 4px; }
+            .tier-grid-4 .tier-range { font-size: 0.88rem; margin-bottom: 10px; }
+            .tier-grid-4 .tier-arrow { font-size: 1rem; margin-bottom: 8px; }
+            .tier-grid-4 .tier-bonus { font-size: 1.1rem; padding: 8px 6px; }
+            .tier-grid-4 .tier-flag { font-size: 0.66rem; padding: 3px 10px; top: -10px; }
             .tier-card { padding: 24px 20px; }
             .tier-card.best { margin-top: 6px; }
 
@@ -439,57 +459,7 @@
                 </div>
             </div>
             <div class="hero-image-wrapper">
-                <!-- 폴더블 일러스트 (펼친 폰 + 접힌 폰) -->
-                <svg viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="폴더블 스마트폰 일러스트">
-                    <defs>
-                        <linearGradient id="screenA" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#3b82f6"/>
-                            <stop offset="55%" stop-color="#6366f1"/>
-                            <stop offset="100%" stop-color="#8b5cf6"/>
-                        </linearGradient>
-                        <linearGradient id="screenB" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#0ea5e9"/>
-                            <stop offset="100%" stop-color="#2563eb"/>
-                        </linearGradient>
-                        <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#e2e8f0"/>
-                            <stop offset="100%" stop-color="#94a3b8"/>
-                        </linearGradient>
-                    </defs>
-
-                    <!-- 펼친 폴드 -->
-                    <g transform="translate(24,26)">
-                        <rect x="0" y="0" width="176" height="176" rx="14" fill="url(#frame)"/>
-                        <rect x="5" y="5" width="166" height="166" rx="11" fill="#0f172a"/>
-                        <rect x="9" y="9" width="158" height="158" rx="9" fill="url(#screenA)" opacity="0.92"/>
-                        <!-- 힌지 -->
-                        <rect x="86" y="5" width="4" height="166" fill="rgba(255,255,255,0.22)"/>
-                        <!-- 펀치홀 -->
-                        <circle cx="140" cy="24" r="4.5" fill="#0f172a" opacity="0.75"/>
-                        <!-- 화면 위젯 -->
-                        <rect x="22" y="34" width="52" height="52" rx="10" fill="rgba(255,255,255,0.28)"/>
-                        <rect x="22" y="96" width="52" height="10" rx="5" fill="rgba(255,255,255,0.35)"/>
-                        <rect x="22" y="112" width="34" height="10" rx="5" fill="rgba(255,255,255,0.22)"/>
-                        <rect x="102" y="60" width="46" height="10" rx="5" fill="rgba(255,255,255,0.3)"/>
-                        <rect x="102" y="78" width="32" height="10" rx="5" fill="rgba(255,255,255,0.2)"/>
-                        <rect x="102" y="112" width="46" height="34" rx="8" fill="rgba(255,255,255,0.16)"/>
-                    </g>
-
-                    <!-- 접힌 플립 -->
-                    <g transform="translate(176,120)">
-                        <rect x="0" y="0" width="96" height="104" rx="16" fill="url(#frame)"/>
-                        <rect x="4" y="4" width="88" height="96" rx="13" fill="#0f172a"/>
-                        <rect x="8" y="8" width="80" height="88" rx="11" fill="url(#screenB)" opacity="0.9"/>
-                        <!-- 카메라 -->
-                        <circle cx="26" cy="26" r="8" fill="#0f172a" opacity="0.8"/>
-                        <circle cx="26" cy="26" r="3.4" fill="#60a5fa" opacity="0.9"/>
-                        <circle cx="48" cy="26" r="8" fill="#0f172a" opacity="0.8"/>
-                        <circle cx="48" cy="26" r="3.4" fill="#60a5fa" opacity="0.9"/>
-                        <!-- 커버 화면 텍스트 -->
-                        <rect x="18" y="52" width="60" height="9" rx="4.5" fill="rgba(255,255,255,0.4)"/>
-                        <rect x="18" y="68" width="38" height="9" rx="4.5" fill="rgba(255,255,255,0.25)"/>
-                    </g>
-                </svg>
+                <img src="fold8_hero.webp" alt="갤럭시 Z 폴드8 · 플립8" loading="lazy" width="1013" height="760">
             </div>
         </div>
 
@@ -499,32 +469,40 @@
             검수 완료 후 확정된 매입가 구간에 따라 추가 금액이 자동으로 합산됩니다.
         </p>
 
-        <div class="tier-grid">
+        <div class="tier-grid tier-grid-4">
             <div class="tier-card">
-                <div class="tier-label">BASIC</div>
-                <div class="tier-range">매입가<br>30만원 미만</div>
+                <div class="tier-label">STEP 1</div>
+                <div class="tier-range">10만원<br>미만</div>
+                <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
+                <div class="tier-bonus">+5,000원</div>
+            </div>
+
+            <div class="tier-card">
+                <div class="tier-label">STEP 2</div>
+                <div class="tier-range">10만원<br>~ 30만원</div>
                 <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
                 <div class="tier-bonus">+10,000원</div>
             </div>
 
             <div class="tier-card">
-                <div class="tier-label">PLUS</div>
-                <div class="tier-range">매입가<br>30만원 이상</div>
+                <div class="tier-label">STEP 3</div>
+                <div class="tier-range">30만원<br>~ 50만원</div>
                 <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
                 <div class="tier-bonus">+20,000원</div>
             </div>
 
             <div class="tier-card best">
-                <div class="tier-flag">가장 많이 받는 구간</div>
-                <div class="tier-label">MAX</div>
-                <div class="tier-range">매입가<br>50만원 이상</div>
+                <div class="tier-flag">최대 혜택</div>
+                <div class="tier-label">STEP 4</div>
+                <div class="tier-range">50만원<br>이상</div>
                 <div class="tier-arrow"><i class="ri-arrow-down-line"></i></div>
                 <div class="tier-bonus">+30,000원</div>
             </div>
         </div>
 
         <p class="tier-note">
-            기종 제한 없이 아이폰 · 갤럭시 등 모든 스마트폰에 적용됩니다.
+            기종 제한 없이 아이폰 · 갤럭시 등 모든 스마트폰에 적용됩니다.<br>
+            <strong style="color:#64748b;">단, 최종 매입가 1만원 미만의 폐폰은 지급 대상에서 제외됩니다.</strong>
         </p>
 
         <!-- 이용 순서 -->
@@ -554,7 +532,7 @@
             <h4><i class="ri-information-line"></i> 이벤트 유의사항</h4>
             <ul>
                 <li>추가 금액 구간은 <strong>검수 완료 후 확정된 최종 매입가</strong>를 기준으로 적용됩니다. 홈페이지에서 조회되는 예상 매입가와 최종 매입가는 기기 상태에 따라 달라질 수 있습니다.</li>
-                <li>정상 작동하는 <strong>모든 스마트폰 기종</strong>에 적용됩니다. (단, 매입 단가 0원인 폐폰 및 매입 불가 판정 기기는 제외)</li>
+                <li>정상 작동하는 <strong>모든 스마트폰 기종</strong>에 적용됩니다. 다만 <strong>최종 매입가가 1만원 미만인 폐폰 및 매입 불가 판정 기기는 지급 대상에서 제외</strong>됩니다.</li>
                 <li>당근마켓 전용 채널 이벤트 등 <strong>타 혜택과 중복 적용이 불가</strong>합니다.</li>
                 <li>추가 금액은 별도 신청 없이 최종 매입 대금 송금 시 함께 합산하여 지급됩니다.</li>
                 <li>매입 대금 및 추가 금액은 도난 · 분실폰 방지를 위해 반드시 <strong>접수자 본인 명의의 계좌</strong>로만 입금 가능합니다.</li>
@@ -573,7 +551,7 @@
         </a>
     </div>
 
-    <script type="module" src="script.js?v=1785403500"></script>
+    <script type="module" src="script.js?v=1786609111"></script>
 
 </body>
 </html>

@@ -20,26 +20,9 @@
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
 
 <!-- Danggeun Market Code -->
-<script defer src="https://karrot-pixel.business.daangn.com/karrot-pixel.js"></script>
-<script>
-  window.addEventListener('load', function() {
-    if (window.karrotPixel) {
-      window.karrotPixel.init('1778656966686481001');
-      window.karrotPixel.track('ViewPage');
-    }
-  });
-</script>
-<!-- End Danggeun Market Code -->
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18055027970"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'AW-18055027970');
-</script>
+
 
 
 
@@ -52,7 +35,11 @@
     <title>관리자 페이지 - Sharaphone</title>
 
 
-    <link rel="stylesheet" href="styles.css?v=1785404000">
+    <!-- [제거됨] 당근픽셀 / 구글광고(AW) / GA4 / 네이버 애널리틱스 — 2026-08
+     관리자 전용 페이지에는 고객 추적이 필요 없다.
+     외부 도메인 4곳 접속이 사라져 로딩이 빨라지고,
+     관리자 접속이 고객 통계에 섞이던 문제도 함께 해결된다. -->
+    <link rel="stylesheet" href="styles.css?v=1785552000">
 
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -644,31 +631,9 @@
 
 
 
-    <!-- Google tag (gtag.js) -->
 
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JWS15NH588"></script>
-
-
-    <script>
-
-
-        window.dataLayer = window.dataLayer || [];
-
-
-        function gtag() { dataLayer.push(arguments); }
-
-
-        gtag('js', new Date());
-
-
-
-
-
-        gtag('config', 'G-JWS15NH588');
-
-
-    </script>
+    
 
 
     <!-- defer — CSV 파싱(시세표 업로드)에만 쓰이므로 초기 로딩을 막을 이유가 없다 -->
@@ -677,19 +642,7 @@
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css" rel="stylesheet">
 
-<!-- NAVER PV SCRIPT -->
-<script async type="text/javascript" src="//wcs.naver.net/wcslog.js"></script> 
-<script type="text/javascript">
-window.addEventListener('load', function() {
-  if (!wcs_add) var wcs_add={};
-  wcs_add["wa"] = "s_bfc3561d569";
-  if (!_nasa) var _nasa={};
-  if(window.wcs){
-    wcs.inflow();
-    wcs_do();
-  }
-});
-</script>
+
 
 
     <!-- OpenGraph SEO Tags -->
@@ -848,10 +801,6 @@ window.addEventListener('load', function() {
                     <span class="material-symbols-outlined">calendar_view_day</span>
                     일일통계 분석표
                 </div>
-                <div class="menu-item" onclick="switchTab('inventory')">
-                    <span class="material-symbols-outlined">inventory_2</span>
-                    재고 현황 대시보드
-                </div>
                 <div class="menu-item" onclick="switchTab('statistics')">
                     <span class="material-symbols-outlined">bar_chart</span>
                     매입 통계 및 차트
@@ -897,6 +846,24 @@ window.addEventListener('load', function() {
                 <div class="menu-item" onclick="switchTab('settings')">
                     <span class="material-symbols-outlined">settings</span>
                     기본 설정 관리
+                </div>
+
+                <div style="margin: 15px 0; border-top: 1px solid #eee;"></div>
+                <!--
+                    ⚠️ 이 항목은 **고객에게 알림톡이 실제로 나가는** 화면이다.
+                       아래 '개발 도구' 와 섞이지 않게 별도 구획으로 둔다.
+                -->
+                <div style="font-size: 0.8rem; color: #888; font-weight: bold; margin: 0 0 5px 15px;">일괄 안내</div>
+                <div class="menu-item" id="menu-tab-pickup-notice" onclick="switchTab('pickup-notice')">
+                    <span class="material-symbols-outlined">campaign</span>
+                    방문수거 일자별 안내
+                </div>
+
+                <div style="margin: 15px 0; border-top: 1px solid #eee;"></div>
+                <div style="font-size: 0.8rem; color: #888; font-weight: bold; margin: 0 0 5px 15px;">개발 도구</div>
+                <div class="menu-item" id="menu-tab-reconcile" onclick="switchTab('reconcile')">
+                    <span class="material-symbols-outlined">compare_arrows</span>
+                    3-3 대조 도구
                 </div>
             </aside>
 
@@ -1280,42 +1247,6 @@ window.addEventListener('load', function() {
                             </thead>
                             <tbody id="daily-stats-table-body">
                                 <tr><td colspan="6" class="text-center">데이터를 불러오는 중입니다...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Inventory Tab -->
-                <div id="tab-inventory" class="view-section" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <div>
-                            <h2 class="mb-2">재고 현황 대시보드</h2>
-                            <p style="color: #666; font-size: 0.95rem; margin: 0;">매입 및 송금 완료된 기기들의 현황입니다.</p>
-                        </div>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" id="inventory-search-input" placeholder="이름 또는 기종 검색..." style="padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; width: 250px;" onkeyup="filterInventory()">
-                            <button onclick="deleteSelectedQuotes('inventory-table-body')" class="action-btn" style="background:#EF4444; color:white; border:none; padding:8px 16px; border-radius:8px; font-weight:bold; cursor:pointer;">
-                                선택 삭제
-                            </button>
-                        </div>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;"><input type="checkbox" onclick="toggleSelectAll(this, 'inventory-table-body')" /></th>
-                                    <th>상태</th>
-                                    <th>기종/용량</th>
-                                    <th>매입가</th>
-                                    <th>접수일 / 송금일</th>
-                                    <th>고객명 / 연락처</th>
-                                    <th>메모 (하자 등)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventory-table-body">
-                                <tr>
-                                    <td colspan="6" class="text-center">데이터를 불러오는 중입니다...</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -2337,6 +2268,351 @@ window.addEventListener('load', function() {
                     </div>
                 </div>
 
+                <!-- 3-3 Reconciliation Tool Section -->
+                <div id="tab-reconcile" class="view-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2 class="mb-1" style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 2rem; color: #2563eb;">compare_arrows</span>
+                                3-3 대조 도구
+                            </h2>
+                            <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
+                                새 앱 (Firestore <code style="background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px;">getCountFromServer</code>) vs 기존 관리자페이지 (메모리 필터링) 수치 비교 및 불일치 검증
+                            </p>
+                        </div>
+                        <button onclick="runReconciliation()" class="btn btn-primary" style="display: flex; align-items: center; gap: 6px; padding: 10px 20px; font-weight: 700; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            <span class="material-symbols-outlined">sync</span> 대조 다시 실행
+                        </button>
+                    </div>
+
+                    <!-- Rule 3 & Index Notice Banner -->
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 5px solid #2563eb; padding: 16px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                            <span class="material-symbols-outlined" style="color: #2563eb; font-size: 1.5rem; margin-top: 2px;">info</span>
+                            <div style="font-size: 0.88rem; color: #334155; line-height: 1.6;">
+                                <strong>⚠️ 규칙 ③ 준수 및 쿼리 집계 안내:</strong>
+                                <ul style="margin: 6px 0 0 18px; padding: 0;">
+                                    <li><strong>새 앱 (좌측):</strong> Firestore <code style="background:#e2e8f0; padding:1px 5px; border-radius:3px;">getCountFromServer</code>를 사용하여 전체 문서를 읽지 않고 서버 카운트 인덱스로 즉시 집계합니다.</li>
+                                    <li><strong>기존 관리자 (우측):</strong> 문서를 읽은 후 메모리에서 <code style="background:#e2e8f0; padding:1px 5px; border-radius:3px;">isDeleted === true</code> 및 <code style="background:#e2e8f0; padding:1px 5px; border-radius:3px;">isForeigner === true</code> 건을 제외한 숫자입니다.</li>
+                                    <li><strong>불일치 시:</strong> 수치가 다른 항목은 <span style="background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 4px; font-weight: bold;">빨간색</span>으로 표시되며, 차이 원인이 되는 문서 ID 칩을 클릭하여 상세 정보를 바로 열어볼 수 있습니다.</li>
+                                </ul>
+                                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 0.82rem; color: #475569;">
+                                    <strong>ℹ️ 활성 복합 인덱스 (Composite Indexes Status):</strong>
+                                    <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; margin-right:4px;">quotes(userId, timestamp)</span>
+                                    <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; margin-right:4px;">quotes(status, firebaseTimestamp)</span>
+                                    <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; margin-right:4px;">quotes(isDeleted, firebaseTimestamp)</span>
+                                    <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px;">posts(category, createdAt)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Execution Bar -->
+                    <div id="reconcile-status-bar" style="display: none; padding: 12px 18px; background: #e0f2fe; color: #0369a1; border-radius: 8px; font-weight: 600; font-size: 0.9rem; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+                        <span id="reconcile-status-text">계산 중...</span>
+                        <span id="reconcile-time-text" style="font-size: 0.8rem; font-weight: normal;">-</span>
+                    </div>
+
+                    <!-- Section 0: 근태 승인 대기 수량 관리 & 어긋남 경고 -->
+                    <div id="reconcile-attendance-warning" style="display: none; background: #fee2e2; border: 1px solid #fca5a5; border-left: 5px solid #dc2626; padding: 16px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="material-symbols-outlined" style="color: #dc2626; font-size: 1.8rem;">warning</span>
+                                <div>
+                                    <strong id="reconcile-attendance-warning-text" style="color: #991b1b; font-size: 0.98rem; display: block;">
+                                        근태 승인 대기 숫자가 어긋났습니다 (현재 -건)
+                                    </strong>
+                                    <span style="font-size: 0.82rem; color: #7f1d1d;">승인 대기 숫자가 0 미만입니다. 아래 버튼을 눌러 다시 계산(recount)하세요.</span>
+                                </div>
+                            </div>
+                            <button id="btn-recount-attendance-warn" onclick="recountAttendancePending()" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                🔄 대기 숫자 다시 세기 (recount)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                            <div>
+                                <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                    <span class="material-symbols-outlined" style="color: #2563eb;">schedule</span>
+                                    근태 승인 대기 수량 관리 (stats/attendance_pending)
+                                </h3>
+                                <p style="font-size: 0.83rem; color: #64748b; margin: 0;">쓰기 권한은 Cloud Function으로만 제한되며, 수치가 어긋났을 때 재집계(recount)합니다.</p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="font-size: 0.95rem; color: #334155;">현재 대기 집계: <strong id="reconcile-attendance-count-display" style="font-size: 1.25rem; color: #2563eb;">-건</strong></div>
+                                <button id="btn-recount-attendance" onclick="recountAttendancePending()" class="btn btn-secondary" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 9px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                    🔄 다시 세기 (recountAttendancePending)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 1: 구간별 건수 -->
+                    <div style="background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 6px; font-weight: 700;">1. 구간별 건수 대조 (Stage-based Count)</h3>
+                        <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 14px;">(접수·수거 / 검수·정산 / 종결)</p>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>구간명</th>
+                                        <th style="width: 180px;">새 앱 (getCountFromServer)</th>
+                                        <th style="width: 180px;">기존 관리자 (메모리 기준)</th>
+                                        <th style="width: 120px;">차이 (Diff)</th>
+                                        <th>메모리 판정 사유 & 차이 분석</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reconcile-stages-tbody">
+                                    <tr><td colspan="5" class="text-center">대조를 시작하려면 [대조 다시 실행] 버튼을 클릭하세요.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: 상태별 건수 13개 전부 -->
+                    <div style="background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 6px; font-weight: 700;">2. 상태별 건수 대조 (13개 전체)</h3>
+                        <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 14px;">(quotes 컬렉션 13개 상태 수치 비교 및 차이 문서 확인)</p>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 160px;">상태명</th>
+                                        <th style="width: 180px;">새 앱 (getCountFromServer)</th>
+                                        <th style="width: 180px;">기존 관리자 (메모리 기준)</th>
+                                        <th style="width: 120px;">차이 (Diff)</th>
+                                        <th>차이 나는 문서 ID (클릭 시 상세보기)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reconcile-statuses-tbody">
+                                    <tr><td colspan="5" class="text-center">대기 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: 이번 달 매입완료 건수와 금액 -->
+                    <div style="background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 6px; font-weight: 700;">3. 이번 달 매입완료 건수 및 금액 대조</h3>
+                        <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 14px;">(이번 달 입금완료 건수 및 매입금액 합계)</p>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>구분</th>
+                                        <th style="width: 220px;">새 앱 (서버 카운트 / 범위)</th>
+                                        <th style="width: 220px;">기존 관리자 (메모리 기준)</th>
+                                        <th style="width: 120px;">차이 (Diff)</th>
+                                        <th>비고 및 규칙 ③ 산출 사유</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reconcile-monthly-tbody">
+                                    <tr><td colspan="5" class="text-center">대기 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: 미집하 · 송장 미입력 · 이탈건 건수 -->
+                    <div style="background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 6px; font-weight: 700;">4. 미집하 · 송장 미입력 · 이탈건 건수 대조</h3>
+                        <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 10px;">(운영 특수 분류 기준)</p>
+                        <!--
+                            ⚠️ 2026-08-18 — 이 절의 '새 앱' 열은 서버 쿼리였는데, 세 항목 모두
+                               실제 앱과 다른 집합을 세고 있었다. 이탈건은 원리상 서버로 셀 수 없다.
+                               → 위에서 이미 훑어둔 문서로, 앱과 같은 규칙으로 센다. 조회는 안 는다.
+                        -->
+                        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #2563eb; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:0.83rem; line-height:1.7; color:#1e3a5f;">
+                            이 절의 <strong>'새 앱'</strong> 은 서버 카운트가 아니라 <strong>직원 앱과 같은 규칙으로 메모리에서 센 값</strong>입니다.
+                            세 항목 다 서버 쿼리로는 표현이 안 됩니다 — 특히 <strong>이탈건은 필드가 아예 없는 문서가 대상</strong>이라 원리상 불가능합니다.
+                            전체 훑기 결과를 그대로 쓰므로 <strong>조회가 늘지 않습니다.</strong><br>
+                            <strong>차이는 조각으로 쪼개서 합이 맞는지 검산합니다.</strong> 설명이 안 되는 차이가 남으면 빨갛게 표시됩니다.
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 160px;">구분</th>
+                                        <th style="width: 180px;">새 앱 (앱과 같은 규칙 · 메모리)</th>
+                                        <th style="width: 180px;">기존 관리자 (메모리 기준)</th>
+                                        <th style="width: 120px;">차이 (Diff)</th>
+                                        <th>메모리 판정 사유 및 차이 문서 ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reconcile-special-tbody">
+                                    <tr><td colspan="5" class="text-center">대기 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: 휴지통 건수 -->
+                    <div style="background: white; border-radius: 14px; padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 6px; font-weight: 700;">5. 휴지통 건수 대조</h3>
+                        <p style="font-size: 0.83rem; color: #64748b; margin-bottom: 14px;">(isDeleted: true 및 status=='삭제' 기준)</p>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 160px;">구분</th>
+                                        <th style="width: 180px;">새 앱 (where isDeleted == true)</th>
+                                        <th style="width: 180px;">기존 관리자 (메모리 기준)</th>
+                                        <th style="width: 120px;">차이 (Diff)</th>
+                                        <th>차이 문서 ID & 상태 상세</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reconcile-trash-tbody">
+                                    <tr><td colspan="5" class="text-center">대기 중...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════
+                     방문수거 일자별 안내 — 일괄 알림톡
+                     ───────────────────────────────────────────────────────────
+                     ⚠️⚠️ 이 화면의 버튼은 **고객에게 실제로 알림톡을 보낸다.**
+                          한 번 나가면 되돌릴 수 없다.
+
+                     ⚠️ 확정 수거일과 고객 희망일은 **다른 축이다. 절대 합치지 않는다.**
+                        위 목록 = 굿스플로에 접수돼 기사가 그날 실제로 가는 건
+                        아래 목록 = 아직 배차가 안 된 건 (고객 희망일만 있다)
+                        합쳐 세면 "그날 방문할 건" 이 부풀려진다.
+
+                     ⚠️ 매입신청일자(접수일)와 방문수거일자는 완전히 다른 날짜다.
+                        이 화면은 **방문수거일자**만 다룬다.
+                     ═══════════════════════════════════════════════════════════ -->
+                <div id="tab-pickup-notice" class="view-section" style="display: none;">
+                    <div style="margin-bottom: 20px;">
+                        <h2 class="mb-1" style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 2rem; color: #d97706;">campaign</span>
+                            방문수거 일자별 안내
+                        </h2>
+                        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
+                            휴무 등으로 안내가 필요할 때, <strong>그 날짜에 수거 예정인 건</strong>을 골라 알림톡을 한 번에 보냅니다.
+                        </p>
+                    </div>
+
+                    <!-- 되돌릴 수 없다는 경고 -->
+                    <div style="background: #fff7ed; border: 1px solid #f5c177; border-left: 5px solid #ea580c; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="font-weight: 700; color: #9a3412; margin-bottom: 6px;">보내기 전에 확인하세요</div>
+                        <ul style="margin: 0; padding-left: 18px; color: #7c2d12; font-size: 0.88rem; line-height: 1.7;">
+                            <li>알림톡은 <strong>한 번 나가면 되돌릴 수 없습니다.</strong> 날짜를 먼저 확인하세요.</li>
+                            <li>같은 번호로 <strong>여러 건을 신청한 고객에게는 한 번만</strong> 갑니다. 신청건은 하나도 지우지 않습니다.</li>
+                            <li>이미 보낸 건은 <span style="background:#dcfce7; color:#166534; padding:1px 6px; border-radius:4px; font-weight:600;">발송함</span> 표시가 붙고 <strong>전체선택에서 빠집니다.</strong> 다시 보내려면 직접 체크하세요.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 날짜 고르기 -->
+                    <div style="background: white; border-radius: 14px; padding: 18px 22px; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; margin-bottom: 18px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 12px;">
+                            <h3 style="font-size: 1rem; color: #0f172a; margin: 0; font-weight: 700;">수거일 고르기</h3>
+                            <button onclick="loadPickupNotice()" class="action-btn" style="background:#f1f5f9; color:#475569; border:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">
+                                <span class="material-symbols-outlined" style="font-size:1rem; vertical-align:-3px;">refresh</span> 다시 불러오기
+                            </button>
+                        </div>
+                        <div id="pn-date-chips" style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="color:#94a3b8; font-size:0.9rem;">불러오는 중...</span>
+                        </div>
+                        <div id="pn-scan-note" style="margin-top:10px; font-size:0.78rem; color:#94a3b8;"></div>
+                    </div>
+
+                    <!-- ⚠️ 이사 — 옛 주소로 배달되는 건 알림 (건수가 0이면 숨김) -->
+                    <div id="pn-old-address-note" style="display:none; background:#fef2f2; border:1px solid #fca5a5; border-left:5px solid #dc2626; padding:14px 18px; border-radius:12px; margin-bottom:18px;"></div>
+
+                    <!-- 발송 도구 -->
+                    <div id="pn-toolbar" style="display:none; background:white; border-radius:14px; padding:16px 22px; box-shadow:var(--shadow-sm); border:1px solid #e2e8f0; margin-bottom:18px;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="font-weight:700; color:#0f172a;" id="pn-selection-summary">선택 0건</span>
+                            <button onclick="pnSelectAll(true)" class="action-btn" style="background:#f1f5f9; color:#475569; border:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">전체 선택</button>
+                            <button onclick="pnSelectAll(false)" class="action-btn" style="background:#f1f5f9; color:#475569; border:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">선택 해제</button>
+                            <button onclick="pnExportCsv()" class="action-btn" style="background:#f1f5f9; color:#475569; border:none; padding:7px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem;">CSV 내보내기 (건별 전체)</button>
+                            <div style="flex:1;"></div>
+                            <button id="pn-send-btn" onclick="sendPickupNoticeBatch()" style="background:#ea580c; color:white; border:none; padding:10px 22px; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.92rem;">
+                                <span class="material-symbols-outlined" style="font-size:1.05rem; vertical-align:-4px;">send</span> 알림톡 발송
+                            </button>
+                        </div>
+                        <div id="pn-progress" style="margin-top:12px; display:none; font-size:0.85rem; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; max-height:220px; overflow-y:auto; white-space:pre-wrap; line-height:1.6;"></div>
+                    </div>
+
+                    <!-- ① 확정 배차 -->
+                    <div style="background:white; border-radius:14px; padding:22px; box-shadow:var(--shadow-sm); border:1px solid #e2e8f0; margin-bottom:18px;">
+                        <h3 style="font-size:1.05rem; color:#0f172a; margin:0 0 4px 0; font-weight:700;">
+                            ① 수거 예정 <span id="pn-scheduled-count" style="color:#2563eb;">0건</span>
+                        </h3>
+                        <p style="font-size:0.83rem; color:#64748b; margin:0 0 14px 0;">
+                            굿스플로에 접수돼 <strong>기사가 그날 실제로 가는 건</strong>입니다.
+                        </p>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:44px;"></th>
+                                        <th style="width:110px;">고객</th>
+                                        <th style="width:130px;">연락처</th>
+                                        <th>기종</th>
+                                        <th style="width:130px;">수거 예정</th>
+                                        <th style="width:120px;">고객 희망일</th>
+                                        <th>주소</th>
+                                        <th style="width:150px;">발송 이력</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pn-scheduled-tbody">
+                                    <tr><td colspan="8" class="text-center">날짜를 먼저 고르세요.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ② 미배차 -->
+                    <div style="background:white; border-radius:14px; padding:22px; box-shadow:var(--shadow-sm); border:1px solid #e2e8f0; margin-bottom:25px;">
+                        <h3 style="font-size:1.05rem; color:#0f172a; margin:0 0 4px 0; font-weight:700;">
+                            ② 배차 안 된 건 <span id="pn-unbooked-count" style="color:#64748b;">0건</span>
+                        </h3>
+                        <p style="font-size:0.83rem; color:#64748b; margin:0 0 14px 0;">
+                            아직 굿스플로에 접수되지 않아 <strong>기사가 가는 날이 정해지지 않았습니다.</strong>
+                            고객 희망일만 맞춰본 건이라 위 목록과 <strong>합쳐 세면 안 됩니다.</strong>
+                            (희망일에는 연도가 없어 월·일로만 비교합니다)
+                        </p>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:44px;"></th>
+                                        <th style="width:110px;">고객</th>
+                                        <th style="width:130px;">연락처</th>
+                                        <th>기종</th>
+                                        <th style="width:120px;">고객 희망일</th>
+                                        <th>주소</th>
+                                        <th style="width:150px;">발송 이력</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pn-unbooked-tbody">
+                                    <tr><td colspan="7" class="text-center">날짜를 먼저 고르세요.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quote Detail Modal for Mismatched Document Inspection -->
+                <div id="reconcile-doc-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 10000; justify-content: center; align-items: center;">
+                    <div style="background: white; width: 90%; max-width: 650px; border-radius: 16px; padding: 25px; box-shadow: var(--shadow-hover); max-height: 85vh; overflow-y: auto; position: relative;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 18px;">
+                            <h3 style="font-weight: 700; color: #1e293b; margin: 0; font-size: 1.15rem;">📄 신청서 상세 조회 (3-3 대조 검증용)</h3>
+                            <button onclick="document.getElementById('reconcile-doc-modal').style.display='none'" style="background: none; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer;">&times;</button>
+                        </div>
+                        <div id="reconcile-doc-modal-content">
+                            <p>로딩 중...</p>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                            <button onclick="document.getElementById('reconcile-doc-modal').style.display='none'" class="btn btn-secondary" style="padding: 8px 18px; background: #f1f5f9; color: #475569; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">닫기</button>
+                        </div>
+                    </div>
+                </div>
             </main>
 
 
@@ -2349,130 +2625,7 @@ window.addEventListener('load', function() {
 
 
 
-    <script type="module" src="admin.js?v=1785404000"></script>
-
-
-
-
-
-    <script>
-
-
-        (function () {
-
-
-            var w = window;
-
-
-            if (w.ChannelIO) {
-
-
-                return (window.console.error || window.console.log || function () { })('ChannelIO script included twice.');
-
-
-            }
-
-
-            var ch = function () {
-
-
-                ch.c(arguments);
-
-
-            };
-
-
-            ch.q = [];
-
-
-            ch.c = function (args) {
-
-
-                ch.q.push(args);
-
-
-            };
-
-
-            w.ChannelIO = ch;
-
-
-            function l() {
-
-
-                if (w.ChannelIOInitialized) {
-
-
-                    return;
-
-
-                }
-
-
-                w.ChannelIOInitialized = true;
-
-
-                var s = document.createElement('script');
-
-
-                s.type = 'text/javascript';
-
-
-                s.async = true;
-
-
-                s.src = 'https://cdn.channel.io/plugin/ch-plugin-web.js';
-
-
-                s.charset = 'UTF-8';
-
-
-                var x = document.getElementsByTagName('script')[0];
-
-
-                x.parentNode.insertBefore(s, x);
-
-
-            }
-
-
-            if (document.readyState === 'complete') {
-
-
-                l();
-
-
-            } else if (window.attachEvent) {
-
-
-                window.attachEvent('onload', l);
-
-
-            } else {
-
-
-                window.addEventListener('DOMContentLoaded', l, false);
-
-
-                window.addEventListener('load', l, false);
-
-
-            }
-
-
-        })();
-
-
-        ChannelIO('boot', {
-
-
-            "pluginKey": "ee78929e-951f-47f5-aec6-047038bd757e"
-
-
-        });
-
-
-    </script>
+    <script type="module" src="admin.js?v=1787045949"></script>
 
     <!-- Inspection (전자매매계약서) Modal -->
     <div id="inspection-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">

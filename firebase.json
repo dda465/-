@@ -41,11 +41,38 @@
       "find_*.js",
       "seed_*.js",
       "recover*.js",
-      "repair*.js"
+      "repair*.js",
+      "screenshot.js",
+      "prototype_*.html",
+      "index_*.html",
+      "quote_live*.html",
+      "admin_new.html",
+      "chat_mockup.html",
+      "check.html",
+      "admin_migrate.html",
+      "admin_perf_check.html",
+      "admin_rc_backfill.html",
+      "delete_reviews.html",
+      "inject_reviews.html",
+      "seed.html",
+      "seed_*.html",
+      "*.md",
+      "docs/**",
+      "staff-app/**"
     ],
     "headers": [
       {
         "source": "**/*.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "//": "⚠️ 위 규칙은 '/'(주소 뒤에 아무것도 없는 접속)에는 안 걸린다. sharaphone.com 으로 들어오면 요청 경로가 '/' 라서 '**/*.html' 과 안 맞고, 파이어베이스 기본 캐시(1시간)가 적용된다. 그러면 배포해도 모바일에서 최대 1시간 동안 예전 화면이 보인다. 대부분의 방문자가 이 주소로 들어오므로 반드시 같이 걸어둔다. (2026-08-11 실제로 겪음)",
+        "source": "/",
         "headers": [
           {
             "key": "Cache-Control",

@@ -400,12 +400,72 @@ exports.syncToGoogleSheetsOnCreate = onDocumentCreated(
     }
 );
 
+// ===================================================================
+// 재방문 고객 요약표
+// -------------------------------------------------------------------
+// 관리자 목록에 '재거래 2 / 반송이력 1' 같은 딱지를 붙이기 위한 집계.
+//
+// ★ 왜 따로 저장하나
+//   예전엔 관리자가 화면을 열 때마다 '입금완료' 건을 전부 읽어 번호를 셌다.
+//   554건에 6~77초가 걸렸고, 매입이 쌓일수록 계속 느려지는 구조였다.
+//   (측정: 정렬 없이 전체를 훑는 조회는 건당 13배 느렸다)
+//   여기서 미리 세어 문서 하나에 담아두면 관리자는 그 １건만 읽으면 된다.
+//
+// ★ 저장 형태  stats/returning_customers
+//     counts: { "01012345678": { paid: 2, returned: 1, canceled: 0 } }
+//   번호당 40바이트 남짓이라 문서 한도(1MB) 기준 3만 명까지 여유가 있다.
+// ===================================================================
+const RC_DOC = 'stats/returning_customers';
+const RC_STATUS_FIELD = { '입금완료': 'paid', '반송접수': 'returned', '취소': 'canceled' };
+
+// 번호에서 숫자만 남긴다. 저장 형식이 제각각(하이픈 유무)이라 반드시 정규화해서 쓴다.
+// 000-0000-0000 같은 자리표시용 번호는 제외한다.
+// 실제로 그 번호 하나에 서로 다른 고객 27명이 뭉쳐 있어, 세면 엉뚱한 사람에게
+// "재방문 25" 딱지가 붙는다. (admin_rc_backfill.html 의 norm 과 같은 기준)
+function rcNormalizePhone(v) {
+    const digits = String(v || '').replace(/\D/g, '');
+    if (digits.length < 9) return '';
+    if (/^(\d)\1+$/.test(digits)) return '';   // 0000000000, 1111111111 …
+    return digits;
+}
+
+async function rcBump(quoteId, phoneRaw, statusKo) {
+    const field = RC_STATUS_FIELD[statusKo];
+    const phone = rcNormalizePhone(phoneRaw);
+    if (!field || !phone) return;
+    try {
+        await admin.firestore().doc(RC_DOC).set({
+            counts: { [phone]: { [field]: admin.firestore.FieldValue.increment(1) } },
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        console.log(`[재방문표] ${phone} ${field} +1 (${quoteId})`);
+    } catch (e) {
+        // 집계 실패가 본래 업무(시트 연동·알림톡)를 막으면 안 되므로 로그만 남긴다.
+        console.error(`[재방문표] 갱신 실패 ${quoteId}:`, e && e.message);
+    }
+}
+
 exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
     { document: 'quotes/{quoteId}', region: 'asia-northeast3' },
     async (event) => {
         const after = event.data.after.data();
         const before = event.data.before.data();
         const quoteId = event.params.quoteId;
+
+        // 종결 상태로 '처음' 바뀔 때만 1 올린다.
+        // rcCounted 에 이미 기록된 상태면 건너뛰어, 상태를 되돌렸다 다시 바꿔도 중복으로 세지 않는다.
+        if (after.status !== before.status && RC_STATUS_FIELD[after.status]) {
+            const field = RC_STATUS_FIELD[after.status];
+            const counted = (after.rcCounted && after.rcCounted[field]) === true;
+            if (!counted) {
+                await rcBump(quoteId, after.customerPhone, after.status);
+                try {
+                    await event.data.after.ref.set({ rcCounted: { [field]: true } }, { merge: true });
+                } catch (e) {
+                    console.error(`[재방문표] 표시 저장 실패 ${quoteId}:`, e && e.message);
+                }
+            }
+        }
 
         // 1. 주소 입력 시점 동기화 (기존에 주소가 없다가 새로 입력된 경우 = 배송지 확정 시점)
         const becameConfirmed = after.customerAddress && after.customerAddress.trim() !== '' && 
@@ -500,13 +560,32 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
                     ? new Intl.NumberFormat('ko-KR').format(after.inspectionData.finalPrice) + '원'
                     : (after.price ? new Intl.NumberFormat('ko-KR').format(after.price) + '원' : '0원');
 
+                // ⚠️ 하자 — "확인 안 함" 과 "하자 없음" 을 구분한다.
+                //    간편접수(method:'simple')는 고객에게 하자를 아예 묻지 않는다.
+                //    그걸 '없음' 으로 쓰면 검수 전에 멀쩡한 기기로 오해한다.
+                //    다만 옛 문서에는 간편인데 defectsDetails 가 남아 있는 건이 있다
+                //    (셀프로 답하다 뒤로 나와 간편으로 확정한 경우 — script.js 4521줄).
+                //    **값이 남아 있으면 숨기지 않고 보여준다.**
+                //    액정 3단계('no'/'light'/'heavy') 함정은 formatDefects 가 이미 처리한다.
+                const hasDefectData = after.defectsDetails
+                    && Object.keys(after.defectsDetails).length > 0;
+                const defectText = hasDefectData
+                    ? formatDefects(after.defectsDetails)
+                    : (after.method === 'simple' ? '간편접수 — 확인 안 함' : '없음');
+
+                const storageText = after.storage ? ` ${after.storage}` : '';
+                // ⚠️ customerAccount 는 "은행명 계좌번호" 가 한 문자열로 합쳐져 있다 (script.js 4361줄)
+                const accountText = after.customerAccount || '미입력';
+
                 const tgMessage = `
 ✍️ *[전자매매계약서 동의 완료]*
 ━━━━━━━━━━━━━━
 👤 *고객명*: ${after.customerName || '알 수 없음'}
 📞 *연락처*: ${after.customerPhone || '알 수 없음'}
-📱 *모델명*: ${after.brand || ''} ${after.model || ''}
+📱 *모델명*: ${after.brand || ''} ${after.model || ''}${storageText}
+🔧 *하자*: ${defectText}
 💰 *최종매입가*: ${finalPriceText}
+🏦 *계좌*: ${accountText}
 ━━━━━━━━━━━━━━
 *상태가 [입금대기]로 전환되었습니다.* 
 관리자 페이지에서 확인 후 신속히 입금을 진행해 주세요.
@@ -608,25 +687,82 @@ const GF_DELIVERY_TYPE = process.env.GOODSFLOW_DELIVERY_TYPE || "D_SHIPPING";
 // 다만 한진 방문수거는 시간 지정이 안 되므로 이 값이 실제 방문시각을 정하지는 않는 것으로 보인다.
 // (굿스플로 담당자 확인 필요) 확인 후 조정할 수 있게 .env로 빼둔다.
 const GF_PICKUP_HOUR = process.env.GOODSFLOW_PICKUP_HOUR || "13:00";
-// 받는 분 = 쉐라폰 사무실 (환경변수로 두어 주소 변경에 대응)
+// ════════════════════════════════════════════════════════════════
+// GF_TO = **받는 곳 = 쉐라폰 사무실.** 기기가 도착하는 주소다.
+// ────────────────────────────────────────────────────────────────
+// ⚠️⚠️ **'회수지' 라고 부르지 말 것.** 기사가 찾아가는 곳으로 읽혀서 정반대가 된다.
+//
+//   from…  = 고객 집        ← 기사가 **가지러 가는** 곳. 신청건마다 다르다 (아래 payload)
+//   to…    = 쉐라폰 사무실   ← 기기가 **도착하는** 곳. 여기 GF_TO 다
+//
+// ⚠️⚠️ **여기가 틀리면 고객에게 받은 기기가 옛 사무실로 배달된다.**
+//    굿스플로는 예약을 만들 때 이 주소를 통째로 실어 보낸다. 그래서
+//    **이미 만들어진 예약은 이 값을 바꿔도 소급되지 않는다.**
+//    이사 때는 ① 이 값 변경 + 배포  ② 이미 잡힌 예약을 홈픽에 따로 요청  둘 다 해야 한다.
+//
+// ⚠️ 기본값(|| 뒤)도 **현재 주소로 같이 고친다.** .env 가 안 읽히는 사고가 나면
+//    조용히 옛 주소로 배차되고, 물건이 안 오기 전까지 아무도 모른다.
+//
+// 【이사 기록】
+//   ~2026-08   47247  부산시 동천로 116 한신밴빌딩 1003호
+//   2026-08-18 48400  부산광역시 남구 남동천로 128 BIFC2 716호   ← 지금
+//
+// ⚠️ addr1 에는 **도로명 기본주소만** 넣는다. 건물 별칭(BIFC2)을 넣으면
+//    우편번호↔주소 검증에 걸릴 수 있다. 건물·호수는 addr2 로 보낸다.
 const GF_TO = {
-    zipCode: process.env.GOODSFLOW_TO_ZIP || "",
+    zipCode: process.env.GOODSFLOW_TO_ZIP || "48400",
     name: process.env.GOODSFLOW_TO_NAME || "쉐라폰",
-    phone: process.env.GOODSFLOW_TO_PHONE || "07086809275",
-    addr1: process.env.GOODSFLOW_TO_ADDR1 || "부산시 동천로 116 한신밴빌딩",
-    addr2: process.env.GOODSFLOW_TO_ADDR2 || "1003호"
+    // ⚠️ 2026-08-18 — **오타를 바로잡았다.** .env 에 `010-5137-5382` 가 들어가 있었다.
+    //    맞는 번호는 홈페이지·알림톡과 같은 `010-5173-5382` 다 (5137 ↔ 5173, 자릿수가 뒤바뀌어 있었다).
+    //    기사가 사무실을 못 찾을 때 거는 번호라, 안 맞으면 그 건이 그대로 미집하가 된다.
+    //    ⚠️ 이 번호를 바꿀 일이 생기면 **홈페이지 발송 안내와 솔라피 템플릿도 같이** 바꿀 것.
+    phone: process.env.GOODSFLOW_TO_PHONE || "01051735382",
+    addr1: process.env.GOODSFLOW_TO_ADDR1 || "부산광역시 남구 남동천로 128",
+    addr2: process.env.GOODSFLOW_TO_ADDR2 || "BIFC2 716호"
 };
+
+// 배포 직후 로그에서 받는 주소를 눈으로 확인할 수 있게 남긴다.
+// 이사처럼 되돌리기 어려운 변경은 "바뀐 게 맞나"를 확인할 방법이 반드시 있어야 한다.
+console.log(`[굿스플로] 받는 곳(쉐라폰 사무실) = ${GF_TO.zipCode} ${GF_TO.addr1} ${GF_TO.addr2} (${GF_TO.name} ${GF_TO.phone})`);
 const GF_ADMIN_EMAILS = ["dda465@hanmail.net", "admin@rejuphone.com", "admin@sharaphone.com", "guffy321@naver.com", "test@admin.com"];
 
 // 관리자 인증 — 통과 못하면 null 반환(응답은 이미 전송됨)
+// ⚠️ 2026-08-14 — 직원 앱(staff.sharaphone.com) 계정도 통과시키도록 확장했다.
+//
+//    ⚠️⚠️ **기존 이메일 목록(GF_ADMIN_EMAILS)을 지우지 않았다. 더한 것이다.**
+//       지우면 기존 관리자페이지의 배차·취소가 통째로 멈춘다. 병행 기간에 그건 사고다.
+//
+//    ⚠️ 직원이 **로그아웃 → 재로그인**을 해야 새 토큰에 team·perms 가 들어간다.
+//       토큰이 낡으면 클레임 경로로 통과하지 못한다 (아래 거부 로그에 그렇게 찍힌다).
 async function gfRequireAdmin(req, res) {
     try {
         const m = String(req.headers.authorization || "").match(/^Bearer (.+)$/);
         if (!m) { res.status(401).json({ ok: false, error: "인증 토큰이 없습니다." }); return null; }
         const decoded = await admin.auth().verifyIdToken(m[1]);
-        if (!decoded.email || !GF_ADMIN_EMAILS.includes(decoded.email)) {
-            res.status(403).json({ ok: false, error: "관리자만 사용할 수 있습니다." }); return null;
+
+        // ── 경로 ① 기존 이메일 목록 (기존 관리자페이지가 쓰는 길. 절대 지우지 말 것)
+        const byEmail = !!decoded.email && GF_ADMIN_EMAILS.includes(decoded.email);
+
+        // ── 경로 ② 직원 앱 커스텀 클레임 (syncStaffClaims 가 심는다)
+        //    admin 팀은 모든 권한을 자동으로 받고, 배송·CS 영역은 'delivery' 권한을 갖는다.
+        const perms = Array.isArray(decoded.perms) ? decoded.perms : [];
+        const byClaim = decoded.team === "admin" || perms.includes("delivery");
+
+        if (!byEmail && !byClaim) {
+            // ⚠️ 거부도 남긴다. "왜 403 이 나지"를 로그 없이 알아낼 방법이 없다
+            console.warn(`[gfAuth] 거부 uid=${decoded.uid} email=${decoded.email || "없음"}`
+                + ` team=${decoded.team || "없음"} perms=[${perms.join(",")}]`);
+            res.status(403).json({ ok: false, error: "배차 권한이 없습니다. 관리자에게 문의해주세요." });
+            return null;
         }
+
+        // ★ 어느 경로로 통과했는지 반드시 남긴다.
+        //   나중에 문제가 생기면 "기존 관리자페이지인지 새 앱인지"가 원인을 좁히는 첫 단서다.
+        console.log(`[gfAuth] 통과 via=${byEmail ? "email" : "claim"} uid=${decoded.uid}`
+            + ` email=${decoded.email || "없음"} team=${decoded.team || "없음"}`);
+
+        // 아래 /cancelOrder 에서 문서에 남기려고 통과 경로를 실어 보낸다
+        decoded.gfAuthVia = byEmail ? "email" : "claim";
         return decoded;
     } catch (e) {
         res.status(401).json({ ok: false, error: "인증 실패: " + e.message }); return null;
@@ -645,6 +781,31 @@ async function gfFetch(path, options = {}) {
     return body;
 }
 const gfDigits = (s) => String(s || "").replace(/[^0-9]/g, "");
+
+/**
+ * 굿스플로에 보낼 이름을 정제한다.
+ *
+ * ⚠️ 카카오 로그인 회원은 닉네임이 이름 칸에 자동으로 채워진다(script.js 2538·2562줄).
+ *    카카오 닉네임에는 이모지가 흔해서(`민지🌸`) 굿스플로가 이름으로 인식하지 못하고
+ *    배차가 실패하거나 송장에 깨져서 찍힌다.
+ *
+ * 남기는 것: 한글 · 영문 · 숫자 · 공백 · 마침표 · 하이픈 · 괄호
+ * 버리는 것: 이모지, 특수기호, 제어문자
+ *
+ * ⚠️ 전부 지워져 빈 문자열이 되면 배차가 또 실패하므로 '고객' 으로 대체한다.
+ *    (연락처와 주소로 기사님이 찾을 수 있다)
+ */
+function gfCleanName(raw) {
+    const s = String(raw || "")
+        // 이모지·기호 영역을 통째로 제거 (서로게이트 페어 포함)
+        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, "")
+        // 허용 문자만 남긴다
+        .replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9 .()\-]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 30);   // 굿스플로 이름 길이 여유
+    return s || "고객";
+}
 
 // 굿스플로는 처리 실패도 HTTP 200으로 주면서 본문에 success:false를 담아 보낸다.
 // (예: "이미 집하되어 취소할 수 없습니다") gfFetch는 HTTP 상태만 보므로 본문도 반드시 확인해야 한다.
@@ -694,7 +855,9 @@ const GF_HOLIDAYS = new Set([
     "2026-03-01", "2026-03-02", "2026-05-05", "2026-05-24", "2026-05-25",
     "2026-06-03", "2026-06-06",
     "2026-07-17", // 제헌절 — 2026년부터 공휴일 재지정
-    "2026-08-15", "2026-08-17",
+    // ⚠️ 8/14 는 공휴일이 아니다. 택배사(한진)·굿스플로가 광복절 연휴로 쉰다.
+    //    "공휴일이 아닌데 왜 있지" 하고 지우지 말 것. 집하가 실제로 안 된다.
+    "2026-08-14", "2026-08-15", "2026-08-17",
     "2026-09-24", "2026-09-25", "2026-09-26",
     "2026-10-03", "2026-10-05", "2026-10-09", "2026-12-25",
     // ⚠ 2027년 이후는 잠정치(특히 설·추석 등 음력 기준일과 대체공휴일은 미확정).
@@ -816,7 +979,7 @@ goodsflowApp.post("/createOrder", async (req, res) => {
             ...(GF_TRANSPORTER ? { transporter: GF_TRANSPORTER } : {}),
             // 보내는 분 = 고객
             fromZipCode: gfDigits(q.customerZipCode),
-            fromName: q.customerName || "",
+            fromName: gfCleanName(q.customerName),
             fromPhoneNumber: gfDigits(q.customerPhone),
             fromAddr1: q.customerAddress || "",
             // 주소2는 비우면 접수가 거절됨("보내는 분 주소2 항목이 누락"). 상세주소가 없으면 '-'로 대체.
@@ -951,7 +1114,9 @@ goodsflowApp.post("/createOrder", async (req, res) => {
             goodsflowStatus: box.orderStatus || "",
             goodsflowCost: box.totalCost || 0,
             goodsflowBookedAt: new Date(),
-            goodsflowBookedBy: user.email,
+            // ⚠️ `|| ""` — 클레임으로 통과한 계정에 이메일이 없으면 undefined 가 되어
+            //    저장이 통째로 실패한다. 예방 차원이다.
+            goodsflowBookedBy: user.email || "",
             goodsflowRaw: JSON.stringify(result).slice(0, 4000), // 응답 전체 저장 (data만 저장하면 구조 파악 불가)
             // 실제로 접수에 쓴 partnerOrderNo — 상태조회는 반드시 이 값으로 해야 한다(재예약 시 문서ID와 달라짐)
             goodsflowPartnerOrderNo: usedPartnerNo,
@@ -1046,7 +1211,16 @@ goodsflowApp.post("/cancelOrder", async (req, res) => {
             goodsflowInvoiceNo: admin.firestore.FieldValue.delete(),
             goodsflowPrevOrderNo: orderNo,
             goodsflowCanceledAt: new Date(),
-            goodsflowCanceledBy: user.email,
+            // ⚠️ 기존 값. 그대로 둔다 — 지우면 예전 기록과 형태가 달라진다
+            goodsflowCanceledBy: user.email || "",
+            // ★ 2026-08-14 추가 — **누가** 취소를 눌렀는지.
+            //   3-5·3-7 에서 inspectedBy·paidBy 를 남긴 것과 같은 이유다.
+            //   기사 헛출동이 생기면 누가 언제 눌렀는지가 유일한 단서다.
+            //   ⚠️ 취소가 실패하면 이 블록은 실행되지 않는다(502 로 먼저 빠진다).
+            //      실패 기록은 새 앱이 남긴다 — 함수는 성공만, 앱은 실패만.
+            goodsflowCanceledByUid: user.uid,
+            goodsflowCanceledByName: String((req.body || {}).staffName || "").slice(0, 40),
+            goodsflowCanceledVia: user.gfAuthVia || "",   // 'email'=기존 페이지, 'claim'=새 앱
             goodsflowCancelRaw: JSON.stringify(result || {}).slice(0, 2000),
             goodsflowError: admin.firestore.FieldValue.delete(),
             goodsflowErrorAt: admin.firestore.FieldValue.delete()
@@ -1388,16 +1562,23 @@ async function buildDailySummary() {
         // 신규 신청 — 배송방법이 확정된 시각(submittedAt) 기준. 없으면 접수 시각.
         const appliedAt = toDateSafe(q.submittedAt) || toDateSafe(q.firebaseTimestamp);
         if (inRange(appliedAt)) {
-            const dm = q.deliveryMethod;
-            if (dm === "courier" || dm === "cvs") {
-                if (dm === "courier") courier++; else cvs++;
-                const key = SOURCE_LABEL[q.trafficSource] || q.trafficSource || "기타";
-                sources[key] = (sources[key] || 0) + 1;
-            } else if (!dm || dm === "pending") {
-                escapee++;
+            // ⚠ 예전엔 취소·삭제된 건도 '신규 신청'에 함께 셌다.
+            //   관리자페이지 '금일 매입신청' 카드는 둘 다 빼므로 숫자가 어긋났다.
+            //   취소 건수는 아래에서 따로 세어 보여주므로, 신규 신청에서는 제외한다.
+            const alive = !q.isDeleted && q.status !== "취소";
+            if (alive) {
+                const dm = q.deliveryMethod;
+                if (dm === "courier" || dm === "cvs") {
+                    if (dm === "courier") courier++; else cvs++;
+                    const key = SOURCE_LABEL[q.trafficSource] || q.trafficSource || "기타";
+                    sources[key] = (sources[key] || 0) + 1;
+                } else if (!dm || dm === "pending") {
+                    escapee++;
+                }
             }
-            if (q.status === "취소") canceled++;
-            if (q.status === "반송접수" || q.status === "반송대기") returned++;
+            // 취소·반송은 '그날 무슨 일이 있었는지' 보여주는 지표라 삭제건만 빼고 그대로 센다.
+            if (!q.isDeleted && q.status === "취소") canceled++;
+            if (!q.isDeleted && (q.status === "반송접수" || q.status === "반송대기")) returned++;
         }
 
         // 택배도착 — 실제 도착한 날 기준
@@ -1413,6 +1594,42 @@ async function buildDailySummary() {
         }
     });
 
+    // ───────────────────────────────────────────────────────────────
+    // ⏳ 검수완료 대기 — 계약서를 보냈는데 고객이 아직 동의하지 않은 건
+    // ───────────────────────────────────────────────────────────────
+    // ⚠️ 위 조회(최근 3개월)를 재활용하지 않고 따로 조회한다.
+    //    방치된 건일수록 오래됐는데, 3개월이 넘으면 위 조회에서 빠진다.
+    //    **오래 묵은 건이야말로 이 목록에 떠야 하는 건**이라 범위를 두면 안 된다.
+    //
+    // ⚠️ status 하나만 보는 조회라 단일 필드 자동 색인으로 충분하다. 인덱스 추가 없음.
+    //    검수완료 상태로 남아 있는 건은 많아야 수십 건이라 전부 읽어도 부담이 없다.
+    //
+    // ⚠️ inspectedAt 은 Timestamp 가 아니라 ISO 문자열이다 (admin.js 3854줄).
+    //    toDateSafe 가 문자열도 받아준다.
+    const waitSnap = await db.collection("quotes").where("status", "==", "검수완료").get();
+    const waiting = [];
+    waitSnap.forEach(doc => {
+        const q = doc.data();
+        if (q.isDeleted) return;
+        // 위 집계와 같은 기준으로 외국인 건을 뺀다 (한 메시지 안에서 기준이 달라지면 안 된다)
+        if (q.isForeigner === true || q.method === "foreigner" || q.series === "Foreigner") return;
+        waiting.push({
+            name: q.customerName || "-",
+            model: `${q.brand || ""} ${q.model || ""}`.trim() || "-",
+            sentAt: toDateSafe(q.inspectionData && q.inspectionData.inspectedAt)
+        });
+    });
+    // 오래 묵은 것이 위로. 시각을 모르는 건은 맨 위 — 확인이 필요한 건이라 묻히면 안 된다.
+    waiting.sort((a, b) => (a.sentAt ? a.sentAt.getTime() : 0) - (b.sentAt ? b.sentAt.getTime() : 0));
+
+    // 한국시간으로 'M/D HH:MM'
+    const fmtKst = (d) => {
+        if (!d) return "시각미상";
+        const k = new Date(d.getTime() + 9 * 3600000);
+        return `${k.getUTCMonth() + 1}/${k.getUTCDate()} `
+             + `${String(k.getUTCHours()).padStart(2, "0")}:${String(k.getUTCMinutes()).padStart(2, "0")}`;
+    };
+
     const dow = ["일", "월", "화", "수", "목", "금", "토"][label.getUTCDay()];
     const dateStr = `${label.getUTCMonth() + 1}월 ${label.getUTCDate()}일 (${dow})`;
 
@@ -1427,6 +1644,17 @@ async function buildDailySummary() {
     msg += `취소 ${canceled}건 · 반송 ${returned}건\n`;
     msg += `\n✅ *매입완료 ${completed.length}건*\n`;
     msg += completed.length ? completed.map(t => `  ${t}`).join("\n") : "  (없음)";
+
+    // 어제 하루가 아니라 **지금 남아 있는 것 전부**다. 며칠 묵은 건이 여기서 걸린다.
+    msg += `\n\n⏳ *검수완료 대기 ${waiting.length}건*\n`;
+    msg += waiting.length
+        ? waiting.map(w => {
+            const days = w.sentAt ? Math.floor((Date.now() - w.sentAt.getTime()) / 86400000) : null;
+            // 이틀 넘게 답이 없으면 경과일을 붙인다. 매일 붙이면 눈에 안 들어온다.
+            const age = (days !== null && days >= 2) ? `  (${days}일 경과)` : "";
+            return `  ${w.name}  ${w.model}  ${fmtKst(w.sentAt)}${age}`;
+        }).join("\n")
+        : "  (없음)";
 
     return msg;
 }
@@ -1513,13 +1741,19 @@ async function botToday() {
     let courier = 0, cvs = 0, escapee = 0, arrived = 0, done = 0, inspecting = 0;
     snap.forEach(d => {
         const q = d.data();
-        if (q.isForeigner === true || q.method === "foreigner") return;
+        if (q.isForeigner === true || q.method === "foreigner" || q.series === "Foreigner") return;
         const applied = toDateSafe(q.submittedAt) || toDateSafe(q.firebaseTimestamp);
         if (applied && applied >= todayStart) {
-            const dm = q.deliveryMethod;
-            if (dm === "courier") courier++;
-            else if (dm === "cvs") cvs++;
-            else if (!dm || dm === "pending") escapee++;
+            // ⚠ 예전엔 취소·삭제된 건도 '신규 신청'에 세고 있었다.
+            //   관리자페이지 '금일 매입신청' 카드는 둘 다 빼고 세기 때문에 숫자가 어긋났다.
+            //   담당자가 보는 화면과 봇 숫자는 반드시 같아야 하므로 기준을 맞춘다.
+            const alive = !q.isDeleted && q.status !== "취소";
+            if (alive) {
+                const dm = q.deliveryMethod;
+                if (dm === "courier") courier++;
+                else if (dm === "cvs") cvs++;
+                else if (!dm || dm === "pending") escapee++;
+            }
         }
         const ar = toDateSafe(q.arrivedAt);
         if (ar && ar >= todayStart) arrived++;
@@ -1661,12 +1895,16 @@ async function botMonth() {
     let applied = 0, escapee = 0, done = 0, amount = 0, canceled = 0, returned = 0;
     snap.forEach(d => {
         const q = d.data();
-        if (q.isForeigner === true || q.method === "foreigner") return;
+        if (q.isForeigner === true || q.method === "foreigner" || q.series === "Foreigner") return;
+        if (q.isDeleted) return;   // 휴지통으로 보낸 건은 어떤 집계에도 넣지 않는다
         const at = toDateSafe(q.submittedAt) || toDateSafe(q.firebaseTimestamp);
         if (at && at >= monthStart) {
-            const dm = q.deliveryMethod;
-            if (dm === "courier" || dm === "cvs") applied++;
-            else if (!dm || dm === "pending") escapee++;
+            // 신규 신청에서는 취소 건을 뺀다 (취소 건수는 아래에서 따로 보여준다)
+            if (q.status !== "취소") {
+                const dm = q.deliveryMethod;
+                if (dm === "courier" || dm === "cvs") applied++;
+                else if (!dm || dm === "pending") escapee++;
+            }
             if (q.status === "취소") canceled++;
             if (q.status === "반송접수" || q.status === "반송대기") returned++;
         }
@@ -1814,3 +2052,12 @@ goodsflowApp.post("/pollNow", async (req, res) => {
         res.status(500).json({ ok: false, error: e.message });
     }
 });
+
+// ── 직원 앱(staff.sharaphone.com) 전용 함수 ──────────────────────
+// 새 파일로 분리해 두었다. 위의 기존 함수들은 영향을 받지 않는다.
+Object.assign(exports, require('./staffAuth'));
+Object.assign(exports, require('./attendance'));
+
+// ── 홈페이지 실시간 접수 피드 ────────────────────────────────────
+// 새 파일로 분리. 위의 기존 함수들은 영향을 받지 않는다.
+Object.assign(exports, require('./liveFeed'));

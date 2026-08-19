@@ -1,8 +1,19 @@
+// ⚠️⚠️ 이 파일을 고쳤으면 **HTML 의 ?v= 번호를 반드시 같이 바꾼다.**
+//
+//   HTML 은 `<script src="script.js?v=1786421206">` 로 불러온다.
+//   Firebase Hosting 은 HTML 만 캐시를 끄고(firebase.json headers),
+//   js 는 브라우저·CDN 이 한 시간 붙잡는다. 번호를 안 바꾸면
+//   **HTML 은 새것, script.js 는 예전 것**이 섞여서 화면이 반만 바뀐다.
+//   증상이 "배포는 됐는데 일부만 반영됨" 이라 원인을 찾기 어렵다. (2026-08-11 겪음)
+//
+//   바꾸는 법 — 이 폴더에서 한 줄:
+//     PowerShell:  (Get-ChildItem *.html) | ForEach-Object { (Get-Content $_ -Raw) -replace 'script\.js\?v=\d+', "script.js?v=$([int](Get-Date -UFormat %s))" | Set-Content $_ -NoNewline }
+//
 import { db, auth, getStorageLazy } from './firebase-config.js';
 
 
 
-import { collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, doc, updateDoc, getDoc, serverTimestamp, where, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, addDoc, getDocs, query, orderBy, limit, startAfter, deleteDoc, doc, updateDoc, getDoc, serverTimestamp, where, setDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
 
@@ -11,6 +22,70 @@ import { onAuthStateChanged, signOut, signInAnonymously } from "https://www.gsta
 
 
 import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+/**
+ * 사람 이름을 정제한다. — 이름 칸에 값을 넣을 때는 이 함수를 거친다.
+ *
+ * ⚠️ 카카오 로그인 회원은 닉네임이 이름 칸에 자동으로 채워진다.
+ *    카카오 닉네임에는 이모지가 흔해서(`민지🌸`) 그대로 접수되면
+ *    굿스플로가 이름으로 인식하지 못해 **배차가 실패한다.**
+ *
+ * 남기는 것: 한글 · 영문 · 숫자 · 공백 · 마침표 · 하이픈 · 괄호
+ * 버리는 것: 이모지, 특수기호
+ *
+ * ⚠️ 여기서는 빈 문자열을 그대로 돌려준다. 대체값을 넣으면 고객이
+ *    엉뚱한 이름으로 접수하게 된다. 비워두고 직접 입력받는 게 맞다.
+ *    (서버 쪽 gfCleanName 은 배차 직전이라 '고객' 으로 대체한다 — 목적이 다르다)
+ */
+function cleanPersonName(raw) {
+    return String(raw || '')
+        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '')
+        .replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9 .()\-]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 30);
+}
+
+/**
+ * 사람 이름으로 쓸 수 있는 값인지 검사한다. — 접수 직전에 막는 용도.
+ *
+ * 통과 기준: **한글 또는 영문이 하나라도 들어 있으면 통과.**
+ *
+ * ⚠️ 너무 빡빡하게 걸면 안 된다. `박민수★` 는 통과시키고 `★★★` 만 막는다.
+ *    특수문자를 전부 금지하면 외국인 이름이나 특이 케이스에서 접수가 막힌다.
+ *    남은 특수문자는 배차 직전에 서버(gfCleanName)가 정리한다.
+ *
+ * ⚠️ 이름은 배차에만 쓰이는 게 아니다. 검수팀이 박스 받고 이름으로 찾고,
+ *    CS가 전화로 확인하고, 전자매매계약서에도 들어간다.
+ *    그래서 '고객' 같은 대체값으로 넘기지 않고 입구에서 막는다.
+ */
+function isValidPersonName(raw) {
+    return /[가-힣a-zA-Z]/.test(String(raw || ''));
+}
+
+/**
+ * 액정 상태를 사람이 읽을 문구로 바꾼다. — 표시용은 반드시 이 함수를 거친다.
+ *
+ * ⚠️ 값이 두 가지 형태로 존재한다.
+ *      현재: 'no'(없음) · 'light'(줄·멍) · 'heavy'(완전 안 보임)   ← quote.html 1058~1062줄
+ *      과거: true / false (불리언)
+ *
+ * ⚠️⚠️ **`'no'` 는 빈 문자열이 아니라서 자바스크립트에서 참이다.**
+ *      예전 표시 코드가 `defects.lcd_damage ? '있음' : '정상'` 이었는데,
+ *      이러면 액정을 '없음'으로 고른 고객이 전부 '있음 ❌' 으로 알림이 나갔다.
+ *      (등급 계산은 'light'/'heavy' 만 보므로 매입가는 정상이었다 — 3277줄)
+ *
+ * @returns {{damaged: boolean, text: string}|null}  값이 없으면 null
+ */
+function describeLcdDamage(v) {
+    if (v === undefined || v === null) return null;
+    if (v === false || v === 'no') return { damaged: false, text: '정상/없음' };
+    if (v === true) return { damaged: true, text: '있음' };
+    if (v === 'light') return { damaged: true, text: '있음 (줄·멍)' };
+    if (v === 'heavy') return { damaged: true, text: '있음 (완전 안 보임)' };
+    // 모르는 값이 들어와도 버리지 않고 원문을 그대로 보여준다
+    return { damaged: true, text: `있음 (${v})` };
+}
 
 
 
@@ -193,18 +268,12 @@ window.triggerFrontendAlimtalk = async (type, phone, payload) => {
         };
     } 
     // 3. 직접발송으로 신청시
+    // 2026-08 착불 전환본으로 교체 (이전: KA01TP260519013835863h7hpYzMO26t)
+    // 새 템플릿은 발송기한이 '오늘부터 7일 이내'로 본문에 고정돼 있어 변수가 없다.
+    // ⚠ 변수를 하나라도 같이 보내면 솔라피에서 발송 실패한다.
     else if (type === "quote_cvs") {
-        templateId = "KA01TP260519013835863h7hpYzMO26t";
-        const dateObj = new Date();
-        dateObj.setDate(dateObj.getDate() + 3);
-        const y = dateObj.getFullYear();
-        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const d = String(dateObj.getDate()).padStart(2, '0');
-        const targetDateStr = `${y}년 ${m}월 ${d}일`;
-
-        variables = {
-            "#{신청일자로부터3일}": targetDateStr
-        };
+        templateId = "KA01TP2608040332511261SZPdl8vG71";
+        variables = {};
     }
 
     if (!templateId) return;
@@ -1064,6 +1133,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let slideInterval;
 
+            // 점(dot)을 슬라이드 개수에 맞춰 다시 만든다.
+            // 예전엔 index.html 에 <span class="slider-dot"> 4개가 하드코딩돼 있어서
+            // 슬라이드를 추가하면 점 개수가 안 맞았다. 이제 자동으로 맞춰진다.
+            const dotsBox = document.getElementById('slider-dots');
+            if (dotsBox) {
+                dotsBox.innerHTML = '';
+                for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+                    dot.setAttribute('data-index', String(i));
+                    dotsBox.appendChild(dot);
+                }
+            }
+
 
 
 
@@ -1073,7 +1156,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const updateSlider = () => {
 
                 // Move the slider container
-                slider.style.transform = `translateX(-${currentIndex * (100 / totalSlides)}%)`;
+                // 각 슬라이드가 화면 폭(100%)을 차지하므로 인덱스당 100%씩 이동한다.
+                // 예전엔 100/totalSlides 였는데, 이는 컨테이너 폭이 (개수×100%)일 때만 맞는 계산이라
+                // 슬라이드를 추가하면 어긋났다.
+                slider.style.transform = `translateX(-${currentIndex * 100}%)`;
 
                 // Update text indicator (hidden, kept for compat)
                 if (currentIndicator) {
@@ -2430,7 +2516,7 @@ async function initDeepWizard() {
                     if (typeof window.renderStorage === 'function' && currentQuote.model) window.renderStorage(currentQuote.model);
                     window.goToStep(4); return;
                 }
-                window.goToStep('method');
+                window.goToStep('grade-list');
             };
         });
     };
@@ -2523,9 +2609,12 @@ async function initDeepWizard() {
                     if (viewNonMember) viewNonMember.style.display = 'none';
                     if (viewMember) viewMember.style.display = 'block';
 
-                    if (nameInput) { 
-                        nameInput.value = memberName; 
-                        nameInput.readOnly = false; 
+                    if (nameInput) {
+                        // ⚠️ 카카오 닉네임에는 이모지가 흔하다(`민지🌸`).
+                        //    그대로 두면 굿스플로가 이름으로 인식하지 못해 배차가 실패한다.
+                        //    자동으로 채울 때 정제하고, 남는 게 없으면 비워서 직접 입력받는다.
+                        nameInput.value = cleanPersonName(memberName);
+                        nameInput.readOnly = false;
                     }
                     if (phoneInput) { 
                         phoneInput.value = memberPhone; 
@@ -2728,7 +2817,7 @@ async function initDeepWizard() {
 
     window.defectSubStepNav = (direction) => {
         if (direction === -1) {
-            if (_defectSubStep <= 1) { goToStep('method'); return; }
+            if (_defectSubStep <= 1) { goToStep('grade-list'); return; }
             _defectSubStep--;
         } else {
             if (_defectSubStep === 1) {
@@ -3815,7 +3904,7 @@ async function initDeepWizard() {
                 const needsStorage = !isSamsung && storageOpts.length > 1;
 
                 if (needsStorage) {
-                    // 용량 선택 화면으로 보낸다. 용량을 고르면 기존 흐름(접수방식 선택)으로 이어진다.
+                    // 용량 선택 화면으로 보낸다. 용량을 고르면 곧바로 등급표로 이어진다.
                     setTimeout(() => {
                         if (typeof window.renderStorage === 'function') window.renderStorage(foundModel);
                         if (typeof window.goToStep === 'function') window.goToStep(4);
@@ -4086,7 +4175,21 @@ async function initDeepWizard() {
                 const phone = document.getElementById('auth-phone').value.trim();
                 const agreeTerms = document.getElementById('agree-terms').checked;
 
-                if (!name || !phone) {
+                // ⚠️ 이름과 연락처를 나눠서 안내한다.
+                //    예전엔 둘 다 '본인인증을 완료해주세요' 였는데,
+                //    카카오 닉네임이 전부 이모지라 이름만 비는 경우가 있다(`🌸🌸🌸`).
+                //    그때 인증하라고 하면 이미 인증한 고객이 헤맨다.
+                if (!name) {
+                    alert('수거하실 분 성함을 입력해 주세요.');
+                    document.getElementById('auth-name')?.focus();
+                    return;
+                }
+                if (!isValidPersonName(name)) {
+                    alert('성함에 한글 또는 영문이 포함되어야 합니다.\n택배 기사님이 이 이름으로 확인합니다.');
+                    document.getElementById('auth-name')?.focus();
+                    return;
+                }
+                if (!phone) {
                     alert('휴대폰 본인인증을 완료해주세요.');
                     return;
                 }
@@ -4319,7 +4422,7 @@ async function initDeepWizard() {
                         목록에 없는 기타 기종은 기기 상태 검수 후 정확한 견적이 산출됩니다.<br>
                         대략적인 단가가 궁금하시다면 고객센터로 문의해 주세요!
                     </p>
-                    <button onclick="if(window.ChannelIO){ChannelIO('showMessenger')}else{alert('채팅 상담 연결 중 문제가 발생했습니다.')}" class="btn btn-secondary" style="background: #2563EB; color: white; border: none; font-weight: 600;">채팅으로 단가 문의하기</button>
+                    <a href="https://pf.kakao.com/_TEvMK/chat" target="_blank" rel="noopener" class="btn btn-secondary" style="background: #FEE500; color: #391B1B; border: none; font-weight: 600; text-decoration:none; display:inline-block;">카카오톡으로 단가 문의하기</a>
                 </div>
             `;
             return;
@@ -4420,6 +4523,35 @@ async function initDeepWizard() {
         } else {
             goToStep('defects');
         }
+    };
+
+    // ── 등급표에서 '판매 신청하기' ────────────────────────────────────
+    // 접수방법 고르는 단계를 없애면서 생긴 갈림길 (2026-08).
+    //
+    // ⚠ 셀프로 들어가 문항 몇 개를 답한 뒤 뒤로 나와 이 버튼을 누르는 경우가 있다.
+    //   그때 defectsDetails 가 남아 있으면 method 는 'simple' 인데 하자 답변이 함께 저장된다.
+    //   관리자 상세는 method==='simple' 이면 "상태체크 생략"으로만 표시해서
+    //   고객이 적은 하자 정보가 화면에서 사라진다 → 검수자가 못 본다.
+    //   그래서 간편으로 확정할 때 하자 답변과 등급을 반드시 비운다.
+    window.bookSimple = () => {
+        if (currentQuote.method !== 'simple') {
+            currentQuote.method = 'simple';
+            currentQuote.defectsDetails = {};   // 셀프에서 입력한 답변 정리
+            currentQuote.grade = 'a';           // 간편접수 기본 등급 = A급
+            let p = (currentQuote.model && currentQuote.model.prices && currentQuote.model.prices['a'] > 0)
+                ? currentQuote.model.prices['a']
+                : Math.round(((currentQuote.model && currentQuote.model.basePrice) || 0) * 0.9);
+            if (p > 0 && currentQuote.storage) p += (currentQuote.storage.priceAdjustment || 0);
+            currentQuote.finalPrice = Math.floor(p / 1000) * 1000;
+        }
+        calculateAndShowResult(true);
+        goToStep('auth');
+    };
+
+    // 등급표에서 '이전 단계로' — 삼성은 용량 단계를 건너뛰므로 모델(3)로 돌아가야 한다.
+    // 무조건 4로 보내면 삼성 고객에게 빈 용량 화면이 뜬다.
+    window.backFromGradeList = () => {
+        goToStep(currentQuote && currentQuote.brand === 'samsung' ? 3 : 4);
     };
 
     function getSamsungParentCategory(seriesName) {
@@ -4544,7 +4676,6 @@ async function initDeepWizard() {
                 storageOptions: [{ size: '해당없음', priceAdjustment: 0 }]
             };
             currentQuote.storage = currentQuote.model.storageOptions[0];
-            goToStep('method'); 
             selectMethod('simple');
         };
         container.appendChild(otherCard);
@@ -4553,13 +4684,10 @@ async function initDeepWizard() {
         notFoundCard.className = 'selection-card';
         notFoundCard.style.borderColor = '#2563EB';
         notFoundCard.style.backgroundColor = '#EFF6FF';
-        notFoundCard.innerHTML = `<div class="card-title" style="color: #1E3A8A;">찾는 시리즈가 없나요?</div><div class="card-sub" style="color:#2563EB;">채팅상담 문의하기</div>`;
+        notFoundCard.innerHTML = `<div class="card-title" style="color: #1E3A8A;">찾는 시리즈가 없나요?</div><div class="card-sub" style="color:#2563EB;">카카오톡으로 문의하기</div>`;
         notFoundCard.onclick = () => {
-            if (window.ChannelIO) {
-                ChannelIO('showMessenger');
-            } else {
-                alert('채팅 상담 플러그인을 불러올 수 없습니다.');
-            }
+            // 채널톡 → 카카오톡 채널로 대체 (2026-08)
+            window.open('https://pf.kakao.com/_TEvMK/chat', '_blank', 'noopener');
         };
     }
 
@@ -4645,7 +4773,7 @@ async function initDeepWizard() {
                 currentQuote.model = item;
                 if (brand === 'samsung') {
                     currentQuote.storage = { size: "기본(용량무관)", priceAdjustment: 0 };
-                    goToStep('method');
+                    selectMethod('simple');   // 접수방법 단계를 없애고 바로 등급표 (2026-08)
                 } else {
                     renderStorage(item);
                     goToStep(4);
@@ -4668,7 +4796,7 @@ async function initDeepWizard() {
 `;
             card.onclick = () => {
                 currentQuote.storage = opt;
-                goToStep('method'); 
+                selectMethod('simple');   // 용량을 고르면 곧바로 등급표
             };
             container.appendChild(card);
         });
@@ -4683,7 +4811,7 @@ async function initDeepWizard() {
             const inputVal = prompt("해당 기기의 저장공간 용량을 직접 입력해주세요 (예: 64GB, 256GB 등)");
             if (inputVal && inputVal.trim() !== "") {
                 currentQuote.storage = { size: inputVal.trim() + " (직접입력)", priceAdjustment: 0 };
-                goToStep('method'); 
+                selectMethod('simple');   // 용량 입력 후 곧바로 등급표
             }
         };
         container.appendChild(customCard);
@@ -4943,7 +5071,7 @@ async function initDeepWizard() {
                                 if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
                                 let parts = [];
                                 if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '미개봉' : '개봉'}`);
-                                if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
+                                { const _lcd = describeLcdDamage(defects.lcd_damage); if (_lcd) parts.push(`액정손상: ${_lcd.text}`); }
                                 if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
                                 for (const key in defects) {
                                     if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
@@ -5017,7 +5145,7 @@ async function initDeepWizard() {
                                 if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
                                 let parts = [];
                                 if (defects.is_sealed !== undefined) parts.push(`미개봉 여부: ${defects.is_sealed ? '미개봉 📦' : '개봉 📱'}`);
-                                if (defects.lcd_damage !== undefined) parts.push(`액정 파손/LCD 불량: ${defects.lcd_damage ? '있음 ❌' : '정상/없음 ✅'}`);
+                                { const _lcd = describeLcdDamage(defects.lcd_damage); if (_lcd) parts.push(`액정 파손/LCD 불량: ${_lcd.text} ${_lcd.damaged ? '❌' : '✅'}`); }
                                 if (defects.burn_in !== undefined) parts.push(`화면 잔상: ${defects.burn_in ? '있음 ❌' : '정상/없음 ✅'}`);
                                 
                                 for (const key in defects) {
@@ -5095,7 +5223,17 @@ ${defectInfo}
                 
                 const instr = document.getElementById('success-instruction');
                 if (deliveryMethod === 'cvs') {
-                    instr.innerHTML = `<p><strong>📦 택배비 지원받기 접수 완료</strong></p><p>고객님 편하신 편의점/우체국을 통해 아래 주소로 기기를 발송해 주세요.<br><br><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-5173-5382</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
+                    instr.innerHTML = `<p><strong>📮 직접발송 접수 완료</strong></p>
+                    <p style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; padding:12px; margin:10px 0; color:#1D4ED8; font-weight:700; line-height:1.6;">
+                        편의점·우체국에서 <strong>반드시 착불(수신자부담)</strong>로 보내주세요.<br>
+                        <span style="font-weight:600; color:#2563EB;">배송비는 쉐라폰이 부담하니 따로 내지 않으셔도 됩니다.</span>
+                    </p>
+                    <p><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-5173-5382</p>
+                    <p style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:8px; padding:12px; margin:10px 0; color:#92400E; line-height:1.6;">
+                        <strong>보내신 뒤에는 마이페이지에서 「택배 보냈어요!」를 눌러주세요.</strong><br>
+                        <span style="font-size:0.9em;">알려주셔야 도착 확인과 검수가 빨라집니다.</span>
+                    </p>
+                    <p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                 } else {
                     instr.innerHTML = `<p><strong>📦 택배 방문수거 접수 완료</strong></p><p>선택하신 수거일자(${pickupDate})에 맞춰 박스를 포장해 문 앞에 두시면, 택배 기사님이 안전하게 수거해 갈 예정입니다.</p><p>기기가 도착하는 즉시 검수하여 <strong>당일 입금</strong>해 드립니다!</p>`;
                 }
@@ -5144,6 +5282,12 @@ ${defectInfo}
 
         if (!name || !phone) {
             alert("이름과 연락처를 입력해주세요.");
+            return;
+        }
+        // 이모지·기호만 있는 이름을 막는다 (카카오 닉네임이 그대로 넘어오는 경우)
+        if (!isValidPersonName(name)) {
+            alert('성함에 한글 또는 영문이 포함되어야 합니다.\n택배 기사님이 이 이름으로 확인합니다.');
+            document.getElementById('auth-name')?.focus();
             return;
         }
 
@@ -5343,7 +5487,7 @@ ${defectInfo}
                 if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
                 let parts = [];
                 if (defects.is_sealed !== undefined) parts.push(`미개봉: ${defects.is_sealed ? '미개봉' : '개봉'}`);
-                if (defects.lcd_damage !== undefined) parts.push(`액정손상: ${defects.lcd_damage ? '있음' : '정상'}`);
+                { const _lcd = describeLcdDamage(defects.lcd_damage); if (_lcd) parts.push(`액정손상: ${_lcd.text}`); }
                 if (defects.burn_in !== undefined) parts.push(`잔상: ${defects.burn_in ? '있음' : '정상'}`);
                 for (const key in defects) {
                     if (['is_sealed', 'lcd_damage', 'burn_in'].includes(key)) continue;
@@ -5433,7 +5577,7 @@ ${defectInfo}
                 if (!defects || Object.keys(defects).length === 0) return '없음/해당없음 (간편견적)';
                 let parts = [];
                 if (defects.is_sealed !== undefined) parts.push(`미개봉 여부: ${defects.is_sealed ? '미개봉 📦' : '개봉 📱'}`);
-                if (defects.lcd_damage !== undefined) parts.push(`액정 파손/LCD 불량: ${defects.lcd_damage ? '있음 ❌' : '정상/없음 ✅'}`);
+                { const _lcd = describeLcdDamage(defects.lcd_damage); if (_lcd) parts.push(`액정 파손/LCD 불량: ${_lcd.text} ${_lcd.damaged ? '❌' : '✅'}`); }
                 if (defects.burn_in !== undefined) parts.push(`화면 잔상: ${defects.burn_in ? '있음 ❌' : '정상/없음 ✅'}`);
                 
                 for (const key in defects) {
@@ -5639,6 +5783,9 @@ let currentReviewPage = 1;
 
 
 const reviewsPerPage = 5;
+// 후기 첫 로드 건수 — 8페이지분. 나머지는 화면을 그린 뒤 이어 받는다.
+const REVIEW_FIRST_PAGE = 40;
+let _reviewsRestLoaded = false;
 
 
 
@@ -5832,7 +5979,7 @@ async function loadRecentReviewsForHomepage() {
 
 
 
-                imageHtml = `<div class="home-review-img-box"><img src="${data.imageUrl}" class="home-review-img" alt="리뷰 이미지"></div>`;
+                imageHtml = `<div class="home-review-img-box"><img src="${data.imageUrl}" class="home-review-img" alt="후기 사진" loading="lazy" decoding="async"></div>`;
 
 
 
@@ -6261,17 +6408,17 @@ async function loadReviews() {
         // 현재 주변 3개만 노출하므로, 이 값을 키워도 렌더 부담은 늘지 않는다.
         // 후기 문서는 텍스트+이미지URL로 가벼워 500개까지 불러와도 로딩에 무리 없다.
         // (후기가 수천 개로 늘면 그때 '더 보기' 커서 방식으로 전환)
-        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(500));
+        // 어디서 시간이 걸리는지 콘솔(F12)에서 바로 보이게 계측한다.
+        const _rv0 = performance.now();
+        // ★ 예전엔 처음부터 500건을 받았다. 화면엔 5개씩만 보여주는데도 그랬다.
+        //   모바일은 통신·처리가 느려 이 대기가 그대로 체감된다.
+        //   먼저 40건(8페이지분)만 받아 화면을 띄우고, 나머지는 뒤에서 이어 받는다.
+        const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(REVIEW_FIRST_PAGE));
 
 
 
         const querySnapshot = await getDocs(q);
-
-
-
-
-
-
+        console.log(`[성능] 후기 조회 ${Math.round(performance.now() - _rv0)}ms / ${querySnapshot.size}건`);
 
         allReviewsData = [];
 
@@ -6323,8 +6470,30 @@ async function loadReviews() {
 
         renderReviews(currentReviewPage);
 
-
-
+        // 첫 화면을 그린 뒤, 나머지 후기를 조용히 이어 받는다.
+        // 모바일에서 처음부터 500건을 받으면 첫 화면이 그만큼 늦어진다.
+        // 화면은 5개씩만 보여주므로, 뒷장은 사용자가 넘기기 전에 채워지면 충분하다.
+        if (querySnapshot.size === REVIEW_FIRST_PAGE && !_reviewsRestLoaded) {
+            _reviewsRestLoaded = true;
+            const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+            setTimeout(async () => {
+                try {
+                    const t1 = performance.now();
+                    const rest = await getDocs(query(
+                        collection(db, "reviews"),
+                        orderBy("createdAt", "desc"),
+                        startAfter(lastDoc),
+                        limit(500)
+                    ));
+                    rest.forEach(d => allReviewsData.push({ id: d.id, ...d.data() }));
+                    console.log(`[성능] 후기 나머지 ${Math.round(performance.now() - t1)}ms / ${rest.size}건 (합계 ${allReviewsData.length}건)`);
+                    // 페이지 번호만 다시 그린다(보고 있던 화면은 건드리지 않음)
+                    if (typeof renderPagination === 'function') renderPagination();
+                } catch (e) {
+                    console.warn('후기 나머지 로드 실패:', e && e.message);
+                }
+            }, 400);
+        }
 
 
 
@@ -6490,7 +6659,7 @@ async function renderReviews(page) {
 
 
 
-                <img src="${data.imageUrl}" class="review-image" alt="Review Image">
+                <img src="${data.imageUrl}" class="review-image" alt="후기 사진" loading="lazy" decoding="async">
 
 
 
@@ -6872,7 +7041,11 @@ document.addEventListener('DOMContentLoaded', () => {
             '2026-03-01', '2026-03-02', '2026-05-05', '2026-05-24', '2026-05-25',
             '2026-06-03', '2026-06-06',
             '2026-07-17', // 제헌절 — 2026년부터 공휴일로 재지정(2026-05-11 시행). 택배 집하 없음
-            '2026-08-15',
+            // ⚠️ 8/14 은 공휴일이 아니다. 택배사(한진)·굿스플로가 광복절 연휴로 쉬는 날이라 뺀다.
+            //    "공휴일이 아닌데 왜 빠져 있지" 하고 지우지 말 것. 집하가 실제로 안 된다.
+            '2026-08-14', // 택배사 휴무 (광복절 연휴)
+            '2026-08-15', // 광복절
+            '2026-08-17', // 광복절 대체공휴일
             '2026-09-24', '2026-09-25', '2026-09-26',
             '2026-10-03', '2026-10-09', '2026-12-25',
         ];
@@ -6918,6 +7091,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         selectEl.innerHTML = validDates.map(formatOption).join('');
+
+        // ── 휴무 안내 ────────────────────────────────────────────────
+        // 날짜만 조용히 빠지면 고객이 "왜 그날이 없지?" 하고 문의한다.
+        // 선택지에서 빠진 기간이 실제로 안내 기간과 겹칠 때만 문구를 띄운다.
+        // (기간이 지나면 자동으로 사라지므로 나중에 지우러 올 필요가 없다)
+        const NOTICE = { from: '2026-08-14', to: '2026-08-17', text: '8/14~8/17 택배사 전체 휴무' };
+        const noticeId = selectEl.id + '-holiday-note';
+        document.getElementById(noticeId)?.remove();
+        const lastYmd = validDates.length
+            ? validDates[validDates.length - 1].toISOString().slice(0, 10)
+            : '';
+        const todayYmd = new Date(Date.now() + KST_MS).toISOString().slice(0, 10);
+        if (todayYmd <= NOTICE.to && lastYmd >= NOTICE.from) {
+            selectEl.insertAdjacentHTML('afterend',
+                `<p id="${noticeId}" style="margin:6px 0 0; font-size:0.78rem; color:#E65100; font-weight:600;">
+                    ⚠️ ${NOTICE.text} — 해당 기간은 수거가 불가합니다
+                 </p>`);
+        }
     };
 
     populatePickupDates('courier-pickup-date');
@@ -6961,7 +7152,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // 리뷰 사진 업로드 전 자동 압축 (긴 변 1280px, JPEG 80%). 실패 시 원본 그대로 업로드.
-async function compressImage(file, maxDim = 1280, quality = 0.8) {
+// 후기 사진은 화면에서 가로 350px(모바일)~150px(PC) 칸에 들어간다.
+// 1280px 원본은 필요한 것보다 훨씬 커서 모바일에서 로딩만 느려진다.
+// 고해상도 화면을 감안해 900px면 충분하다. (한 장 250KB → 100KB 수준)
+async function compressImage(file, maxDim = 900, quality = 0.75) {
     if (!file || !file.type || !file.type.startsWith('image/')) return file;
     try {
         const dataUrl = await new Promise((resolve, reject) => {
@@ -7931,27 +8125,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
 
-    // 3. Channel Talk Open
-
-    if (window.ChannelIO) {
-
-        window.ChannelIO('onShowMessenger', function() {
-
-            if (typeof gtag !== 'undefined') {
-
-                gtag('event', 'click_contact', {
-
-                    'event_category': 'engagement',
-
-                    'event_label': 'Channel Talk'
-
-                });
-
-            }
-
-        });
-
-    }
+    // 3. [제거됨] 채널톡 열림 추적 — 2026-08 채널톡 위젯을 걷어내 더는 동작하지 않는다.
+    //    고객센터 문의는 카카오톡 채널로 이동했다. 카카오 쪽 대화 시작은
+    //    외부 사이트에서 일어나므로 이 코드로는 잡을 수 없다.
+    //    문의 클릭 수가 필요하면 카카오톡 링크에 클릭 이벤트를 따로 붙여야 한다.
 
 
     window.actuallySubmitQuote = window.executeFinalSubmit;
@@ -8223,3 +8400,118 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ════════════════════════════════════════════════════════════════
+// 홈페이지 실시간 접수 피드
+// ════════════════════════════════════════════════════════════════
+//
+// ⚠️⚠️ **quotes 를 직접 읽지 않는다.**
+//
+//   예전 코드는 홈에서 이렇게 했다.
+//     getDocs(query(collection(db,"quotes"), orderBy("firebaseTimestamp","desc"), limit(6)))
+//
+//   화면에는 모델만 그렸지만 브라우저는 **문서를 통째로** 내려받는다.
+//   customerName · customerPhone · customerAddress · customerAccount 가
+//   방문자 누구에게나 개발자도구로 그대로 보인다.
+//   (보안 규칙이 `match /quotes/{id} { allow read: if true }` 라 막히지도 않는다)
+//
+//   → Cloud Functions(functions/liveFeed.js)가 내보내도 되는 값만 골라
+//     settings/live_feed 에 적어두고, 여기서는 **그 문서 하나만** 구독한다.
+//     읽기도 방문자당 1회뿐이라 비용이 늘지 않는다.
+//
+// ⚠️ 시간 표기는 **분 단위**다 (2026-08-11 확정).
+//    한동안 "최근" 으로 뭉뚱그렸는데, 분이 찍혀야 방금 들어온 게 눈에 띈다.
+//    1시간 안쪽은 파랗게(is-fresh) 표시해 구분한다.
+// ════════════════════════════════════════════════════════════════
+
+function lfTimeText(date) {
+    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (mins < 1) return { text: '방금 전', fresh: true };
+    if (mins < 60) return { text: `${mins}분 전`, fresh: true };
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return { text: `${hours}시간 전`, fresh: false };
+    return { text: `${Math.floor(hours / 24)}일 전`, fresh: false };
+}
+
+function lfEscape(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
+function initLiveFeed() {
+    // 시세조회 카드(.fast-search-section) 안, 검색창 바로 아래에 들어간다.
+    // 예전 '인기 기종' 3카드가 있던 자리다 (그건 무작위였다 — index.html 주석 참고).
+    const section = document.getElementById('live-feed-block');
+    const list = document.getElementById('live-feed-list');
+    if (!section || !list) return;   // 홈이 아니면 아무것도 안 한다
+
+    // 직전에 그린 줄들 — 새로 들어온 것만 잠깐 밝히려고 기억해 둔다
+    let prevKeys = null;
+    // 마지막으로 받은 목록 — 시간 표기만 다시 그릴 때 쓴다
+    let lastItems = [];
+
+    const render = (items) => {
+        lastItems = Array.isArray(items) ? items : [];
+        if (!Array.isArray(items) || items.length === 0) {
+            section.style.display = 'none';   // 빈 칸을 남기지 않는다
+            return;
+        }
+
+        const rows = [];
+        const keys = [];
+
+        for (const it of items) {
+            // Timestamp 는 { seconds } 로 내려온다
+            const at = it && it.at
+                ? (typeof it.at.toDate === 'function' ? it.at.toDate()
+                   : it.at.seconds ? new Date(it.at.seconds * 1000) : null)
+                : null;
+            if (!at) continue;
+
+            const model = [it.model, it.storage].filter(Boolean).join(' ');
+            if (!model) continue;
+
+            const key = `${model}|${at.getTime()}`;
+            keys.push(key);
+
+            const t = lfTimeText(at);
+            // 처음 그릴 때(prevKeys === null)는 전부 새 것이라 표시하지 않는다
+            const isNew = prevKeys !== null && !prevKeys.has(key);
+
+            rows.push(
+                `<li class="lf-item${isNew ? ' is-new' : ''}">` +
+                    `<span class="lf-ico"><i class="ri-smartphone-line"></i></span>` +
+                    `<span class="lf-model">${lfEscape(model)}</span>` +
+                    (it.grade ? `<span class="lf-grade">${lfEscape(it.grade)}</span>` : '') +
+                    `<span class="lf-time${t.fresh ? ' is-fresh' : ''}">${t.text}</span>` +
+                `</li>`
+            );
+        }
+
+        if (rows.length === 0) { section.style.display = 'none'; return; }
+
+        list.innerHTML = rows.join('');
+        section.style.display = '';
+        prevKeys = new Set(keys);
+    };
+
+    // 문서 하나만 구독한다. 새 접수가 들어오면 화면이 알아서 바뀐다.
+    onSnapshot(
+        doc(db, 'settings', 'live_feed'),
+        (snap) => render(snap.exists() ? (snap.data().items || []) : []),
+        (err) => {
+            // ⚠️ 조용히 실패하면 원인을 못 찾는다. 화면에서는 섹션만 숨긴다.
+            console.error('[liveFeed] 구독 실패:', err);
+            section.style.display = 'none';
+        }
+    );
+
+    // ⏱ 시간 표기만 1분마다 다시 그린다 — 분 단위로 적으므로 매분 바뀐다.
+    //    Firestore 를 다시 읽지 않는다. 이미 받아둔 목록으로만 다시 그린다.
+    setInterval(() => {
+        if (lastItems.length) render(lastItems);
+    }, 60 * 1000);
+}
+
+initLiveFeed();
