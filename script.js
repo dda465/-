@@ -5228,7 +5228,7 @@ ${defectInfo}
                         편의점·우체국에서 <strong>반드시 착불(수신자부담)</strong>로 보내주세요.<br>
                         <span style="font-weight:600; color:#2563EB;">배송비는 쉐라폰이 부담하니 따로 내지 않으셔도 됩니다.</span>
                     </p>
-                    <p><strong>보내실 곳:</strong><br>부산시 부산진구 동천로 116 한신밴빌딩 1003호 쉐라폰<br>연락처: 010-5173-5382</p>
+                    <p><strong>보내실 곳:</strong><br>부산광역시 남구 남동천로 128 BIFC2 716호 쉐라폰검수센터<br>연락처: 010-5173-5382</p>
                     <p style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:8px; padding:12px; margin:10px 0; color:#92400E; line-height:1.6;">
                         <strong>보내신 뒤에는 마이페이지에서 「택배 보냈어요!」를 눌러주세요.</strong><br>
                         <span style="font-size:0.9em;">알려주셔야 도착 확인과 검수가 빨라집니다.</span>
@@ -5685,7 +5685,7 @@ ${defectInfo}
 
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0; font-size: 0.95rem; line-height: 1.6;">
                     받는 이: <strong>쉐라폰</strong><br>
-                    주소: <strong>부산시 부산진구 동천로 116 한신밴빌딩 1003호</strong><br>
+                    주소: <strong>부산광역시 남구 남동천로 128 BIFC2 716호 쉐라폰검수센터</strong><br>
                     연락처: <span style="color: #666;">010-5173-5382</span>
                 </div>
 
@@ -8219,8 +8219,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.siteName) fill('#dyn-company-name, .dyn-company-name', data.siteName);
             if (data.siteCeo) fill('#dyn-ceo-name, .dyn-ceo-name, #dyn-ceo-name2', data.siteCeo);
             if (data.siteAddress) {
-                if (data.siteAddress.includes("전포동") || data.siteAddress.includes("더블루2") || data.siteAddress.includes("47247")) {
-                    data.siteAddress = "부산시 동천로 116 한신밴빌딩 1003호";
+                // ⚠️ 이사 대비 안전장치 — Firestore(settings/general)에 옛 주소가 남아 있어도
+                //    화면에는 현재 주소가 뜨게 한다. 관리자페이지에서 값을 고치면 이 분기는 안 탄다.
+                //    【이사 기록】 전포동 더블루2(47294) → 동천로 116 한신밴빌딩(47247)
+                //                → 남동천로 128 BIFC2 716호(48400)  ← 지금 (2026-08)
+                //    ⚠️ 새 주소의 조각(48400·남동천로)을 조건에 넣으면 안 된다. 무한히 덮어쓴다.
+                const _oldAddrMarks = ["전포동", "더블루2", "47294", "한신밴", "동천로 116", "47247"];
+                if (_oldAddrMarks.some(m => data.siteAddress.includes(m))) {
+                    data.siteAddress = "부산광역시 남구 남동천로 128 BIFC2 716호";
                 }
                 fill('#dyn-address, .dyn-address', data.siteAddress);
             }

@@ -560,7 +560,7 @@ const missingCode = `
                 <h4 style="color: #2196F3; margin-bottom: 10px;">\${msgTitle}</h4>
                 <p>\${msgDesc}</p>
                 <div style="background: white; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin: 10px 0;">
-                    <strong>부산시 동천로 116 한신밴빌딩 1003호</strong><br>
+                    <strong>부산광역시 남구 남동천로 128 BIFC2 716호</strong><br>
                     <span style="font-size: 0.9rem; color: #666;">Tel: 010-5173-5382</span>
                 </div>
                 <p style="font-size: 0.9rem; color: #666;">* 마이페이지에서 진행 상황을 확인하실 수 있습니다.</p>
