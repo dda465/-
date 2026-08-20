@@ -244,6 +244,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // 재고 (5단계 · 직원 앱 전용) — 2026-08-20 추가
+    //
+    // ⚠️ 고객 사이트는 이 컬렉션을 보지 않는다. 직원 앱만 읽고 쓴다.
+    // ⚠️ 등록한 사람을 자기 자신으로만 쓸 수 있다 — 남의 이름으로 등록 못 한다.
+    //    검수한 사람이 입금까지 하는 구조라 이력이 유일한 사후 추적 근거다.
+    // ★ 물리 삭제를 막는다. 등록취소는 isDeleted 플래그로 한다 —
+    //   지우면 왜 없어졌는지 영영 못 찾는다 (quotes 삭제와 같은 원칙).
+    match /inventory/{id} {
+      allow read: if isStaffAdmin() || hasPerm('stock') || hasPerm('viewAnalytics');
+
+      allow create: if (isStaffAdmin() || hasPerm('stock'))
+                    && request.resource.data.createdBy == request.auth.uid;
+
+      allow update: if isStaffAdmin() || hasPerm('stock');
+
+      allow delete: if false;
+    }
+
     // 그 외 모든 경로 차단
     match /{document=**}  { allow read, write: if false; }
   }
