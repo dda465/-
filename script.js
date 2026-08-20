@@ -268,11 +268,11 @@ window.triggerFrontendAlimtalk = async (type, phone, payload) => {
         };
     } 
     // 3. 직접발송으로 신청시
-    // 2026-08 착불 전환본으로 교체 (이전: KA01TP260519013835863h7hpYzMO26t)
+    // 2026-08-20 검수완료본으로 교체 (이전: KA01TP2608040332511261SZPdl8vG71 ← 그 이전: KA01TP260519013835863h7hpYzMO26t)
     // 새 템플릿은 발송기한이 '오늘부터 7일 이내'로 본문에 고정돼 있어 변수가 없다.
     // ⚠ 변수를 하나라도 같이 보내면 솔라피에서 발송 실패한다.
     else if (type === "quote_cvs") {
-        templateId = "KA01TP2608040332511261SZPdl8vG71";
+        templateId = "KA01TP26081804203029516IG1h7hiOC";
         variables = {};
     }
 
