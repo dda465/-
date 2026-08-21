@@ -1305,27 +1305,74 @@ async function gfSendAlimtalk(templateId, phone, variables) {
 
 async function goodsflowPollOnce() {
     const db = admin.firestore();
-    const summary = { checked: 0, pickedUp: 0, arrived: 0, failed: 0, errors: 0, details: [] };
+    // total = 대상 전체 / checked = 실제로 굿스플로에 조회한 건
+    // skip* = 대상이지만 건너뛴 이유별 건수. 셋을 나눠 두지 않으면
+    //         "왜 이 건이 처리 안 됐나"를 로그만으로 못 가린다.
+    const summary = {
+        total: 0, checked: 0, skipNoOrder: 0, skipDeleted: 0, skipOld: 0,
+        pickedUp: 0, arrived: 0, failed: 0, errors: 0, details: []
+    };
 
-    const snap = await db.collection("quotes")
-        .where("status", "in", GF_POLL_TARGET_STATUSES)
-        .limit(300)
-        .get();
+    // ⚠️⚠️ 2026-08-21 사고 — 예전에는 여기가 `.limit(300)` 한 줄이었다.
+    //
+    //    `orderBy` 가 없으면 Firestore 는 **문서 ID 순**으로 앞에서 300건만 준다.
+    //    `신청접수`+`수거중` 이 348건이 되자 ID 가 뒤쪽인 **48건이 통째로 빠졌고**,
+    //    그 건들은 기기가 도착해도 `택배도착` 전환도, 도착 알림톡도 나가지 않았다.
+    //    (이효은 고객 건 등 최소 31건 · 8/13 부터 8일간)
+    //
+    //    ★ 가장 나쁜 점은 **조회가 성공한다는 것**이다. 잘린 걸 아무도 모른다.
+    //      로그에는 errors:0 으로 찍히고, 관리자 화면에도 아무 표시가 없었다.
+    //
+    //    ❌ limit 을 400·500 으로 올리는 것으로 끝내지 말 것.
+    //       건수가 늘면 같은 사고가 그대로 반복되고, 터지는 시점만 미뤄진다.
+    //    ✅ 커서로 **대상 전체**를 돈다. 그리고 못 본 게 있으면 **반드시 로그로 알린다.**
+    const GF_POLL_PAGE = 300;
+    const GF_POLL_MAX_PAGES = 40;   // 12,000건. 무한 루프를 막는 최후의 안전장치일 뿐이다
+    const targetDocs = [];
+    let gfCursor = null;
+    let gfPages = 0;
+    let gfTruncated = false;
+    for (;;) {
+        let qy = db.collection("quotes")
+            .where("status", "in", GF_POLL_TARGET_STATUSES)
+            .orderBy(admin.firestore.FieldPath.documentId())
+            .limit(GF_POLL_PAGE);
+        if (gfCursor) qy = qy.startAfter(gfCursor);
+        const page = await qy.get();
+        if (page.empty) break;
+        targetDocs.push(...page.docs);
+        gfCursor = page.docs[page.docs.length - 1];
+        gfPages++;
+        if (page.size < GF_POLL_PAGE) break;      // 마지막 장
+        if (gfPages >= GF_POLL_MAX_PAGES) { gfTruncated = true; break; }
+    }
+
+    // ★ 대상 전체 건수를 요약에 남긴다. checked(실제 조회한 건)와 나란히 봐야
+    //   "왜 이 건은 처리가 안 됐지"를 로그만으로 되짚을 수 있다.
+    summary.total = targetDocs.length;
+    if (gfTruncated) {
+        // 여기 걸리면 실제로 누락이 발생한 것이다. 조용히 넘어가면 안 된다.
+        summary.truncated = true;
+        console.error(
+            `[굿스플로 폴러] ⚠️ 대상이 ${GF_POLL_MAX_PAGES * GF_POLL_PAGE}건을 넘어 일부를 보지 못했다. ` +
+            `누락 건은 도착 전환도 알림톡도 나가지 않는다. 상한을 올리거나 대상 조건을 좁혀야 한다.`
+        );
+    }
 
     // 예약한 지 오래된 건은 폴러가 손을 뗀다. 고객이 미집하 후 방치해도(취소도 도착도 안 됨)
     // 30분마다 영원히 조회하는 걸 막는 안전장치. 이 기간이 지나면 관리자가 수동 처리할 몫.
     const GF_POLL_MAX_AGE_MS = 7 * 24 * 3600000; // 7일
     const nowMs = Date.now();
 
-    for (const doc of snap.docs) {
+    for (const doc of targetDocs) {
         const q = doc.data();
-        if (!q.goodsflowOrderNo) continue;          // 굿스플로 예약이 없는 건은 대상 아님
-        if (q.isDeleted) continue;
+        if (!q.goodsflowOrderNo) { summary.skipNoOrder++; continue; }  // 굿스플로 예약이 없는 건은 대상 아님
+        if (q.isDeleted) { summary.skipDeleted++; continue; }
         // 예약 시각(goodsflowBookedAt)이 7일보다 오래됐으면 조회 중단 (죽은 건 방지)
         const bookedMs = q.goodsflowBookedAt
             ? (q.goodsflowBookedAt.toDate ? q.goodsflowBookedAt.toDate().getTime() : new Date(q.goodsflowBookedAt).getTime())
             : 0;
-        if (bookedMs && (nowMs - bookedMs) > GF_POLL_MAX_AGE_MS) continue;
+        if (bookedMs && (nowMs - bookedMs) > GF_POLL_MAX_AGE_MS) { summary.skipOld++; continue; }
         summary.checked++;
 
         try {
