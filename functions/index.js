@@ -303,7 +303,16 @@ exports.portoneApi = onRequest({ region: 'asia-northeast3', invoker: 'public' },
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV2y7ShTjq8AsOGvxwe1zLZ4UUJ76qdz_2i0d_DDHtGBKcOErI8c7pvQ/exec';
-const GOOGLE_SCRIPT_URL_INVENTORY = 'https://script.google.com/macros/s/AKfycbyw5cC_ZMJWk-4qqo9MhKF9mGmf0pOwuiZwJ0aB2oPZj6EtZvZxh9STJYWEOtKyqN5M/exec';
+// ⚠️⚠️ 2026-08-22 — 이 URL 은 **매입완료 시트 스크립트(addInventory)** 의 것이어야 한다.
+//    직전까지 다른 스크립트의 URL 이 들어가 있었다. 요청은 200 으로 도착하는데
+//    그 스크립트에 addInventory 분기가 없어 **아무 일도 안 하고 끝났다.**
+//    로그에는 '동기화 성공' 으로 찍혀서 며칠간 아무도 몰랐다.
+//    → URL 을 바꿀 때는 반드시 그 스크립트가 addInventory 를 처리하는지 확인할 것.
+//
+// ⚠️ 시트 소유권을 다른 계정으로 넘기면 기존 웹앱 배포가 깨진다(404).
+//    배포 설정(실행 계정·액세스 권한)이 맞아 보여도 되살아나지 않는다.
+//    새 계정에서 **'새 배포'** 로 URL 을 새로 받아 여기에 넣어야 한다.
+const GOOGLE_SCRIPT_URL_INVENTORY = 'https://script.google.com/macros/s/AKfycbz6CsUz4EO5yjzlmU0zLtL7kjnKB6f3LQcUgMCVNhwgjZT1f4PShPNTooqdMayh3wQx/exec';
 
 function formatTimestampToFriendly(timestamp) {
     if (!timestamp) {
