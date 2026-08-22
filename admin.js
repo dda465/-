@@ -1,5 +1,5 @@
 import { db, auth, getStorageLazy } from './firebase-config.js';
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkewwgQ-m_3OQVph5Laex78UEgJV1klI1MaluW5ugsIeZy-bfXdi0JpZMnpER1CxGR/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV2y7ShTjq8AsOGvxwe1zLZ4UUJ76qdz_2i0d_DDHtGBKcOErI8c7pvQ/exec";
 import { collection, getDocs, getDoc, query, orderBy, limit, doc, updateDoc, setDoc, deleteDoc, deleteField, writeBatch, serverTimestamp, addDoc, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";

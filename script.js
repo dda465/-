@@ -93,7 +93,7 @@ function describeLcdDamage(v) {
 
 
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyJ7SJmjqF0mNABE3TE7Xo-A7EPXgfhHc2mxebVzfSwDGqTJ3dhasTXB7pjNTCOmTr/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV2y7ShTjq8AsOGvxwe1zLZ4UUJ76qdz_2i0d_DDHtGBKcOErI8c7pvQ/exec";
 
 
 

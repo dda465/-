@@ -302,8 +302,8 @@ exports.portoneApi = onRequest({ region: 'asia-northeast3', invoker: 'public' },
 // ==========================================
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkewwgQ-m_3OQVph5Laex78UEgJV1klI1MaluW5ugsIeZy-bfXdi0JpZMnpER1CxGR/exec';
-const GOOGLE_SCRIPT_URL_INVENTORY = 'https://script.google.com/macros/s/AKfycby-ekHguU90cIoRdGxxztAf_XYOIma-Mg7FvCnEZdVa3OYvqN3LmaTrEG8OHehmXtGO/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV2y7ShTjq8AsOGvxwe1zLZ4UUJ76qdz_2i0d_DDHtGBKcOErI8c7pvQ/exec';
+const GOOGLE_SCRIPT_URL_INVENTORY = 'https://script.google.com/macros/s/AKfycbyw5cC_ZMJWk-4qqo9MhKF9mGmf0pOwuiZwJ0aB2oPZj6EtZvZxh9STJYWEOtKyqN5M/exec';
 
 function formatTimestampToFriendly(timestamp) {
     if (!timestamp) {
