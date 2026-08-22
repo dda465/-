@@ -314,6 +314,46 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV
 //    새 계정에서 **'새 배포'** 로 URL 을 새로 받아 여기에 넣어야 한다.
 const GOOGLE_SCRIPT_URL_INVENTORY = 'https://script.google.com/macros/s/AKfycbz6CsUz4EO5yjzlmU0zLtL7kjnKB6f3LQcUgMCVNhwgjZT1f4PShPNTooqdMayh3wQx/exec';
 
+// ⚠️⚠️ 시트 응답은 **본문까지 봐야 한다.** HTTP 200 이 성공이 아니다. (2026-08-22 사고)
+//
+//   Apps Script 는 무슨 일이 있어도 200 을 돌려준다.
+//     · action 이 안 맞으면      → "스크립트는 완료했지만 아무것도 반환하지 않았습니다" (HTML)
+//     · 시트에 그 행이 없으면    → {"success":false,"message":"Order ID not found"}
+//     · 스크립트가 죽으면        → "Error: ..." 또는 오류 HTML
+//   전부 200 이다. 그래서 예전 코드는 이 셋을 모두 '동기화 성공' 으로 찍었고,
+//   매입완료 시트가 며칠 동안 한 건도 안 쌓이는 걸 아무도 몰랐다.
+//
+// ★ 굿스플로 폴러 limit(300) 과 같은 유형 — **조용히 실패하는 것이 가장 나쁘다.**
+//   실패는 console.error 로 남겨서 `firebase functions:log` 에 걸리게 한다.
+async function sheetResult(response, label, quoteId) {
+    const text = await response.text().catch(() => '');
+    const body = String(text || '').trim();
+    let ok = response.ok;
+    let why = '';
+
+    if (!response.ok) {
+        why = `HTTP ${response.status}`;
+    } else if (body.startsWith('<')) {
+        // HTML 이 왔다 = Apps Script 가 값을 안 돌려줬거나 오류 페이지다.
+        ok = false;
+        why = body.includes('아무것도 반환하지 않았습니다') || body.includes('did not return')
+            ? '스크립트가 아무것도 반환하지 않음 — action 이 스크립트와 안 맞거나 분기를 못 탄 것'
+            : 'HTML 오류 페이지 반환';
+    } else if (/^Error[: ]/i.test(body)) {
+        ok = false;
+        why = body.slice(0, 200);
+    } else {
+        try {
+            const j = JSON.parse(body);
+            if (j && j.success === false) { ok = false; why = j.message || '스크립트가 success:false 반환'; }
+        } catch (_) { /* JSON 아니면 'Success' 같은 평문 — 그대로 성공으로 본다 */ }
+    }
+
+    if (ok) console.log(`[${label}] 성공: ${quoteId}`, body.slice(0, 120));
+    else console.error(`[${label}] ❌ 실패: ${quoteId} — ${why}`, body.slice(0, 200));
+    return ok;
+}
+
 function formatTimestampToFriendly(timestamp) {
     if (!timestamp) {
         const date = new Date();
@@ -402,7 +442,7 @@ exports.syncToGoogleSheetsOnCreate = onDocumentCreated(
                     status: payload.status || "신청접수"
                 })
             });
-            console.log(`[Google Sheets Sync] 신규 매입 접수 동기화 성공: ${quoteId}`, await response.text());
+            await sheetResult(response, 'Google Sheets Sync 신규접수', quoteId);
         } catch (error) {
             console.error(`[Google Sheets Sync Error] 신규 접수 동기화 실패: ${quoteId}`, error);
         }
@@ -513,7 +553,7 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
                         status: after.status || "신청접수"
                     })
                 });
-                console.log(`[Google Sheets Sync] 배송지 확정 연동 성공: ${quoteId}`, await response.text());
+                await sheetResult(response, 'Google Sheets Sync 배송지확정', quoteId);
             } catch (error) {
                 console.error(`[Google Sheets Sync Error] 배송지 확정 연동 실패: ${quoteId}`, error);
             }
@@ -532,7 +572,7 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
                         status: after.status
                     })
                 });
-                console.log(`[Google Sheets Sync] 상태 변경 동기화 성공: ${quoteId}`, await response.text());
+                await sheetResult(response, 'Google Sheets Sync 상태변경', quoteId);
             } catch (error) {
                 console.error(`[Google Sheets Sync Error] 상태 변경 동기화 실패: ${quoteId}`, error);
             }
@@ -553,7 +593,7 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
                             defects: defectsText
                         })
                     });
-                    console.log(`[Inventory Sync] 매입 완료 전용 시트 동기화 성공: ${quoteId}`, await invResponse.text());
+                    await sheetResult(invResponse, 'Inventory Sync 매입완료시트', quoteId);
                 } catch (error) {
                     console.error(`[Inventory Sync Error] 매입 완료 전용 시트 동기화 실패: ${quoteId}`, error);
                 }
