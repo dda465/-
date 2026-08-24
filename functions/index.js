@@ -794,6 +794,136 @@ exports.alimtalkOnStatusChange = onDocumentUpdated(
     }
 );
 
+// ════════════════════════════════════════════════════════════════
+// 입금 알림 — 계약서 동의 건을 **입금 담당자에게만** 따로 보낸다 (2026-08-24)
+// ════════════════════════════════════════════════════════════════
+//
+// 【왜 따로 만드나】
+//   기존 알람봇은 6명이 **모든 알림**(신청 접수·완료·계약서 동의)을 다 받는다.
+//   그래서 "지금 입금해야 한다" 는 신호가 나머지 알림에 묻힌다.
+//   → 새 봇 · 새 방으로 **계약서 동의 건만** 따로 보낸다.
+//
+// ⚠️ 기존 텔레그램 알림(syncToGoogleSheetsOnUpdate 안)은 **그대로 둔다.**
+//    이건 그 위에 얹는 것이지 대체가 아니다. 트리거를 나눠 둔 이유도 같다 —
+//    여기서 실패해도 시트 동기화와 기존 알림은 아무 영향이 없어야 한다.
+//
+// 【설정 — 값은 .env 에만 둔다. 코드에 박지 않는다】
+//   TELEGRAM_PAY_BOT_TOKEN   새 봇 토큰
+//   TELEGRAM_PAY_CHAT_IDS    받을 방 ID. 쉼표로 여러 개 (예: -1001111,-1002222)
+//
+//   ⚠️ 그룹 ID 는 **마이너스**로 시작한다. 양수는 개인 채팅(사람 ID)이다.
+//      개인에게 보내려면 그 사람이 새 봇을 한 번 시작해야 하지만(텔레그램 정책),
+//      그룹은 봇을 초대만 하면 방 사람들이 아무것도 안 해도 받는다.
+//
+//   ⚠️ 둘 중 하나라도 비어 있으면 **보내지 않고 경고를 남긴다.** 조용히 넘어가면
+//      "왜 알림이 안 오지" 를 아무도 못 찾는다 (규칙 ⑥)
+// ════════════════════════════════════════════════════════════════
+
+const PAY_BOT_TOKEN = process.env.TELEGRAM_PAY_BOT_TOKEN || '';
+const PAY_CHAT_IDS = String(process.env.TELEGRAM_PAY_CHAT_IDS || '')
+    .split(',').map((s) => s.trim()).filter(Boolean);
+
+/** 직원 앱 신청건 주소 — 알림에서 바로 눌러 들어간다 */
+const STAFF_APP_QUOTE_URL = 'https://sharaphone-staff.web.app/quotes';
+
+function payWon(n) {
+    return `${new Intl.NumberFormat('ko-KR').format(Number(n) || 0)}원`;
+}
+
+exports.payAlertOnContractAgreed = onDocumentUpdated(
+    { document: 'quotes/{quoteId}', region: 'asia-northeast3' },
+    async (event) => {
+        const after = event.data.after.data();
+        const before = event.data.before.data();
+        const quoteId = event.params.quoteId;
+
+        if (!after || !before) return;
+
+        // 고객이 전자매매계약서에 동의한 순간 — 기존 텔레그램 알림과 같은 판정이다
+        if (!(after.status === '입금대기' && before.status === '검수완료')) return;
+
+        if (after.isDeleted) return;
+
+        // 폴러·재처리로 같은 전환이 두 번 잡혀도 한 번만 보낸다
+        if (after.payAlertSentAt) {
+            console.log(`[입금알림] 건너뜀(이미 발송) ${quoteId}`);
+            return;
+        }
+
+        if (!PAY_BOT_TOKEN || PAY_CHAT_IDS.length === 0) {
+            console.error(
+                `[입금알림] ❌ 설정이 비어 있어 못 보냄 ${quoteId} — ` +
+                `TELEGRAM_PAY_BOT_TOKEN / TELEGRAM_PAY_CHAT_IDS 를 .env 에 넣고 재배포할 것`
+            );
+            return;
+        }
+
+        // ⚠️⚠️ 금액은 **계약서 금액(inspectionData.finalPrice)** 이다.
+        //    없다고 예상가(price)로 대신 채우면 안 된다. 예상가는 고객이 시세표에서
+        //    고른 값이라 실제 지급액과 무관하고, 보통 **훨씬 크다**
+        //    (2026-08 실측 — 최종가 중앙값 2만원 / 예상가 중앙값 19.5만원).
+        //    그걸 입금 알림에 띄우면 그 금액 그대로 송금하는 사고가 난다.
+        //    → 없으면 없다고 쓰고 사람이 확인하게 한다.
+        const fin = after.inspectionData && after.inspectionData.finalPrice;
+        const amountLine = (typeof fin === 'number' && fin > 0)
+            ? `💰 *${payWon(fin)}*`
+            : `⚠️ *금액 미확인* — 계약서 금액이 저장돼 있지 않습니다. 확인 후 입금하세요`;
+
+        const model = `${after.brand || ''} ${after.model || ''}`.trim() || '기종미상';
+        // ⚠️ customerAccount 는 "은행명 계좌번호" 가 한 문자열로 합쳐져 있다 (script.js 4361줄)
+        const account = after.customerAccount || '계좌 미입력';
+
+        const msg = [
+            `💳 *입금 대기*`,
+            ``,
+            `${after.customerName || '이름없음'} · ${after.customerPhone || '연락처없음'}`,
+            model,
+            amountLine,
+            `🏦 ${account}`,
+            ``,
+            // ⭐ 새 앱으로 바로 들어가게 한다. 여기서 입금 처리를 해야
+            //    payment.paidBy · paidAmount 가 쌓인다 (3-7 · 3-8 실적표의 근거)
+            `▸ ${STAFF_APP_QUOTE_URL}/${quoteId}`,
+        ].join('\n');
+
+        let ok = 0;
+        const failed = [];
+        for (const chatId of PAY_CHAT_IDS) {
+            try {
+                const r = await fetch(`https://api.telegram.org/bot${PAY_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: msg,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: true,
+                    }),
+                });
+                // ⚠️ 텔레그램은 실패해도 HTTP 200 이 아닌 4xx 를 준다. 본문의 ok 까지 본다
+                const body = await r.text().catch(() => '');
+                let sent = r.ok;
+                try { const j = JSON.parse(body); if (j && j.ok === false) sent = false; } catch (_) { }
+                if (sent) { ok++; continue; }
+                failed.push(`${chatId}: ${body.slice(0, 160)}`);
+            } catch (e) {
+                failed.push(`${chatId}: ${e && e.message}`);
+            }
+        }
+
+        if (failed.length) {
+            // 방에서 봇이 쫓겨났거나 ID 가 틀리면 여기 찍힌다. 조용히 넘어가지 않는다
+            console.error(`[입금알림] ❌ 일부 실패 ${quoteId} — ${failed.join(' | ')}`);
+        }
+
+        if (ok > 0) {
+            // 한 곳이라도 갔으면 보낸 것으로 본다. 남은 실패는 위 로그로 본다
+            await event.data.after.ref.set({ payAlertSentAt: new Date() }, { merge: true });
+            console.log(`[입금알림] ✅ ${after.customerName || quoteId} — ${ok}/${PAY_CHAT_IDS.length}곳`);
+        }
+    }
+);
+
 exports.migrateTodayQuotes = onRequest({ region: 'asia-northeast3' }, async (req, res) => {
     try {
         const startOfToday = new Date();
