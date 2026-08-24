@@ -600,63 +600,11 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
             }
         }
         
-        // 3. 고객 전자매매계약서 동의 완료 시 텔레그램 알림 발송
-        if (after.status === '입금대기' && before.status === '검수완료') {
-            try {
-                console.log(`[Telegram Notification] 전자매매계약서 동의 완료 감지: ${quoteId}`);
-                
-                const finalPriceText = after.inspectionData && after.inspectionData.finalPrice 
-                    ? new Intl.NumberFormat('ko-KR').format(after.inspectionData.finalPrice) + '원'
-                    : (after.price ? new Intl.NumberFormat('ko-KR').format(after.price) + '원' : '0원');
-
-                // ⚠️ 하자 — "확인 안 함" 과 "하자 없음" 을 구분한다.
-                //    간편접수(method:'simple')는 고객에게 하자를 아예 묻지 않는다.
-                //    그걸 '없음' 으로 쓰면 검수 전에 멀쩡한 기기로 오해한다.
-                //    다만 옛 문서에는 간편인데 defectsDetails 가 남아 있는 건이 있다
-                //    (셀프로 답하다 뒤로 나와 간편으로 확정한 경우 — script.js 4521줄).
-                //    **값이 남아 있으면 숨기지 않고 보여준다.**
-                //    액정 3단계('no'/'light'/'heavy') 함정은 formatDefects 가 이미 처리한다.
-                const hasDefectData = after.defectsDetails
-                    && Object.keys(after.defectsDetails).length > 0;
-                const defectText = hasDefectData
-                    ? formatDefects(after.defectsDetails)
-                    : (after.method === 'simple' ? '간편접수 — 확인 안 함' : '없음');
-
-                const storageText = after.storage ? ` ${after.storage}` : '';
-                // ⚠️ customerAccount 는 "은행명 계좌번호" 가 한 문자열로 합쳐져 있다 (script.js 4361줄)
-                const accountText = after.customerAccount || '미입력';
-
-                const tgMessage = `
-✍️ *[전자매매계약서 동의 완료]*
-━━━━━━━━━━━━━━
-👤 *고객명*: ${after.customerName || '알 수 없음'}
-📞 *연락처*: ${after.customerPhone || '알 수 없음'}
-📱 *모델명*: ${after.brand || ''} ${after.model || ''}${storageText}
-🔧 *하자*: ${defectText}
-💰 *최종매입가*: ${finalPriceText}
-🏦 *계좌*: ${accountText}
-━━━━━━━━━━━━━━
-*상태가 [입금대기]로 전환되었습니다.* 
-관리자 페이지에서 확인 후 신속히 입금을 진행해 주세요.
-`.trim();
-
-                const sendPromises = TELEGRAM_CHAT_IDS.map(chatId => {
-                    return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            chat_id: chatId,
-                            text: tgMessage,
-                            parse_mode: "Markdown"
-                        })
-                    });
-                });
-                await Promise.all(sendPromises);
-                console.log(`[Telegram Notification] 동의 완료 알림 발송 성공: ${quoteId}`);
-            } catch (tgError) {
-                console.error(`[Telegram Notification Error] 동의 완료 알림 발송 실패: ${quoteId}`, tgError);
-            }
-        }
+        // 3. 전자매매계약서 동의 알림은 여기서 **뺐다.** (2026-08-24)
+        //    기존 알람봇은 6명이 모든 알림을 다 받아서 '지금 입금해야 한다' 는
+        //    신호가 묻혔다. 이제 전용 봇·전용 방으로만 간다.
+        //    → `payAlertOnContractAgreed` (이 파일 아래쪽)
+        //    ⚠️ 두 곳에서 보내면 같은 건이 두 번 간다. 여기에 되살리지 말 것.
     }
 );
 
@@ -866,25 +814,40 @@ exports.payAlertOnContractAgreed = onDocumentUpdated(
         //    → 없으면 없다고 쓰고 사람이 확인하게 한다.
         const fin = after.inspectionData && after.inspectionData.finalPrice;
         const amountLine = (typeof fin === 'number' && fin > 0)
-            ? `💰 *${payWon(fin)}*`
-            : `⚠️ *금액 미확인* — 계약서 금액이 저장돼 있지 않습니다. 확인 후 입금하세요`;
+            ? `💰 *최종매입가*: ${payWon(fin)}`
+            : `⚠️ *최종매입가*: 미확인 — 계약서 금액이 저장돼 있지 않습니다. 확인 후 입금하세요`;
 
-        const model = `${after.brand || ''} ${after.model || ''}`.trim() || '기종미상';
+        // ⚠️ 하자 — "확인 안 함" 과 "하자 없음" 을 구분한다. 간편접수(method:'simple')는
+        //    고객에게 하자를 아예 묻지 않는다. 그걸 '없음' 으로 쓰면 검수 전에 멀쩡한
+        //    기기로 오해한다. 다만 옛 문서에는 간편인데 값이 남아 있는 건이 있어
+        //    (script.js 4521줄) **값이 있으면 숨기지 않고 보여준다**
+        const hasDefectData = after.defectsDetails
+            && Object.keys(after.defectsDetails).length > 0;
+        const defectText = hasDefectData
+            ? formatDefects(after.defectsDetails)
+            : (after.method === 'simple' ? '간편접수 — 확인 안 함' : '없음');
+
+        const storageText = after.storage ? ` ${after.storage}` : '';
         // ⚠️ customerAccount 는 "은행명 계좌번호" 가 한 문자열로 합쳐져 있다 (script.js 4361줄)
-        const account = after.customerAccount || '계좌 미입력';
+        const account = after.customerAccount || '미입력';
 
-        const msg = [
-            `💳 *입금 대기*`,
-            ``,
-            `${after.customerName || '이름없음'} · ${after.customerPhone || '연락처없음'}`,
-            model,
-            amountLine,
-            `🏦 ${account}`,
-            ``,
-            // ⭐ 새 앱으로 바로 들어가게 한다. 여기서 입금 처리를 해야
-            //    payment.paidBy · paidAmount 가 쌓인다 (3-7 · 3-8 실적표의 근거)
-            `▸ ${STAFF_APP_QUOTE_URL}/${quoteId}`,
-        ].join('\n');
+        // ⭐ 기존 알람봇이 쓰던 양식 그대로다. 보던 사람이 그대로 읽을 수 있어야 한다.
+        //    바뀐 곳은 두 군데뿐 — 금액 판정(위)과 맨 아래 직원 앱 링크.
+        const msg = `
+✍️ *[전자매매계약서 동의 완료]*
+━━━━━━━━━━━━━━
+👤 *고객명*: ${after.customerName || '알 수 없음'}
+📞 *연락처*: ${after.customerPhone || '알 수 없음'}
+📱 *모델명*: ${after.brand || ''} ${after.model || ''}${storageText}
+🔧 *하자*: ${defectText}
+${amountLine}
+🏦 *계좌*: ${account}
+━━━━━━━━━━━━━━
+*상태가 [입금대기]로 전환되었습니다.*
+아래를 눌러 확인 후 신속히 입금을 진행해 주세요.
+
+▸ ${STAFF_APP_QUOTE_URL}/${quoteId}
+`.trim();
 
         let ok = 0;
         const failed = [];
