@@ -774,6 +774,20 @@ const PAY_CHAT_IDS = String(process.env.TELEGRAM_PAY_CHAT_IDS || '')
 /** 직원 앱 신청건 주소 — 알림에서 바로 눌러 들어간다 */
 const STAFF_APP_QUOTE_URL = 'https://sharaphone-staff.web.app/quotes';
 
+/**
+ * 텔레그램에 넣기 전 값 정리.
+ *
+ * ⚠️⚠️ 예전 양식은 `parse_mode: 'Markdown'` 이었다. 고객 이름이나 하자 메모에
+ *    `_` `*` `[` 같은 글자가 하나만 들어가도 텔레그램이
+ *    `Bad Request: can't parse entities` 로 **메시지를 통째로 거절한다.**
+ *    알림이 안 오는데 이유가 데이터에 있어서 찾기가 어렵다.
+ *    → HTML 모드로 바꾸고 `& < >` 만 막는다. 훨씬 덜 깨진다.
+ */
+function payEsc(v) {
+    return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function payWon(n) {
     return `${new Intl.NumberFormat('ko-KR').format(Number(n) || 0)}원`;
 }
@@ -814,8 +828,8 @@ exports.payAlertOnContractAgreed = onDocumentUpdated(
         //    → 없으면 없다고 쓰고 사람이 확인하게 한다.
         const fin = after.inspectionData && after.inspectionData.finalPrice;
         const amountLine = (typeof fin === 'number' && fin > 0)
-            ? `💰 *최종매입가*: ${payWon(fin)}`
-            : `⚠️ *최종매입가*: 미확인 — 계약서 금액이 저장돼 있지 않습니다. 확인 후 입금하세요`;
+            ? `💰 <b>최종매입가</b>  ${payEsc(payWon(fin))}`
+            : `⚠️ <b>최종매입가  미확인</b> — 계약서 금액이 저장돼 있지 않습니다. 확인 후 입금하세요`;
 
         // ⚠️ 하자 — "확인 안 함" 과 "하자 없음" 을 구분한다. 간편접수(method:'simple')는
         //    고객에게 하자를 아예 묻지 않는다. 그걸 '없음' 으로 쓰면 검수 전에 멀쩡한
@@ -831,21 +845,28 @@ exports.payAlertOnContractAgreed = onDocumentUpdated(
         // ⚠️ customerAccount 는 "은행명 계좌번호" 가 한 문자열로 합쳐져 있다 (script.js 4361줄)
         const account = after.customerAccount || '미입력';
 
-        // ⭐ 기존 알람봇이 쓰던 양식 그대로다. 보던 사람이 그대로 읽을 수 있어야 한다.
-        //    바뀐 곳은 두 군데뿐 — 금액 판정(위)과 맨 아래 직원 앱 링크.
+        // ════════════════════════════════════════════════════════
+        // 기존 알람봇 양식 + 입금 담당자용 정리를 합친 것 (2026-08-24)
+        //
+        //  기존에서 가져온 것 — 제목·구분선·하자·최종매입가·계좌. 보던 사람이
+        //  그대로 읽을 수 있어야 한다
+        //  새로 넣은 것 — ① 이름과 연락처를 한 줄로 (이모지가 라벨을 대신한다)
+        //                ② 돈 두 줄(금액·계좌)을 구분선으로 따로 떼어냈다.
+        //                   입금할 때 실제로 보는 건 이 두 줄이다
+        //                ③ 맨 아래 직원 앱 링크
+        //  뺀 것 — "상태가 [입금대기]로 전환되었습니다" 는 제목과 같은 말이라 지웠다
+        // ════════════════════════════════════════════════════════
         const msg = `
-✍️ *[전자매매계약서 동의 완료]*
+💳 <b>입금 대기</b> — 전자매매계약서 동의 완료
 ━━━━━━━━━━━━━━
-👤 *고객명*: ${after.customerName || '알 수 없음'}
-📞 *연락처*: ${after.customerPhone || '알 수 없음'}
-📱 *모델명*: ${after.brand || ''} ${after.model || ''}${storageText}
-🔧 *하자*: ${defectText}
+👤 ${payEsc(after.customerName || '알 수 없음')} · ${payEsc(after.customerPhone || '연락처 없음')}
+📱 ${payEsc(`${after.brand || ''} ${after.model || ''}${storageText}`.trim() || '기종미상')}
+🔧 하자  ${payEsc(defectText)}
+━━━━━━━━━━━━━━
 ${amountLine}
-🏦 *계좌*: ${account}
+🏦 <b>계좌</b>  ${payEsc(account)}
 ━━━━━━━━━━━━━━
-*상태가 [입금대기]로 전환되었습니다.*
-아래를 눌러 확인 후 신속히 입금을 진행해 주세요.
-
+아래를 눌러 확인 후 입금해 주세요.
 ▸ ${STAFF_APP_QUOTE_URL}/${quoteId}
 `.trim();
 
@@ -859,7 +880,7 @@ ${amountLine}
                     body: JSON.stringify({
                         chat_id: chatId,
                         text: msg,
-                        parse_mode: 'Markdown',
+                        parse_mode: 'HTML',
                         disable_web_page_preview: true,
                     }),
                 });
