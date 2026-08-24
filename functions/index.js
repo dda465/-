@@ -660,6 +660,140 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
     }
 );
 
+// ════════════════════════════════════════════════════════════════
+// 상태변경 알림톡 — 발송을 서버 한 곳으로 모은다 (2026-08-24)
+// ════════════════════════════════════════════════════════════════
+//
+// 【왜 서버로 옮겼나】
+//   예전에는 `admin.js` 가 **브라우저에서 직접** 쐈다 (triggerAlimtalk).
+//   그래서 관리자페이지로 상태를 바꿀 때만 나갔다. 직원 앱에서 바꾸면 안 나가고,
+//   폴러가 바꿔도 안 나갔다. 직원이 새 앱에서 검수를 저장해도 계약서가 안 가서
+//   결국 관리자페이지를 한 번 더 열어야 했다 — 직원 전환을 막던 진짜 이유였다.
+//
+//   ★ 이제 **누가 상태를 바꾸든** 여기서 한 번 나간다.
+//
+// 【⚠️⚠️ 배포 순서 — 뒤집으면 고객에게 두 번 간다】
+//   1단계) ALIMTALK_TRIGGER 를 두지 않거나 `log` 로 배포. admin.js 는 **그대로 둔다.**
+//          → 고객이 받는 건 예전과 똑같다. 로그에만 "보낼 뻔했다" 가 찍힌다.
+//            하루 돌려서 대상·건수를 눈으로 확인한다.
+//   2단계) admin.js 발송 제거분을 **먼저** 배포(hosting)하고,
+//          **그 다음** ALIMTALK_TRIGGER=send 로 functions 를 배포한다.
+//          → 사이에 몇 분간 알림톡이 안 나가는 구간이 생긴다. 순서를 뒤집으면
+//            그 구간에 **두 번** 나간다. 안 가는 쪽이 낫다.
+//
+// 【중복 방지】
+//   상태별로 발송 표시를 남긴다. 상태를 되돌렸다 다시 걸어도 두 번 가지 않는다.
+//
+// 【여기 없는 것 — 일부러 뺐다】
+//   ⚠️ `택배도착` — 굿스플로 폴러가 이미 운송장번호까지 넣어 보낸다
+//      (`arrivedNotifiedAt`). 여기서 또 보내면 겹치고, 직접발송 건은 운송장이
+//      없어 '-' 로 나간다. 도착 알림은 폴러 쪽에서만 다룬다.
+//   ⚠️ 서명 재촉(`sendContractReminder`) — 사람이 눌러서 보내는 것이라 그대로 둔다.
+// ════════════════════════════════════════════════════════════════
+
+/** `send` 일 때만 실제로 나간다. 그 외(미설정 포함)는 로그만 찍는다 — 기본값이 안전한 쪽이다 */
+const AT_MODE = String(process.env.ALIMTALK_TRIGGER || 'log').toLowerCase();
+
+/**
+ * 서울 기준 날짜 문자열.
+ * ⚠️ 함수는 UTC 로 돈다. `timeZone` 을 안 주면 한국 새벽 9시 이전 입금이
+ *    **전날 날짜**로 고객에게 나간다. admin.js 는 관리자 PC 시간이라 문제가 없었다.
+ */
+function atKstDate(d) {
+    return new Intl.DateTimeFormat('ko-KR', {
+        timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(d);
+}
+
+function atModel(q) {
+    return `${q.brand || ''} ${q.model || ''}`.trim() || '-';
+}
+
+// ⚠️⚠️ 변수는 **템플릿 문구에 실제로 있는 것만** 넣는다.
+//    없는 변수를 같이 보내면 발송이 통째로 실패한다 (admin.js 3412줄에 같은 사고 기록).
+//    예전 admin.js 는 어떤 이름이 맞는지 몰라 #{고객명}·#{이름}·#{링크} 등 10개를
+//    한꺼번에 쐈다. 2026-08-24 솔라피 콘솔 문구와 하나씩 대조해 아래로 확정했다.
+const AT_ON_STATUS = {
+    '검수중': {
+        tpl: process.env.ALIMTALK_TPL_INSPECTING || 'KA01TP260720082124111MHxTYbunZp8',
+        mark: 'inspectingNotifiedAt',
+        vars: (q) => ({ '#{고객성함}': q.customerName || '-', '#{모델}': atModel(q) })
+    },
+    // 전자매매계약서 안내. 버튼은 마이페이지 고정 링크라 변수가 없다
+    '검수완료': {
+        tpl: process.env.ALIMTALK_TPL_CONTRACT || 'KA01TP26051503220469833hM7NmGsbZ',
+        mark: 'contractNotifiedAt',
+        vars: (q) => ({ '#{고객성함}': q.customerName || '-', '#{기종}': atModel(q) })
+    },
+    '입금완료': {
+        tpl: process.env.ALIMTALK_TPL_PAID || 'KA01TP260519020029152DuoB5fUdLPL',
+        mark: 'paidNotifiedAt',
+        vars: (q) => ({
+            '#{고객성함}': q.customerName || '-',
+            '#{기종}': atModel(q),
+            '#{입금완료일자}': atKstDate(new Date())
+        })
+    }
+};
+
+exports.alimtalkOnStatusChange = onDocumentUpdated(
+    { document: 'quotes/{quoteId}', region: 'asia-northeast3' },
+    async (event) => {
+        const after = event.data.after.data();
+        const before = event.data.before.data();
+        const id = event.params.quoteId;
+
+        if (!after || !before) return;
+        // 발송 표시를 우리가 쓸 때도 이 트리거가 다시 돈다. 상태가 그대로면 여기서 끝난다
+        if (after.status === before.status) return;
+
+        const rule = AT_ON_STATUS[after.status];
+        if (!rule) return;
+
+        if (after.isDeleted) {
+            console.log(`[알림톡] 건너뜀(삭제됨) ${id} → ${after.status}`);
+            return;
+        }
+        if (after[rule.mark]) {
+            console.log(`[알림톡] 건너뜀(이미 발송) ${id} → ${after.status} (${rule.mark})`);
+            return;
+        }
+        if (!after.customerPhone) {
+            console.error(`[알림톡] ❌ 연락처 없음 — 발송 못 함 ${id} → ${after.status}`);
+            return;
+        }
+
+        const who = `${after.customerName || id} · ${atModel(after)}`;
+
+        // ── 1단계: 로그만 찍는다 ──
+        if (AT_MODE !== 'send') {
+            console.log(
+                `[알림톡:log] ${before.status} → ${after.status} | ${who} | ${after.customerPhone} | tpl=${rule.tpl}`
+            );
+            return;
+        }
+
+        // ── 2단계: 실제 발송 ──
+        const r = await gfSendAlimtalk(rule.tpl, after.customerPhone, rule.vars(after));
+
+        if (r && r.ok) {
+            await event.data.after.ref.set({ [rule.mark]: new Date() }, { merge: true });
+            console.log(`[알림톡] ✅ ${after.status} 발송 — ${who}`);
+            return;
+        }
+
+        // ⚠️ 실패를 조용히 넘기지 않는다.
+        //    발송 표시는 **남기지 않는다** — 남기면 영영 안 나간 채로 '보냄' 이 된다.
+        //    표시가 비어 있어야 나중에 미발송 건을 골라낼 수 있다.
+        const why = String((r && (r.error || r.skipped || r.body)) || '발송 실패').slice(0, 200);
+        console.error(`[알림톡] ❌ ${after.status} 발송 실패 — ${who} (${after.customerPhone}) — ${why}`);
+        await event.data.after.ref.set(
+            { [`${rule.mark}Error`]: why, [`${rule.mark}FailedAt`]: new Date() },
+            { merge: true }
+        );
+    }
+);
+
 exports.migrateTodayQuotes = onRequest({ region: 'asia-northeast3' }, async (req, res) => {
     try {
         const startOfToday = new Date();
