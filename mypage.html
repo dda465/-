@@ -250,6 +250,59 @@
             .qc-info p { font-size: 0.82rem; letter-spacing: -0.3px; }
         }
 
+        /* ════════════════════════════════════════════════════════
+           카드 머리 — 제목·금액·신청일 / 상태 배지
+           ════════════════════════════════════════════════════════
+           ⚠️⚠️ 배지는 줄바꿈이 안 되고(white-space:nowrap) 줄어들지도 않는다.
+              그래서 **배지 글자가 길수록 왼쪽을 통째로 밀어낸다.**
+              「입금 완료」(4글자)는 견디는데 「입금 대기 (송금예정)」(11글자)이면
+              폰에서 제목이 3줄로 쪼개지고 신청일이 `2026-08-` / `25 15:49` 로
+              날짜 중간에서 끊긴다. (2026-08-25 실제 확인)
+           → 좁은 화면에서는 배지를 **제목 위로** 올려서 본문이 전폭을 쓰게 한다.
+              DOM 순서는 그대로 두고 column-reverse 로만 뒤집는다 —
+              큰 화면에서는 지금처럼 오른쪽에 있어야 한다. */
+        .qc-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 480px) {
+            .qc-head { flex-direction: column-reverse; gap: 6px; }
+            .qc-head .qc-badge { align-self: flex-start; }
+        }
+
+        /* ⚠️ 날짜·연락처는 중간에서 끊기면 못 읽는다 */
+        .qc-nowrap { white-space: nowrap; }
+
+        /* ════════════════════════════════════════════════════════
+           [보내실 곳] — ⭐ 카드 머리(flex) **밖**에 둔다
+           ════════════════════════════════════════════════════════
+           고객이 이 주소를 보고 택배를 부친다. 폭이 제일 필요한 정보인데
+           예전에는 배지 옆 좁은 칸에 갇혀 있어서 주소가 6줄로 쪼개지고
+           `동천로 128` / `BIFC2 716` / `호 쉐라폰검` / `수센터` 처럼
+           **단어 중간에서 끊겼다.** 잘못 읽으면 배송 사고다.
+           ⚠️ `word-break: keep-all` — 한글은 기본값이 글자 단위로 끊어서
+              이걸 안 주면 아무리 넓혀도 낱말이 갈라진다. */
+        .qc-address {
+            margin-top: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: #475569;
+            text-align: left;
+            line-height: 1.65;
+            word-break: keep-all;
+        }
+        .qc-address strong {
+            color: #1e293b;
+            display: block;
+            margin-bottom: 5px;
+        }
+
 
 
 
@@ -1693,18 +1746,21 @@ window.addEventListener('load', function() {
                     const priceStr = new Intl.NumberFormat('ko-KR').format(price) + '원';
                     
                     let deliveryInfo = '';
+                    let addressBox = '';
                     if (data.deliveryMethod === 'cvs') {
                         deliveryInfo = '<br><span style="font-size: 0.8rem; color: #ff9800; margin-top: 4px; display: inline-block;">[직접발송]</span>';
                         if (data.shippingFeePaid) {
                             deliveryInfo += `<br><span style="font-size: 0.8rem; color: #2E7D32; font-weight: 600; margin-top: 4px; display: inline-block;">✅ 배송비 입금 완료</span>`;
                         }
                         
-                        // Add return address box for direct delivery users
-                        deliveryInfo += `
-                            <div style="margin-top: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #475569; text-align: left;">
-                                <strong style="color: #1e293b; display: block; margin-bottom: 5px;">[보내실 곳]</strong>
+                        // ⭐ 보내실 곳은 **카드 머리 밖**으로 뺀다 (`addressBox`).
+                        //    여기(deliveryInfo)에 붙이면 배지 옆 좁은 칸에 갇혀서
+                        //    폰에서 주소가 낱말 중간에서 끊긴다. CSS `.qc-address` 참고
+                        addressBox = `
+                            <div class="qc-address">
+                                <strong>[보내실 곳]</strong>
                                 받는 이: 쉐라폰<br>
-                                연락처: 010-5173-5382<br>
+                                연락처: <span class="qc-nowrap">010-5173-5382</span><br>
                                 주소: 부산광역시 남구 남동천로 128 BIFC2 716호 쉐라폰검수센터
                             </div>
                         `;
@@ -1768,17 +1824,18 @@ window.addEventListener('load', function() {
                     el.className = 'quote-card';
                     el.style.display = 'block';
                     el.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;">
+                        <div class="qc-head">
                             <div class="qc-info">
                                 <h3>${data.brand || ''} ${data.model || ''} <span style="font-size:0.8rem; color:#888;">${data.storage || ''}</span></h3>
                                 <p>예상 매입가: <strong style="color: #2563EB;">${priceStr}</strong></p>
-                                <p style="font-size: 0.8rem; margin-top: 4px; color: #666;">신청일: ${dateStr}</p>
+                                <p style="font-size: 0.8rem; margin-top: 4px; color: #666;">신청일: <span class="qc-nowrap">${dateStr}</span></p>
                                 ${deliveryInfo}
                             </div>
-                            <div style="text-align: right; flex-shrink: 0;">
-                                 <span class="status-badge ${statusBadgeClass}" style="white-space: nowrap;">${statusText}</span>
+                            <div class="qc-badge" style="flex-shrink: 0;">
+                                 <span class="status-badge ${statusBadgeClass}">${statusText}</span>
                             </div>
                         </div>
+                        ${addressBox}
                         ${stepperHtml}
                         ${dispatchBtnHtml}
                         ${contractBtnHtml}
