@@ -302,6 +302,20 @@
             display: block;
             margin-bottom: 5px;
         }
+        /* ════════════════════════════════════════════════════════
+           폰에서는 **여백이 글자 자리를 먹는다**
+           ════════════════════════════════════════════════════════
+           414px 폰 실측 (2026-08-25) — 좌우 여백이 세 겹으로 쌓인다.
+             바깥 .container 20  +  .dashboard-container 30  +  .quote-card 20
+             = 한쪽 70px, 양쪽 140px. 414 중 34% 가 여백이고 글자에는 247px 뿐.
+           그래서 배지를 위로 올려도 주소·기종명이 계속 두 줄로 접혔다.
+           → 좁은 화면에서만 안쪽 여백을 줄여 본문 폭을 약 44px 되돌린다.
+           ⚠️ 바깥 .container 는 건드리지 않는다 — 사이트 전체(내비게이션 포함)가
+              같은 클래스를 쓴다. 이 페이지 안쪽 두 겹만 줄인다. */
+        @media (max-width: 480px) {
+            .dashboard-container { padding: 20px 14px; }
+            .quote-card { padding: 16px 14px; }
+        }
 
 
 
@@ -1761,7 +1775,7 @@ window.addEventListener('load', function() {
                                 <strong>[보내실 곳]</strong>
                                 받는 이: 쉐라폰<br>
                                 연락처: <span class="qc-nowrap">010-5173-5382</span><br>
-                                주소: 부산광역시 남구 남동천로 128 BIFC2 716호 쉐라폰검수센터
+                                주소: 부산광역시 남구 남동천로 128 <span class="qc-nowrap">BIFC2 716호</span> 쉐라폰검수센터
                             </div>
                         `;
                     } else if (data.deliveryMethod === 'courier') {
