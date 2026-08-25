@@ -3401,61 +3401,22 @@ window.saveAdminMemo = async () => {
 
 
 // 알림톡 전송 도우미 함수
-async function triggerAlimtalk(quoteData, status) {
-    let templateId = "";
-    let variables = {};
-    const phone = quoteData.customerPhone ? quoteData.customerPhone.replace(/-/g, '') : '';
-    if (!phone) return;
-
-    if (status === "검수중") {
-        templateId = "KA01TP260720082124111MHxTYbunZp8"; // 2026-07 문구 수정본
-        // 수정본에서 #{접수계정}이 문구에서 빠짐 → 보내면 안 됨(템플릿에 없는 변수)
-        variables = {
-            "#{고객성함}": quoteData.customerName || "-",
-            "#{모델}": `${quoteData.brand} ${quoteData.model}`
-        };
-    } else if (status === "입금완료") {
-        templateId = "KA01TP260519020029152DuoB5fUdLPL";
-        variables = {
-            "#{고객성함}": quoteData.customerName || "-",
-            "#{기종}": `${quoteData.brand} ${quoteData.model}`,
-            "#{입금완료일자}": new Date().toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
-        };
-    } else if (status === "검수완료") {
-        templateId = "KA01TP26051503220469833hM7NmGsbZ";
-        variables = {
-            "#{고객성함}": quoteData.customerName || "-",
-            "#{고객명}": quoteData.customerName || "-",
-            "#{이름}": quoteData.customerName || "-",
-            "#{기종}": `${quoteData.brand || ''} ${quoteData.model || ''}`,
-            "#{모델}": `${quoteData.brand || ''} ${quoteData.model || ''}`,
-            "#{최종매입금액}": quoteData.inspectionData && quoteData.inspectionData.finalPrice ? quoteData.inspectionData.finalPrice.toLocaleString() + '원' : "-",
-            "#{최종금액}": quoteData.inspectionData && quoteData.inspectionData.finalPrice ? quoteData.inspectionData.finalPrice.toLocaleString() + '원' : "-",
-            "#{차감사유}": quoteData.inspectionData && quoteData.inspectionData.details ? quoteData.inspectionData.details : "없음",
-            "#{차감내역}": quoteData.inspectionData && quoteData.inspectionData.details ? quoteData.inspectionData.details : "없음",
-            "#{링크}": "https://rejeuphone.web.app/mypage.html",
-            "#{마이페이지}": "https://rejeuphone.web.app/mypage.html"
-        };
-    }
-
-    if (!templateId) return;
-
-    try {
-        const response = await fetch("https://asia-northeast3-rejeuphone.cloudfunctions.net/alimtalkApi/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                phone: phone,
-                templateId: templateId,
-                variables: variables
-            })
-        });
-        const result = await response.json();
-        console.log("Alimtalk trigger result:", result);
-    } catch (e) {
-        console.error("Alimtalk trigger error:", e);
-    }
-}
+// ════════════════════════════════════════════════════════════════
+// triggerAlimtalk 은 **제거했다.** (2026-08-25)
+//
+//   상태변경 알림톡(검수중·검수완료·입금완료)은 이제 서버가 보낸다.
+//   → functions/index.js 의 `alimtalkOnStatusChange`
+//
+//   여기서 보내면 관리자페이지로 바꿀 때만 나가고, 직원 앱이나 폴러가
+//   바꿀 때는 안 나갔다. 그래서 직원이 새 앱에서 검수를 저장해도 계약서가
+//   안 가서 결국 이 페이지를 한 번 더 열어야 했다.
+//
+// ⚠️⚠️ **여기에 되살리지 말 것. 되살리면 고객에게 같은 알림톡이 두 번 간다.**
+//   문구나 변수를 고칠 일이 있으면 functions/index.js 를 고친다.
+//
+// ※ 사람이 눌러서 보내는 것들(sendContractReminder·sendDropoffAlert·
+//   미집하 안내)은 그대로 둔다. 자동 발송이 아니라 겹치지 않는다.
+// ════════════════════════════════════════════════════════════════
 
 window.sendDropoffAlert = async (docId) => {
     if(!confirm("해당 고객에게 이탈 알림톡(이어서 작성하기)을 발송하시겠습니까?")) return;
@@ -3843,10 +3804,8 @@ window.updateQuoteStatus = async (id, newStatus) => {
             }
         }
 
-        // 알림톡 발송
-        if(quoteData) {
-            triggerAlimtalk(quoteData, newStatus);
-        }
+        // 알림톡은 서버가 보낸다 (functions/index.js · alimtalkOnStatusChange).
+        // 여기서 다시 부르면 두 번 간다.
 
         // 구글 시트 동기화 호출
         try {
@@ -4021,7 +3980,8 @@ window.saveInspectionForm = async () => {
         alert("검수서가 저장되었습니다. 고객의 동의 대기 중입니다.");
         
         if (docSnap.exists()) {
-            triggerAlimtalk({ ...docSnap.data(), id: id, inspectionData: inspectionData }, "검수완료");
+            // 계약서 알림톡은 status 가 '검수완료' 로 바뀌는 걸 서버가 보고 보낸다.
+            // 위 updateDoc 이 이미 그 전환을 만들었으므로 여기서 할 일이 없다.
         }
     } catch(e) {
         console.error("Save Inspection Error:", e);
