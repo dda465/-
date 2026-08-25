@@ -771,7 +771,17 @@ const PAY_BOT_TOKEN = process.env.TELEGRAM_PAY_BOT_TOKEN || '';
 const PAY_CHAT_IDS = String(process.env.TELEGRAM_PAY_CHAT_IDS || '')
     .split(',').map((s) => s.trim()).filter(Boolean);
 
-/** 직원 앱 신청건 주소 — 알림에서 바로 눌러 들어간다 */
+/**
+ * 직원 앱 신청건 주소 — 알림에서 바로 눌러 들어간다.
+ *
+ * ⚠️ 직원 앱의 **진짜 주소는 sharaphone-staff.web.app 하나뿐이다.**
+ *    staff.sharaphone.com 은 파이어베이스 콘솔에 커스텀 도메인으로 등록만 해두고
+ *    DNS 레코드를 안 넣어서 **열리지 않는다** (2026-08-25 확인 — NXDOMAIN,
+ *    없는 이름과 결과가 같다). 그런데 콘솔에 등록돼 있다는 이유로 배포할 때마다
+ *    CLI 가 "Hosting URL: … / https://staff.sharaphone.com" 을 찍는다.
+ *    그 줄을 보고 "주소가 두 개구나" 하고 쓰면 안 된다.
+ *    → 코드에 넣을 주소는 항상 아래 값이다.
+ */
 const STAFF_APP_QUOTE_URL = 'https://sharaphone-staff.web.app/quotes';
 
 /**
@@ -1024,7 +1034,7 @@ console.log(`[굿스플로] 받는 곳(쉐라폰 사무실) = ${GF_TO.zipCode} $
 const GF_ADMIN_EMAILS = ["dda465@hanmail.net", "admin@rejuphone.com", "admin@sharaphone.com", "guffy321@naver.com", "test@admin.com"];
 
 // 관리자 인증 — 통과 못하면 null 반환(응답은 이미 전송됨)
-// ⚠️ 2026-08-14 — 직원 앱(staff.sharaphone.com) 계정도 통과시키도록 확장했다.
+// ⚠️ 2026-08-14 — 직원 앱(sharaphone-staff.web.app) 계정도 통과시키도록 확장했다.
 //
 //    ⚠️⚠️ **기존 이메일 목록(GF_ADMIN_EMAILS)을 지우지 않았다. 더한 것이다.**
 //       지우면 기존 관리자페이지의 배차·취소가 통째로 멈춘다. 병행 기간에 그건 사고다.
@@ -2397,7 +2407,7 @@ goodsflowApp.post("/pollNow", async (req, res) => {
     }
 });
 
-// ── 직원 앱(staff.sharaphone.com) 전용 함수 ──────────────────────
+// ── 직원 앱(sharaphone-staff.web.app) 전용 함수 ──────────────────
 // 새 파일로 분리해 두었다. 위의 기존 함수들은 영향을 받지 않는다.
 Object.assign(exports, require('./staffAuth'));
 Object.assign(exports, require('./attendance'));
