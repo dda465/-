@@ -2415,3 +2415,8 @@ Object.assign(exports, require('./attendance'));
 // ── 홈페이지 실시간 접수 피드 ────────────────────────────────────
 // 새 파일로 분리. 위의 기존 함수들은 영향을 받지 않는다.
 Object.assign(exports, require('./liveFeed'));
+
+// ── M360 연동 (1단계 · 검수 세션 조회) ──────────────────────────
+// 새 파일로 분리. 위의 기존 함수들은 영향을 받지 않는다.
+// ⚠️ 읽기 전용이다 — Firestore 에도 M360 에도 아무것도 쓰지 않는다.
+Object.assign(exports, require('./m360'));
