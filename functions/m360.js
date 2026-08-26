@@ -240,8 +240,26 @@ function trimRecord(r) {
 //    tngus2595@naver.com → tngus2595.naver 인데 dda465@gmail.com → dda465 다.
 //    규칙이 일정하지 않다. 직원 문서에 저장해 두고 그 값을 그대로 넘긴다.
 
+// ⚠️⚠️ `invoker: "public"` 이 **반드시 있어야 한다.** 빼면 앱에서 못 부른다.
+//
+// 【무슨 일이 있었나 — 2026-08-26】
+//   이 옵션 없이 배포했더니 앱에서 부르는 게 통째로 막혔다. 브라우저에는
+//   "Failed to fetch" 만 나오고 함수 로그에는 아무것도 안 찍힌다 — 요청이
+//   함수까지 오지도 못하기 때문이다. 원인을 찾는 데 한참 걸렸다.
+//
+//   ⭐ 갈라보는 법: 잘 도는 함수(punch)와 같은 방식으로 불러 비교한다.
+//      punch 는 401 과 함께 **함수 안의 문구**를 돌려주는데(=함수가 실행됨),
+//      이건 CORS 사전확인 단계에서 막혀 응답 자체가 없었다.
+//
+// 【보안이 약해지는 게 아니다】
+//   "public" 은 **요청이 함수까지 닿게** 해주는 것뿐이다. 로그인·직원·권한
+//   확인은 아래 requireInspectionOrStock 이 직접 한다. 이 프로젝트의 다른
+//   callable 함수(punch · 근태 등)도 전부 같은 상태다.
+//
+// ⚠️ 콘솔에서 손으로 권한을 열지 말 것 — 다음 배포 때 되돌아갈 수 있다.
+//    코드에 두면 배포할 때마다 유지된다.
 exports.m360GetHistory = onCall(
-    { region: REGION, maxInstances: 5 },
+    { region: REGION, maxInstances: 5, invoker: "public" },
     async (request) => {
         const staff = await requireInspectionOrStock(request);
 
