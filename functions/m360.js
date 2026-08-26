@@ -297,7 +297,9 @@ exports.m360GetHistory = onCall(
         //    null 을 보내면 **목록에 1건만 나온다.** 그건 아무도 원인을 못 찾는다.
         //    → 쓸 수 있는 값(1 이상의 숫자)일 때만 쓰고, 나머지는 전부 기본값으로.
         let limit = DEFAULT_LIMIT;
-        if (d.limit !== undefined && d.limit !== null && d.limit !== "") {
+        // ⚠️ Number(true) === 1 이라 true/false 가 숫자처럼 통과한다. 먼저 걷어낸다
+        if (d.limit !== undefined && d.limit !== null && d.limit !== "" &&
+            typeof d.limit !== "boolean") {
             const n = Number(d.limit);
             if (Number.isFinite(n) && n >= 1) {
                 limit = Math.min(MAX_LIMIT, Math.floor(n));
