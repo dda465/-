@@ -22,10 +22,16 @@ Authorization: Bearer {인증코드}-{Auth-Token}
    → **Cloud Function 을 하나 만들어 대신 부르게 한다.** 토큰은 `functions/.env` 에만.
 
 ```
-M360_AUTH_CODE=...
-M360_AUTH_TOKEN=...
-M360_TESTING=true      # 개발 중에는 true. 실제로 붙일 때 false
+M360_AUTH_CODE=a1b2c3d4e5          # ← 이 자리에 실제 값. 설명 문구를 적지 마라
+M360_AUTH_TOKEN=A1B2-C3D4-E5F6     # ← 이 자리에 실제 값
+M360_TESTING=true                  # 개발 중에는 true. 실제로 붙일 때 false
 ```
+
+⚠️ **위의 `a1b2c3d4e5` 는 모양을 보여주는 가짜다.** 실제로 저 자리에
+「대시보드의 인증 코드」 같은 설명 문구가 그대로 들어간 적이 있다 (2026-08-26).
+그러면 `fetch` 가 헤더를 만들다 `ByteString ...` 이라는 알아볼 수 없는 오류를 낸다.
+지금은 `m360.js` 의 `checkSecret()` 이 미리 잡아서 어디를 고칠지 한국어로 알려준다.
+값에는 **영문·숫자·기호만** 들어간다. 한글이나 공백이 있으면 값이 아니다.
 
 ## 2. 테스트 모드
 

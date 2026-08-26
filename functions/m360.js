@@ -125,11 +125,36 @@ function toKstText(iso) {
 // M360 호출
 // ────────────────────────────────────────────────────────────────
 
+// .env 값이 「대시보드의 인증 코드」 같은 설명글 그대로 들어간 적이 있다 (2026-08-26).
+// 그러면 fetch 가 헤더를 만들다가 ByteString 어쩌구 하는 알아볼 수 없는 오류를 낸다.
+// 값이 이상하면 여기서 미리 잡아서, 어디를 고쳐야 하는지 사람 말로 알려준다.
+const ASCII_ONLY = /^[\x21-\x7E]+$/; // 공백·한글·따옴표가 하나라도 있으면 걸린다
+
+function checkSecret(name, raw) {
+    const v = String(raw || "").trim().replace(/^["']|["']$/g, "");
+    if (!v) return { ok: false, why: `${name} 가 비어 있습니다` };
+    if (!ASCII_ONLY.test(v)) {
+        const bad = [...v].find((ch) => ch.charCodeAt(0) > 126 || ch.charCodeAt(0) < 33);
+        return {
+            ok: false,
+            why: `${name} 에 값이 아닌 글자가 들어 있습니다 (「${bad}」). ` +
+                 `설명 문구를 그대로 붙여넣지 말고 M360 대시보드의 실제 값만 넣으세요`,
+        };
+    }
+    return { ok: true, v };
+}
+
+/** 문제가 없으면 헤더 문자열, 있으면 null 을 준다. 이유는 authHeaderProblem 에 남는다 */
+let authHeaderProblem = null;
 function authHeader() {
-    const code = String(process.env.M360_AUTH_CODE || "").trim();
-    const token = String(process.env.M360_AUTH_TOKEN || "").trim();
-    if (!code || !token) return null;
-    return `Bearer ${code}-${token}`;
+    authHeaderProblem = null;
+    const c = checkSecret("M360_AUTH_CODE", process.env.M360_AUTH_CODE);
+    const t = checkSecret("M360_AUTH_TOKEN", process.env.M360_AUTH_TOKEN);
+    if (!c.ok || !t.ok) {
+        authHeaderProblem = [c.why, t.why].filter(Boolean).join(" / ");
+        return null;
+    }
+    return `Bearer ${c.v}-${t.v}`;
 }
 
 /** .env 의 M360_TESTING. 안 적어두면 **안전한 쪽(테스트)** 으로 본다 */
@@ -143,8 +168,8 @@ async function callM360(endpoint, body) {
     if (!header) {
         // 조용히 빈 목록을 주지 않는다. 왜 안 되는지 사람이 읽을 수 있게 말한다
         console.error(
-            "[M360] ❌ 설정이 비어 있어 부르지 못함 — " +
-                "M360_AUTH_CODE / M360_AUTH_TOKEN 을 functions/.env 에 넣고 재배포할 것"
+            "[M360] ❌ 설정이 잘못돼 부르지 못함 — " + (authHeaderProblem || "값 없음") +
+                " · functions/.env 를 고치고 재배포할 것"
         );
         throw new HttpsError(
             "failed-precondition",
