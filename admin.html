@@ -2625,7 +2625,7 @@
 
 
 
-    <script type="module" src="admin.js?v=1787642525"></script>
+    <script type="module" src="admin.js?v=1787645120"></script>
 
     <!-- Inspection (전자매매계약서) Modal -->
     <div id="inspection-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
@@ -2657,25 +2657,37 @@
                 <div style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; padding: 15px;">
                     <h3 style="margin: 0 0 15px 0; font-size: 1.1rem;">검수 차감 항목 체크</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; font-size: 0.9rem;">
+                        <div style="grid-column: 1 / -1; margin-top: 6px; font-size: 0.8rem; font-weight: 700; color: #555; border-bottom: 1px solid #eee; padding-bottom: 3px;">외관</div>
                         <label><input type="checkbox" name="insp-fault" value="케이스 개봉 (중고)"> 케이스 개봉 (중고)</label>
                         <label><input type="checkbox" name="insp-fault" value="LCD 손상 (줄/멍/파손)"> LCD 손상 (줄/멍/파손)</label>
                         <label><input type="checkbox" name="insp-fault" value="화면 잔상 (번인)"> 화면 잔상 (번인)</label>
-                        
                         <label><input type="checkbox" name="insp-fault" value="전면 파손/찍힘"> 전면 파손/찍힘</label>
                         <label><input type="checkbox" name="insp-fault" value="테두리/베젤 파손"> 테두리/베젤 파손</label>
                         <label><input type="checkbox" name="insp-fault" value="후면 파손/찍힘"> 후면 파손/찍힘</label>
-                        
                         <label><input type="checkbox" name="insp-fault" value="전면 미세 기스"> 전면 미세 기스</label>
                         <label><input type="checkbox" name="insp-fault" value="테두리 미세 기스"> 테두리 미세 기스</label>
                         <label><input type="checkbox" name="insp-fault" value="후면 미세 기스"> 후면 미세 기스</label>
-                        
+                        <div style="grid-column: 1 / -1; margin-top: 6px; font-size: 0.8rem; font-weight: 700; color: #555; border-bottom: 1px solid #eee; padding-bottom: 3px;">기능</div>
                         <label><input type="checkbox" name="insp-fault" value="카메라 불량/기스"> 카메라 불량/기스</label>
                         <label><input type="checkbox" name="insp-fault" value="생체인식(지문/페이스ID) 불량"> 생체인식 불량</label>
                         <label><input type="checkbox" name="insp-fault" value="Wifi/블루투스 불량"> Wifi/블루투스 불량</label>
-                        
                         <label><input type="checkbox" name="insp-fault" value="스피커/마이크 불량"> 스피커/마이크 불량</label>
                         <label><input type="checkbox" name="insp-fault" value="터치/진동 불량"> 터치/진동 불량</label>
                         <label><input type="checkbox" name="insp-fault" value="배터리 효율 저하/전원 불량"> 배터리/전원 불량</label>
+                        <label><input type="checkbox" name="insp-fault" value="통화 불량 (수화부/송화부)"> 통화 불량 (수화부/송화부)</label>
+                        <label><input type="checkbox" name="insp-fault" value="충전 단자 불량"> 충전 단자 불량</label>
+                        <label><input type="checkbox" name="insp-fault" value="버튼 불량 (전원/볼륨/무음)"> 버튼 불량 (전원/볼륨/무음)</label>
+                        <label><input type="checkbox" name="insp-fault" value="센서 불량 (자이로/근접/조도/나침반)"> 센서 불량 (자이로/근접/조도/나침반)</label>
+                        <label><input type="checkbox" name="insp-fault" value="무선충전/맥세이프 불량"> 무선충전/맥세이프 불량</label>
+                        <label><input type="checkbox" name="insp-fault" value="LiDAR/뎁스 카메라 불량"> LiDAR/뎁스 카메라 불량</label>
+                        <div style="grid-column: 1 / -1; margin-top: 6px; font-size: 0.8rem; font-weight: 700; color: #555; border-bottom: 1px solid #eee; padding-bottom: 3px;">부속 · 수리 이력</div>
+                        <label><input type="checkbox" name="insp-fault" value="유심 트레이 부재/손상"> 유심 트레이 부재/손상</label>
+                        <label><input type="checkbox" name="insp-fault" value="사설수리·비정품 부품 (액정/배터리)"> 사설수리·비정품 부품 (액정/배터리)</label>
+                        <label><input type="checkbox" name="insp-fault" value="트루톤 미지원"> 트루톤 미지원</label>
+                        <div style="grid-column: 1 / -1; margin-top: 6px; font-size: 0.8rem; font-weight: 700; color: #555; border-bottom: 1px solid #eee; padding-bottom: 3px;">매입 불가 확인 — 하나라도 걸리면 진행 전에 확인할 것</div>
+                        <label><input type="checkbox" name="insp-fault" value="침수"> 침수</label>
+                        <label><input type="checkbox" name="insp-fault" value="계정 잠김 (iCloud/Google)"> 계정 잠김 (iCloud/Google)</label>
+                        <label><input type="checkbox" name="insp-fault" value="분실·도난 신고 / 통신사 미납 잠김"> 분실·도난 신고 / 통신사 미납 잠김</label>
                     </div>
                     
                     <label style="display: block; font-weight: 600; margin-bottom: 8px;">상세 차감 내역 및 사유 (고객 노출용)</label>
