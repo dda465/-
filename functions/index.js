@@ -312,6 +312,12 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV
 // ⚠️ 시트 소유권을 다른 계정으로 넘기면 기존 웹앱 배포가 깨진다(404).
 //    배포 설정(실행 계정·액세스 권한)이 맞아 보여도 되살아나지 않는다.
 //    새 계정에서 **'새 배포'** 로 URL 을 새로 받아 여기에 넣어야 한다.
+// 매입완료 시트에 찍는 날짜 — 반드시 한국시간으로 (서버는 UTC)
+const KST_STAMP = new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+});
+
 const GOOGLE_SCRIPT_URL_INVENTORY = 'https://script.google.com/macros/s/AKfycbz6CsUz4EO5yjzlmU0zLtL7kjnKB6f3LQcUgMCVNhwgjZT1f4PShPNTooqdMayh3wQx/exec';
 
 // ⚠️⚠️ 시트 응답은 **본문까지 봐야 한다.** HTTP 200 이 성공이 아니다. (2026-08-22 사고)
@@ -586,8 +592,14 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
                         headers: { 'Content-Type': 'text/plain' },
                         body: JSON.stringify({
                             action: 'addInventory',
-                            date: new Date().toLocaleString(),
-                            imei: after.customerName || '',
+                            // ⚠️ 서버는 UTC 다. toLocaleString() 을 그냥 쓰면 9시간 이른
+                            //    미국식 날짜가 시트에 찍힌다 (2026-08-27 확인).
+                            date: KST_STAMP.format(new Date()),
+                            // ⚠️ 예전에는 imei 자리에 customerName 을 보냈다. 그래서 시트
+                            //    B열(원래 IMEI 칸)에 고객 이름이 들어갔다. 이제 따로 보낸다.
+                            //    시트 스크립트를 먼저 고친 뒤에 이 함수를 배포할 것.
+                            customerName: after.customerName || '',
+                            imei: after.imei || '',
                             model: `${after.brand || ''} ${after.model || ''}`.trim(),
                             storage: after.storage || '용량미상',
                             defects: defectsText
