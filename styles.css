@@ -1970,3 +1970,49 @@ footer {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
 }
 
+
+/* ─────────────────────────────────────────────────────────────
+   PC 헤더 줄바꿈 문제 (2026-08-27)
+
+   증상: 창을 1080px 아래로 줄이면 「내 폰 판 매」, 「자주 묻는 질 문」,
+        「마이페이 지」처럼 메뉴 글자가 중간에서 끊겼다.
+   원인: .nav-links 가 flex(nowrap) + gap:32px 인데 자리가 부족해지면
+        각 항목이 눌리면서 글자가 줄바꿈됐다. white-space 가 normal 이었다.
+
+   ⚠️ 모바일(≤768px)에는 닿지 않는다 — 아래는 전부 min-width:769px 안에 있고,
+      768px 이하에서는 .pc-only 자체가 display:none 이다.
+
+   측정 결과 (관리자 로그인 상태, 항목이 가장 많은 경우):
+     고치기 전  1080px 부터 7개 항목이 2줄로 접힘
+     고친 후    769px 까지 접힘 0 · 가로 넘침 0
+   ───────────────────────────────────────────────────────────── */
+
+@media (min-width: 769px) {
+    nav.navbar .nav-links a,
+    nav.navbar .nav-links span,
+    nav.navbar .btn.pc-only,
+    nav.navbar .logo-text-wrapper {
+        white-space: nowrap;          /* 라벨은 중간에서 끊지 않는다 */
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1180px) {
+    nav.navbar .nav-links { gap: 14px !important; }          /* 32px → 14px */
+    nav.navbar .nav-links a,
+    nav.navbar .nav-links span { font-size: 0.875rem; }
+    nav.navbar .btn.pc-only {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+        font-size: 0.875rem;
+    }
+    nav.navbar .container {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+}
+
+/* 「○○님 환영합니다」가 128px 로 가장 길다. 좁아지면 이것부터 접는다.
+   로그인 여부는 옆의 「마이페이지 / 로그아웃」으로 이미 알 수 있다. */
+@media (min-width: 769px) and (max-width: 950px) {
+    nav.navbar #nav-welcome-text { display: none !important; }
+}
