@@ -2016,3 +2016,55 @@ footer {
 @media (min-width: 769px) and (max-width: 950px) {
     nav.navbar #nav-welcome-text { display: none !important; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   2026-08-28  「판매하기」 버튼이 넓은 화면에서도 두 줄로 쪼개지던 문제
+
+   terms / privacy / delivery-guide / delivery-guide-self 네 페이지는
+   헤더 마크업이 예전 버전이라 버튼에 `.pc-only` 클래스가 없다.
+   그래서 8/27 에 넣은 `nav.navbar .btn.pc-only` 규칙이 안 걸렸고,
+   1440·1920 같은 일반 PC 폭에서도 「판매」/「하기」로 끊겨 있었다.
+   (769~1180 구간만 우연히 멀쩡했다 — 그 구간 글자 축소 규칙 덕분)
+
+   `.pc-only` 를 떼고 nav.navbar 안의 버튼 전체를 잡는다.
+   flex-shrink:0 이 핵심이다. 없으면 자리가 모자랄 때 버튼부터 찌그러진다.
+   ⚠️ 전부 min-width:769px 안에 있다. 모바일(≤768px)은 건드리지 않는다.
+   ───────────────────────────────────────────────────────────── */
+@media (min-width: 769px) {
+    nav.navbar .btn {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+    nav.navbar .logo,
+    nav.navbar .logo-text-wrapper { flex-shrink: 0 !important; }
+}
+
+@media (min-width: 769px) and (max-width: 1180px) {
+    /* .pc-only 없는 버튼도 같이 줄인다 */
+    nav.navbar .btn {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+        font-size: 0.875rem !important;
+    }
+}
+
+/* 버튼을 안 찌그러지게 했으니 좁은 구간에서는 링크 간격이 대신 양보한다.
+   (관리자로 로그인하면 헤더에 「관리자」 버튼이 하나 더 붙어 가장 빡빡하다) */
+@media (min-width: 769px) and (max-width: 850px) {
+    nav.navbar .nav-links { gap: 10px !important; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2026-08-28  event_danggeun.html 의 모바일 메뉴가 PC 에서도 보이던 문제
+
+   그 페이지의 모바일 메뉴 div 에는 태그 안에 직접 `display: flex` 가 적혀 있다.
+   태그 안에 적힌 값이 스타일시트보다 세서, PC 에서 모바일용 언어선택 + 「판매하기」가
+   PC 메뉴 옆에 겹쳐 나왔다 (판매하기가 37px 폭에 세 줄로 끼여 있었다).
+
+   `.mobile-only` 는 이름 그대로 PC 에서 나오면 안 되는 것이라 전역으로 못박는다.
+   `!important` 라야 태그 안에 적힌 값을 이긴다.
+   ⚠️ min-width:769px 안이라 모바일(≤768px)에는 닿지 않는다.
+   ───────────────────────────────────────────────────────────── */
+@media (min-width: 769px) {
+    .mobile-only { display: none !important; }
+}
