@@ -69,9 +69,15 @@ const TPL_MORNING = (process.env.ALIMTALK_TPL_PICKUP_REMINDER_AM || "").trim(); 
 //     22:00  한진 실제 익일수거 마감 (script.js 주석 · 실측 확인)
 //     13:00  기사 방문 시각 (배차건 전부 이 시각)
 //
-//   최근 60일, 수거 전날에 배차된 863건 중 **21시 이후 배차가 114건(13.2%)** 이다.
-//   21시에 보내면 그 114건은 안내를 못 받는다.
-//   22:00 을 넘겨 보내야 그날 밤 배차가 끝난 뒤라 누락이 없다.
+//   ★ 왜 21:40 인가
+//     화면 마감이 21:30 이므로 그 뒤로 **새 접수는 못 들어온다.**
+//     남는 변수는 배차뿐인데, 배차는 관리자가 손으로 누르는 일이라 밤에도 이어진다.
+//     최근 60일 · 전날 배차 796건 기준 그 시각 이후 배차 건수:
+//        21:00 이후 101건 (하루 1.7건)
+//        21:40 이후  60건 (하루 1.0건)   ← 지금 값
+//        22:10 이후  24건 (하루 0.4건)
+//     22:10 으로 더 미뤄도 하루 0.6건 차이다. 밤 10시가 넘는 값을 쓸 만큼은 아니라
+//     화면 마감 직후인 21:40 으로 두고, 남는 건 이튿날 아침 발송이 줍는다.
 //
 //   ※ "늦게 배차한 건이 집하 실패가 많을 것" 이라 보고 확인했으나 **틀렸다.**
 //     22시 이후 배차 집하율 94.7% 로 오히려 가장 높았다(표본 38건).
@@ -82,8 +88,8 @@ const hourOf = (v, dflt) => {
     const n = Number(v);
     return Number.isInteger(n) && n >= 0 && n <= 23 ? n : dflt;
 };
-const NIGHT_HOUR = hourOf(process.env.PICKUP_REMINDER_HOUR, 22);
-const NIGHT_MIN = 10;
+const NIGHT_HOUR = hourOf(process.env.PICKUP_REMINDER_HOUR, 21);
+const NIGHT_MIN = 40;
 const MORNING_HOUR = hourOf(process.env.PICKUP_REMINDER_AM_HOUR, 8);
 
 // 아침 발송 대상 — 기본은 '밤에 못 보낸 건만'.
@@ -261,7 +267,13 @@ function buildVariables(q, req, allow) {
         "#{고객성함}": q.customerName || "고객",
         "#{기종}": `${q.brand || ""} ${q.model || ""}`.trim() || "-",
         "#{수거일}": day ? LABEL_KST.format(day) : (q.pickupDate || "-"),
-        "#{수거시각}": hhmmToKorean(req) || "오후 1시",
+        // ⚠️⚠️ 방문 시각을 문구에 넣지 말 것 (2026-08-28 사장님 확인)
+        //    이 값은 우리가 굿스플로에 **요청한** 시각(전건 13:00)일 뿐,
+        //    기사가 실제로 오는 시각이 아니다. 새벽에 오는 경우가 실제로 있다.
+        //    "오후 1시경 방문합니다" 라고 보내면 고객이 낮까지 기다리다 놓친다.
+        //    → 안내는 **"오늘 밤 안에 내놔주세요"** 로 가야 한다.
+        //    변수는 남겨두되 템플릿에는 넣지 않는 것을 권한다.
+        "#{수거시각}": hhmmToKorean(req) || "-",
         "#{수거주소}": q.customerAddress || "-",
         "#{택배사}": q.goodsflowTransporter || "-"
     };
