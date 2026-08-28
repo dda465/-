@@ -2444,6 +2444,11 @@ Object.assign(exports, require('./attendance'));
 // 새 파일로 분리. 위의 기존 함수들은 영향을 받지 않는다.
 Object.assign(exports, require('./liveFeed'));
 
+// ── 방문수거 전날 안내 알림톡 (미집하 예방) ─────────────────────
+// 새 파일로 분리. 위의 기존 함수들은 영향을 받지 않는다.
+// ⚠️ .env 의 ALIMTALK_TPL_PICKUP_REMINDER 가 비어 있으면 발송하지 않고 로그만 남긴다.
+Object.assign(exports, require('./pickupReminder'));
+
 // ── M360 연동 (1단계 · 검수 세션 조회) ──────────────────────────
 // 새 파일로 분리. 위의 기존 함수들은 영향을 받지 않는다.
 // ⚠️ 읽기 전용이다 — Firestore 에도 M360 에도 아무것도 쓰지 않는다.
