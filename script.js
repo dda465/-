@@ -59,8 +59,18 @@ function cleanPersonName(raw) {
  *    CS가 전화로 확인하고, 전자매매계약서에도 들어간다.
  *    그래서 '고객' 같은 대체값으로 넘기지 않고 입구에서 막는다.
  */
+// 이름 검증 — 택배 기사님이 이 이름으로 본인 확인을 한다.
+// 카카오·네이버 닉네임이 그대로 넘어와서 '한규씨입니다', '🌸🌸🌸' 같은 값이
+// 실제로 접수된 적이 있다. (2026-08-28)
+//   · 한글 이름 : 2~4자, 한글만 (홍길동 / 남궁민수)
+//   · 영문 이름 : 2~20자, 알파벳과 띄어쓰기만 (외국인 고객)
+// 한글·영문을 섞거나 숫자·이모지·기호가 들어가면 통과하지 않는다.
+// ⚠️ 5자 이상 한글 이름(외국인 등록명 등)이 필요해지면 아래 {2,4} 를 늘릴 것.
 function isValidPersonName(raw) {
-    return /[가-힣a-zA-Z]/.test(String(raw || ''));
+    const name = String(raw || '').trim().replace(/\s+/g, ' ');
+    if (/^[가-힣]{2,4}$/.test(name)) return true;
+    if (/^[A-Za-z][A-Za-z ]{1,19}$/.test(name)) return true;
+    return false;
 }
 
 /**
@@ -4185,7 +4195,7 @@ async function initDeepWizard() {
                     return;
                 }
                 if (!isValidPersonName(name)) {
-                    alert('성함에 한글 또는 영문이 포함되어야 합니다.\n택배 기사님이 이 이름으로 확인합니다.');
+                    alert('성함을 정확히 입력해 주세요.\n한글 이름은 2~4자, 영문 이름은 알파벳만 입력할 수 있습니다.\n(택배 기사님이 이 이름으로 본인 확인을 합니다)');
                     document.getElementById('auth-name')?.focus();
                     return;
                 }
@@ -5286,7 +5296,7 @@ ${defectInfo}
         }
         // 이모지·기호만 있는 이름을 막는다 (카카오 닉네임이 그대로 넘어오는 경우)
         if (!isValidPersonName(name)) {
-            alert('성함에 한글 또는 영문이 포함되어야 합니다.\n택배 기사님이 이 이름으로 확인합니다.');
+            alert('성함을 정확히 입력해 주세요.\n한글 이름은 2~4자, 영문 이름은 알파벳만 입력할 수 있습니다.\n(택배 기사님이 이 이름으로 본인 확인을 합니다)');
             document.getElementById('auth-name')?.focus();
             return;
         }

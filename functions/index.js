@@ -360,11 +360,26 @@ async function sheetResult(response, label, quoteId) {
     return ok;
 }
 
+// ⚠️ 이 함수가 만드는 날짜는 매입신청서 시트에 그대로 찍힌다.
+//    서버(Cloud Functions)는 UTC 로 돌기 때문에 date.getHours() 같은 걸 쓰면
+//    한국시간보다 9시간 이르게 나온다. 밤 9시 이후 접수건은 「전날」로 기록됐다.
+//    그래서 아래 kstFormat() 으로만 문자열을 만든다. (2026-08-28)
+const KST_PARTS = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+});
+function kstFormat(date) {
+    const p = {};
+    for (const part of KST_PARTS.formatToParts(date)) p[part.type] = part.value;
+    // en-CA 는 24시 자정을 '24' 로 주는 버전이 있다. 00 으로 맞춘다.
+    const h = p.hour === '24' ? '00' : p.hour;
+    return `${p.year}-${p.month}-${p.day} ${h}:${p.minute}:${p.second}`;
+}
+
 function formatTimestampToFriendly(timestamp) {
     if (!timestamp) {
-        const date = new Date();
-        const pad = (n) => ("0" + n).slice(-2);
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        return kstFormat(new Date());
     }
     
     let date = null;
@@ -384,7 +399,10 @@ function formatTimestampToFriendly(timestamp) {
             const day = parseInt(match[4]);
             const month = parseInt(match[5]) - 1;
             const year = parseInt(match[6]);
-            date = new Date(year, month, day, hours, minutes, seconds);
+            // 이 문자열은 이미 한국시간 벽시계 값이다. 시간대 변환을 또 하면 안 되므로
+            // 여기서 바로 문자열로 만들어 돌려준다.
+            const pad2 = (n) => ("0" + n).slice(-2);
+            return `${year}-${pad2(month + 1)}-${pad2(day)} ${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
         } else {
             const parsed = new Date(timestamp);
             if (!isNaN(parsed.getTime())) date = parsed;
@@ -395,14 +413,7 @@ function formatTimestampToFriendly(timestamp) {
         date = new Date();
     }
     
-    const pad = (n) => ("0" + n).slice(-2);
-    const y = date.getFullYear();
-    const m = pad(date.getMonth() + 1);
-    const d = pad(date.getDate());
-    const h = pad(date.getHours());
-    const min = pad(date.getMinutes());
-    const s = pad(date.getSeconds());
-    return `${y}-${m}-${d} ${h}:${min}:${s}`;
+    return kstFormat(date);
 }
 
 exports.syncToGoogleSheetsOnCreate = onDocumentCreated(
@@ -596,10 +607,15 @@ exports.syncToGoogleSheetsOnUpdate = onDocumentUpdated(
                             //    미국식 날짜가 시트에 찍힌다 (2026-08-27 확인).
                             date: KST_STAMP.format(new Date()),
                             // ⚠️ 예전에는 imei 자리에 customerName 을 보냈다. 그래서 시트
-                            //    B열(원래 IMEI 칸)에 고객 이름이 들어갔다. 이제 따로 보낸다.
-                            //    시트 스크립트를 먼저 고친 뒤에 이 함수를 배포할 것.
+                            //    B열(원래 IMEI 칸)에 고객 이름이 들어갔다.
+                            //
+                            //    아래처럼 「옛 이름 + 새 이름」을 같이 보내면 시트 스크립트가
+                            //    옛 버전이든 새 버전이든 결과가 똑같이 나온다. 즉 배포 순서를
+                            //    지킬 필요가 없다. 시트 스크립트를 새 버전으로 바꾼 뒤에는
+                            //    아래 imei 줄만 지우면 된다. (2026-08-28)
+                            imei: after.customerName || '',   // 구버전 스크립트가 B열(이름)에 넣는 값
                             customerName: after.customerName || '',
-                            imei: after.imei || '',
+                            deviceImei: after.imei || '',     // 신버전 스크립트가 K열에 넣는 진짜 IMEI
                             model: `${after.brand || ''} ${after.model || ''}`.trim(),
                             storage: after.storage || '용량미상',
                             defects: defectsText
