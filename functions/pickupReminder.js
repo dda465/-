@@ -199,7 +199,7 @@ async function pickTargets(targetYmd) {
 
     const stat = {
         전체: docs.length, 대상: 0, 배차없음: 0, 삭제됨: 0, 방문수거아님: 0,
-        날짜다름: 0, 이미발송: 0, 이미집하됨: 0, 연락처없음: 0,
+        날짜다름: 0, 이미발송: 0, 이미집하됨: 0, 연락처없음: 0, 한사람묶음: 0,
         보조판정_pickupDate사용: 0, truncated
     };
     const targets = [];
@@ -233,7 +233,31 @@ async function pickTargets(targetYmd) {
         stat.대상++;
         targets.push({ id: doc.id, q, req });
     }
-    return { targets, stat };
+
+    // ─────────────────────────────────────────────────────────
+    // ★ 한 사람에게 두 번 보내지 않는다 (2026-08-28 사장님 지적)
+    // ─────────────────────────────────────────────────────────
+    //   고객이 폰을 여러 대 팔면 **한 대씩 따로 접수**한다. 그런데 수거는 한 번만 온다.
+    //   대부분은 배차도 한 건만 잡지만, 같은 번호·같은 수거일에 배차가 두 건인 경우가
+    //   최근 90일에 10건 있었다. 문서 단위로 보내면 같은 사람이 똑같은 문자를 두 통 받는다.
+    //
+    //   → 번호로 묶어 **한 통만** 보낸다.
+    //     보내지 않은 나머지 문서에도 발송 표시를 남겨야(sameAs) 다음 회차에 또 잡히지 않는다.
+    const byPhone = new Map();
+    for (const t of targets) {
+        const ph = String(t.q.customerPhone || "").replace(/[^0-9]/g, "");
+        if (!byPhone.has(ph)) byPhone.set(ph, []);
+        byPhone.get(ph).push(t);
+    }
+    const 대표 = [];
+    for (const [, list] of byPhone) {
+        const head = list[0];
+        head.sameAs = list.slice(1).map((x) => x.id);   // 같이 발송 표시만 남길 문서들
+        if (head.sameAs.length) stat.한사람묶음 += head.sameAs.length;
+        대표.push(head);
+    }
+    stat.대상 = 대표.length;
+    return { targets: 대표, stat };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -304,11 +328,20 @@ async function runPickupReminder({ dryRun = false, notify = true } = {}) {
 
         const r = await sendAlimtalk(TPL_NIGHT, t.q.customerPhone, vars);
         if (r.ok) {
+            const now = new Date();
             await db.collection("quotes").doc(t.id).update({
-                pickupReminderSentAt: new Date(),
+                pickupReminderSentAt: now,
                 pickupReminderFor: targetYmd
             });
-            보낸것.push(표시);
+            // 같은 사람의 나머지 건 — 문자는 안 갔지만 '한 통으로 갈음' 표시를 남긴다.
+            for (const otherId of (t.sameAs || [])) {
+                await db.collection("quotes").doc(otherId).update({
+                    pickupReminderSentAt: now,
+                    pickupReminderFor: targetYmd,
+                    pickupReminderMergedInto: t.id
+                });
+            }
+            보낸것.push(표시 + (t.sameAs && t.sameAs.length ? ` (+${t.sameAs.length}대 함께)` : ""));
         } else {
             // 3회까지만 재시도 — 잘못된 번호·수신거부처럼 영구 실패면 매일 무한 시도하게 된다.
             const tries = Number(t.q.pickupReminderTries || 0) + 1;
@@ -326,7 +359,8 @@ async function runPickupReminder({ dryRun = false, notify = true } = {}) {
         `📦 방문수거 전날 안내 (${targetYmd})\n` +
         (logOnly ? `\n⚠️ ${TPL_NIGHT ? "테스트 실행" : "템플릿 ID 미설정"} — 실제로는 아무것도 보내지 않았습니다.\n` : "") +
         `\n대상 ${stat.대상}건 · 발송 ${logOnly ? 0 : 보낸것.length}건 · 실패 ${실패.length}건\n` +
-        `제외: 배차없음 ${stat.배차없음} / 날짜다름 ${stat.날짜다름} / 이미발송 ${stat.이미발송}\n` +
+        `제외: 배차없음 ${stat.배차없음} / 날짜다름 ${stat.날짜다름} / 이미발송 ${stat.이미발송}` +
+        (stat.한사람묶음 ? ` / 같은사람묶음 ${stat.한사람묶음}` : "") + `\n` +
         (보낸것.length ? `\n${보낸것.slice(0, 30).join("\n")}\n` : "") +
         (보낸것.length > 30 ? `…외 ${보낸것.length - 30}건\n` : "") +
         (실패.length ? `\n❌ 실패\n${실패.slice(0, 10).join("\n")}\n` : "");
