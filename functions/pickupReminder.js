@@ -48,7 +48,6 @@
 // ════════════════════════════════════════════════════════════════
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 if (!admin.apps.length) admin.initializeApp();
 
@@ -388,37 +387,24 @@ exports.pickupReminderBot = onSchedule(
     async () => { await runPickupReminder(); }
 );
 
-// ── 미리보기 ──────────────────────────────────────────────────
-// 언제든 눌러서 "지금 기준 내일 대상이 누구인지" 확인할 수 있다.  ?key=<열쇠>
+// ── 미리보기 (2026-08-28 배포에서 뺐다) ─────────────────────────
 //
-// ⚠️ 이 주소는 **절대 발송하지 않는다.** 로그·응답만 만든다.
-//    (발송까지 되게 하면 주소를 아는 누구나 고객에게 문자를 쏠 수 있고 건당 요금이 나간다)
+// 원래 여기에 pickupReminderPreview 라는 조회용 주소가 있었다. 배포하려니
+// 이렇게 막혔다:
 //
-// ⚠️ 처음 배포하면 403 이 날 수 있다. `invoker: "public"` 을 코드에 써도
-//    Cloud Run 권한이 자동으로 붙지 않는 경우가 있다 (2026-08-26 m360 때 겪음).
-//    그때는 Cloud Shell 에서 아래 한 줄:
-//      gcloud functions add-invoker-policy-binding pickupReminderPreview \\
-//        --region=asia-northeast3 --member=allUsers
-const PREVIEW_KEY = (process.env.PICKUP_REMINDER_PREVIEW_KEY || "").trim();
-exports.pickupReminderPreview = onRequest(
-    { region: REGION, invoker: "public" },
-    async (req, res) => {
-        // 열쇠를 안 정해두면 아예 동작하지 않는다. (주소만 알면 누구나 조회를 돌릴 수 있으므로)
-        if (!PREVIEW_KEY) {
-            return res.status(503).json({
-                ok: false,
-                error: "PICKUP_REMINDER_PREVIEW_KEY 가 .env 에 없습니다. 아무 문자열이나 정해 넣고 배포하세요."
-            });
-        }
-        if (String(req.query.key || "") !== PREVIEW_KEY) {
-            return res.status(403).json({ ok: false, error: "key 가 맞지 않습니다." });
-        }
-        try {
-            const r = await runPickupReminder({ dryRun: true, notify: false });
-            res.json({ ok: true, 발송함: false, ...r });
-        } catch (e) {
-            console.error("[전날안내] 미리보기 실패:", e);
-            res.status(500).json({ ok: false, error: e.message });
-        }
-    }
-);
+//   Error: Missing required permission on project rejeuphone to deploy new
+//   HTTPS functions. The permission cloudfunctions.functions.setIamPolicy is
+//   required to deploy the following functions: - pickupReminderPreview
+//
+// 배포에 쓰는 계정에 「Cloud Functions 관리자」 권한이 없어서 **새 HTTPS 함수**를
+// 못 만든다. (이미 있는 alimtalkApi 같은 것들은 새로 만드는 게 아니라 그대로 배포된다)
+//
+// 권한을 받아 되살릴 수도 있지만, 이 주소는 없어도 되는 것이라 그냥 뺐다.
+//   · 대상 조회는 관리자 화면에서 직접 Firestore 를 읽어도 되고
+//   · 밖에서 접근 가능한 주소가 하나 줄어드는 편이 낫다
+//
+// 되살리려면 커밋 e9478d5 에 코드가 그대로 있고, 그 전에 아래 권한이 필요하다:
+//   https://console.cloud.google.com/iam-admin/iam?project=rejeuphone
+//   → 배포 계정에 "Cloud Functions 관리자" 부여
+//
+// 배포되는 것은 pickupReminderBot(스케줄러) 하나뿐이다.
