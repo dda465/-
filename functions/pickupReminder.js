@@ -58,7 +58,10 @@ const REGION = "asia-northeast3";
 // 카카오 승인 후 .env 에 넣으면 그때부터 실제로 나간다.
 // 비어 있으면 로그만 남기고 아무것도 보내지 않는다. 둘은 문구가 다르므로 템플릿도 둘이다.
 const TPL_NIGHT = (process.env.ALIMTALK_TPL_PICKUP_REMINDER || "").trim();        // "내일 방문합니다"
-const TPL_MORNING = (process.env.ALIMTALK_TPL_PICKUP_REMINDER_AM || "").trim();   // "오늘 방문합니다"
+
+// ※ 당일 아침 보완 발송은 만들었다가 **뺐다** (2026-08-28 사장님 결정).
+//   전날 밤 안내로 충분하고, 다음날은 미집하가 떴을 때만 연락하면 된다는 판단.
+//   되살릴 일이 있으면 커밋 8d6b5d8 에 그대로 있다.
 
 // ─────────────────────────────────────────────────────────────
 // ★ 왜 21시가 아니라 22시 10분인가 (2026-08-28 실측)
@@ -90,11 +93,6 @@ const hourOf = (v, dflt) => {
 };
 const NIGHT_HOUR = hourOf(process.env.PICKUP_REMINDER_HOUR, 21);
 const NIGHT_MIN = 40;
-const MORNING_HOUR = hourOf(process.env.PICKUP_REMINDER_AM_HOUR, 8);
-
-// 아침 발송 대상 — 기본은 '밤에 못 보낸 건만'.
-// .env 에 PICKUP_REMINDER_AM_ALL=1 을 넣으면 밤에 받은 사람에게도 한 번 더 보낸다.
-const MORNING_ALL = String(process.env.PICKUP_REMINDER_AM_ALL || "") === "1";
 
 // 텔레그램 — 기존 '쉐라폰비서' 봇을 그대로 쓴다 (index.js 와 같은 수신자)
 const TG_TOKEN = process.env.TELEGRAM_DAILY_BOT_TOKEN || "";
@@ -180,7 +178,7 @@ const TARGET_STATUSES = ["신청접수", "수거중"];
 const PAGE = 300;
 const MAX_PAGES = 40;
 
-async function pickTargets(targetYmd, { kind }) {
+async function pickTargets(targetYmd) {
     const db = admin.firestore();
     const docs = [];
     let cursor = null, pages = 0, truncated = false;
@@ -201,7 +199,7 @@ async function pickTargets(targetYmd, { kind }) {
 
     const stat = {
         전체: docs.length, 대상: 0, 배차없음: 0, 삭제됨: 0, 방문수거아님: 0,
-        날짜다름: 0, 이미발송: 0, 밤에받음: 0, 이미집하됨: 0, 연락처없음: 0,
+        날짜다름: 0, 이미발송: 0, 이미집하됨: 0, 연락처없음: 0,
         보조판정_pickupDate사용: 0, truncated
     };
     const targets = [];
@@ -216,13 +214,7 @@ async function pickTargets(targetYmd, { kind }) {
         if (q.deliveryMethod !== "courier") { stat.방문수거아님++; continue; }
         if (!q.goodsflowOrderNo) { stat.배차없음++; continue; }
         if (q.pickedUpAt || q.arrivedAt) { stat.이미집하됨++; continue; }
-        // 밤 발송은 pickupReminderSentAt, 아침 발송은 pickupReminderAmSentAt 로 따로 센다.
-        if (kind === "night" && q.pickupReminderSentAt) { stat.이미발송++; continue; }
-        if (kind === "morning") {
-            if (q.pickupReminderAmSentAt) { stat.이미발송++; continue; }
-            // 기본값: 밤에 이미 안내받은 사람에게는 또 보내지 않는다.
-            if (!MORNING_ALL && q.pickupReminderSentAt) { stat.밤에받음++; continue; }
-        }
+        if (q.pickupReminderSentAt) { stat.이미발송++; continue; }
 
         const req = String(q.goodsflowPickupRequestDateTime || "").trim();
         let hit = false, viaFallback = false;
@@ -258,8 +250,6 @@ async function pickTargets(targetYmd, { kind }) {
 // ─────────────────────────────────────────────────────────────
 const VARS_NIGHT = (process.env.ALIMTALK_TPL_PICKUP_REMINDER_VARS || "")
     .split(",").map((v) => v.trim()).filter(Boolean);
-const VARS_MORNING = (process.env.ALIMTALK_TPL_PICKUP_REMINDER_AM_VARS || "")
-    .split(",").map((v) => v.trim()).filter(Boolean);
 
 function buildVariables(q, req, allow) {
     const day = req ? new Date(req.replace(" ", "T") + ":00+09:00") : null;
@@ -288,63 +278,55 @@ function buildVariables(q, req, allow) {
 }
 
 // ── 본체 ──────────────────────────────────────────────────────
-// kind = "night"  : 오늘 밤 22:10 → **내일** 수거 예정건에 "내일 방문합니다"
-// kind = "morning": 아침 08:00  → **오늘** 수거 예정건에 "오늘 방문합니다"
-//                   기본은 밤에 못 보낸 건만 (21시 이후 배차분 등 누락 보완)
-async function runPickupReminder({ kind = "night", dryRun = false, notify = true } = {}) {
+// 오늘 밤 21:40 → **내일** 수거 예정건에 "내일 방문합니다" 안내 1회.
+async function runPickupReminder({ dryRun = false, notify = true } = {}) {
     const db = admin.firestore();
-    const tpl = kind === "night" ? TPL_NIGHT : TPL_MORNING;
-    const offsetMs = kind === "night" ? 24 * 3600000 : 0;
-    const targetYmd = ymdKst(new Date(Date.now() + offsetMs));
-    const 이름 = kind === "night" ? "전날 밤 안내" : "당일 아침 안내";
-
-    const { targets, stat } = await pickTargets(targetYmd, { kind });
+    const targetYmd = ymdKst(new Date(Date.now() + 24 * 3600000));   // 내일(한국시간)
+    const { targets, stat } = await pickTargets(targetYmd);
 
     // 템플릿이 없으면 무조건 로그만. (카카오 승인 대기 중 확인용)
-    const logOnly = dryRun || !tpl;
+    const logOnly = dryRun || !TPL_NIGHT;
 
-    console.log(`[${이름}] 대상일 ${targetYmd} · ${logOnly ? "로그만(발송 안 함)" : "실발송"} · ${JSON.stringify(stat)}`);
+    console.log(`[전날안내] 대상일 ${targetYmd} · ${logOnly ? "로그만(발송 안 함)" : "실발송"} · ${JSON.stringify(stat)}`);
 
     if (stat.truncated) {
         // 여기 걸리면 실제로 누락이 생긴 것이다. 조용히 넘어가면 안 된다.
-        console.error(`[${이름}] ⚠️ 대상이 ${MAX_PAGES * PAGE}건을 넘어 일부를 보지 못했다. 못 본 건은 안내가 나가지 않는다.`);
-        if (notify) await sendTelegram(`⚠️ ${이름}: 조회 상한 초과로 일부 건을 보지 못했습니다. 코드 확인 필요.`);
+        console.error(`[전날안내] ⚠️ 대상이 ${MAX_PAGES * PAGE}건을 넘어 일부를 보지 못했다. 못 본 건은 안내가 나가지 않는다.`);
+        if (notify) await sendTelegram("⚠️ 전날안내: 조회 상한 초과로 일부 건을 보지 못했습니다. 코드 확인 필요.");
     }
 
     const 보낸것 = [], 실패 = [];
     for (const t of targets) {
-        const vars = buildVariables(t.q, t.req, kind === "night" ? VARS_NIGHT : VARS_MORNING);
-        const full = buildVariables(t.q, t.req);   // 로그용 — 고른 것과 무관하게 전부
-        const 표시 = `${t.q.customerName || t.id} ${maskPhone(t.q.customerPhone)} / ${full["#{기종}"]} / ${full["#{수거일}"]} ${full["#{수거시각}"]}`;
+        const full = buildVariables(t.q, t.req);                 // 로그용 — 고른 것과 무관하게 전부
+        const vars = buildVariables(t.q, t.req, VARS_NIGHT);     // 실제 발송용
+        const 표시 = `${t.q.customerName || t.id} ${maskPhone(t.q.customerPhone)} / ${full["#{기종}"]} / ${full["#{수거일}"]}`;
         if (logOnly) { 보낸것.push("(로그) " + 표시); continue; }
 
-        const r = await sendAlimtalk(tpl, t.q.customerPhone, vars);
-        const sentField = kind === "night" ? "pickupReminderSentAt" : "pickupReminderAmSentAt";
-        const triesField = kind === "night" ? "pickupReminderTries" : "pickupReminderAmTries";
-        const errField = kind === "night" ? "pickupReminderError" : "pickupReminderAmError";
-
+        const r = await sendAlimtalk(TPL_NIGHT, t.q.customerPhone, vars);
         if (r.ok) {
             await db.collection("quotes").doc(t.id).update({
-                [sentField]: new Date(),
+                pickupReminderSentAt: new Date(),
                 pickupReminderFor: targetYmd
             });
             보낸것.push(표시);
         } else {
             // 3회까지만 재시도 — 잘못된 번호·수신거부처럼 영구 실패면 매일 무한 시도하게 된다.
-            const tries = Number(t.q[triesField] || 0) + 1;
-            const patch = { [triesField]: tries, [errField]: String(r.why || r.body || "발송 실패").slice(0, 200) };
-            if (tries >= 3) patch[sentField] = new Date(); // 포기
+            const tries = Number(t.q.pickupReminderTries || 0) + 1;
+            const patch = {
+                pickupReminderTries: tries,
+                pickupReminderError: String(r.why || r.body || "발송 실패").slice(0, 200)
+            };
+            if (tries >= 3) patch.pickupReminderSentAt = new Date(); // 포기
             await db.collection("quotes").doc(t.id).update(patch);
-            실패.push(`${표시} — ${patch[errField]}`);
+            실패.push(`${표시} — ${patch.pickupReminderError}`);
         }
     }
 
     const 요약 =
-        `📦 ${이름} (${targetYmd})\n` +
-        (logOnly ? `\n⚠️ ${tpl ? "테스트 실행" : "템플릿 ID 미설정"} — 실제로는 아무것도 보내지 않았습니다.\n` : "") +
+        `📦 방문수거 전날 안내 (${targetYmd})\n` +
+        (logOnly ? `\n⚠️ ${TPL_NIGHT ? "테스트 실행" : "템플릿 ID 미설정"} — 실제로는 아무것도 보내지 않았습니다.\n` : "") +
         `\n대상 ${stat.대상}건 · 발송 ${logOnly ? 0 : 보낸것.length}건 · 실패 ${실패.length}건\n` +
-        `제외: 배차없음 ${stat.배차없음} / 날짜다름 ${stat.날짜다름} / 이미발송 ${stat.이미발송}` +
-        (kind === "morning" ? ` / 밤에받음 ${stat.밤에받음}` : "") + `\n` +
+        `제외: 배차없음 ${stat.배차없음} / 날짜다름 ${stat.날짜다름} / 이미발송 ${stat.이미발송}\n` +
         (보낸것.length ? `\n${보낸것.slice(0, 30).join("\n")}\n` : "") +
         (보낸것.length > 30 ? `…외 ${보낸것.length - 30}건\n` : "") +
         (실패.length ? `\n❌ 실패\n${실패.slice(0, 10).join("\n")}\n` : "");
@@ -353,26 +335,18 @@ async function runPickupReminder({ kind = "night", dryRun = false, notify = true
     // 조용히 지나가지 않는다 — 실패가 있거나, 템플릿이 없는데 보낼 대상이 있으면 알린다.
     if (notify && (실패.length || (logOnly && stat.대상 > 0))) await sendTelegram(요약);
 
-    return { kind, targetYmd, logOnly, stat, sent: logOnly ? 0 : 보낸것.length, failed: 실패.length };
+    return { targetYmd, logOnly, stat, sent: logOnly ? 0 : 보낸것.length, failed: 실패.length };
 }
 
 // ── 스케줄 ────────────────────────────────────────────────────
-// ① 전날 밤 — 한진 익일수거 마감(22:00) 이후라야 그날 배차가 다 끝나 누락이 없다.
+// 전날 밤 21:40 — 홈페이지 접수 마감(21:30) 직후.
 exports.pickupReminderBot = onSchedule(
     { schedule: `${NIGHT_MIN} ${NIGHT_HOUR} * * *`, timeZone: "Asia/Seoul", region: REGION },
-    async () => { await runPickupReminder({ kind: "night" }); }
-);
-
-// ② 당일 아침 — 기사 방문(13시) 전. 기본은 밤에 못 보낸 건만 보낸다.
-exports.pickupReminderAmBot = onSchedule(
-    { schedule: `0 ${MORNING_HOUR} * * *`, timeZone: "Asia/Seoul", region: REGION },
-    async () => { await runPickupReminder({ kind: "morning" }); }
+    async () => { await runPickupReminder(); }
 );
 
 // ── 미리보기 ──────────────────────────────────────────────────
-// 언제든 눌러서 "지금 기준 대상이 누구인지" 확인할 수 있다.
-//   ?key=<열쇠>            밤 발송 대상(내일 수거건)
-//   ?key=<열쇠>&kind=morning  아침 발송 대상(오늘 수거건)
+// 언제든 눌러서 "지금 기준 내일 대상이 누구인지" 확인할 수 있다.  ?key=<열쇠>
 //
 // ⚠️ 이 주소는 **절대 발송하지 않는다.** 로그·응답만 만든다.
 //    (발송까지 되게 하면 주소를 아는 누구나 고객에게 문자를 쏠 수 있고 건당 요금이 나간다)
@@ -397,8 +371,7 @@ exports.pickupReminderPreview = onRequest(
             return res.status(403).json({ ok: false, error: "key 가 맞지 않습니다." });
         }
         try {
-            const kind = req.query.kind === "morning" ? "morning" : "night";
-            const r = await runPickupReminder({ kind, dryRun: true, notify: false });
+            const r = await runPickupReminder({ dryRun: true, notify: false });
             res.json({ ok: true, 발송함: false, ...r });
         } catch (e) {
             console.error("[전날안내] 미리보기 실패:", e);
