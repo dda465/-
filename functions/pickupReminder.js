@@ -269,18 +269,28 @@ async function pickTargets(targetYmd) {
 //   → 템플릿에 안 쓴 변수를 같이 보내면 **그 건은 안 나간다.**
 //
 //   그래서 .env 로 쓸 변수만 고를 수 있게 했다. 이름은 #{} 없이 쉼표로.
-//     ALIMTALK_TPL_PICKUP_REMINDER_VARS=고객성함,수거일,수거시각
-//   비워두면 아래 6개를 전부 보낸다(템플릿이 6개를 다 쓸 때만 성공).
+//     ALIMTALK_TPL_PICKUP_REMINDER_VARS=고객성함,방문수거일자,고객주소
+//
+//   ★ 2026-08-28 승인된 템플릿(KA01TP260820074854691yiXxJSHKEga)이 쓰는 변수는
+//     고객성함 / 방문수거일자 / 고객주소  세 개다. 그래서 그게 기본값이다.
+//     기종·택배사는 만들어는 두되 기본으로는 보내지 않는다(보내면 발송 실패).
 // ─────────────────────────────────────────────────────────────
-const VARS_NIGHT = (process.env.ALIMTALK_TPL_PICKUP_REMINDER_VARS || "")
-    .split(",").map((v) => v.trim()).filter(Boolean);
+const DEFAULT_VARS = ["고객성함", "방문수거일자", "고객주소"];
+const VARS_NIGHT = (() => {
+    const v = (process.env.ALIMTALK_TPL_PICKUP_REMINDER_VARS || "")
+        .split(",").map((x) => x.trim()).filter(Boolean);
+    return v.length ? v : DEFAULT_VARS;
+})();
 
 function buildVariables(q, req, allow) {
     const day = req ? new Date(req.replace(" ", "T") + ":00+09:00") : null;
     const all = {
+        // ── 승인 템플릿이 실제로 쓰는 세 개 ──
         "#{고객성함}": q.customerName || "고객",
+        "#{방문수거일자}": day ? LABEL_KST.format(day) : (q.pickupDate || "-"),
+        "#{고객주소}": q.customerAddress || "-",
+        // ── 아래는 예비. 템플릿에 없으면 보내면 안 된다 ──
         "#{기종}": `${q.brand || ""} ${q.model || ""}`.trim() || "-",
-        "#{수거일}": day ? LABEL_KST.format(day) : (q.pickupDate || "-"),
         // ⚠️⚠️ 방문 시각을 문구에 넣지 말 것 (2026-08-28 사장님 확인)
         //    이 값은 우리가 굿스플로에 **요청한** 시각(전건 13:00)일 뿐,
         //    기사가 실제로 오는 시각이 아니다. 새벽에 오는 경우가 실제로 있다.
@@ -288,7 +298,6 @@ function buildVariables(q, req, allow) {
         //    → 안내는 **"오늘 밤 안에 내놔주세요"** 로 가야 한다.
         //    변수는 남겨두되 템플릿에는 넣지 않는 것을 권한다.
         "#{수거시각}": hhmmToKorean(req) || "-",
-        "#{수거주소}": q.customerAddress || "-",
         "#{택배사}": q.goodsflowTransporter || "-"
     };
     if (!allow || !allow.length) return all;
@@ -323,7 +332,7 @@ async function runPickupReminder({ dryRun = false, notify = true } = {}) {
     for (const t of targets) {
         const full = buildVariables(t.q, t.req);                 // 로그용 — 고른 것과 무관하게 전부
         const vars = buildVariables(t.q, t.req, VARS_NIGHT);     // 실제 발송용
-        const 표시 = `${t.q.customerName || t.id} ${maskPhone(t.q.customerPhone)} / ${full["#{기종}"]} / ${full["#{수거일}"]}`;
+        const 표시 = `${t.q.customerName || t.id} ${maskPhone(t.q.customerPhone)} / ${full["#{기종}"]} / ${full["#{방문수거일자}"]}`;
         if (logOnly) { 보낸것.push("(로그) " + 표시); continue; }
 
         const r = await sendAlimtalk(TPL_NIGHT, t.q.customerPhone, vars);
