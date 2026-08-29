@@ -736,7 +736,10 @@
 
 
         .step-text {
-            font-size: 0.72rem;
+            /* 2026-08-29 기준글자 13px 로 내리면서 rem 이라 같이 줄어들었다.
+               「접수-수거-검수-정산」은 고객이 마이페이지를 여는 이유라서
+               px 로 고정한다. (0.72rem → 9.4px / 0.65rem → 8.4px 이었다) */
+            font-size: 11px;
             color: #999;
             font-weight: 500;
             word-break: keep-all;
@@ -746,7 +749,7 @@
             letter-spacing: -0.3px;
         }
         @media (max-width: 420px) {
-            .step-text { font-size: 0.65rem; letter-spacing: -0.5px; }
+            .step-text { font-size: 10px; letter-spacing: -0.5px; }
         }
 
 
