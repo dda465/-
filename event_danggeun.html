@@ -389,6 +389,11 @@
             gap: 8px;
             box-shadow: 0 4px 15px rgba(255, 111, 15, 0.3);
             transition: all 0.3s ease;
+            /* 390px 에서 「혜택 받 / 기」로 낱말 중간이 끊겼다 (2026-08-29). */
+            word-break: keep-all;
+        }
+        @media (max-width: 768px) {
+            .bottom-cta-btn { font-size: 0.9rem; padding: 14px 16px; }
         }
 
         .bottom-cta-btn:hover {
