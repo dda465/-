@@ -2068,3 +2068,63 @@ footer {
 @media (min-width: 769px) {
     .mobile-only { display: none !important; }
 }
+
+/* ──────────────────────────────────────────────────────────────
+   모바일 기준 글자 크기 (2026-08-29, 사장님 요청)
+   "모바일로 볼 때 글자가 너무 커서 정보를 한 번에 많이 못 본다"
+
+   이 사이트 글자 대부분이 rem 단위라 html 의 기준값 하나만 내리면
+   본문·제목·여백이 같은 비율로 함께 줄어든다. 페이지마다 손댈 필요가 없다.
+   16px → 13px (-19%).
+   실측(390px): 택배발송안내 2570→2028px, 마이페이지 1696→1540px,
+                자주묻는질문 3359→3071px.
+
+   ⚠ 메인 홈페이지(index.html)는 제외다. <html class="mobile-base-16"> 이
+     붙어 있으면 16px 를 유지한다. 히어로 배너가 이미 모바일 전용으로
+     따로 맞춰져 있어서 같이 줄이면 어긋난다.
+   ⚠ px 로 하드코딩된 글자는 이 규칙으로 안 줄어든다. 새로 만들 때는
+     되도록 rem 으로 쓰자.
+   ────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    html { font-size: 13px; }
+    html.mobile-base-16 { font-size: 16px; }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   위의 13px 축소에서 빼는 것들 (2026-08-29)
+
+   기준값을 내리면 본문·제목은 잘 줄어드는데, 원래부터 작던 UI 글자는
+   같이 줄어서 못 읽을 크기가 된다. 실측으로 걸러낸 것만 px 로 고정한다.
+     · 헤더 「판매하기 / 로그인」  12px → 9.8px  (가장 중요한 버튼이다)
+     · 접수 페이지 신뢰 문구        11.8px → 9.6px
+   푸터 사업자·인증 문구(12.8→10.4px)은 그대로 둔다. 원래 읽는 글이 아니고
+   이 정도 크기는 다른 쇼핑몰들도 쓴다.
+   ────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* 이 버튼들은 태그 안에 style="font-size:0.8rem" 이 직접 박혀 있다.
+       클래스가 없어서 .btn 으로는 안 잡힌다. 부모(.mobile-only)로 잡는다. */
+    html:not(.mobile-base-16) nav.navbar .mobile-only a,
+    html:not(.mobile-base-16) nav.navbar .btn,
+    html:not(.mobile-base-16) nav.navbar .nav-links a,
+    html:not(.mobile-base-16) nav.navbar .nav-links span { font-size: 12px !important; }
+
+    /* 「로그인」은 40여 개 페이지가 각자 <style> 안에
+       `.navbar .mobile-only a#mobile-auth-link { font-size: 0.75rem !important }`
+       를 들고 있다. id 가 들어 있어 위 규칙보다 우선순위가 높다.
+       페이지 40개를 고치는 대신 여기서 id 를 같이 써서 이긴다. */
+    html:not(.mobile-base-16) nav.navbar .mobile-only a#mobile-auth-link { font-size: 12px !important; }
+
+    /* 언어 선택 — 23px 도 원래 작았는데 19px 까지 내려가면 못 누른다 */
+    html:not(.mobile-base-16) nav.navbar select { min-height: 26px; font-size: 12px !important; }
+
+    /* 손가락으로 누르는 칩은 40px 밑으로 내려가지 않게 한다 (단가표 전체/애플/삼성) */
+    html:not(.mobile-base-16) .filter-btn,
+    html:not(.mobile-base-16) .pl-brand-tab { min-height: 40px; }
+
+    /* 접수 진행 표시(브랜드-시리즈-모델-용량-접수). 9.9px 도 원래 작았는데
+       8.1px 이면 어느 단계인지 못 읽는다. */
+    html:not(.mobile-base-16) .wiz-step-label { font-size: 10px !important; }
+
+    html:not(.mobile-base-16) .quote-trust-row .qt-d { font-size: 11px !important; }
+    html:not(.mobile-base-16) .quote-trust-row .qt-t { font-size: 12.5px !important; }
+}
