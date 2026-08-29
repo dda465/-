@@ -285,6 +285,24 @@
             .benefit-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
+
+<style>
+/* 제외 조항 강조 — 다른 유의사항보다 눈에 띄어야 하는 문구 (2026-08-29)
+   페이지마다 목록 스타일이 달라(점 ·, 기본 불릿) 마커를 전부 지운다. */
+li.event-exclusion {
+    list-style: none !important;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    border-left: 4px solid #F59E0B;
+    border-radius: 8px;
+    padding: 13px 15px !important;
+    margin: 12px 0 4px -20px;
+    color: #7C2D12 !important;
+    font-weight: 700;
+    line-height: 1.65;
+}
+li.event-exclusion::before, li.event-exclusion::marker { content: none !important; }
+</style>
 </head>
 <body>
 
@@ -450,7 +468,7 @@
             <ul class="terms-list">
                 <li>본 이벤트는 아이폰 8 시리즈부터 17 시리즈까지의 모델 및 SE 모델을 판매하시는 고객님을 대상으로 진행됩니다. (갤럭시 등 타 제조사 기종은 본 이벤트 대상에서 제외됩니다.)</li>
                 <li>특별 혜택 보너스는 정상 매입 처리 및 최종 정산금액 동의가 완료된 기기에 한하여 지급됩니다.</li>
-                <li>매입 불가(도난, 분실, 계정 잠김, 전원 불가 등) 또는 부품용/폐폰 매입 대상 기기는 본 이벤트 혜택 적용 대상에서 제외됩니다.</li>
+                <li class="event-exclusion">정상 매입 거래가 완료된 기기에 한하여 지급되며, <u>최종 견적가 3만원 이하</u>이거나 매입 불가(도난·분실·계정 잠김·전원 불가 등) 또는 부품용/폐폰 매입 대상 기기는 본 이벤트에서 제외됩니다.</li>
                 <li>본 이벤트는 쉐라폰에서 진행하는 당근마켓 유입 보너스 등 타 이벤트 및 혜택 쿠폰과 중복 적용되지 않으며, 고객님께 가장 유리한 혜택 하나만 최종 적용되어 정산됩니다.</li>
                 <li>본 이벤트는 내부 사정에 의해 조기 종료되거나 변경될 수 있으며, 종료 시 홈페이지를 통해 사전 공지됩니다. (현재 진행 기간: 별도 공지 시까지)</li>
             </ul>

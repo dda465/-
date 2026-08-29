@@ -422,6 +422,24 @@
             .bottom-cta-btn { font-size: 1rem; padding: 14px 20px; }
         }
     </style>
+
+<style>
+/* 제외 조항 강조 — 다른 유의사항보다 눈에 띄어야 하는 문구 (2026-08-29)
+   페이지마다 목록 스타일이 달라(점 ·, 기본 불릿) 마커를 전부 지운다. */
+li.event-exclusion {
+    list-style: none !important;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    border-left: 4px solid #F59E0B;
+    border-radius: 8px;
+    padding: 13px 15px !important;
+    margin: 12px 0 4px -20px;
+    color: #7C2D12 !important;
+    font-weight: 700;
+    line-height: 1.65;
+}
+li.event-exclusion::before, li.event-exclusion::marker { content: none !important; }
+</style>
 </head>
 <body>
 
@@ -532,7 +550,8 @@
             <h4><i class="ri-information-line"></i> 이벤트 유의사항</h4>
             <ul>
                 <li>추가 금액 구간은 <strong>검수 완료 후 확정된 최종 매입가</strong>를 기준으로 적용됩니다. 홈페이지에서 조회되는 예상 매입가와 최종 매입가는 기기 상태에 따라 달라질 수 있습니다.</li>
-                <li>정상 작동하는 <strong>모든 스마트폰 기종</strong>에 적용됩니다. 다만 <strong>최종 매입가가 1만원 미만인 폐폰 및 매입 불가 판정 기기는 지급 대상에서 제외</strong>됩니다.</li>
+                <li>정상 작동하는 <strong>모든 스마트폰 기종</strong>에 적용됩니다.</li>
+                <li class="event-exclusion">정상 매입 거래가 완료된 기기에 한하여 지급되며, <u>최종 견적가 3만원 이하</u>이거나 매입 불가(도난·분실·계정 잠김·전원 불가 등) 또는 부품용/폐폰 매입 대상 기기는 본 이벤트에서 제외됩니다.</li>
                 <li>당근마켓 전용 채널 이벤트 등 <strong>타 혜택과 중복 적용이 불가</strong>합니다.</li>
                 <li>추가 금액은 별도 신청 없이 최종 매입 대금 송금 시 함께 합산하여 지급됩니다.</li>
                 <li>매입 대금 및 추가 금액은 도난 · 분실폰 방지를 위해 반드시 <strong>접수자 본인 명의의 계좌</strong>로만 입금 가능합니다.</li>

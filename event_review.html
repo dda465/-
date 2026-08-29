@@ -457,6 +457,24 @@
             .navbar .mobile-only { gap: 0 !important; }
         }
     </style>
+
+<style>
+/* 제외 조항 강조 — 다른 유의사항보다 눈에 띄어야 하는 문구 (2026-08-29)
+   페이지마다 목록 스타일이 달라(점 ·, 기본 불릿) 마커를 전부 지운다. */
+li.event-exclusion {
+    list-style: none !important;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    border-left: 4px solid #F59E0B;
+    border-radius: 8px;
+    padding: 13px 15px !important;
+    margin: 12px 0 4px -20px;
+    color: #7C2D12 !important;
+    font-weight: 700;
+    line-height: 1.65;
+}
+li.event-exclusion::before, li.event-exclusion::marker { content: none !important; }
+</style>
 </head>
 
 <body>
@@ -603,6 +621,7 @@
                 <li>허위 또는 부적절한 내용의 후기는 보너스 지급 대상에서 제외될 수 있습니다.</li>
                 <li>이벤트 참여 신청 및 후기 전송 확인 후 영업일 기준 1~2일 이내 송금됩니다.</li>
                 <li>본 이벤트는 사전 고지 없이 변경 또는 종료될 수 있습니다.</li>
+                <li class="event-exclusion">정상 매입 거래가 완료된 기기에 한하여 지급되며, <u>최종 견적가 3만원 이하</u>이거나 매입 불가(도난·분실·계정 잠김·전원 불가 등) 또는 부품용/폐폰 매입 대상 기기는 본 이벤트에서 제외됩니다.</li>
             </ul>
         </div>
     </div>
