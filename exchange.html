@@ -284,8 +284,21 @@
             box-shadow: 0 8px 25px rgba(255, 111, 15, 0.08);
         }
         .danggeun-perk-icon { font-size: 1.5rem; margin-bottom: 6px; display: block; }
+        /* 당근 혜택 카드 아이콘 (2026-08-29) — carrot/phones/gift _3d 이미지였다.
+           1024px AI 렌더를 36px 로 줄여 쓰고 있었고, 배경이 투명이 아니라 흰 네모가
+           그대로 보였다. 셋의 그림체도 제각각이었다. 코드로 다시 그려 통일. */
+        .dg-ico { width: 36px; height: 36px; display: block; }
+        /* 좁은 PC(1024px 등)에서 「최대 +20,000원 추 / 가」처럼 단어 중간이 끊겼다.
+           한글은 keep-all 이라야 낱말 단위로 넘어간다. 좁은 구간에서는 여백·글자도 줄인다. */
+        .danggeun-perk-label, .danggeun-perk-value { word-break: keep-all; }
         .danggeun-perk-label { font-size: 0.75rem; color: #64748B; margin-bottom: 2px; }
         .danggeun-perk-value { font-weight: 700; font-size: 0.9rem; color: #0F172A; }
+        @media (min-width: 769px) and (max-width: 1180px) {
+            .danggeun-perks { gap: 8px; }
+            .danggeun-perk-card { padding: 12px 12px; }
+            .danggeun-perk-label { font-size: 0.7rem; }
+            .danggeun-perk-value { font-size: 0.82rem; }
+        }
         /* CTA */
         .danggeun-cta-row { display: flex; gap: 12px; align-items: center; }
         .danggeun-btn-primary {
@@ -349,7 +362,8 @@
             .danggeun-perks { display: none !important; }
             .danggeun-cta-row { display: none !important; }
             .danggeun-event-period { display: none !important; }
-            .danggeun-event-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 138, 61, 0.05)); border: 1px solid rgba(255, 111, 15, 0.3); color: #FF8A3D; font-weight: 700; font-size: 0.65rem; padding: 2px 7px; border-radius: 12px; margin-bottom: 6px; }
+            /* 모바일에서 「위한 특 / 별 혜택」처럼 낱말 중간이 끊겼다 (2026-08-29). */
+            .danggeun-event-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 138, 61, 0.05)); border: 1px solid rgba(255, 111, 15, 0.3); color: #FF8A3D; font-weight: 700; font-size: 0.65rem; padding: 2px 7px; border-radius: 12px; margin-bottom: 6px; word-break: keep-all; line-height: 1.45; }
             .danggeun-hero-image { width: 105px !important; flex-shrink: 0; }
             .danggeun-phone-showcase img { max-height: 95px !important; }
             .danggeun-floating-bonus {
@@ -798,17 +812,17 @@ window.addEventListener('load', function() {
                             <!-- 이벤트 혜택 카드 -->
                             <div class="danggeun-perks">
                                 <div class="danggeun-perk-card">
-                                    <span class="danggeun-perk-icon"><img src="carrot_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="당근"></span>
+                                    <span class="danggeun-perk-icon"><svg class="dg-ico" viewBox="0 0 36 36" aria-label="당근" role="img"><rect width="36" height="36" rx="11" fill="#FF6F0F" opacity="0.10"/><path d="M18 30.5C16.2 26 13.4 19.6 12.9 15.6c2.6-1.5 7.6-1.5 10.2 0-.5 4-3.3 10.4-5.1 14.9z" fill="#FF6F0F"/><path d="M18 30.5c-1.8-4.5-4.6-10.9-5.1-14.9 1.3-.75 3.2-1.15 5.1-1.2z" fill="#000" opacity="0.10"/><path d="M18 14.2c-.6-2.2.1-4.4 1.7-5.7 1 1.7 1 3.9-.1 5.6z" fill="#16A34A"/><path d="M17.4 14.3c-1.6-1.7-2.1-3.9-1.3-5.8 1.7 1 2.7 3 2.5 5z" fill="#22C55E"/><path d="M20 14.6c1.3-1.6 3.3-2.3 5.1-1.9-.8 1.7-2.5 2.9-4.4 3.1z" fill="#16A34A"/></svg></span>
                                     <div class="danggeun-perk-label">유입 특별 보너스</div>
                                     <div class="danggeun-perk-value">최대 +20,000원 추가</div>
                                 </div>
                                 <div class="danggeun-perk-card">
-                                    <span class="danggeun-perk-icon"><img src="phones_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="폰"></span>
+                                    <span class="danggeun-perk-icon"><svg class="dg-ico" viewBox="0 0 36 36" aria-label="휴대폰 2대" role="img"><rect width="36" height="36" rx="11" fill="#FF6F0F" opacity="0.10"/><rect x="5.8" y="10.5" width="12" height="19" rx="3" fill="#FDBA74"/><rect x="9.2" y="13.5" width="5.2" height="9.5" rx="1" fill="#fff" opacity="0.7"/><rect x="17.5" y="6.5" width="13" height="22" rx="3.2" fill="#FF6F0F"/><rect x="20" y="10" width="8" height="12" rx="1.4" fill="#fff" opacity="0.88"/><circle cx="24" cy="25.2" r="1.25" fill="#fff" opacity="0.88"/></svg></span>
                                     <div class="danggeun-perk-label">2대 이상 묶음 판매</div>
                                     <div class="danggeun-perk-value">+20,000원 무조건 합산</div>
                                 </div>
                                 <div class="danggeun-perk-card">
-                                    <span class="danggeun-perk-icon"><img src="gift_3d.png" style="width:36px; height:36px; object-fit:contain;" alt="선물"></span>
+                                    <span class="danggeun-perk-icon"><svg class="dg-ico" viewBox="0 0 36 36" aria-label="기프티콘" role="img"><rect width="36" height="36" rx="11" fill="#FF6F0F" opacity="0.10"/><rect x="8" y="16.5" width="20" height="12.5" rx="2.4" fill="#FF6F0F"/><rect x="6.5" y="12" width="23" height="5.5" rx="2" fill="#FB923C"/><rect x="16.2" y="12" width="3.6" height="17" fill="#fff" opacity="0.9"/><path d="M18 12c-1.6-3.6-6.4-3.2-6.4-.6 0 1.4 1.4 2 2.9 1.6z" fill="#EA580C"/><path d="M18 12c1.6-3.6 6.4-3.2 6.4-.6 0 1.4-1.4 2-2.9 1.6z" fill="#EA580C"/></svg></span>
                                     <div class="danggeun-perk-label">매주 럭키드로우</div>
                                     <div class="danggeun-perk-value">치킨 기프티콘 (2명)</div>
                                 </div>
