@@ -1524,7 +1524,22 @@ window.addEventListener('load', function() {
 
             <!-- Slide 4: 리뷰 작성 보너스 (상시) -->
             <div class="hero-slide" style="background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #6366F1 100%);">
-                <style>@keyframes floatHero { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }</style>
+                <style>
+                    @keyframes floatHero { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+                    /* 후기 배너 그림 (2026-08-29) — 예전엔 review_bonus_banner.webp 였다.
+                       ₩ 기호가 뭉개진 AI 이미지라 코드(SVG)로 다시 그렸다. 확대해도 안 깨진다.
+                       ⚠️ 모바일에서 이 자리는 95px 까지 줄어든다. 그 크기에서는 작은 글자
+                          (안내문·배지)가 완전히 뭉개져서, 별과 금액만 크게 남긴 ra-mo 로 바꾼다. */
+                    .review-art { width: 350px; height: 350px; max-width: 80%; display: inline-block; vertical-align: middle;
+                                  animation: floatHero 6s ease-in-out infinite;
+                                  font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+                    .review-art .ra-mo { display: none; }
+                    @media (max-width: 768px) {
+                        .review-art .ra-pc { display: none; }
+                        .review-art .ra-mo { display: block; }
+                        .hero-image-area .review-art { width: 95px !important; height: 95px !important; max-width: 100% !important; }
+                    }
+                </style>
                 <a href="event_review.html" style="text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; position: relative; z-index: 10;">
                     <div class="container hero-container" style="padding: 20px 15px !important; position: relative; width: 100%; height: 100%; display: flex; align-items: center;">
                         <div class="hero-content-wrapper">
@@ -1548,7 +1563,29 @@ window.addEventListener('load', function() {
                                 </div>
                             </div>
                             <div class="hero-image-area" style="text-align: right; margin-right: 50px;">
-                                <img src="review_bonus_banner.webp" alt="리뷰 보너스" width="700" height="700" loading="lazy" decoding="async" style="max-width: 80%; max-height: 350px; display: inline-block; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); animation: floatHero 6s ease-in-out infinite; border-radius: 16px;">
+                                <svg class="review-art" viewBox="0 0 400 400" role="img" aria-label="이용후기를 남기면 5,000원">
+                                    <defs>
+                                        <filter id="raSh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#170A3C" flood-opacity="0.34"/></filter>
+                                        <filter id="raSh2" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#170A3C" flood-opacity="0.32"/></filter>
+                                        <path id="raStar" d="M50.00,2.00 L60.78,35.17 L95.65,35.17 L67.44,55.67 L78.21,88.83 L50.00,68.34 L21.79,88.83 L32.56,55.67 L4.35,35.17 L39.22,35.17 Z"/>
+                                    </defs>
+                                    <g class="ra-pc">
+                                        <g filter="url(#raSh)"><path d="M96,270 L136,270 L110,304 Z" fill="#ffffff"/><rect x="46" y="86" width="308" height="192" rx="28" fill="#ffffff"/></g>
+                                        <text x="200" y="129" text-anchor="middle" font-size="17" font-weight="700" fill="#7C3AED" letter-spacing="0.5">이용후기를 남기면</text>
+                                        <g fill="#FCD34D">
+                                            <use href="#raStar" transform="translate(93,150) scale(0.38)"/><use href="#raStar" transform="translate(137,150) scale(0.38)"/><use href="#raStar" transform="translate(181,150) scale(0.38)"/><use href="#raStar" transform="translate(225,150) scale(0.38)"/><use href="#raStar" transform="translate(269,150) scale(0.38)"/>
+                                        </g>
+                                        <text x="200" y="250" text-anchor="middle" font-weight="900" fill="#312E81" letter-spacing="-1.5"><tspan font-size="58">5,000</tspan><tspan font-size="28" font-weight="800" dx="2">원</tspan></text>
+                                        <g transform="rotate(6 316 74)" filter="url(#raSh2)"><rect x="238" y="54" width="140" height="40" rx="20" fill="#FCD34D"/><text x="308" y="80" text-anchor="middle" font-size="17" font-weight="900" fill="#4C1D95">리뷰 보너스</text></g>
+                                    </g>
+                                    <g class="ra-mo">
+                                        <g filter="url(#raSh)"><path d="M104,286 L152,286 L120,326 Z" fill="#ffffff"/><rect x="34" y="96" width="332" height="196" rx="34" fill="#ffffff"/></g>
+                                        <g fill="#FCD34D">
+                                            <use href="#raStar" transform="translate(48,130) scale(0.54)"/><use href="#raStar" transform="translate(110,130) scale(0.54)"/><use href="#raStar" transform="translate(173,130) scale(0.54)"/><use href="#raStar" transform="translate(236,130) scale(0.54)"/><use href="#raStar" transform="translate(298,130) scale(0.54)"/>
+                                        </g>
+                                        <text x="200" y="266" text-anchor="middle" font-weight="900" fill="#312E81" letter-spacing="-2"><tspan font-size="76">5,000</tspan><tspan font-size="38" font-weight="800" dx="2">원</tspan></text>
+                                    </g>
+                                </svg>
                             </div>
                         </div>
                     </div>
