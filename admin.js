@@ -1052,6 +1052,26 @@ async function loadAbStats(view, ctx = {}) {
     const escapeeCount = ctx.escapee || 0;
     const legacy = document.getElementById('stats-legacy');
     const ab = document.getElementById('stats-ab');
+
+    // ab-card3 은 뷰마다 내용이 바뀌는 공용 자리다 (이탈건 / 매입완료).
+    // 이탈건을 담고 있을 때만 눌리게 하고, 다른 뷰에서는 클릭을 떼어낸다.
+    // 안 떼면 「매입완료」 카드를 눌렀는데 이탈건 목록으로 튄다. (2026-09-01)
+    const setCard3Link = (on) => {
+        const box = document.getElementById('ab-card3-box');
+        const t = document.getElementById('ab-card3-title');
+        if (!box) return;
+        if (on) {
+            box.onclick = () => window.switchQuoteView('escapee');
+            box.style.cursor = 'pointer';
+            box.title = '\uB20C\uB7EC\uC11C \uC774\uD0C8\uAC74 \uBAA9\uB85D \uBCF4\uAE30';
+            if (t && !t.textContent.trim().endsWith('\u203A')) t.textContent = t.textContent + ' \u203A';
+        } else {
+            box.onclick = null;
+            box.style.cursor = 'default';
+            box.removeAttribute('title');
+        }
+    };
+    setCard3Link(false);   // 기본은 못 누름. 이탈건을 넣는 자리에서만 켠다
     if (view === 'all') { // 전체 보기는 기존 2카드 그대로
         if (legacy) legacy.style.display = 'grid';
         if (ab) ab.style.display = 'none';
@@ -1072,13 +1092,16 @@ async function loadAbStats(view, ctx = {}) {
     const today = _startOfToday();
     const monthStart = _startOfMonth();
 
-    if (view === 'a') {
+    // 이탈건 뷰는 접수·수거(A)와 같은 조회를 쓴다 — 카드도 같은 것을 보여줘야 맞다.
+    // (b 분기로 흘려보내면 이탈건 화면에 검수·정산 숫자가 뜬다)
+    if (view === 'a' || view === 'escapee') {
         // 이미 계산된 값 즉시 표시
         set(2, '진행중 매입신청', `${pendingCount}건`, `방문수거 ${ctx.courier || 0}건 · 개인발송 ${ctx.cvs || 0}건`);
         const pf = ctx.pickupFailed || 0;
         // 미집하는 방치되면 손실로 이어지므로 이탈 카드에 함께 띄워 눈에 띄게 한다.
         set(3, '이탈건', `${escapeeCount}건`,
             pf ? `배송방법 미입력 · ⚠ 미집하 ${pf}건` : '배송방법 미입력');
+        setCard3Link(view === 'a');   // 이탈건 화면에서 자기 자신으로 가는 링크는 필요 없다
         set(1, '금일 매입신청', '집계 중…', '-');
         try {
             // 기준 시각 정리
