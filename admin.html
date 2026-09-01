@@ -990,6 +990,28 @@
                     </div>
 
 
+                    <!-- ─── 이탈건 일괄 정리 (2026-09-01) ────────────────────────────
+                         이탈건 = 배송방법을 안 고르고 나간 건(deliveryMethod === 'pending').
+                         하루 50건 넘게 쌓여서 목록과 취소 탭을 덮는다.
+                         날짜로 골라서 한 번에 휴지통으로 보낸다.
+                         ※ 휴지통 이동이라 되돌릴 수 있다. 실제로 지우지 않는다.
+                         ※ 조회를 먼저 눌러야 삭제 버튼이 열린다. 숫자 보고 누르시라고. -->
+                    <div style="background:#FFFBEB; border:1px solid #FDE68A; border-left:4px solid #F59E0B; padding:14px 16px; border-radius:10px; margin-bottom:18px;">
+                        <div style="font-weight:800; color:#92400E; margin-bottom:4px;">이탈건 일괄 정리</div>
+                        <div style="font-size:0.8rem; color:#B45309; margin-bottom:10px;">
+                            배송방법을 고르지 않고 나간 신청건을 기간으로 묶어 휴지통으로 보냅니다.
+                            기준 날짜는 <b>본인인증 시각</b>입니다 (이탈건엔 신청완료 시각이 없습니다).
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                            <input type="date" id="esc-from" style="padding:7px 10px; border:1px solid #D6D3D1; border-radius:7px; font-size:0.85rem;">
+                            <span style="color:#92400E;">~</span>
+                            <input type="date" id="esc-to" style="padding:7px 10px; border:1px solid #D6D3D1; border-radius:7px; font-size:0.85rem;">
+                            <button onclick="previewEscapeeCleanup()" style="background:#F59E0B; color:#fff; border:none; padding:8px 16px; border-radius:7px; font-weight:700; cursor:pointer; min-height:40px;">조회</button>
+                            <button id="esc-delete-btn" onclick="runEscapeeCleanup()" disabled style="background:#EF4444; color:#fff; border:none; padding:8px 16px; border-radius:7px; font-weight:700; cursor:pointer; min-height:40px; opacity:0.4;">휴지통으로 보내기</button>
+                        </div>
+                        <div id="esc-result" style="margin-top:10px; font-size:0.85rem; color:#1F2937; line-height:1.6;"></div>
+                    </div>
+
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <h3 class="mb-0" style="font-size: 1.1rem; color: var(--text-secondary);">신청 목록</h3>
                         <div style="display: flex; gap: 10px;">

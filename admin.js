@@ -1,6 +1,6 @@
 import { db, auth, getStorageLazy } from './firebase-config.js';
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHEgJMYpYvWV2y7ShTjq8AsOGvxwe1zLZ4UUJ76qdz_2i0d_DDHtGBKcOErI8c7pvQ/exec";
-import { collection, getDocs, getDoc, query, orderBy, limit, doc, updateDoc, setDoc, deleteDoc, deleteField, writeBatch, serverTimestamp, addDoc, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, getDocs, getDoc, query, orderBy, limit, doc, updateDoc, setDoc, deleteDoc, deleteField, writeBatch, serverTimestamp, addDoc, where, getCountFromServer, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 // Firebase Storage is lazy-loaded via getStorageLazy() — only loaded when uploading inspection photos
@@ -3418,6 +3418,26 @@ window.saveAdminMemo = async () => {
 //   미집하 안내)은 그대로 둔다. 자동 발송이 아니라 겹치지 않는다.
 // ════════════════════════════════════════════════════════════════
 
+/**
+ * 이탈 알림톡을 보낸 사실을 신청 문서에 남긴다. (2026-08-29 신설)
+ *
+ * 이게 없으면 「알림톡 한 번은 보내고 정리한다」를 지킬 수가 없다.
+ * 실제로 이 기록을 넣기 전까지 이탈건 2,024건 중 발송 이력이 남은 건 0건이었다.
+ *
+ * 기록 실패가 발송을 되돌리지는 못하므로, 여기서 던지지 않고 콘솔에만 남긴다.
+ * (이미 나간 문자를 취소할 수는 없다)
+ */
+async function recordDropoffAlert(docId) {
+    try {
+        await updateDoc(doc(db, "quotes", docId), {
+            dropoffAlertSentAt: serverTimestamp(),
+            dropoffAlertCount: increment(1)
+        });
+    } catch (e) {
+        console.error("[이탈알림톡] 발송은 됐으나 이력 기록 실패:", docId, e);
+    }
+}
+
 window.sendDropoffAlert = async (docId) => {
     if(!confirm("해당 고객에게 이탈 알림톡(이어서 작성하기)을 발송하시겠습니까?")) return;
     try {
@@ -3464,6 +3484,9 @@ window.sendDropoffAlert = async (docId) => {
             });
             const result = await response.json();
             if (result.success || (result.data && result.data.messageId)) {
+                // 2026-08-29 — 예전엔 보내고 아무 기록도 안 남겼다. 그래서 누구한테
+                // 보냈는지 알 방법이 없었고, 「보낸 건만 정리」가 아예 불가능했다.
+                await recordDropoffAlert(docId);
                 alert("이탈 알림톡이 발송되었습니다!");
             } else {
                 alert("알림톡 발송 실패: " + (result.error || JSON.stringify(result)));
@@ -5357,6 +5380,7 @@ window.bulkSendPendingAlimtalk = async (selectedOnly) => {
                     });
                     const result = await response.json();
                     if (result.success || (result.data && result.data.messageId)) {
+                        await recordDropoffAlert(id);   // 발송 이력 남기기 (위 주석 참고)
                         successCount++;
                     } else {
                         failCount++;
@@ -7331,4 +7355,164 @@ window.sendPickupNoticeBatch = async () => {
 
     _pnSelected = new Set();
     window.loadPickupNotice();
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   이탈건 일괄 정리 (2026-09-01)
+
+   이탈건이란: 시세는 봤고 본인인증까지 했는데 배송방법을 안 고르고
+   나간 신청. 데이터상으론 deliveryMethod === 'pending' 이다.
+   (값은 courier / cvs / pending 셋뿐이라 서버 쿼리로 바로 뽑힌다)
+
+   왜 만들었나: 하루 50건 넘게 쌓인다. 2026-09-01 기준 2,024건이고
+   그중 1,945건은 이미 '취소' 로 넘겨둔 것들이라 취소 탭을 덮고 있었다.
+
+   ⚠️ 날짜 기준은 firebaseTimestamp(본인인증 시각)다.
+      이탈건은 submittedAt(신청완료 시각)이 아예 없다. 이게 유일한 날짜다.
+
+   ⚠️ 안전장치가 핵심이다. deliveryMethod 가 'pending' 인데도 실제로는
+      거래가 끝난 건이 섞여 있다 (2026-09-01 실측: 입금완료 1건, 반송접수 1건).
+      날짜만 보고 쓸어담으면 이런 게 딸려나간다. 아래 EXCLUDE 조건으로 뺀다.
+
+   삭제라고 썼지만 휴지통 이동이다(isDeleted). 되돌릴 수 있다.
+   ══════════════════════════════════════════════════════════════════ */
+
+/** 한 건이 정리 대상이 될 수 없는 이유를 돌려준다. 대상이면 null. */
+function escapeeExcludeReason(q) {
+    if (q.isDeleted === true) return '이미 휴지통';
+    if (q.status === '입금완료') return '입금완료 (거래 끝난 건)';
+    if (q.status === '반송접수') return '반송접수';
+    if (q.pickedUpAt || q.arrivedAt) return '집하·도착 기록 있음';
+    if (q.goodsflowOrderNo) return '굿스플로 배차된 건';
+    return null;
+}
+
+/** 화면의 날짜 입력 두 개를 KST 기준 [시작, 끝] Date 로 바꾼다. */
+function readEscapeeRange() {
+    const from = (document.getElementById('esc-from') || {}).value;
+    const to = (document.getElementById('esc-to') || {}).value;
+    if (!from || !to) { alert('시작일과 종료일을 모두 골라주세요.'); return null; }
+    if (from > to) { alert('시작일이 종료일보다 늦습니다.'); return null; }
+    // 한국시간 그날 00:00:00 ~ 그날 23:59:59 로 잡는다.
+    // +09:00 을 붙여야 브라우저 시간대와 무관하게 같은 구간이 나온다.
+    return {
+        from, to,
+        start: new Date(from + 'T00:00:00+09:00'),
+        end: new Date(to + 'T23:59:59.999+09:00')
+    };
+}
+
+/** 조회 — 지우기 전에 숫자부터 보여준다. */
+window.previewEscapeeCleanup = async () => {
+    const r = readEscapeeRange();
+    if (!r) return;
+    const box = document.getElementById('esc-result');
+    const btn = document.getElementById('esc-delete-btn');
+    btn.disabled = true; btn.style.opacity = '0.4';
+    window._escapeeTargets = null;
+    box.innerHTML = '조회 중…';
+
+    try {
+        // ⚠️ where(같음) + where(범위) 를 다른 필드에 같이 쓰면 파이어스토어가
+        //    복합 인덱스를 요구한다(없으면 런타임에 그냥 실패한다).
+        //    이탈건은 2천 건 남짓이라 날짜는 받아와서 여기서 거른다.
+        //    인덱스 배포라는 단계를 하나 없애는 게 낫다고 봤다.
+        const snap = await getDocs(query(
+            collection(db, 'quotes'),
+            where('deliveryMethod', '==', 'pending')
+        ));
+
+        const targets = [];
+        const excluded = {};
+        let inRange = 0;
+        snap.forEach(d => {
+            const q = d.data();
+            const ts = q.firebaseTimestamp && q.firebaseTimestamp.toDate
+                ? q.firebaseTimestamp.toDate() : null;
+            if (!ts || ts < r.start || ts > r.end) return;   // 기간 밖
+            inRange++;
+            const why = escapeeExcludeReason(q);
+            if (why) { excluded[why] = (excluded[why] || 0) + 1; return; }
+            targets.push({ id: d.id, name: q.customerName || '(이름없음)', status: q.status || '-' });
+        });
+
+        window._escapeeTargets = targets;
+        const exLines = Object.entries(excluded)
+            .map(([k, v]) => `<li>${k} — <b>${v}건</b></li>`).join('');
+
+        box.innerHTML =
+            `<div style="font-size:1.05rem;"><b>${r.from} ~ ${r.to}</b> 조회 결과</div>` +
+            `<div style="margin-top:4px;">기간 내 이탈건 <b>${inRange}건</b> 중 ` +
+            `<b style="color:#B91C1C; font-size:1.1rem;">${targets.length}건</b>을 휴지통으로 보냅니다.</div>` +
+            (exLines
+                ? `<div style="margin-top:8px; background:#fff; border:1px solid #E5E7EB; border-radius:8px; padding:8px 12px;">
+                     <b>안전을 위해 제외한 건</b>
+                     <ul style="margin:4px 0 0 18px; padding:0;">${exLines}</ul>
+                   </div>`
+                : '<div style="margin-top:6px; color:#6B7280;">제외된 건은 없습니다.</div>');
+
+        if (targets.length > 0) { btn.disabled = false; btn.style.opacity = '1'; }
+    } catch (e) {
+        console.error('[이탈건 조회]', e);
+        box.innerHTML = `<span style="color:#B91C1C;">조회 실패: ${e.message}</span>`;
+    }
+};
+
+/** 실행 — 조회해서 확정된 목록만 휴지통으로 보낸다. */
+window.runEscapeeCleanup = async () => {
+    const targets = window._escapeeTargets;
+    if (!targets || !targets.length) { alert('먼저 조회를 눌러주세요.'); return; }
+    if (!confirm(`${targets.length}건을 휴지통으로 보냅니다.\n\n` +
+                 `휴지통에 남아 있으니 되돌릴 수 있습니다.\n계속할까요?`)) return;
+
+    const box = document.getElementById('esc-result');
+    const btn = document.getElementById('esc-delete-btn');
+    btn.disabled = true; btn.style.opacity = '0.4';
+    document.body.style.cursor = 'wait';
+
+    let done = 0, failed = 0;
+    try {
+        // 한 건씩 updateDoc 하면 2,000건에 몇 분씩 걸린다. 배치로 묶는다.
+        // 파이어스토어 배치 한도가 500이라 400씩 끊는다.
+        const CHUNK = 400;
+        for (let i = 0; i < targets.length; i += CHUNK) {
+            const slice = targets.slice(i, i + CHUNK);
+            const batch = writeBatch(db);
+            slice.forEach(t => {
+                const patch = {
+                    isDeleted: true,
+                    deletedAt: serverTimestamp(),
+                    deletedBy: '이탈건 일괄정리'
+                };
+                // 종결 상태(취소 등)는 집계가 틀어지지 않게 그대로 두고,
+                // 진행중인 건만 '삭제' 로 바꾼다 — 기존 선택삭제와 같은 규칙이다.
+                if (t.status !== '입금완료' && t.status !== '취소' &&
+                    t.status !== '반송접수' && t.status !== '삭제') {
+                    patch.prevStatus = t.status;
+                    patch.status = '삭제';
+                }
+                batch.update(doc(db, 'quotes', t.id), patch);
+            });
+            try {
+                await batch.commit();
+                done += slice.length;
+            } catch (e) {
+                console.error('[이탈건 정리] 배치 실패', i, e);
+                failed += slice.length;
+            }
+            box.innerHTML = `처리 중… ${done + failed} / ${targets.length}`;
+        }
+
+        box.innerHTML =
+            `<b style="color:#047857;">${done}건을 휴지통으로 보냈습니다.</b>` +
+            (failed ? ` <span style="color:#B91C1C;">(실패 ${failed}건 — F12 콘솔 확인)</span>` : '') +
+            `<div style="margin-top:4px; color:#6B7280;">휴지통 메뉴에서 되돌릴 수 있습니다.</div>`;
+        window._escapeeTargets = null;
+        if (typeof loadQuotes === 'function') await loadQuotes();
+    } catch (e) {
+        console.error('[이탈건 정리]', e);
+        box.innerHTML = `<span style="color:#B91C1C;">정리 중 오류: ${e.message}</span>`;
+    } finally {
+        document.body.style.cursor = 'default';
+    }
 };
