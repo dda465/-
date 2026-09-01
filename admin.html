@@ -773,6 +773,10 @@
                     <span class="material-symbols-outlined">inventory_2</span>
                     검수·정산
                 </div>
+                <div class="menu-item" id="menu-quotes-escapee" onclick="switchQuoteView('escapee')" style="padding-left: 26px;">
+                    <span class="material-symbols-outlined">logout</span>
+                    이탈건
+                </div>
                 <div class="menu-item" id="menu-quotes-all" onclick="switchQuoteView('all')" style="padding-left: 26px;">
                     <span class="material-symbols-outlined">request_quote</span>
                     전체 보기(기존)
@@ -898,8 +902,8 @@
                             <strong id="ab-card2-main" style="font-size: 1.8rem; color: #0D47A1;">0건</strong>
                             <span id="ab-card2-sub" style="display: block; font-size: 0.9rem; font-weight: 700; color: #1565C0; margin-top: 6px;">-</span>
                         </div>
-                        <div style="background: linear-gradient(135deg, #FFF8E1, #FFECB3); padding: 22px; border-radius: 16px; box-shadow: var(--shadow-sm);">
-                            <h4 id="ab-card3-title" style="color: #E65100; margin-bottom: 5px; font-size: 0.9rem;">이탈건</h4>
+                        <div onclick="switchQuoteView('escapee')" title="눌러서 이탈건 목록 보기" style="background: linear-gradient(135deg, #FFF8E1, #FFECB3); padding: 22px; border-radius: 16px; box-shadow: var(--shadow-sm); cursor: pointer;">
+                            <h4 id="ab-card3-title" style="color: #E65100; margin-bottom: 5px; font-size: 0.9rem;">이탈건 ›</h4>
                             <strong id="ab-card3-main" style="font-size: 1.8rem; color: #BF360C;">0건</strong>
                             <span id="ab-card3-sub" style="display: block; font-size: 0.9rem; font-weight: 700; color: #E65100; margin-top: 6px;">-</span>
                         </div>
@@ -2647,7 +2651,7 @@
 
 
 
-    <script type="module" src="admin.js?v=1787890740"></script>
+    <script type="module" src="admin.js?v=1788228766"></script>
 
     <!-- Inspection (전자매매계약서) Modal -->
     <div id="inspection-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">

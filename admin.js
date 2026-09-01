@@ -215,7 +215,9 @@ async function loadQuotes(view) {
         let q;
         if (view === 'b') {
             q = query(collection(db, "quotes"), where("status", "in", B_STATUSES), orderBy("status"), orderBy("firebaseTimestamp", "desc"));
-        } else if (view === 'a') {
+        } else if (view === 'a' || view === 'escapee') {
+            // 이탈건 보기('escapee')는 조회 범위가 'a' 와 같다.
+            // 어느 구역을 그릴지만 아래에서 갈린다 (2026-09-02)
             q = query(collection(db, "quotes"), where("status", "not-in", [...TERMINAL_FOR_LIST, ...B_STATUSES]), orderBy("status"), orderBy("firebaseTimestamp", "desc"));
         } else {
             q = query(collection(db, "quotes"), where("status", "not-in", TERMINAL_FOR_LIST), orderBy("status"), orderBy("firebaseTimestamp", "desc"));
@@ -588,8 +590,12 @@ async function loadQuotes(view) {
         });
 
         // Append sorted rows — 보기 모드에 따라 섹션 선택
-        const showA = (view === 'a' || view === 'all'); // 방문수거/개인발송/이탈
+        const showA = (view === 'a' || view === 'all'); // 방문수거/개인발송/미집하
         const showB = (view === 'b' || view === 'all'); // 택배도착/검수중/입금대기·검수완료/반송대기
+        // ⭐ 이탈건(배송방법 미입력)은 2026-09-02 부터 전용 보기로 뺐다.
+        //    접수·수거 목록에서 101건이 아래를 덮어 실제 처리할 건이 묻혔다.
+        //    사장님 요청 — "수거방법 미정은 이탈건 눌렀을 때만 보였으면 좋겠다"
+        const showEscapee = (view === 'escapee' || view === 'all');
 
         // 미집하: 기사가 갔는데 못 받아온 건. 건수는 항상 보이되 목록은 접어두고,
         // 헤더를 클릭할 때만 펼친다 (평소 목록이 길어지는 걸 막으면서 존재는 놓치지 않게).
@@ -700,7 +706,7 @@ async function loadQuotes(view) {
             courierRows.forEach(tr => quotesTableBody.appendChild(tr));
         }
 
-        if (showA && pendingRows.length > 0) {
+        if (showEscapee && pendingRows.length > 0) {
             const dividerPending = document.createElement('tr');
             dividerPending.innerHTML = `<td colspan="8" style="background: #FFEBEE; padding: 8px 16px; color: #C62828; border-bottom: 2px solid #FFCDD2; ${(urgentRows.length > 0 || inspectingRows.length > 0 || returnPendingRows.length > 0 || cvsRows.length > 0 || courierRows.length > 0) ? 'border-top: 2px solid #e2e8f0;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -2026,7 +2032,10 @@ window.switchQuoteView = (view) => {
     const descEl = document.getElementById('quotes-view-desc');
     if (view === 'a') {
         if (titleEl) titleEl.textContent = '접수·수거';
-        if (descEl) descEl.textContent = '방문수거 · 개인발송 · 이탈 (물건이 아직 도착하지 않은 단계)';
+        if (descEl) descEl.textContent = '방문수거 · 개인발송 · 미집하 (물건이 아직 도착하지 않은 단계) — 이탈건은 왼쪽 「이탈건」에서 봅니다';
+    } else if (view === 'escapee') {
+        if (titleEl) titleEl.textContent = '이탈건';
+        if (descEl) descEl.textContent = '배송방법을 고르지 않고 나간 신청건입니다. 알림톡·취소·일괄정리를 여기서 합니다';
     } else if (view === 'b') {
         if (titleEl) titleEl.textContent = '검수·정산';
         if (descEl) descEl.textContent = '택배도착 · 검수중 · 입금대기 · 반송대기 (물건이 우리 손에 있는 단계)';
