@@ -1276,8 +1276,23 @@ async function gfDescribeAvailable() {
 }
 
 // 방문수거 예약 생성
-goodsflowApp.post("/createOrder", async (req, res) => {
-    const user = await gfRequireAdmin(req, res); if (!user) return;
+/**
+ * ⭐ 수거 예약(배차)의 **본체**. 2026-09-02 에 라우트에서 이름만 떼어냈다.
+ *
+ *   본문은 **한 글자도 바꾸지 않았다.** 바뀐 건 이 함수의 머리(=시그니처)와
+ *   아래 라우트가 3줄짜리 껍데기가 된 것뿐이다.
+ *
+ *   왜 뗐나: 자동 배차(스케줄 함수)에는 사람의 로그인 토큰이 없어서
+ *   HTTP 라우트를 부를 수가 없다. 그렇다고 배차 코드를 한 벌 더 쓰면
+ *   재예약(-R1)·중복응답·날짜밀림 판정이 두 벌이 되어 언젠가 갈라진다.
+ *   (이 코드베이스는 이미 그걸로 「수거 무산」 25건을 놓친 적이 있다)
+ *   → 코드는 한 벌로 두고, 부르는 쪽만 둘로 한다.
+ *
+ * @param req  { body: { quoteId } } 모양이면 된다. 자동배차는 가짜 객체를 만든다
+ * @param res  express 응답 객체. 자동배차는 status()/json() 만 흉내낸 가짜를 넘긴다
+ * @param user 누가 배차했는지. goodsflowBookedBy 로 저장된다
+ */
+async function gfCreateOrderCore(req, res, user) {
     const quoteId = (req.body || {}).quoteId;
     try {
         if (!quoteId) return res.status(400).json({ ok: false, error: "quoteId가 필요합니다." });
@@ -1481,6 +1496,12 @@ goodsflowApp.post("/createOrder", async (req, res) => {
         } catch (_) { }
         res.status(500).json({ ok: false, error: e.message });
     }
+}
+
+// 배차 라우트 — 권한만 확인하고 위 본체에 넘긴다 (2026-09-02)
+goodsflowApp.post("/createOrder", async (req, res) => {
+    const user = await gfRequireAdmin(req, res); if (!user) return;
+    await gfCreateOrderCore(req, res, user);
 });
 
 // 예약 취소 — 고객이 취소했는데 기사가 출동하는 헛수거 방지
